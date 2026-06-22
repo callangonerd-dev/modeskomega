@@ -174,7 +174,7 @@ table.tbl tr:hover td{background:rgba(91,140,255,.05)}
   radial-gradient(700px 350px at 75% 80%,rgba(124,92,255,.22),transparent 60%),
   var(--bg0);z-index:1000}
 #login-screen .box{width:min(420px,92vw);padding:30px;background:var(--glass);border:1px solid var(--line-2);border-radius:18px;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:var(--shadow)}
-#login-screen .logo-l{width:60px;height:60px;border-radius:16px;background:var(--grad);display:grid;place-items:center;font-family:'Sora';font-weight:800;font-size:24px;color:#fff;margin:0 auto 14px}
+#login-screen .logo-l{display:none}
 #login-screen h2{text-align:center;margin-bottom:4px}
 #login-screen p.sub{text-align:center;color:var(--fg-mut);margin:0 0 18px;font-size:13px}
 
@@ -296,27 +296,26 @@ html.light .theme-toggle .moon{display:none}
 <!-- LOGIN -->
 <div id="login-screen">
   <div class="box">
-    <div class="logo-l">M</div>
-    <h2>MODESK OMEGA</h2>
+    <h2 class="brand-title"><span class="bt-blink">MO</span><span class="bt-rest">DESK</span> <span class="bt-omega">OMEGA</span></h2>
     <p class="sub">v4.4 · Ultimate Enterprise · SENAC</p>
-    <div class="field"><label>Login</label><input id="lg-user" autocomplete="username" placeholder="usuário" value="marciooliveira"/></div>
+    <div class="field"><label>Login</label><input id="lg-user" autocomplete="off" placeholder="usuário" value=""/></div>
     <div class="field"><label>Senha</label>
       <div style="position:relative">
-        <input id="lg-pass" type="password" autocomplete="current-password" placeholder="••••••••" value="Deadpool365*"/>
+        <input id="lg-pass" type="password" autocomplete="new-password" placeholder="••••••••" value=""/>
         <button type="button" id="lg-show" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:transparent;border:0;color:var(--fg-mut);cursor:pointer;font-size:12px">mostrar</button>
       </div>
     </div>
     <button class="btn primary" style="width:100%;justify-content:center" id="lg-btn">Entrar</button>
-    <p class="tiny muted" style="text-align:center;margin-top:14px">Acesso restrito · usuário <b>marciooliveira</b> · senha <b>Deadpool365*</b></p>
+    <p class="tiny muted" style="text-align:center;margin-top:14px">Acesso restrito · informe suas credenciais</p>
   </div>
 </div>
 
 <!-- APP -->
 <div id="app" style="display:none">
   <aside class="sidebar" id="sidebar">
-    <div class="brand">
-      <div class="logo">M</div>
-      <div class="name">MODESK OMEGA<small>v4.5 Enterprise</small></div>
+    <div class="brand brand-modesk">
+      <div class="logo"><span class="lg-blink">M</span></div>
+      <div class="name brand-title"><span class="bt-blink">MO</span><span class="bt-rest">DESK</span> <span class="bt-omega">OMEGA</span><small>// SUPORTE</small></div>
     </div>
     <nav class="tabs" id="tabs">
       <div class="cat">Operação</div>
@@ -331,6 +330,7 @@ html.light .theme-toggle .moon{display:none}
       <button data-tab="laudos"><span class="ic"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h4"/></svg></span>Laudos de Baixa</button>
       <button data-tab="movpat"><span class="ic"><svg viewBox="0 0 24 24"><path d="M3 7h13l-3-3M21 17H8l3 3"/><rect x="3" y="10" width="6" height="4" rx="1"/><rect x="15" y="14" width="6" height="4" rx="1"/></svg></span>Movimentação de Patrimônio</button>
       <button data-tab="manut"><span class="ic"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-2.4z"/></svg></span>Registro de Serviço</button>
+      <button data-tab="invsom"><span class="ic"><svg viewBox="0 0 24 24"><path d="M3 10v4a1 1 0 0 0 1 1h3l5 4V5L7 9H4a1 1 0 0 0-1 1z"/><path d="M16 8a5 5 0 0 1 0 8"/><path d="M19 5a9 9 0 0 1 0 14"/></svg></span>Inventário Sala de Som</button>
 
       <div class="cat">Compras</div>
       <button data-tab="compras" data-anchor="sec-itens"><span class="ic"><svg viewBox="0 0 24 24"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg></span>1. Lista Prévia</button>
@@ -724,7 +724,7 @@ html.light .theme-toggle .moon{display:none}
           <div class="field"><label>Telefone</label><input id="us-phone" placeholder="(11) 99999-0000"/></div>
         </div>
         <div class="row2">
-          <div class="field"><label>Contato (e-mail)</label><input id="us-mail" placeholder="email@senac.br"/></div>
+          <div class="field"><label>Contato (e-mail) <span class="tiny muted">— opcional</span></label><input id="us-mail" placeholder="email@senac.br (opcional)"/></div>
           <div class="field"><label>Função</label>
             <select id="us-role">
               <option value="editor">Editor</option>
@@ -735,6 +735,23 @@ html.light .theme-toggle .moon{display:none}
         <div class="row2">
           <div class="field"><label>Login</label><input id="us-login" placeholder="usuario.login" autocomplete="off"/></div>
           <div class="field"><label>Senha</label><input id="us-pass" type="password" placeholder="mínimo 6 caracteres" autocomplete="new-password"/></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>Foto do usuário <span class="tiny muted">— opcional</span></label>
+            <label class="filmora-up" id="us-photo-drop">
+              <input id="us-photo" type="file" accept="image/*"/>
+              <div class="fm-body">
+                <div class="fm-icon"><svg viewBox="0 0 24 24"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="4"/></svg></div>
+                <div class="fm-txt">
+                  <p class="fm-title">Anexar foto do usuário</p>
+                  <div class="fm-hint"><span class="fm-pill">JPG · PNG</span><span>até 2MB · arraste ou clique</span></div>
+                </div>
+                <div class="fm-cta"><svg viewBox="0 0 24 24" stroke="white" fill="none" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg><span>Anexar</span></div>
+              </div>
+            </label>
+            <div id="us-photo-prev" style="margin-top:6px"></div>
+          </div>
+          <div class="field"><label>&nbsp;</label><div class="tiny muted">Imagem JPG/PNG. Aparece na lista de usuários e no perfil.</div></div>
         </div>
         <div class="flex" style="justify-content:flex-end;margin-top:6px">
           <button class="btn ghost sm" id="us-clear">Limpar</button>
@@ -2306,6 +2323,474 @@ window.renderLaudos=function(){_origRenderLaudos&&_origRenderLaudos();renderSign
       save(); renderMovPat();
     });
   };
+})();
+</script>
+
+<!-- ============== PATCH v4.6 (UI/UX requested) ============== -->
+<style>
+/* Brand title with blinking "MO" */
+.brand-title{font-family:'Sora',sans-serif;font-weight:800;letter-spacing:.02em;display:flex;align-items:baseline;gap:0;flex-wrap:wrap}
+.brand-title .bt-blink{color:#ff3030;text-shadow:0 0 10px rgba(255,50,50,.55);animation:btblink 1.05s steps(1,end) infinite}
+.brand-title .bt-rest{color:var(--fg)}
+.brand-title .bt-omega{color:#5b8cff;font-weight:700;letter-spacing:.08em}
+.brand-title small{display:block;color:var(--fg-mut);font-weight:600;font-size:11px;letter-spacing:.18em;text-transform:uppercase;margin-top:2px;width:100%}
+.lg-blink{animation:btblink 1.05s steps(1,end) infinite}
+@keyframes btblink{0%,55%{opacity:1}56%,100%{opacity:.15}}
+#login-screen .brand-title{justify-content:center}
+#login-screen .brand-title .bt-blink{font-size:1em}
+
+/* Dashboard overdue alert (matches uploaded reference) */
+#dash-vencidos{display:none;margin-bottom:14px;border:1px solid rgba(255,80,90,.55);background:linear-gradient(90deg,rgba(255,60,70,.10),rgba(255,60,70,.02));border-radius:12px;padding:14px 18px;cursor:pointer;box-shadow:0 0 0 1px rgba(255,80,90,.08), 0 0 24px rgba(255,60,70,.08) inset;animation:dvPulse 2.2s ease-in-out infinite}
+#dash-vencidos.show{display:flex;align-items:center;gap:14px}
+#dash-vencidos .dv-ic{font-size:26px;color:#ff5d6b;filter:drop-shadow(0 0 6px rgba(255,90,90,.55))}
+#dash-vencidos .dv-tt{flex:1}
+#dash-vencidos .dv-tt b{display:block;color:#ff5d6b;font-family:'Sora';letter-spacing:.02em;font-size:15px}
+#dash-vencidos .dv-tt span{display:block;color:var(--fg-mut);font-family:'JetBrains Mono',monospace;font-size:12px;margin-top:3px}
+#dash-vencidos .dv-cta{background:linear-gradient(135deg,#ff3b4d,#c01f30);color:#fff;font-family:'Sora';font-weight:700;letter-spacing:.14em;font-size:12px;padding:9px 16px;border-radius:8px;text-transform:uppercase;box-shadow:0 4px 14px rgba(255,60,70,.35)}
+@keyframes dvPulse{0%,100%{box-shadow:0 0 0 1px rgba(255,80,90,.20),0 0 24px rgba(255,60,70,.10) inset}50%{box-shadow:0 0 0 1px rgba(255,80,90,.45),0 0 32px rgba(255,60,70,.22) inset}}
+
+/* Sidebar overdue block */
+.side-overdue{margin:10px 8px 8px;padding:10px 12px;border:1px solid rgba(255,80,90,.35);border-radius:10px;background:linear-gradient(180deg,rgba(255,60,70,.08),rgba(255,60,70,.02));cursor:pointer;transition:.2s}
+.side-overdue:hover{border-color:rgba(255,80,90,.7)}
+.side-overdue.empty{border-color:var(--line);background:transparent;cursor:default;opacity:.7}
+.side-overdue .so-hd{display:flex;align-items:center;gap:8px;font-family:'Sora';font-weight:700;color:#ff5d6b;font-size:12px;text-transform:uppercase;letter-spacing:.08em}
+.side-overdue.empty .so-hd{color:var(--fg-mut)}
+.side-overdue .so-cnt{margin-left:auto;background:#ff3b4d;color:#fff;border-radius:99px;padding:1px 8px;font-size:11px;font-family:'JetBrains Mono'}
+.side-overdue.empty .so-cnt{background:var(--bg3);color:var(--fg-mut)}
+.side-overdue .so-list{margin-top:8px;display:flex;flex-direction:column;gap:4px;max-height:160px;overflow:auto}
+.side-overdue .so-item{font-size:11.5px;font-family:'JetBrains Mono';color:var(--fg-mut);padding:4px 6px;border-radius:6px;background:rgba(255,255,255,.02);border:1px solid var(--line);display:flex;justify-content:space-between;gap:6px}
+.side-overdue .so-item:hover{color:var(--fg);border-color:rgba(255,80,90,.4)}
+.side-overdue .so-item .sl-id{color:#ff5d6b;font-weight:600}
+.side-overdue .so-empty{font-size:11.5px;color:var(--fg-dim);padding:4px 6px;font-family:'JetBrains Mono'}
+
+/* User avatar in users list */
+.usr-row{display:flex;align-items:center;gap:12px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;margin-bottom:6px;background:var(--bg2)}
+.usr-row .usr-av{width:42px;height:42px;border-radius:50%;object-fit:cover;background:var(--bg3);display:grid;place-items:center;color:var(--fg-mut);font-family:'Sora';font-weight:700;border:1px solid var(--line-2)}
+.usr-row .usr-meta{flex:1;min-width:0}
+#us-photo-prev img{width:64px;height:64px;border-radius:50%;object-fit:cover;border:1px solid var(--line-2)}
+
+/* Inventory (Sala de Som) */
+.invsom-grid{display:grid;grid-template-columns:1fr;gap:12px}
+.inv-form-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+.inv-form-grid .field{margin:0}
+.inv-form-grid .field.col-2{grid-column:span 2}
+.inv-form-grid .field.col-3{grid-column:span 3}
+.inv-form-grid .field.col-6{grid-column:span 6}
+@media(max-width:900px){.inv-form-grid{grid-template-columns:repeat(2,1fr)}.inv-form-grid .field.col-2,.inv-form-grid .field.col-3,.inv-form-grid .field.col-6{grid-column:span 2}}
+.inv-cat-bar{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.inv-cat-bar button{background:var(--bg2);border:1px solid var(--line);color:var(--fg-mut);font-size:12px;padding:6px 10px;border-radius:99px;cursor:pointer;font-family:'JetBrains Mono'}
+.inv-cat-bar button.active{background:var(--grad);color:#fff;border-color:transparent;font-weight:700}
+.inv-kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:10px}
+.inv-kpis .card{padding:10px 12px}
+.inv-kpis .lbl{font-size:11px;color:var(--fg-mut);text-transform:uppercase;letter-spacing:.08em}
+.inv-kpis .val{font-family:'Sora';font-weight:800;font-size:22px;margin-top:2px}
+@media(max-width:900px){.inv-kpis{grid-template-columns:repeat(2,1fr)}}
+.badge.pat{background:rgba(91,140,255,.18);color:#9bb6ff}
+.badge.npat{background:rgba(245,176,66,.18);color:#f5b042}
+.badge.compra{background:rgba(255,93,107,.18);color:#ff5d6b}
+.badge.ok2{background:rgba(39,211,159,.18);color:#27d39f}
+</style>
+
+<!-- Inventário Sala de Som pane (injected) -->
+<template id="tpl-invsom-pane">
+<section class="pane" data-pane="invsom">
+  <div class="card">
+    <div class="flex between" style="margin-bottom:6px">
+      <div>
+        <h3 style="margin:0">🎚 Inventário — Sala de Som do Auditório</h3>
+        <p class="muted tiny" style="margin:2px 0 0">Levantamento e conferência de equipamentos patrimoniados e não patrimoniados (TI, som e audiovisual). Itens marcados como <b>Para Compra</b> alimentam a Lista Prévia.</p>
+      </div>
+      <div class="flex">
+        <button class="btn sm" id="inv-xls">📊 Excel</button>
+        <button class="btn sm" id="inv-pdf">📄 PDF</button>
+        <button class="btn sm warn" id="inv-tocompra">→ Enviar marcados p/ Lista Prévia</button>
+      </div>
+    </div>
+
+    <div class="inv-kpis" id="inv-kpis">
+      <div class="card"><div class="lbl">Total de itens</div><div class="val" id="ik-tot">0</div></div>
+      <div class="card"><div class="lbl">Patrimoniados</div><div class="val" style="color:#9bb6ff" id="ik-pat">0</div></div>
+      <div class="card"><div class="lbl">Não patrimoniados</div><div class="val" style="color:#f5b042" id="ik-npat">0</div></div>
+      <div class="card"><div class="lbl">Para compra</div><div class="val" style="color:#ff5d6b" id="ik-comp">0</div></div>
+      <div class="card"><div class="lbl">Conferidos</div><div class="val" style="color:#27d39f" id="ik-ok">0</div></div>
+    </div>
+
+    <div class="card" style="background:var(--bg2)">
+      <h4 style="margin:0 0 8px">Adicionar / atualizar item</h4>
+      <div class="inv-form-grid">
+        <div class="field col-2"><label>Categoria</label>
+          <select id="inv-cat">
+            <option>Som</option><option>Audiovisual</option><option>TI</option>
+            <option>Cabos</option><option>Adaptadores</option><option>Componentes</option><option>Peças</option><option>Acessórios</option>
+          </select>
+        </div>
+        <div class="field col-2"><label>Tipo</label>
+          <select id="inv-tipo">
+            <option value="patrimoniado">Patrimoniado</option>
+            <option value="nao">Não patrimoniado</option>
+          </select>
+        </div>
+        <div class="field col-2"><label>Patrimônio (se houver)</label><input id="inv-tag" placeholder="Ex.: 1234567"/></div>
+        <div class="field col-3"><label>Equipamento / descrição</label><input id="inv-desc" placeholder="Ex.: Mesa de som Yamaha MG12XU"/></div>
+        <div class="field"><label>Marca</label><input id="inv-marca"/></div>
+        <div class="field"><label>Modelo</label><input id="inv-modelo"/></div>
+        <div class="field"><label>Qtd</label><input id="inv-qtd" type="number" value="1" min="1"/></div>
+        <div class="field"><label>Unidade</label>
+          <select id="inv-un"><option>un</option><option>par</option><option>m</option><option>kit</option><option>cx</option></select>
+        </div>
+        <div class="field"><label>Estado</label>
+          <select id="inv-estado">
+            <option>Funcional</option><option>Funcional c/ ressalva</option><option>Avariado</option><option>Inservível</option>
+          </select>
+        </div>
+        <div class="field"><label>Localização</label>
+          <select id="inv-loc">
+            <option>Rack principal</option><option>Mesa de som</option><option>Armário 1</option><option>Armário 2</option><option>Bancada</option><option>Palco</option><option>Sala de controle</option><option>Outro</option>
+          </select>
+        </div>
+        <div class="field col-6"><label>Observação</label><input id="inv-obs" placeholder="Detalhes, série, defeitos, vínculos"/></div>
+        <div class="field col-2"><label class="flex" style="gap:6px;align-items:center"><input type="checkbox" id="inv-conf"/> Conferido in loco</label></div>
+        <div class="field col-2"><label class="flex" style="gap:6px;align-items:center"><input type="checkbox" id="inv-comp"/> Marcar para compra</label></div>
+        <div class="field col-3"><label>Foto do item <span class="tiny muted">— opcional</span></label>
+          <label class="filmora-up" id="inv-photo-drop">
+            <input id="inv-photo" type="file" accept="image/*"/>
+            <div class="fm-body">
+              <div class="fm-icon"><svg viewBox="0 0 24 24"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="4"/></svg></div>
+              <div class="fm-txt">
+                <p class="fm-title">Anexar foto do item</p>
+                <div class="fm-hint"><span class="fm-pill">JPG · PNG</span><span>até 2MB · arraste ou clique</span></div>
+              </div>
+              <div class="fm-cta"><svg viewBox="0 0 24 24" stroke="white" fill="none" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg><span>Anexar</span></div>
+            </div>
+          </label>
+          <div id="inv-photo-prev" style="margin-top:6px"></div>
+        </div>
+        <div class="field col-3" style="text-align:right;align-self:end">
+          <button class="btn ghost sm" id="inv-clear">Limpar</button>
+          <button class="btn primary" id="inv-add">＋ Adicionar / Salvar</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex between" style="margin-top:12px">
+      <div class="search-box"><svg class="si" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><input id="inv-q" placeholder="Buscar por nome, patrimônio, marca..."/></div>
+      <div class="inv-cat-bar" id="inv-filterbar"></div>
+    </div>
+
+    <div class="tbl-wrap"><table class="tbl" id="tbl-inv"><thead><tr>
+      <th>✓</th><th>Foto</th><th>Categoria</th><th>Tipo</th><th>Patrimônio</th><th>Equipamento</th><th>Marca/Modelo</th><th>Qtd</th><th>Estado</th><th>Localização</th><th>Status</th><th>Ações</th>
+    </tr></thead><tbody></tbody></table></div>
+  </div>
+</section>
+</template>
+
+<script>
+(function(){
+  /* ========== Inject Inventário Sala de Som pane ========== */
+  function injectInvPane(){
+    if(document.querySelector('section.pane[data-pane="invsom"]')) return;
+    var main=document.querySelector('main.content'); if(!main) return;
+    var tpl=document.getElementById('tpl-invsom-pane'); if(!tpl) return;
+    main.appendChild(tpl.content.cloneNode(true));
+  }
+  injectInvPane();
+
+  /* Register page meta */
+  if(window.PAGES){ window.PAGES.invsom = ["Inventário Sala de Som","Patrimoniados e não patrimoniados · TI, som e audiovisual"]; }
+
+  /* ========== State + CRUD ========== */
+  function ensureInv(){ state.invsom = Array.isArray(state.invsom)?state.invsom:[]; }
+  ensureInv();
+  var invFilter='', invEditing=null;
+  var INV_CATS=['Todos','Som','Audiovisual','TI','Cabos','Adaptadores','Componentes','Peças','Acessórios'];
+
+  function buildFilterBar(){
+    var bar=document.getElementById('inv-filterbar'); if(!bar) return;
+    bar.innerHTML=INV_CATS.map(c=>`<button data-cat="${c==='Todos'?'':c}" class="${(invFilter===''&&c==='Todos')||invFilter===c?'active':''}">${c}</button>`).join('');
+    bar.querySelectorAll('button').forEach(b=>b.onclick=()=>{invFilter=b.dataset.cat; renderInv()});
+  }
+
+  var invPhoto=null;
+  function readForm(){
+    return {
+      cat:$('inv-cat').value, tipo:$('inv-tipo').value,
+      tag:$('inv-tag').value.trim(), desc:$('inv-desc').value.trim(),
+      marca:$('inv-marca').value.trim(), modelo:$('inv-modelo').value.trim(),
+      qtd:parseInt($('inv-qtd').value)||1, un:$('inv-un').value,
+      estado:$('inv-estado').value, loc:$('inv-loc').value,
+      obs:$('inv-obs').value.trim(), conf:$('inv-conf').checked, comp:$('inv-comp').checked,
+      photo: invPhoto || (invEditing&&invEditing.photo) || null
+    };
+  }
+  function writeForm(r){
+    $('inv-cat').value=r.cat||'Som'; $('inv-tipo').value=r.tipo||'patrimoniado';
+    $('inv-tag').value=r.tag||''; $('inv-desc').value=r.desc||'';
+    $('inv-marca').value=r.marca||''; $('inv-modelo').value=r.modelo||'';
+    $('inv-qtd').value=r.qtd||1; $('inv-un').value=r.un||'un';
+    $('inv-estado').value=r.estado||'Funcional'; $('inv-loc').value=r.loc||'Rack principal';
+    $('inv-obs').value=r.obs||''; $('inv-conf').checked=!!r.conf; $('inv-comp').checked=!!r.comp;
+    var pv=document.getElementById('inv-photo-prev'); var fi=document.getElementById('inv-photo');
+    invPhoto=null; if(fi) fi.value='';
+    if(pv) pv.innerHTML = r.photo ? '<img src="'+r.photo+'" style="max-width:120px;border-radius:8px;border:1px solid var(--line-2)"/> <button type="button" class="btn sm warn" id="inv-photo-rm">remover</button>' : '';
+    var rm=document.getElementById('inv-photo-rm');
+    if(rm) rm.onclick=function(){ invPhoto=null; if(invEditing)invEditing.photo=null; pv.innerHTML=''; };
+  }
+  function clearForm(){ invPhoto=null; invEditing=null; writeForm({}); var pv=document.getElementById('inv-photo-prev'); if(pv)pv.innerHTML=''; var fi=document.getElementById('inv-photo'); if(fi)fi.value=''; }
+
+  function bindInv(){
+    if(!$('inv-add')||$('inv-add').dataset.bound) return;
+    $('inv-add').dataset.bound='1';
+    var fi=document.getElementById('inv-photo');
+    if(fi) fi.onchange=function(){
+      var f=fi.files&&fi.files[0]; if(!f){invPhoto=null;return}
+      if(f.size>5*1024*1024){toast('Foto muito grande (máx 5MB)');fi.value='';return}
+      var r=new FileReader(); r.onload=function(e){ invPhoto=e.target.result; var pv=document.getElementById('inv-photo-prev'); if(pv) pv.innerHTML='<img src="'+invPhoto+'" style="max-width:120px;border-radius:8px;border:1px solid var(--line-2)"/>'; }; r.readAsDataURL(f);
+    };
+    $('inv-add').onclick=function(){
+      ensureInv();
+      var r=readForm();
+      if(!r.desc){toast('Informe o equipamento/descrição');return}
+      if(invEditing){
+        Object.assign(invEditing,r); invEditing.updatedAt=Date.now();
+        toast('Item atualizado');
+      } else {
+        r.id=uid('INV'); r.createdAt=Date.now();
+        state.invsom.unshift(r);
+        toast('Item adicionado ao inventário');
+      }
+      save(); clearForm(); renderInv();
+    };
+    $('inv-clear').onclick=clearForm;
+    $('inv-q').oninput=renderInv;
+
+
+    $('inv-tocompra').onclick=function(){
+      var sel=state.invsom.filter(i=>i.comp);
+      if(!sel.length){toast('Nenhum item marcado para compra');return}
+      if(!confirm('Enviar '+sel.length+' item(ns) para a Lista Prévia de Compras?')) return;
+      state.itens=Array.isArray(state.itens)?state.itens:[];
+      sel.forEach(i=>{
+        state.itens.unshift({
+          id:uid('IT'), eq:i.desc+(i.marca?' '+i.marca:'')+(i.modelo?' '+i.modelo:''),
+          qtd:i.qtd||1, un:i.un||'un', just:'Inventário Sala de Som — '+(i.cat||''),
+          origem:'invsom:'+i.id, createdAt:Date.now()
+        });
+      });
+      save(); toast('✅ '+sel.length+' item(ns) enviados para Lista Prévia');
+    };
+
+    $('inv-xls').onclick=function(){
+      var rows=state.invsom.map(i=>({Categoria:i.cat,Tipo:i.tipo,Patrimonio:i.tag,Equipamento:i.desc,Marca:i.marca,Modelo:i.modelo,Qtd:i.qtd,Unidade:i.un,Estado:i.estado,Localizacao:i.loc,Conferido:i.conf?'Sim':'Não',ParaCompra:i.comp?'Sim':'Não',Observacao:i.obs}));
+      var ws=XLSX.utils.json_to_sheet(rows); var wb=XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb,ws,'Inventario'); XLSX.writeFile(wb,'inventario_sala_som.xlsx');
+    };
+    $('inv-pdf').onclick=function(){
+      var doc=new jspdf.jsPDF({orientation:'landscape'});
+      doc.setFontSize(14); doc.text('MODESK OMEGA — Inventário Sala de Som do Auditório',14,14);
+      doc.setFontSize(9); doc.text('Gerado em '+new Date().toLocaleString('pt-BR'),14,20);
+      doc.autoTable({startY:26,head:[['Cat','Tipo','Patr.','Equipamento','Marca/Modelo','Qtd','Estado','Local','Conf','Compra']],
+        body:state.invsom.map(i=>[i.cat,i.tipo,i.tag||'-',i.desc,(i.marca||'')+' '+(i.modelo||''),(i.qtd||1)+' '+(i.un||''),i.estado,i.loc,i.conf?'✓':'-',i.comp?'✓':'-']),styles:{fontSize:8}});
+      doc.save('inventario_sala_som.pdf');
+    };
+  }
+
+  window.renderInv=function(){
+    ensureInv(); bindInv(); buildFilterBar();
+    var tb=document.querySelector('#tbl-inv tbody'); if(!tb) return;
+    var q=($('inv-q')&&$('inv-q').value||'').toLowerCase();
+    var rows=state.invsom.filter(i=>{
+      if(invFilter && i.cat!==invFilter) return false;
+      if(!q) return true;
+      return (i.desc+' '+(i.tag||'')+' '+(i.marca||'')+' '+(i.modelo||'')+' '+(i.obs||'')).toLowerCase().includes(q);
+    });
+    tb.innerHTML=rows.map(i=>{
+      var tipoB=i.tipo==='patrimoniado'?'<span class="badge pat">Patr.</span>':'<span class="badge npat">Não patr.</span>';
+      var stB=i.comp?'<span class="badge compra">P/ COMPRA</span>':(i.conf?'<span class="badge ok2">Conferido</span>':'<span class="badge">—</span>');
+      var ph = i.photo ? '<img src="'+i.photo+'" data-zoom="'+i.id+'" style="width:46px;height:46px;object-fit:cover;border-radius:8px;border:1px solid var(--line-2);cursor:zoom-in"/>' : '<span class="tiny muted">—</span>';
+      return '<tr>'+
+        '<td><input type="checkbox" data-cf="'+i.id+'" '+(i.conf?'checked':'')+'/></td>'+
+        '<td>'+ph+'</td>'+
+        '<td>'+escapeHTML(i.cat)+'</td>'+
+        '<td>'+tipoB+'</td>'+
+        '<td>'+escapeHTML(i.tag||'-')+'</td>'+
+        '<td>'+escapeHTML(i.desc)+(i.obs?'<div class="tiny muted">'+escapeHTML(i.obs)+'</div>':'')+'</td>'+
+        '<td>'+escapeHTML((i.marca||'-')+' '+(i.modelo||''))+'</td>'+
+        '<td>'+(i.qtd||1)+' '+(i.un||'')+'</td>'+
+        '<td>'+escapeHTML(i.estado||'-')+'</td>'+
+        '<td>'+escapeHTML(i.loc||'-')+'</td>'+
+        '<td>'+stB+'</td>'+
+        '<td><button class="btn sm" data-ed="'+i.id+'">✎</button> <button class="btn sm warn" data-rm="'+i.id+'">🗑</button></td>'+
+      '</tr>';
+    }).join('')||'<tr><td colspan="12" class="muted tiny" style="text-align:center;padding:18px">Nenhum item no inventário</td></tr>';
+    tb.querySelectorAll('[data-zoom]').forEach(img=>img.onclick=()=>{var w=window.open('','_blank');if(w)w.document.write('<img src="'+img.src+'" style="max-width:100%"/>');});
+
+    tb.querySelectorAll('[data-cf]').forEach(c=>c.onchange=()=>{var it=state.invsom.find(x=>x.id===c.dataset.cf);if(it){it.conf=c.checked;save();renderInv()}});
+    tb.querySelectorAll('[data-ed]').forEach(b=>b.onclick=()=>{var it=state.invsom.find(x=>x.id===b.dataset.ed); if(!it)return; invEditing=it; writeForm(it); window.scrollTo({top:0,behavior:'smooth'})});
+    tb.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{if(!confirm('Remover item do inventário?'))return; state.invsom=state.invsom.filter(x=>x.id!==b.dataset.rm); save(); renderInv()});
+
+    var k=id=>{var e=document.getElementById(id);if(e)e.textContent=arguments[1]};
+    var tot=state.invsom.length;
+    document.getElementById('ik-tot').textContent=tot;
+    document.getElementById('ik-pat').textContent=state.invsom.filter(i=>i.tipo==='patrimoniado').length;
+    document.getElementById('ik-npat').textContent=state.invsom.filter(i=>i.tipo!=='patrimoniado').length;
+    document.getElementById('ik-comp').textContent=state.invsom.filter(i=>i.comp).length;
+    document.getElementById('ik-ok').textContent=state.invsom.filter(i=>i.conf).length;
+  };
+
+  /* Hook into tab navigation */
+  var _origGo=window.go;
+  if(typeof _origGo==='function'){
+    window.go=function(tab){
+      _origGo.apply(this,arguments);
+      if(tab==='invsom'){ try{renderInv()}catch(e){console.error(e)} }
+    };
+  }
+  // Also bind sidebar button directly (in case go isn't intercepted in time)
+  document.querySelectorAll('#tabs [data-tab="invsom"]').forEach(function(b){
+    b.addEventListener('click',function(){ setTimeout(function(){ try{renderInv()}catch(e){} },80); });
+  });
+})();
+</script>
+
+<script>
+/* ========== Dashboard overdue alert (matches reference) ========== */
+(function(){
+  function isAtivo(c){ return !['Finalizado','Cancelado'].includes(c.st); }
+  function overduePrazo(c){ return isAtivo(c) && c.prazo && c.prazo<Date.now(); }
+  function overdueSLA(c){
+    if(!isAtivo(c)) return false;
+    var end=c.createdAt+((c.sla||24)*3600*1000);
+    return Date.now()>end;
+  }
+  function overdueAll(){
+    if(!window.state||!Array.isArray(state.chamados)) return [];
+    return state.chamados.filter(c=>overduePrazo(c)||overdueSLA(c));
+  }
+  function ensureDashAlert(){
+    var pane=document.querySelector('section.pane[data-pane="dashboard"]');
+    if(!pane||document.getElementById('dash-vencidos')) return;
+    var div=document.createElement('div');
+    div.id='dash-vencidos';
+    div.innerHTML='<div class="dv-ic">⚠</div><div class="dv-tt"><b>ATENÇÃO: <span id="dv-n1">0</span> chamado(s) precisam de resolução imediata</b><span><span id="dv-n2">0</span> vencido(s) ativo(s) // Clique para ver detalhes.</span></div><div class="dv-cta">VER ALERTAS</div>';
+    div.onclick=()=>{ try{ if($('ch-filter-st'))$('ch-filter-st').value=''; if($('ch-search'))$('ch-search').value=''; go('chamados'); }catch(e){} };
+    pane.insertBefore(div, pane.firstChild);
+  }
+  function refresh(){
+    ensureDashAlert();
+    var arr=overdueAll(), n=arr.length;
+    var el=document.getElementById('dash-vencidos'); if(!el) return;
+    el.classList.toggle('show',n>0);
+    var a=document.getElementById('dv-n1'), b=document.getElementById('dv-n2');
+    if(a)a.textContent=n; if(b)b.textContent=n;
+    refreshSidebar(arr);
+  }
+
+  /* ========== Sidebar overdue block ========== */
+  function ensureSideBlock(){
+    var side=document.querySelector('aside.sidebar');
+    if(!side||document.getElementById('side-overdue')) return;
+    var foot=side.querySelector('.side-foot');
+    var div=document.createElement('div');
+    div.id='side-overdue'; div.className='side-overdue empty';
+    div.innerHTML='<div class="so-hd">⚠ Vencidos <span class="so-cnt" id="so-cnt">0</span></div><div class="so-list" id="so-list"></div>';
+    div.onclick=(e)=>{ if(e.target.closest('.so-item'))return; try{go('chamados')}catch(_){} };
+    if(foot) side.insertBefore(div,foot); else side.appendChild(div);
+  }
+  function refreshSidebar(arr){
+    ensureSideBlock();
+    var box=document.getElementById('side-overdue'); if(!box) return;
+    var cnt=document.getElementById('so-cnt'), list=document.getElementById('so-list');
+    var n=arr.length;
+    box.classList.toggle('empty',n===0);
+    if(cnt) cnt.textContent=n;
+    if(!list) return;
+    if(!n){ list.innerHTML='<div class="so-empty">Nenhum chamado vencido ✓</div>'; return; }
+    list.innerHTML=arr.slice(0,12).map(c=>{
+      var atraso='';
+      var end = c.prazo || (c.createdAt+((c.sla||24)*3600*1000));
+      var h=Math.floor((Date.now()-end)/3600000);
+      atraso = h>=24 ? Math.floor(h/24)+'d' : h+'h';
+      return '<div class="so-item" data-open="'+c.id+'"><span class="sl-id">'+escapeHTML(c.id)+'</span><span title="'+escapeHTML(c.tt||'')+'">'+escapeHTML((c.tt||'-').slice(0,18))+'</span><span style="color:#ff5d6b">'+atraso+'</span></div>';
+    }).join('') + (n>12?'<div class="so-empty">+'+(n-12)+' outros...</div>':'');
+    list.querySelectorAll('[data-open]').forEach(it=>it.onclick=(ev)=>{ev.stopPropagation();try{go('chamados');setTimeout(()=>{if(typeof openCh==='function')openCh(it.dataset.open)},120);}catch(_){}});
+  }
+
+  /* Hook & loop */
+  function hook(){
+    if(typeof window.renderDashboard==='function'){
+      var o=window.renderDashboard;
+      window.renderDashboard=function(){try{o.apply(this,arguments)}catch(e){} refresh();};
+    }
+    if(typeof window.renderChamados==='function'){
+      var o2=window.renderChamados;
+      window.renderChamados=function(){try{o2.apply(this,arguments)}catch(e){} refresh();};
+    }
+  }
+  var t=setInterval(()=>{ if(window.state){ hook(); refresh(); clearInterval(t); }},300);
+  setInterval(refresh,30000);
+})();
+</script>
+
+<script>
+/* ========== User photo + email opcional ========== */
+(function(){
+  var photoData=null;
+  function bindPhoto(){
+    var f=document.getElementById('us-photo'); if(!f||f.dataset.bound) return;
+    f.dataset.bound='1';
+    f.onchange=function(){
+      var file=f.files&&f.files[0]; if(!file){photoData=null;return}
+      var r=new FileReader(); r.onload=e=>{photoData=e.target.result;document.getElementById('us-photo-prev').innerHTML='<img src="'+photoData+'"/>'}; r.readAsDataURL(file);
+    };
+  }
+  bindPhoto();
+
+  /* Wrap us-add: drop email requirement (already optional in original) + attach photo */
+  function rebind(){
+    var btn=document.getElementById('us-add'); if(!btn) return;
+    var oldFn=btn.onclick;
+    btn.onclick=function(ev){
+      // call original (it doesn't require email, so just decorate)
+      var prevLen=(state.users||[]).length;
+      if(oldFn) oldFn.call(this,ev);
+      // if user got added, attach photo
+      if(state.users && state.users.length>prevLen && photoData){
+        state.users[state.users.length-1].photo=photoData;
+        save(); photoData=null;
+        var pv=document.getElementById('us-photo-prev'); if(pv)pv.innerHTML='';
+        var fi=document.getElementById('us-photo'); if(fi)fi.value='';
+        if(typeof renderUsers==='function') renderUsers();
+      }
+    };
+  }
+  rebind();
+
+  /* Override renderUsers to show avatars */
+  function initials(s){return (s||'?').trim().split(/\s+/).slice(0,2).map(w=>w[0]||'').join('').toUpperCase()}
+  function customRender(){
+    var wrap=document.getElementById('us-list'); if(!wrap) return;
+    var rows=[];
+    rows.push('<div class="usr-row"><div class="usr-av" style="background:var(--grad);color:#fff">'+initials(ADMIN.name)+'</div><div class="usr-meta"><div style="font-weight:700">'+escapeHTML(ADMIN.name)+' <span class="badge acc">GESTOR · MASTER</span></div><div class="tiny muted">login: <code>'+escapeHTML(ADMIN.user)+'</code> · '+escapeHTML(ADMIN.mail||'-')+'</div></div><span class="tiny muted">built-in</span></div>');
+    if(!(state.users||[]).length){
+      rows.push('<div class="muted tiny" style="padding:8px 4px">Nenhum usuário cadastrado ainda.</div>');
+    } else {
+      state.users.forEach(u=>{
+        var av=u.photo?'<img class="usr-av" src="'+u.photo+'"/>':'<div class="usr-av">'+initials(u.name)+'</div>';
+        var canRm=isGestor();
+        rows.push('<div class="usr-row">'+av+'<div class="usr-meta"><div style="font-weight:700">'+escapeHTML(u.name)+' <span class="badge '+(u.role==='gestor'?'acc':'warn')+'">'+(u.role==='gestor'?'GESTOR':'EDITOR')+'</span></div><div class="tiny muted">login: <code>'+escapeHTML(u.login)+'</code> · '+escapeHTML(u.mail||'sem e-mail')+' · '+escapeHTML(u.phone||'-')+'</div></div>'+(canRm?'<button class="btn sm warn" data-urm="'+escapeHTML(u.id)+'">🗑 Remover</button>':'<span class="tiny muted">somente gestor pode remover</span>')+'</div>');
+      });
+    }
+    wrap.innerHTML=rows.join('');
+    wrap.querySelectorAll('[data-urm]').forEach(b=>b.onclick=()=>{
+      if(!isGestor()){toast('⛔ Apenas gestor pode remover usuários');return}
+      if(!confirm('Remover este usuário?'))return;
+      state.users=state.users.filter(x=>x.id!==b.dataset.urm);save();customRender();
+    });
+  }
+  if(typeof window.renderUsers==='function'){
+    var orig=window.renderUsers;
+    window.renderUsers=function(){customRender()};
+  }
 })();
 </script>
 
