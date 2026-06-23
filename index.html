@@ -53,7 +53,7 @@ aside.sidebar{
   border-right:1px solid var(--line);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
   padding:18px 14px;display:flex;flex-direction:column;gap:6px;z-index:20}
 .brand{display:flex;align-items:center;gap:10px;padding:6px 8px 16px;border-bottom:1px solid var(--line);margin-bottom:10px}
-.brand .logo{display: none !important;
+.brand .logo{display: none !important;}
 .brand .name{font-family:'Sora';font-weight:800;font-size:15px;letter-spacing:.02em}
 .brand .name small{display:block;color:var(--fg-mut);font-weight:500;font-size:11px;letter-spacing:.12em;text-transform:uppercase}
 nav.tabs{display:flex;flex-direction:column;gap:2px;overflow:auto;flex:1;padding:4px 0}
@@ -307,6 +307,33 @@ html.light .theme-toggle .moon{display:none}
     </div>
     <button class="btn primary" style="width:100%;justify-content:center" id="lg-btn">Entrar</button>
     <p class="tiny muted" style="text-align:center;margin-top:14px">Acesso restrito · informe suas credenciais</p>
+  </div>
+    </div>
+
+<!-- PRIMEIRO ACESSO: troca de senha obrigatória + completar cadastro -->
+<div id="first-access-screen" style="display:none;position:fixed;inset:0;z-index:9999;background:var(--bg0);overflow-y:auto;padding:24px 12px">
+  <div class="box" style="max-width:520px;margin:24px auto">
+    <h2 class="brand-title"><span class="bt-blink">PRIMEIRO</span> <span class="bt-omega">ACESSO</span></h2>
+    <p class="sub" id="fa-hello">Antes de continuar, defina uma nova senha pessoal.</p>
+    <p class="tiny muted" style="margin-bottom:10px">A senha padrão fornecida no cadastro só vale para este primeiro acesso. Você também pode completar suas informações de perfil.</p>
+
+    <fieldset style="border:1px solid var(--line-2);border-radius:10px;padding:10px;margin-bottom:10px">
+      <legend class="tiny muted">🔒 Nova senha (obrigatório)</legend>
+      <div class="field"><label>Nova senha</label><input id="fa-pass1" type="password" autocomplete="new-password" placeholder="mínimo 6 caracteres"/></div>
+      <div class="field"><label>Confirmar nova senha</label><input id="fa-pass2" type="password" autocomplete="new-password" placeholder="repita a nova senha"/></div>
+    </fieldset>
+
+    <fieldset style="border:1px solid var(--line-2);border-radius:10px;padding:10px;margin-bottom:10px">
+      <legend class="tiny muted">👤 Completar cadastro (opcional)</legend>
+      <div class="field"><label>Nome completo</label><input id="fa-name" placeholder="Seu nome completo"/></div>
+      <div class="field"><label>Telefone</label><input id="fa-phone" placeholder="(11) 99999-0000"/></div>
+      <div class="field"><label>E-mail</label><input id="fa-mail" placeholder="email@senac.br"/></div>
+    </fieldset>
+
+    <div class="flex" style="justify-content:space-between;gap:8px">
+      <button type="button" class="btn ghost" id="fa-cancel">Cancelar</button>
+      <button type="button" class="btn primary" id="fa-save" style="flex:1;justify-content:center">Salvar e entrar</button>
+    </div>
   </div>
 </div>
 
@@ -929,6 +956,33 @@ function save(){ try{localStorage.setItem(LS_KEY,JSON.stringify(state))}catch(e)
 function load(){
   try{const v=localStorage.getItem(LS_KEY);if(v)Object.assign(state,JSON.parse(v))}catch(e){}
   if(!Array.isArray(state.users)) state.users=[];
+  seedDefaultUsers();
+}
+function seedDefaultUsers(){
+  const seeds=[
+    {name:"Carlos Eduardo",     login:"cadu",            pass:"1234", role:"editor", cargo:"Aprendiz"},
+    {name:"Gabriel Bomfim",     login:"gabrielbimfim",   pass:"1234", role:"editor", cargo:"Aprendiz"},
+    {name:"Vitoria Barbosa",    login:"vitoriabarbosa",  pass:"1234", role:"editor", cargo:"Aprendiz"},
+    {name:"Milena",             login:"milena",          pass:"1234", role:"editor", cargo:"Aprendiz"},
+    {name:"Matheus Veras",      login:"matheusveras",    pass:"1234", role:"editor", cargo:"Aprendiz"},
+    {name:"Milena Barros",      login:"milebnabarros",   pass:"1234", role:"editor", cargo:"Estagiária de TI"}
+  ];
+  let changed=false;
+  seeds.forEach(s=>{
+    const exists=state.users.some(u=>String(u.login||'').toLowerCase()===s.login);
+    if(!exists){
+      state.users.push({
+        id:'USR'+s.login,
+        name:s.name, login:s.login, pass:s.pass,
+        role:s.role, cargo:s.cargo,
+        phone:'', mail:'',
+        mustChangePass:true,
+        createdAt:Date.now(), createdBy:'seed'
+      });
+      changed=true;
+    }
+  });
+  if(changed){ try{localStorage.setItem(LS_KEY,JSON.stringify(state))}catch(e){} }
 }
 
 function toast(msg,t=2400){
@@ -936,7 +990,84 @@ function toast(msg,t=2400){
   document.body.appendChild(el);setTimeout(()=>el.remove(),t);
 }
 
-/* ==================== LOGIN ==================== */
+/* ==================== LOGIN / SESSÃO PERSISTENTE ==================== */
+const SESSION_KEY="modesk_omega_session_v1";
+const SESSION_TTL=24*60*60*1000; // 24h
+/* Boot marker: vive apenas enquanto o SO estiver ligado.
+   Usa sessionStorage compartilhado entre abas via BroadcastChannel-like trick:
+   gravamos um id em sessionStorage; quando o computador é desligado/reiniciado,
+   toda a memória de sessão do navegador é descartada. */
+function deviceFingerprint(){
+  const n=navigator;
+  const parts=[
+    n.userAgent||'', n.platform||'', n.language||'',
+    (n.hardwareConcurrency||'')+'', (n.maxTouchPoints||'')+'',
+    screen.width+'x'+screen.height+'x'+screen.colorDepth,
+    new Date().getTimezoneOffset()+''
+  ];
+  // hash simples (djb2)
+  let h=5381; const s=parts.join('|');
+  for(let i=0;i<s.length;i++) h=((h<<5)+h+s.charCodeAt(i))|0;
+  return 'fp_'+(h>>>0).toString(36);
+}
+function browserName(){
+  const ua=navigator.userAgent;
+  if(/Edg\//.test(ua)) return 'Edge';
+  if(/OPR\//.test(ua)) return 'Opera';
+  if(/Chrome\//.test(ua)) return 'Chrome';
+  if(/Firefox\//.test(ua)) return 'Firefox';
+  if(/Safari\//.test(ua)) return 'Safari';
+  return 'Navegador';
+}
+function deviceName(){
+  const ua=navigator.userAgent;
+  if(/Windows/.test(ua)) return 'Windows';
+  if(/Mac OS X|Macintosh/.test(ua)) return 'Mac';
+  if(/Android/.test(ua)) return 'Android';
+  if(/iPhone|iPad|iPod/.test(ua)) return 'iOS';
+  if(/Linux/.test(ua)) return 'Linux';
+  return navigator.platform||'Dispositivo';
+}
+function saveSession(auth){
+  const now=Date.now();
+  const sess={
+    user:auth,
+    fp:deviceFingerprint(),
+    device:deviceName(), browser:browserName(),
+    loginAt:now, expiresAt:now+SESSION_TTL,
+    bootId: getOrCreateBootId()
+  };
+  try{localStorage.setItem(SESSION_KEY,JSON.stringify(sess))}catch(e){}
+}
+function clearSession(){ try{localStorage.removeItem(SESSION_KEY)}catch(e){} }
+/* bootId: gravado em sessionStorage. Sobrevive a F5/reabrir aba do mesmo navegador
+   (sessionStorage de janela permanece enquanto o processo do navegador estiver vivo),
+   mas é descartado quando o navegador/SO é fechado/reiniciado. Persistimos o último
+   bootId conhecido em localStorage para comparar entre reaberturas. */
+function getOrCreateBootId(){
+  let id=sessionStorage.getItem('modesk_boot_id');
+  if(!id){
+    id='boot_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,8);
+    sessionStorage.setItem('modesk_boot_id',id);
+  }
+  return id;
+}
+function readSession(){
+  try{
+    const raw=localStorage.getItem(SESSION_KEY); if(!raw) return null;
+    const s=JSON.parse(raw);
+    if(!s||!s.user) return null;
+    if(Date.now()>Number(s.expiresAt||0)){ clearSession(); return {expired:true}; }
+    if(s.fp!==deviceFingerprint()){ clearSession(); return {mismatch:true}; }
+    return s;
+  }catch(e){ return null; }
+}
+function applyAuth(auth){
+  currentUser=auth; window.currentUser=auth;
+  $('login-screen').style.display='none';
+  $('app').style.display='grid';
+  try{ init(); }catch(e){ console.error(e); toast('Erro ao iniciar: '+e.message); }
+}
 function doLogin(){
   const u=($('lg-user').value||'').trim().toLowerCase();
   const p=($('lg-pass').value||'').trim();
@@ -946,24 +1077,94 @@ function doLogin(){
   } else {
     try{const v=localStorage.getItem(LS_KEY);if(v){const s=JSON.parse(v);const list=Array.isArray(s.users)?s.users:[];
       const m=list.find(x=>String(x.login||'').toLowerCase()===u && String(x.pass||'')===p);
-      if(m) auth={login:m.login,name:m.name,role:m.role==='gestor'?'gestor':'editor',phone:m.phone,mail:m.mail,builtin:false};
+      if(m){
+        if(m.mustChangePass){ openFirstAccess(m); return; }
+        auth={login:m.login,name:m.name,role:m.role==='gestor'?'gestor':'editor',phone:m.phone,mail:m.mail,builtin:false};
+      }
     }}catch(e){}
   }
   if(auth){
-    currentUser=auth;window.currentUser=auth;
-    $('login-screen').style.display='none';
-    $('app').style.display='grid';
-    try{ init(); }catch(e){ console.error(e); toast('Erro ao iniciar: '+e.message); }
-    toast('Bem-vindo, '+auth.name+' ('+auth.role+')');
+    saveSession(auth);
+    applyAuth(auth);
+    toast('Bem-vindo, '+auth.name+' ('+auth.role+') · '+browserName()+' / '+deviceName());
   } else {
     toast('⛔ Credenciais inválidas');
   }
+}
+
+/* ===== Primeiro acesso: troca de senha obrigatória ===== */
+let _faTarget=null;
+function openFirstAccess(userRec){
+  _faTarget=userRec;
+  const fa=document.getElementById('first-access-screen');
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('fa-hello').textContent='Olá, '+(userRec.name||userRec.login)+'! Defina sua senha pessoal para continuar.';
+  document.getElementById('fa-name').value=userRec.name||'';
+  document.getElementById('fa-phone').value=userRec.phone||'';
+  document.getElementById('fa-mail').value=userRec.mail||'';
+  document.getElementById('fa-pass1').value='';
+  document.getElementById('fa-pass2').value='';
+  fa.style.display='block';
+}
+function closeFirstAccess(){
+  document.getElementById('first-access-screen').style.display='none';
+  document.getElementById('login-screen').style.display='';
+  _faTarget=null;
+}
+document.getElementById('fa-cancel').addEventListener('click',closeFirstAccess);
+document.getElementById('fa-save').addEventListener('click',function(){
+  if(!_faTarget) return;
+  const p1=document.getElementById('fa-pass1').value;
+  const p2=document.getElementById('fa-pass2').value;
+  if(!p1||p1.length<6){toast('Nova senha mínima de 6 caracteres');return}
+  if(p1!==p2){toast('As senhas não coincidem');return}
+  if(p1===_faTarget.pass){toast('A nova senha deve ser diferente da padrão');return}
+  const nm=document.getElementById('fa-name').value.trim();
+  const ph=document.getElementById('fa-phone').value.trim();
+  const ml=document.getElementById('fa-mail').value.trim();
+  if(ml && !/^\S+@\S+\.\S+$/.test(ml)){toast('E-mail inválido');return}
+  // atualiza no state
+  try{
+    const idx=state.users.findIndex(x=>x.id===_faTarget.id || (String(x.login||'').toLowerCase()===String(_faTarget.login||'').toLowerCase()));
+    if(idx>=0){
+      state.users[idx].pass=p1;
+      state.users[idx].mustChangePass=false;
+      state.users[idx].passChangedAt=Date.now();
+      if(nm) state.users[idx].name=nm;
+      if(ph) state.users[idx].phone=ph;
+      if(ml) state.users[idx].mail=ml;
+      save();
+    }
+  }catch(e){console.error(e)}
+  const m=state.users.find(x=>String(x.login||'').toLowerCase()===String(_faTarget.login||'').toLowerCase());
+  const auth={login:m.login,name:m.name,role:m.role==='gestor'?'gestor':'editor',phone:m.phone,mail:m.mail,builtin:false};
+  closeFirstAccess();
+  saveSession(auth);
+  applyAuth(auth);
+  toast('✅ Senha atualizada. Bem-vindo, '+auth.name+'!');
+});
+
+/* Auto-login se houver sessão válida (mesmo dispositivo/navegador, dentro de 24h) */
+function tryAutoLogin(){
+  const s=readSession();
+  if(!s) return false;
+  if(s.expired){ toast('Sessão expirada (24h). Faça login novamente.'); return false; }
+  if(s.mismatch){ toast('Sessão inválida para este dispositivo/navegador.'); return false; }
+  applyAuth(s.user);
+  const restMs=Math.max(0,s.expiresAt-Date.now());
+  const restH=Math.floor(restMs/3600000), restM=Math.floor((restMs%3600000)/60000);
+  toast('Sessão restaurada · '+s.browser+' / '+s.device+' · expira em '+restH+'h'+restM+'m');
+  // agenda logout automático ao atingir 24h
+  setTimeout(()=>{ clearSession(); toast('Sessão expirada (24h). Faça login novamente.'); setTimeout(()=>location.reload(),1500); }, restMs);
+  return true;
 }
 $('lg-btn').addEventListener('click',doLogin);
 $('lg-pass').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();doLogin();}});
 $('lg-user').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('lg-pass').focus();}});
 $('lg-show').addEventListener('click',()=>{const i=$('lg-pass');const b=$('lg-show');if(i.type==='password'){i.type='text';b.textContent='ocultar';}else{i.type='password';b.textContent='mostrar';}});
-$('logout-btn').onclick=()=>location.reload();
+$('logout-btn').onclick=()=>{ clearSession(); location.reload(); };
+// dispara restauração ao carregar
+try{ tryAutoLogin(); }catch(e){ console.error(e); }
 
 /* ==================== ROUTER ==================== */
 const PAGE_META={
@@ -1643,10 +1844,10 @@ if($('us-add'))$('us-add').onclick=()=>{
   if(mail && !/^\S+@\S+\.\S+$/.test(mail)){toast('E-mail inválido');return}
   if(login===ADMIN.user.toLowerCase()){toast('Login reservado');return}
   if(state.users.some(u=>u.login.toLowerCase()===login)){toast('Login já existe');return}
-  const u={id:uid('USR'),name,phone,mail,role,login,pass,createdAt:Date.now(),createdBy:currentUser&&currentUser.login};
+  const u={id:uid('USR'),name,phone,mail,role,login,pass,mustChangePass:true,createdAt:Date.now(),createdBy:currentUser&&currentUser.login};
   state.users.push(u);save();syncUserCloud(u);
   ['us-name','us-phone','us-mail','us-login','us-pass'].forEach(k=>$(k).value='');$('us-role').value='editor';
-  renderUsers();toast('✅ Usuário cadastrado: '+name+' ('+role+')');
+  renderUsers();toast('✅ Usuário cadastrado: '+name+' ('+role+') · senha padrão será trocada no 1º acesso');
 };
 if($('us-clear'))$('us-clear').onclick=()=>{['us-name','us-phone','us-mail','us-login','us-pass'].forEach(k=>$(k).value='');$('us-role').value='editor'};
 
