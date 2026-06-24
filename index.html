@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
-<title>MODESK OMEGA v4.5 — Ultimate Enterprise</title>
+<title>MODESK OMEGA v4.6 — Drive + Firebase Sync</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
@@ -1613,7 +1613,7 @@ $('it-new').onclick=()=>openItem(null);
 $('it-foto').onchange=async e=>{
   const f=e.target.files[0];if(!f)return;
   if(f.size>2*1024*1024){toast('Foto deve ter até 2MB');$('it-foto').value='';return}
-  editingIt.foto=await new Promise(res=>{const r=new FileReader();r.onload=()=>res({name:f.name,data:r.result});r.readAsDataURL(f)});
+  editingIt.foto=await window.uploadAnexoDrive(f);
   $('it-foto-prev').innerHTML=`<div class="fm-thumb"><img src="${editingIt.foto.data}"/><div class="cap">${escapeHTML(editingIt.foto.name||'foto')}</div></div>`;fmMarkFilled('it-foto-drop',editingIt.foto.name);
 };
 $('it-save').onclick=()=>{
@@ -1637,7 +1637,7 @@ function renderItens(){
   </tr>`).join('')||'<tr><td colspan="8" class="muted" style="text-align:center;padding:20px">Sem itens.</td></tr>';
   tb.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>openItem(b.dataset.edit));
   tb.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{if(!confirm('Excluir item?'))return;state.itens=state.itens.filter(x=>x.id!==b.dataset.del);save();renderItens()});
-  tb.querySelectorAll('[data-img]').forEach(im=>im.onclick=()=>{const it=state.itens.find(x=>x.id===im.dataset.img);if(it&&it.foto)window.open(it.foto.data,'_blank')});
+  tb.querySelectorAll('[data-img]').forEach(im=>im.onclick=()=>{const it=state.itens.find(x=>x.id===im.dataset.img);if(it&&it.foto)window.open(it.foto.url||it.foto.data,'_blank')});
 }
 
 /* ==================== REQUISIÇÕES INTERNAS ==================== */
@@ -1650,13 +1650,13 @@ function renderReqChecklist(){
   const pend=state.itens.filter(i=>i.st==='Pendente');
   cont.innerHTML=pend.map(i=>`<label style="display:flex;gap:6px;padding:4px 0;font-size:12.5px"><input type="checkbox" value="${i.id}"/> <b>${escapeHTML(i.id)}</b> · ${escapeHTML(i.desc)} <span class="muted">(qtd ${i.qtd})</span></label>`).join('')||'<div class="muted tiny">Nenhum item pendente.</div>';
 }
-function readFileAsDataURL(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res({name:file.name,size:file.size,data:r.result});r.onerror=rej;r.readAsDataURL(file)})}
+async function readFileAsDataURL(file){ try{ return await window.uploadAnexoDrive(file); }catch(e){ toast('Falha upload Drive: '+e.message); throw e; } }
 $('rq-save').onclick=async()=>{
   const num=$('rq-num').value.trim();if(!num){toast('Nº de Controle obrigatório');return}
   const data=$('rq-data').value||todayISO();
   const ids=[...$('rq-checklist').querySelectorAll('input:checked')].map(i=>i.value);
   let anexo=null;const f=$('rq-file').files[0];
-  if(f){if(f.size>2*1024*1024){toast('Anexo deve ter até 2MB');return}anexo=await readFileAsDataURL(f)}
+  if(f){if(f.size>25*1024*1024){toast('Anexo deve ter até 25MB');return}anexo=await readFileAsDataURL(f)}
   const prev=state.reqs.find(r=>r.num===num);
   const rq={tipo:$('rq-tipo').value,num,data,sol:$('rq-sol').value.trim(),desc:$('rq-desc').value,itens:ids,anexo:anexo||(prev&&prev.anexo)||null,ts:Date.now(),st:'Aberta'};
   if(!ids.length && !anexo){toast('Selecione itens ou anexe documento');return}
@@ -1678,7 +1678,7 @@ function renderReqs(){
     <td><button class="btn sm warn" data-del="${escapeHTML(r.num)}">🗑</button></td>
   </tr>`).join('')||'<tr><td colspan="8" class="muted" style="text-align:center;padding:20px">Sem requisições.</td></tr>';
   tb.querySelectorAll('[data-srch]').forEach(b=>b.onclick=()=>window.open('https://outlook.office.com/mail/search?q='+encodeURIComponent(b.dataset.srch),'_blank'));
-  tb.querySelectorAll('[data-anx]').forEach(b=>b.onclick=()=>{const r=state.reqs.find(x=>x.num===b.dataset.anx);if(r&&r.anexo){const a=document.createElement('a');a.href=r.anexo.data;a.download=r.anexo.name;a.click()}});
+  tb.querySelectorAll('[data-anx]').forEach(b=>b.onclick=()=>{const r=state.reqs.find(x=>x.num===b.dataset.anx);if(r&&r.anexo){ if(r.anexo.url){ window.open(r.anexo.url,'_blank'); } else if(r.anexo.data){ const a=document.createElement('a');a.href=r.anexo.data;a.download=r.anexo.name;a.click(); } }});
   tb.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{state.reqs=state.reqs.filter(r=>r.num!==b.dataset.del);save();renderReqs()});
   $('pd-req').innerHTML='<option value="">—</option>'+state.reqs.map(r=>`<option>${escapeHTML(r.num)}</option>`).join('');
 }
@@ -2176,6 +2176,41 @@ window.renderLaudos=function(){_origRenderLaudos&&_origRenderLaudos();renderSign
     }catch(e){}
   };
 })();
+
+
+/* ========== GOOGLE DRIVE UPLOADER (Apps Script) ========== */
+window.DRIVE_ENDPOINT = "https://script.google.com/macros/s/AKfycbyThYBJgwlITrPeJUPtaEabrPEEGXu2LbmgRtk1rtR5U9-rpI5PhlftfAEpgSFo_Ilp/exec";
+window.fileToBase64 = function(file){
+  return new Promise((res,rej)=>{
+    const r=new FileReader();
+    r.onload=()=>{const v=r.result;res(v.includes(',')?v.split(',')[1]:v)};
+    r.onerror=()=>rej(r.error);
+    r.readAsDataURL(file);
+  });
+};
+window.uploadParaDrive = async function(fileBase64, filename, mimetype){
+  const body = JSON.stringify({file:fileBase64, filename, mimetype});
+  const resp = await fetch(window.DRIVE_ENDPOINT, {
+    method:'POST', mode:'cors',
+    headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body
+  });
+  if(!resp.ok) throw new Error('HTTP '+resp.status);
+  const txt = await resp.text();
+  let data; try{ data=JSON.parse(txt); }catch{ throw new Error('Resposta inválida do Apps Script'); }
+  if(!data.url) throw new Error('URL não retornada');
+  return data.url;
+};
+/* Helper: recebe File, devolve {name,size,mimetype,url} já salvo no Drive.
+   Persistimos APENAS a URL no Firestore — nunca o binário. */
+window.uploadAnexoDrive = async function(file){
+  if(!file) return null;
+  try{ window.toast && toast('⏳ Enviando '+file.name+'...'); }catch(e){}
+  const b64 = await window.fileToBase64(file);
+  const url = await window.uploadParaDrive(b64, file.name, file.type||'application/octet-stream');
+  try{ window.toast && toast('✅ '+file.name+' no Drive'); }catch(e){}
+  return {name:file.name, size:file.size, mimetype:file.type, url};
+};
 
 /* ========== DASHBOARD EXTRA (KPIs, alerta vencidos, gráfico técnico) ========== */
 (function(){
