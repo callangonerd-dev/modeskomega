@@ -172,6 +172,13 @@ table.tbl tr:hover td{background:rgba(91,140,255,.05)}
 .cal-side h4{font-size:13px;color:var(--fg-mut);text-transform:uppercase;letter-spacing:.08em}
 .cal-side .ev{background:var(--bg2);border:1px solid var(--line);padding:8px 10px;border-radius:8px;margin-bottom:6px;font-size:12.5px}
 
+/* ===== CONFIG GRID ===== */
+.cfg-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px;margin-top:14px}
+.pane[data-pane="config"] .card{padding:18px}
+.pane[data-pane="config"] .card h3{font-size:16px;margin:0 0 8px}
+.pane[data-pane="config"] .card+.card{margin-top:0}
+@media (max-width:640px){ .cfg-grid{grid-template-columns:1fr} }
+
 /* ===== LOGIN ===== */
 #login-screen{position:fixed;inset:0;display:grid;place-items:center;background:
   radial-gradient(800px 400px at 30% 20%,rgba(91,140,255,.25),transparent 60%),
@@ -748,56 +755,48 @@ html.light .theme-toggle .moon{display:none}
     <!-- CONFIG (engloba cadastro de usuários autorizados + cloud + alertas) -->
     <section class="pane" data-pane="config">
       <div class="card">
-        <h3>👥 Cadastro de Usuários Autorizados</h3>
-        <p class="muted tiny">Cadastre usuários com permissão de <b>Editor</b> (criar/editar) ou <b>Gestor</b> (acesso total, inclusive exclusão definitiva). Login e senha são usados para acessar o sistema.</p>
-        <div class="row2" style="margin-top:10px">
-          <div class="field"><label>Nome completo</label><input id="us-name" placeholder="Ex.: Ana Souza"/></div>
-          <div class="field"><label>Telefone</label><input id="us-phone" placeholder="(11) 99999-0000"/></div>
-        </div>
-        <div class="row2">
-          <div class="field"><label>Contato (e-mail) <span class="tiny muted">— opcional</span></label><input id="us-mail" placeholder="email@senac.br (opcional)"/></div>
-          <div class="field"><label>Função</label>
-            <select id="us-role">
-              <option value="editor">Editor</option>
-              <option value="gestor">Gestor</option>
-            </select>
+        <div class="flex" style="justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+          <div style="min-width:0">
+            <h3 style="margin:0">👥 Usuários Autorizados</h3>
+            <p class="muted tiny" style="margin:4px 0 0">Gerencie quem pode acessar o sistema. Cadastros e edições abrem em janela dedicada.</p>
           </div>
-        </div>
-        <div class="row2">
-          <div class="field"><label>Login</label><input id="us-login" placeholder="usuario.login" autocomplete="off"/></div>
-          <div class="field"><label>Senha</label><input id="us-pass" type="password" placeholder="mínimo 6 caracteres" autocomplete="new-password"/></div>
-        </div>
-        <div class="row2">
-          <div class="field"><label>Foto do usuário <span class="tiny muted">— opcional</span></label>
-            <label class="filmora-up" id="us-photo-drop">
-              <input id="us-photo" type="file" accept="image/*"/>
-              <div class="fm-body">
-                <div class="fm-icon"><svg viewBox="0 0 24 24"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="4"/></svg></div>
-                <div class="fm-txt">
-                  <p class="fm-title">Anexar foto do usuário</p>
-                  <div class="fm-hint"><span class="fm-pill">JPG · PNG</span><span>até 2MB · arraste ou clique</span></div>
-                </div>
-                <div class="fm-cta"><svg viewBox="0 0 24 24" stroke="white" fill="none" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg><span>Anexar</span></div>
-              </div>
-            </label>
-            <div id="us-photo-prev" style="margin-top:6px"></div>
-          </div>
-          <div class="field"><label>&nbsp;</label><div class="tiny muted">Imagem JPG/PNG. Aparece na lista de usuários e no perfil.</div></div>
-        </div>
-        <div class="flex" style="justify-content:flex-end;margin-top:6px">
-          <button class="btn ghost sm" id="us-clear">Limpar</button>
-          <button class="btn primary" id="us-add">＋ Cadastrar usuário</button>
+          <button class="btn primary" id="us-open-modal">＋ Novo usuário</button>
         </div>
         <hr class="sep"/>
         <div id="us-list"></div>
       </div>
-      <div class="card" style="margin-top:14px">
-        <h3>🔊 Alertas Sonoros</h3>
-        <div class="flex">
-          <label class="flex" style="gap:6px"><input type="checkbox" id="snd-en" checked/> Habilitar beeps de SLA</label>
-          <button class="btn sm" id="snd-test">🔊 Testar beep</button>
+
+      <div class="cfg-grid">
+        <div class="card">
+          <h3>🔊 Alertas Sonoros</h3>
+          <p class="muted tiny">Beeps audíveis quando um chamado se aproxima do SLA.</p>
+          <div class="flex" style="margin-top:10px;flex-wrap:wrap;gap:10px">
+            <label class="flex" style="gap:6px"><input type="checkbox" id="snd-en" checked/> Habilitar beeps de SLA</label>
+            <button class="btn sm" id="snd-test">🔊 Testar beep</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>📄 Timbrado Padrão do Laudo</h3>
+          <p class="muted tiny">Imagem JPG/PNG (A4 vertical) usada como <b>fundo</b> de todas as páginas do laudo.</p>
+          <label class="filmora-up" id="tb-drop" style="margin-top:10px">
+            <input id="tb-file" type="file" accept="image/*"/>
+            <div class="fm-body">
+              <div class="fm-icon"><svg viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M9 13h6M9 17h6"/></svg></div>
+              <div class="fm-txt">
+                <p class="fm-title">Anexar timbrado oficial (A4)</p>
+                <div class="fm-hint"><span class="fm-pill">JPG · PNG</span><span>até 4MB · 210×297mm</span></div>
+              </div>
+              <div class="fm-cta"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span>Trocar</span></div>
+            </div>
+          </label>
+          <div id="tb-preview" style="margin-top:12px"></div>
+          <div class="flex" style="margin-top:8px">
+            <button class="btn ghost sm" id="tb-reset">↺ Restaurar timbrado padrão</button>
+          </div>
         </div>
       </div>
+
       <!-- Sincronização Firebase ativa automaticamente (modeskpro) — sem UI exposta -->
       <div style="display:none" aria-hidden="true">
         <span id="cloud-status"></span>
@@ -805,28 +804,53 @@ html.light .theme-toggle .moon{display:none}
         <button id="fb-connect"></button><button id="fb-disconnect"></button>
         <input id="pm-mail"/><button id="pm-add"></button><div id="pm-list"></div>
       </div>
-      <div class="card" style="margin-top:14px">
-        <h3>📄 Timbrado Padrão do Laudo</h3>
-        <p class="muted tiny">Imagem JPG/PNG (A4 vertical) usada como <b>fundo</b> de todas as páginas do laudo. O conteúdo é posicionado respeitando o cabeçalho e o rodapé do timbrado.</p>
-        <label class="filmora-up" id="tb-drop" style="margin-top:10px">
-          <input id="tb-file" type="file" accept="image/*"/>
-          <div class="fm-body">
-            <div class="fm-icon"><svg viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M9 13h6M9 17h6"/></svg></div>
-            <div class="fm-txt">
-              <p class="fm-title">Anexar timbrado oficial (A4)</p>
-              <div class="fm-hint"><span class="fm-pill">JPG · PNG</span><span>até 4MB · proporção 210×297mm</span></div>
-            </div>
-            <div class="fm-cta"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span>Trocar</span></div>
-          </div>
-        </label>
-        <div id="tb-preview" style="margin-top:12px"></div>
-        <div class="flex" style="margin-top:8px">
-          <button class="btn ghost sm" id="tb-reset">↺ Restaurar timbrado padrão</button>
-        </div>
-      </div>
     </section>
   </main>
 </div>
+
+<!-- ========== MODAL: Cadastro de Usuário ========== -->
+<div class="modal-back" id="modal-user"><div class="modal" style="max-width:760px">
+  <button class="close" data-close>×</button>
+  <h3>👤 Cadastrar usuário autorizado</h3>
+  <p class="muted tiny" style="margin-top:-4px">Editor: criar/editar. Gestor: acesso total, inclusive exclusão definitiva.</p>
+  <div class="row2" style="margin-top:10px">
+    <div class="field"><label>Nome completo</label><input id="us-name" placeholder="Ex.: Ana Souza"/></div>
+    <div class="field"><label>Telefone</label><input id="us-phone" placeholder="(11) 99999-0000"/></div>
+  </div>
+  <div class="row2">
+    <div class="field"><label>Contato (e-mail) <span class="tiny muted">— opcional</span></label><input id="us-mail" placeholder="email@senac.br"/></div>
+    <div class="field"><label>Função</label>
+      <select id="us-role">
+        <option value="editor">Editor</option>
+        <option value="gestor">Gestor</option>
+      </select>
+    </div>
+  </div>
+  <div class="row2">
+    <div class="field"><label>Login</label><input id="us-login" placeholder="usuario.login" autocomplete="off"/></div>
+    <div class="field"><label>Senha</label><input id="us-pass" type="password" placeholder="mínimo 6 caracteres" autocomplete="new-password"/></div>
+  </div>
+  <div class="field" style="margin-top:6px">
+    <label>Foto do usuário <span class="tiny muted">— opcional</span></label>
+    <label class="filmora-up" id="us-photo-drop">
+      <input id="us-photo" type="file" accept="image/*"/>
+      <div class="fm-body">
+        <div class="fm-icon"><svg viewBox="0 0 24 24"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="4"/></svg></div>
+        <div class="fm-txt">
+          <p class="fm-title">Anexar foto do usuário</p>
+          <div class="fm-hint"><span class="fm-pill">JPG · PNG</span><span>até 2MB · arraste ou clique</span></div>
+        </div>
+        <div class="fm-cta"><svg viewBox="0 0 24 24" stroke="white" fill="none" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg><span>Anexar</span></div>
+      </div>
+    </label>
+    <div id="us-photo-prev" style="margin-top:6px"></div>
+  </div>
+  <div class="flex" style="justify-content:flex-end;margin-top:14px;gap:8px">
+    <button class="btn ghost sm" id="us-clear" data-close>Cancelar</button>
+    <button class="btn primary" id="us-add">＋ Cadastrar usuário</button>
+  </div>
+</div></div>
+
 
 <!-- MODAL CHAMADO -->
 <div class="modal-back" id="modal-ch"><div class="modal">
@@ -859,11 +883,13 @@ html.light .theme-toggle .moon{display:none}
   </div>
   <div id="mch-prazo-info" class="tiny muted" style="margin:-4px 0 8px 2px"></div>
   <div class="field"><label>Descrição</label><textarea id="mch-desc"></textarea></div>
+  <div class="field" id="mch-parecer-wrap" style="display:none"><label>📝 Parecer Técnico <span class="tiny muted">— obrigatório para finalizar</span></label><textarea id="mch-parecer" placeholder="Descreva o serviço executado / solução aplicada..."></textarea></div>
   <hr class="sep"/>
   <div class="flex between" style="flex-wrap:wrap;gap:8px">
     <div class="flex" style="flex-wrap:wrap;gap:6px">
       <button class="btn sm" id="mch-wa" title="Abrir conversa no WhatsApp">📲 WhatsApp</button>
       <button class="btn sm ghost" id="mch-atender" title="Iniciar atendimento (Em Atendimento)">▶ Atender</button>
+      <button class="btn sm" id="mch-reagendar" title="Reagendar escolhendo nova data">📅 Reagendar</button>
       <button class="btn sm ok" id="mch-finalizar" title="Finalizar e travar (Finalizado)">✓ Finalizado</button>
       <button class="btn sm" id="mch-refresh" title="Recarregar status atual">↺ Atualizar Status</button>
     </div>
@@ -938,7 +964,7 @@ const fmtDate=d=>{if(!d)return"-";const x=new Date(d);return x.toLocaleString('p
 const fmtDay=d=>{if(!d)return"-";const x=new Date(d);return x.toLocaleDateString('pt-BR')};
 const todayISO=()=>new Date().toISOString().slice(0,10);
 
-const ADMIN={user:"marciooliveira",name:"Marcio Oliveira",role:"gestor",pass:"Deadpool365*",mail:"callangonerd@gmail.com",phone:"",builtin:true};
+const ADMIN={user:"marciooliveira",name:"Marcio Oliveira",role:"gestor",pass:"Deadpool365*",mail:"paulooliveira@ce.senac.br",phone:"",builtin:true};
 const LS_KEY="modesk_omega_v44";
 let state={
   chamados:[], laudos:[], manut:[], itens:[], reqs:[], pedidos:[], eventos:[], premiumMails:[ADMIN.mail],
@@ -994,13 +1020,14 @@ function toast(msg,t=2400){
   document.body.appendChild(el);setTimeout(()=>el.remove(),t);
 }
 
-/* ==================== LOGIN / SESSÃO PERSISTENTE ==================== */
-const SESSION_KEY="modesk_omega_session_v1";
-const SESSION_TTL=24*60*60*1000; // 24h
-/* Boot marker: vive apenas enquanto o SO estiver ligado.
-   Usa sessionStorage compartilhado entre abas via BroadcastChannel-like trick:
-   gravamos um id em sessionStorage; quando o computador é desligado/reiniciado,
-   toda a memória de sessão do navegador é descartada. */
+/* ==================== LOGIN / SESSÃO PERSISTENTE ====================
+   Regras:
+   - A sessão é vinculada ao dispositivo + navegador onde foi feito o login.
+   - Persiste indefinidamente. Só é encerrada quando o usuário clica em "Sair".
+   - Mudanças de fingerprint (atualização do navegador, resolução etc.) NÃO
+     deslogam — apenas registram um aviso no console para auditoria.
+*/
+const SESSION_KEY="modesk_omega_session_v2";
 function deviceFingerprint(){
   const n=navigator;
   const parts=[
@@ -1009,7 +1036,6 @@ function deviceFingerprint(){
     screen.width+'x'+screen.height+'x'+screen.colorDepth,
     new Date().getTimezoneOffset()+''
   ];
-  // hash simples (djb2)
   let h=5381; const s=parts.join('|');
   for(let i=0;i<s.length;i++) h=((h<<5)+h+s.charCodeAt(i))|0;
   return 'fp_'+(h>>>0).toString(36);
@@ -1038,31 +1064,26 @@ function saveSession(auth){
     user:auth,
     fp:deviceFingerprint(),
     device:deviceName(), browser:browserName(),
-    loginAt:now, expiresAt:now+SESSION_TTL,
-    bootId: getOrCreateBootId()
+    loginAt:now, lastSeen:now
   };
   try{localStorage.setItem(SESSION_KEY,JSON.stringify(sess))}catch(e){}
 }
 function clearSession(){ try{localStorage.removeItem(SESSION_KEY)}catch(e){} }
-/* bootId: gravado em sessionStorage. Sobrevive a F5/reabrir aba do mesmo navegador
-   (sessionStorage de janela permanece enquanto o processo do navegador estiver vivo),
-   mas é descartado quando o navegador/SO é fechado/reiniciado. Persistimos o último
-   bootId conhecido em localStorage para comparar entre reaberturas. */
-function getOrCreateBootId(){
-  let id=sessionStorage.getItem('modesk_boot_id');
-  if(!id){
-    id='boot_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,8);
-    sessionStorage.setItem('modesk_boot_id',id);
-  }
-  return id;
+function touchSession(){
+  try{
+    const raw=localStorage.getItem(SESSION_KEY); if(!raw) return;
+    const s=JSON.parse(raw); s.lastSeen=Date.now();
+    localStorage.setItem(SESSION_KEY,JSON.stringify(s));
+  }catch(e){}
 }
 function readSession(){
   try{
     const raw=localStorage.getItem(SESSION_KEY); if(!raw) return null;
     const s=JSON.parse(raw);
     if(!s||!s.user) return null;
-    if(Date.now()>Number(s.expiresAt||0)){ clearSession(); return {expired:true}; }
-    if(s.fp!==deviceFingerprint()){ clearSession(); return {mismatch:true}; }
+    if(s.fp && s.fp!==deviceFingerprint()){
+      console.warn('[modesk] fingerprint mudou desde o último login — mantendo sessão (logout só manual).');
+    }
     return s;
   }catch(e){ return null; }
 }
@@ -1127,7 +1148,6 @@ document.getElementById('fa-save').addEventListener('click',function(){
   const ph=document.getElementById('fa-phone').value.trim();
   const ml=document.getElementById('fa-mail').value.trim();
   if(ml && !/^\S+@\S+\.\S+$/.test(ml)){toast('E-mail inválido');return}
-  // atualiza no state
   try{
     const idx=state.users.findIndex(x=>x.id===_faTarget.id || (String(x.login||'').toLowerCase()===String(_faTarget.login||'').toLowerCase()));
     if(idx>=0){
@@ -1148,25 +1168,26 @@ document.getElementById('fa-save').addEventListener('click',function(){
   toast('✅ Senha atualizada. Bem-vindo, '+auth.name+'!');
 });
 
-/* Auto-login se houver sessão válida (mesmo dispositivo/navegador, dentro de 24h) */
+/* Auto-login persistente — só termina via clique em "Sair" */
 function tryAutoLogin(){
   const s=readSession();
   if(!s) return false;
-  if(s.expired){ toast('Sessão expirada (24h). Faça login novamente.'); return false; }
-  if(s.mismatch){ toast('Sessão inválida para este dispositivo/navegador.'); return false; }
   applyAuth(s.user);
-  const restMs=Math.max(0,s.expiresAt-Date.now());
-  const restH=Math.floor(restMs/3600000), restM=Math.floor((restMs%3600000)/60000);
-  toast('Sessão restaurada · '+s.browser+' / '+s.device+' · expira em '+restH+'h'+restM+'m');
-  // agenda logout automático ao atingir 24h
-  setTimeout(()=>{ clearSession(); toast('Sessão expirada (24h). Faça login novamente.'); setTimeout(()=>location.reload(),1500); }, restMs);
+  touchSession();
+  toast('Sessão restaurada · '+(s.browser||browserName())+' / '+(s.device||deviceName()));
   return true;
 }
 $('lg-btn').addEventListener('click',doLogin);
 $('lg-pass').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();doLogin();}});
 $('lg-user').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('lg-pass').focus();}});
 $('lg-show').addEventListener('click',()=>{const i=$('lg-pass');const b=$('lg-show');if(i.type==='password'){i.type='text';b.textContent='ocultar';}else{i.type='password';b.textContent='mostrar';}});
-$('logout-btn').onclick=()=>{ clearSession(); location.reload(); };
+$('logout-btn').onclick=()=>{
+  if(!confirm('Encerrar a sessão neste dispositivo/navegador?')) return;
+  clearSession(); location.reload();
+};
+// mantém lastSeen atualizado
+window.addEventListener('focus',touchSession);
+setInterval(touchSession, 5*60*1000);
 // dispara restauração ao carregar
 try{ tryAutoLogin(); }catch(e){ console.error(e); }
 
@@ -1852,8 +1873,16 @@ if($('us-add'))$('us-add').onclick=()=>{
   state.users.push(u);save();syncUserCloud(u);
   ['us-name','us-phone','us-mail','us-login','us-pass'].forEach(k=>$(k).value='');$('us-role').value='editor';
   renderUsers();toast('✅ Usuário cadastrado: '+name+' ('+role+') · senha padrão será trocada no 1º acesso');
+  var mu=document.getElementById('modal-user'); if(mu) mu.classList.remove('open');
 };
 if($('us-clear'))$('us-clear').onclick=()=>{['us-name','us-phone','us-mail','us-login','us-pass'].forEach(k=>$(k).value='');$('us-role').value='editor'};
+if($('us-open-modal'))$('us-open-modal').onclick=()=>{
+  if(!isGestor()){toast('⛔ Apenas o gestor pode cadastrar usuários');return}
+  ['us-name','us-phone','us-mail','us-login','us-pass'].forEach(k=>{ var el=$(k); if(el) el.value=''; });
+  var r=$('us-role'); if(r) r.value='editor';
+  var pp=$('us-photo-prev'); if(pp) pp.innerHTML='';
+  document.getElementById('modal-user').classList.add('open');
+};
 
 /* ==================== DASHBOARD ==================== */
 let chartVol,chartSt;
@@ -2091,6 +2120,8 @@ window.renderLaudos=function(){_origRenderLaudos&&_origRenderLaudos();renderSign
   animation:pulseBan 1.6s ease-in-out infinite;cursor:pointer}
 #overdue-banner.show{display:flex}
 #overdue-banner .ic{font-size:28px}
+  #overdue-banner {
+    display: none !important;}
 #overdue-banner .ct{flex:1}
 #overdue-banner .ct b{display:block;font-size:18px;font-family:'Sora'}
 #overdue-banner .ct small{opacity:.9;font-weight:500}
@@ -3031,6 +3062,1211 @@ window.uploadAnexoDrive = async function(file){
     var orig=window.renderUsers;
     window.renderUsers=function(){customRender()};
   }
+})();
+</script>
+
+
+<!-- ============== MODESK OMEGA · PATCH v4.7 (menu config + paleta + PDF dashboard + cadastros em popup) ============== -->
+<style>
+/* ---- Menu interno das Configurações ---- */
+.cfg-menu{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.cfg-menu button{background:var(--bg2);border:1px solid var(--line-2);color:var(--fg-mut);padding:10px 16px;border-radius:11px;font-family:'Sora',sans-serif;font-weight:600;font-size:13px;cursor:pointer;transition:.2s;display:inline-flex;align-items:center;gap:7px}
+.cfg-menu button:hover{color:var(--fg);border-color:var(--acc);transform:translateY(-1px)}
+.cfg-menu button.active{background:var(--grad);color:#fff;border-color:transparent;box-shadow:0 6px 18px rgba(91,140,255,.32)}
+.cfg-section{display:none}
+.cfg-section.active{display:block;animation:cfgFade .25s ease}
+@keyframes cfgFade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* ---- Paleta de cores ---- */
+.palette-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:12px}
+.palette-card{border:2px solid var(--line-2);border-radius:13px;padding:12px;cursor:pointer;background:var(--bg2);transition:.2s}
+.palette-card:hover{transform:translateY(-3px);border-color:var(--line-2)}
+.palette-card.active{border-color:var(--acc);box-shadow:0 0 0 3px color-mix(in oklab, var(--acc) 30%, transparent)}
+.palette-sw{display:flex;gap:5px;margin-bottom:9px}
+.palette-sw span{flex:1;height:30px;border-radius:7px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)}
+.palette-card .pname{font-size:12.5px;font-weight:700;color:var(--fg);font-family:'Sora',sans-serif}
+.theme-seg{display:inline-flex;border:1px solid var(--line-2);border-radius:11px;overflow:hidden;margin-top:8px}
+.theme-seg button{background:var(--bg2);border:0;color:var(--fg-mut);padding:9px 18px;cursor:pointer;font-weight:600;font-family:'Sora',sans-serif;font-size:13px;transition:.2s}
+.theme-seg button.active{background:var(--grad);color:#fff}
+
+/* ---- Toolbar do Dashboard ---- */
+.dash-toolbar{display:flex;justify-content:flex-end;gap:8px;margin-bottom:14px}
+
+/* ---- Layout de listas (Patrimônio / Inventário) em coluna única ---- */
+.pane[data-pane="movpat"] .grid.patrimonio-single,
+.pane[data-pane="laudos"] .grid.patrimonio-single{grid-template-columns:1fr !important}
+.list-head-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.modal .card.in-modal{background:transparent;border:0;box-shadow:none;padding:0;margin:0}
+.modal-back .modal>.close{position:absolute;top:10px;right:14px;float:none;z-index:6}
+.modal-back .modal{position:relative}
+.modal-back .modal>.card.in-modal{padding-top:10px}
+</style>
+
+<script>
+(function(){
+  function $id(x){return document.getElementById(x)}
+  function ready(fn){ var t=setInterval(function(){ if(typeof state!=='undefined' && state && typeof window.go==='function'){ clearInterval(t); try{window.state=state}catch(e){} try{fn()}catch(e){console.error('patch47',e)} } },120); }
+
+  /* ===================== 1) PALETA DE CORES + TEMA ===================== */
+  var PALETTES={
+    azul   :{acc:'#5b8cff',acc2:'#3b82f6',dk:'#1d4ed8',name:'Azul Senac'},
+    verde  :{acc:'#27d39f',acc2:'#0fae7e',dk:'#047857',name:'Verde'},
+    teal   :{acc:'#22d3ee',acc2:'#0891b2',dk:'#0e7490',name:'Ciano'},
+    roxo   :{acc:'#a855f7',acc2:'#8b5cf6',dk:'#6d28d9',name:'Roxo'},
+    laranja:{acc:'#fb923c',acc2:'#f97316',dk:'#c2410c',name:'Laranja'},
+    rosa   :{acc:'#fb7185',acc2:'#ec4899',dk:'#be185d',name:'Rosa'},
+    vermelho:{acc:'#f87171',acc2:'#ef4444',dk:'#b91c1c',name:'Vermelho'},
+    grafite:{acc:'#94a3b8',acc2:'#64748b',dk:'#334155',name:'Grafite'}
+  };
+  function applyPalette(key,persist){
+    var p=PALETTES[key]||PALETTES.azul;
+    var r=document.documentElement.style;
+    r.setProperty('--acc',p.acc);
+    r.setProperty('--acc2',p.acc2);
+    r.setProperty('--grad','linear-gradient(135deg,'+p.acc+' 0%,'+p.acc2+' 60%,'+p.dk+' 100%)');
+    if(persist){try{localStorage.setItem('modesk_palette',key)}catch(e){}}
+    document.querySelectorAll('.palette-card').forEach(function(c){c.classList.toggle('active',c.dataset.pal===key)});
+  }
+  var savedPal='azul'; try{savedPal=localStorage.getItem('modesk_palette')||'azul'}catch(e){}
+  applyPalette(savedPal,false);
+
+  function applyTheme(mode,persist){
+    var de=document.documentElement;
+    if(mode==='light'){de.classList.add('light');de.classList.remove('dark')}
+    else{de.classList.add('dark');de.classList.remove('light')}
+    if(persist){try{localStorage.setItem('modesk_theme',mode)}catch(e){}}
+    document.querySelectorAll('.theme-seg button').forEach(function(b){b.classList.toggle('active',b.dataset.theme===mode)});
+  }
+  var savedTheme='dark'; try{savedTheme=localStorage.getItem('modesk_theme')||'dark'}catch(e){}
+  applyTheme(savedTheme,false);
+
+  ready(function(){
+    /* persistir o toggle de tema existente */
+    var tgl=$id('theme-tgl');
+    if(tgl){ tgl.addEventListener('click',function(){ setTimeout(function(){ applyTheme(document.documentElement.classList.contains('light')?'light':'dark',true); },10); }); }
+
+    /* ===================== 2) MENU INTERNO DAS CONFIGURAÇÕES ===================== */
+    var cpane=document.querySelector('section.pane[data-pane="config"]');
+    if(cpane && !cpane.dataset.menued){
+      cpane.dataset.menued='1';
+      var usersCard=cpane.querySelector('.card');
+      var cfgGrid=cpane.querySelector('.cfg-grid');
+      var sonsCard=null,tbCard=null;
+      if(cfgGrid){
+        [].slice.call(cfgGrid.children).forEach(function(c){
+          if(c.querySelector('#snd-en')) sonsCard=c;
+          if(c.querySelector('#tb-drop')) tbCard=c;
+        });
+      }
+      /* card de aparência (paleta + tema) */
+      var apCard=document.createElement('div');
+      apCard.className='card';
+      apCard.innerHTML=''
+        +'<h3>🎨 Aparência</h3>'
+        +'<p class="muted tiny">Personalize a paleta de cores e o tema do sistema. As preferências ficam salvas neste dispositivo.</p>'
+        +'<div class="field" style="margin-top:8px"><label>Tema</label>'
+          +'<div class="theme-seg"><button data-theme="dark">🌙 Escuro</button><button data-theme="light">☀️ Claro</button></div>'
+        +'</div>'
+        +'<div class="field"><label>Paleta de cores</label><div class="palette-grid" id="palette-grid"></div></div>';
+
+      function sec(id){var d=document.createElement('div');d.className='cfg-section';d.dataset.cfgsec=id;return d}
+      var sAp=sec('aparencia'), sUs=sec('usuarios'), sDoc=sec('documentos'), sAl=sec('alertas');
+      sAp.appendChild(apCard);
+      if(usersCard) sUs.appendChild(usersCard);
+      if(tbCard) sDoc.appendChild(tbCard);
+      if(sonsCard) sAl.appendChild(sonsCard);
+      if(cfgGrid) cfgGrid.remove();
+
+      var menu=document.createElement('div'); menu.className='cfg-menu';
+      var ITEMS=[['aparencia','🎨 Aparência'],['usuarios','👥 Usuários'],['documentos','📄 Timbrado'],['alertas','🔔 Alertas Sonoros']];
+      menu.innerHTML=ITEMS.map(function(it){return '<button data-cfgsec="'+it[0]+'">'+it[1]+'</button>'}).join('');
+
+      cpane.insertBefore(menu, cpane.firstChild);
+      menu.after(sAp); sAp.after(sUs); sUs.after(sDoc); sDoc.after(sAl);
+
+      function showSec(id){
+        menu.querySelectorAll('button').forEach(function(b){b.classList.toggle('active',b.dataset.cfgsec===id)});
+        cpane.querySelectorAll('.cfg-section').forEach(function(s){s.classList.toggle('active',s.dataset.cfgsec===id)});
+      }
+      menu.querySelectorAll('button').forEach(function(b){b.onclick=function(){showSec(b.dataset.cfgsec)}});
+      showSec('aparencia');
+
+      /* preencher paletas */
+      var pg=$id('palette-grid');
+      if(pg){
+        pg.innerHTML=Object.keys(PALETTES).map(function(k){var p=PALETTES[k];
+          return '<div class="palette-card" data-pal="'+k+'">'
+            +'<div class="palette-sw"><span style="background:'+p.acc+'"></span><span style="background:'+p.acc2+'"></span><span style="background:'+p.dk+'"></span></div>'
+            +'<div class="pname">'+p.name+'</div></div>';
+        }).join('');
+        pg.querySelectorAll('.palette-card').forEach(function(c){c.onclick=function(){applyPalette(c.dataset.pal,true)}});
+      }
+      apCard.querySelectorAll('.theme-seg button').forEach(function(b){b.onclick=function(){applyTheme(b.dataset.theme,true)}});
+      applyPalette(savedPal,false); applyTheme(savedTheme,false);
+    }
+
+    /* ===================== 3) EXPORTAR DASHBOARD EM PDF (timbrado SENAC) ===================== */
+    function dashExportPDF(){
+      if(!window.jspdf){toast('PDF indisponível');return}
+      var jsPDF=window.jspdf.jsPDF;
+      var doc=new jsPDF({unit:'mm',format:'a4'});
+      var W=210,H=297, ML=20,MR=20,MT=46,MB=28;
+      var timbrado=window.state&&state.timbrado&&state.timbrado.data;
+      function bg(){
+        if(timbrado){
+          try{doc.addImage(timbrado,'JPEG',0,0,W,H,undefined,'FAST');return}catch(_){}
+          try{doc.addImage(timbrado,'PNG',0,0,W,H);return}catch(_){}
+        }
+        doc.setFont('helvetica','bold');doc.setFontSize(13);doc.setTextColor(15,40,90);
+        doc.text('SENAC — Departamento Regional do Ceará',W/2,18,{align:'center'});
+        doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(80);
+        doc.text('Relatório de Indicadores · Central de Suporte de TI',W/2,24,{align:'center'});
+        doc.setDrawColor(15,40,90);doc.setLineWidth(.6);doc.line(ML,28,W-MR,28);
+        doc.line(ML,H-MB+8,W-MR,H-MB+8);
+        doc.setFontSize(8);doc.setTextColor(110);
+        doc.text('Documento gerado por MODESK OMEGA · Suporte Técnico',W/2,H-MB+13,{align:'center'});
+        doc.setTextColor(20);
+      }
+      bg();
+      var today=new Date().toLocaleString('pt-BR');
+      doc.setTextColor(20);doc.setFont('helvetica','normal');doc.setFontSize(10);
+      doc.text('Fortaleza, '+today,W-MR,MT,{align:'right'});
+      doc.setFont('helvetica','bold');doc.setFontSize(15);
+      doc.text('RELATÓRIO DO DASHBOARD',W/2,MT+9,{align:'center'});
+      doc.setDrawColor(15,40,90);doc.setLineWidth(.5);doc.line(W/2-32,MT+11,W/2+32,MT+11);
+
+      var kget=function(id){var e=$id(id);return e?e.textContent:'0'};
+      var kpis=[
+        ['Chamados Abertos',kget('kpi-open')],
+        ['Em SLA Crítico',kget('kpi-sla')],
+        ['Finalizados (mês)',kget('kpi-done')],
+        ['Pedidos Pendentes',kget('kpi-ped')]
+      ];
+      doc.autoTable({startY:MT+18,head:[['Indicador','Valor']],body:kpis,theme:'grid',
+        headStyles:{fillColor:[15,40,90],textColor:255,halign:'left',fontStyle:'bold'},
+        bodyStyles:{fontSize:10.5,cellPadding:3,textColor:30},
+        alternateRowStyles:{fillColor:[245,248,253]},
+        columnStyles:{1:{halign:'center',fontStyle:'bold',cellWidth:42}},
+        margin:{left:ML,right:MR}});
+      var y=doc.lastAutoTable.finalY+9;
+
+      var KCOLS=['Novo','Em Atendimento','Reagendado','Finalizado','Cancelado'];
+      var arr=(window.state&&Array.isArray(state.chamados))?state.chamados:[];
+      var stBody=KCOLS.map(function(s){return [s,String(arr.filter(function(c){return c.st===s}).length)]});
+      doc.setFont('helvetica','bold');doc.setFontSize(11);doc.setTextColor(20);
+      doc.text('Distribuição por Status',ML,y); y+=3;
+      doc.autoTable({startY:y,head:[['Status','Quantidade']],body:stBody,theme:'striped',
+        headStyles:{fillColor:[59,130,246],textColor:255},bodyStyles:{fontSize:10,cellPadding:2.6,textColor:30},
+        columnStyles:{1:{halign:'center',cellWidth:42}},margin:{left:ML,right:MR}});
+      y=doc.lastAutoTable.finalY+10;
+
+      function addCanvas(id,label){
+        var cv=$id(id); if(!cv) return;
+        try{
+          var img=cv.toDataURL('image/png',1.0);
+          var cw=W-ML-MR, ch=Math.min(cw*(cv.height/cv.width),85);
+          if(y+ch+8>H-MB){doc.addPage();bg();y=MT}
+          doc.setFont('helvetica','bold');doc.setFontSize(11);doc.setTextColor(20);
+          doc.text(label,ML,y); y+=4;
+          doc.addImage(img,'PNG',ML,y,cw,ch); y+=ch+10;
+        }catch(_){}
+      }
+      addCanvas('chart-vol','Volume Operacional (últimos 7 dias)');
+      addCanvas('chart-st','Status dos Chamados');
+
+      var pages=doc.internal.getNumberOfPages();
+      for(var p=1;p<=pages;p++){doc.setPage(p);doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(90);doc.text('Pág. '+p+'/'+pages,W-MR,H-MB+13,{align:'right'})}
+
+      var blob=doc.output('blob'); var url=URL.createObjectURL(blob);
+      var win=window.open(url,'_blank'); if(!win){toast('Permita pop-ups para abrir o PDF');location.href=url;return}
+      toast('Dashboard exportado em PDF');
+      setTimeout(function(){URL.revokeObjectURL(url)},60000);
+    }
+    window.dashExportPDF=dashExportPDF;
+
+    var dpane=document.querySelector('section.pane[data-pane="dashboard"]');
+    if(dpane && !dpane.dataset.pdfbtn){
+      dpane.dataset.pdfbtn='1';
+      var bar=document.createElement('div'); bar.className='dash-toolbar';
+      bar.innerHTML='<button class="btn sm primary" id="dash-pdf">📄 Exportar Dashboard (PDF)</button>';
+      dpane.insertBefore(bar, dpane.firstChild);
+      $id('dash-pdf').onclick=dashExportPDF;
+    }
+
+    /* ===================== 4) CADASTROS EM POPUP + LISTAS SEMPRE VISÍVEIS ===================== */
+    function makeModal(id,maxw){
+      if($id(id)) return $id(id).querySelector('.modal');
+      var back=document.createElement('div'); back.className='modal-back'; back.id=id;
+      var m=document.createElement('div'); m.className='modal'; if(maxw)m.style.maxWidth=maxw;
+      var close=document.createElement('button'); close.className='close'; close.type='button'; close.textContent='×';
+      close.onclick=function(){back.classList.remove('open')};
+      m.appendChild(close); back.appendChild(m);
+      back.addEventListener('click',function(e){if(e.target===back)back.classList.remove('open')});
+      document.body.appendChild(back);
+      return m;
+    }
+    function openModal(id){var b=$id(id); if(b)b.classList.add('open')}
+    function closeModal(id){var b=$id(id); if(b)b.classList.remove('open')}
+
+    /* fecha o modal quando o salvar limpa o campo-chave (sucesso) */
+    function autoClose(btnId,keyField,modalId){
+      var btn=$id(btnId); if(!btn) return;
+      var orig=btn.onclick;
+      btn.onclick=function(ev){
+        if(orig) orig.call(this,ev);
+        var kf=$id(keyField);
+        if(!kf || (kf.value||'').trim()===''){ closeModal(modalId); }
+      };
+    }
+
+    /* ---- 4a) Movimentação de Patrimônio ---- */
+    var mvPane=document.querySelector('section.pane[data-pane="movpat"]');
+    if(mvPane && !mvPane.dataset.popup){
+      mvPane.dataset.popup='1';
+      var mvGrid=mvPane.querySelector('.grid');
+      if(mvGrid){
+        mvGrid.classList.add('patrimonio-single');
+        var mvForm=mvGrid.children[0], mvList=mvGrid.children[1];
+        var mvModal=makeModal('modal-movpat','740px');
+        mvForm.classList.add('in-modal'); mvModal.appendChild(mvForm);
+        if(mvList){
+          var mvHdr=mvList.querySelector('.flex.between') || mvList;
+          var mvRight=mvHdr.querySelector('.flex') || mvHdr;
+          var mvBtn=document.createElement('button'); mvBtn.className='btn primary'; mvBtn.type='button';
+          mvBtn.textContent='＋ Nova Movimentação';
+          mvBtn.onclick=function(){
+            if(window.renderMovPat) try{renderMovPat()}catch(e){}
+            ['mp-tag','mp-eq','mp-uo','mp-ud','mp-so','mp-sd','mp-resp','mp-receb','mp-defeito','mp-sol','mp-obs'].forEach(function(id){var e=$id(id);if(e)e.value=''});
+            var pv=$id('mp-ficha-prev'); if(pv)pv.innerHTML='';
+            openModal('modal-movpat');
+            autoClose('mp-save','mp-tag','modal-movpat');
+          };
+          mvRight.appendChild(mvBtn);
+        }
+      }
+    }
+
+    /* ---- 4b) Laudos de Baixa (cadastro de equipamento em popup) ---- */
+    var ldPane=document.querySelector('section.pane[data-pane="laudos"]');
+    if(ldPane && !ldPane.dataset.popup){
+      ldPane.dataset.popup='1';
+      var ldGrid=ldPane.querySelector('.grid');
+      if(ldGrid){
+        ldGrid.classList.add('patrimonio-single');
+        var ldForm=ldGrid.children[0], ldList=ldGrid.children[1];
+        var ldModal=makeModal('modal-laudo','620px');
+        ldForm.classList.add('in-modal'); ldModal.appendChild(ldForm);
+        if(ldList){
+          var ldHdr=ldList.querySelector('.flex.between') || ldList;
+          var ldRight=ldHdr.querySelector('.flex') || ldHdr;
+          var ldBtn=document.createElement('button'); ldBtn.className='btn primary'; ldBtn.type='button';
+          ldBtn.textContent='＋ Adicionar Equipamento';
+          ldBtn.onclick=function(){
+            ['ld-eq','ld-tag','ld-defeito','ld-sol'].forEach(function(id){var e=$id(id);if(e)e.value=''});
+            var pv=$id('ld-ficha-prev'); if(pv)pv.innerHTML='';
+            openModal('modal-laudo');
+            autoClose('ld-add','ld-eq','modal-laudo');
+          };
+          if(ldRight.firstChild) ldRight.insertBefore(ldBtn,ldRight.firstChild); else ldRight.appendChild(ldBtn);
+        }
+      }
+    }
+
+    /* ---- 4c) Inventário Sala de Som (cadastro em popup) ---- */
+    var ivPane=document.querySelector('section.pane[data-pane="invsom"]');
+    if(ivPane && !ivPane.dataset.popup){
+      ivPane.dataset.popup='1';
+      var ivForm=null;
+      [].slice.call(ivPane.querySelectorAll('.card')).forEach(function(c){ if(c.querySelector('#inv-add')) ivForm=c; });
+      if(ivForm){
+        var ivModal=makeModal('modal-invsom','760px');
+        ivForm.classList.add('in-modal'); ivModal.appendChild(ivForm);
+        var ivHdr=ivPane.querySelector('.flex.between');
+        var ivRight=ivHdr?(ivHdr.querySelector('.flex')||ivHdr):null;
+        if(ivRight){
+          var ivBtn=document.createElement('button'); ivBtn.className='btn primary'; ivBtn.type='button';
+          ivBtn.textContent='＋ Novo Item';
+          ivBtn.onclick=function(){
+            var clr=$id('inv-clear'); if(clr) clr.click();
+            openModal('modal-invsom');
+            autoClose('inv-add','inv-desc','modal-invsom');
+          };
+          ivRight.appendChild(ivBtn);
+        }
+        /* editar: abre o popup (o handler original preenche o formulário) */
+        document.addEventListener('click',function(e){
+          var ed=e.target.closest && e.target.closest('#tbl-inv [data-ed]');
+          if(ed){ setTimeout(function(){ openModal('modal-invsom'); autoClose('inv-add','inv-desc','modal-invsom'); },30); }
+        });
+      }
+    }
+  });
+})();
+</script>
+
+<!-- ============== MODESK OMEGA · PATCH v4.8 (edição de usuários + clipboard upload + logo/rodapé/timbrados + SLA unificado + workflow de chamados + lista paisagem) ============== -->
+<style>
+.usr-row .usr-actions{display:flex;gap:6px;flex-wrap:wrap}
+#tbm-list .tbm-item,#up-logo-prev .upv,#up-rodape-prev .upv{display:flex;gap:10px;align-items:center;background:var(--bg2);border:1px solid var(--line-2);border-radius:10px;padding:8px 10px;margin-top:8px}
+#tbm-list .tbm-item img,#up-logo-prev .upv img,#up-rodape-prev .upv img{height:38px;max-width:110px;object-fit:contain;border-radius:6px;background:#fff;padding:2px}
+.tbm-item .tbm-meta{flex:1;min-width:0}
+.tbm-item .badge.acc{flex:none}
+</style>
+<script>
+(function(){
+  function $id(x){return document.getElementById(x)}
+  function ready(fn){ var t=setInterval(function(){ if(typeof state!=='undefined' && state && typeof window.go==='function'){ clearInterval(t); try{fn()}catch(e){console.error('patch48',e)} } },120); }
+  function pad(n){return String(n).padStart(2,'0')}
+
+  /* ========== state defaults ========== */
+  function ensureState(){
+    if(typeof state==='undefined')return;
+    if(!Array.isArray(state.timbrados)) state.timbrados=[];
+    if(state.logo===undefined) state.logo=null;
+    if(state.rodape===undefined) state.rodape=null;
+  }
+
+  /* ===================== CLIPBOARD UPLOAD (Ctrl+C → anexar) ===================== */
+  var lastUploadInput=null;
+  function fileFromBlob(blob,name){ return new File([blob], (name||'colado-'+Date.now())+'.png', {type:blob.type||'image/png'}); }
+  function setInputFile(input,file){
+    try{ var dt=new DataTransfer(); dt.items.add(file); input.files=dt.files; input.dispatchEvent(new Event('change',{bubbles:true})); return true; }catch(e){ return false; }
+  }
+  async function clipboardImage(){
+    if(!navigator.clipboard||!navigator.clipboard.read) return null;
+    try{
+      var items=await navigator.clipboard.read();
+      for(var i=0;i<items.length;i++){
+        var t=items[i].types.find(function(x){return x.indexOf('image/')===0});
+        if(t){ return await items[i].getType(t); }
+      }
+    }catch(e){}
+    return null;
+  }
+  // intercept clicks on upload zones: try clipboard first, else file picker
+  document.addEventListener('click',function(e){
+    var lab=e.target.closest && e.target.closest('label.filmora-up');
+    if(!lab) return;
+    var input=lab.querySelector('input[type=file]');
+    if(!input) return;
+    lastUploadInput=input;
+    if(lab.dataset.clipBusy==='1') return;
+    e.preventDefault();
+    lab.dataset.clipBusy='1';
+    clipboardImage().then(function(blob){
+      lab.dataset.clipBusy='';
+      if(blob){
+        if(setInputFile(input,fileFromBlob(blob))){ try{toast('📋 Último arquivo copiado anexado')}catch(_){ } return; }
+      }
+      try{ input.click(); }catch(_){}
+    });
+  },true);
+  // Ctrl+V paste anywhere fills the last-focused upload zone
+  document.addEventListener('paste',function(e){
+    var items=e.clipboardData&&e.clipboardData.items; if(!items||!lastUploadInput) return;
+    for(var i=0;i<items.length;i++){
+      if(items[i].type && items[i].type.indexOf('image/')===0){
+        var blob=items[i].getAsFile();
+        if(blob && setInputFile(lastUploadInput,fileFromBlob(blob))){ try{toast('📋 Arquivo colado anexado')}catch(_){ } e.preventDefault(); return; }
+      }
+    }
+  });
+
+  ready(function(){
+    ensureState();
+
+    /* ===================== 1) EDIÇÃO DE USUÁRIOS (gestor edita todos) ===================== */
+    var _usEditing=null;
+    function initials(s){return (s||'?').trim().split(/\s+/).slice(0,2).map(function(w){return w[0]||''}).join('').toUpperCase()}
+    function usListRender(){
+      var wrap=$id('us-list'); if(!wrap) return;
+      var rows=[];
+      rows.push('<div class="usr-row"><div class="usr-av" style="background:var(--grad);color:#fff">'+initials(ADMIN.name)+'</div><div class="usr-meta"><div style="font-weight:700">'+escapeHTML(ADMIN.name)+' <span class="badge acc">GESTOR · MASTER</span></div><div class="tiny muted">login: <code>'+escapeHTML(ADMIN.user)+'</code> · '+escapeHTML(ADMIN.mail||'-')+'</div></div><span class="tiny muted">built-in</span></div>');
+      if(!(state.users||[]).length){
+        rows.push('<div class="muted tiny" style="padding:8px 4px">Nenhum usuário cadastrado ainda.</div>');
+      } else {
+        state.users.forEach(function(u){
+          var av=u.photo?'<img class="usr-av" src="'+u.photo+'"/>':'<div class="usr-av">'+initials(u.name)+'</div>';
+          var actions=isGestor()
+            ? '<div class="usr-actions"><button class="btn sm" data-ued="'+escapeHTML(u.id)+'">✏️ Editar</button><button class="btn sm warn" data-urm="'+escapeHTML(u.id)+'">🗑 Remover</button></div>'
+            : '<span class="tiny muted">somente gestor edita</span>';
+          rows.push('<div class="usr-row">'+av+'<div class="usr-meta"><div style="font-weight:700">'+escapeHTML(u.name)+' <span class="badge '+(u.role==='gestor'?'acc':'warn')+'">'+(u.role==='gestor'?'GESTOR':'EDITOR')+'</span></div><div class="tiny muted">login: <code>'+escapeHTML(u.login)+'</code> · '+escapeHTML(u.mail||'sem e-mail')+' · '+escapeHTML(u.phone||'-')+'</div></div>'+actions+'</div>');
+        });
+      }
+      wrap.innerHTML=rows.join('');
+      wrap.querySelectorAll('[data-urm]').forEach(function(b){b.onclick=function(){
+        if(!isGestor()){toast('⛔ Apenas gestor pode remover usuários');return}
+        if(!confirm('Remover este usuário?'))return;
+        state.users=state.users.filter(function(x){return x.id!==b.dataset.urm});save();usListRender();
+      }});
+      wrap.querySelectorAll('[data-ued]').forEach(function(b){b.onclick=function(){
+        if(!isGestor()){toast('⛔ Apenas gestor pode editar usuários');return}
+        var u=state.users.find(function(x){return x.id===b.dataset.ued}); if(!u)return;
+        openUserModal(u);
+      }});
+    }
+    if(typeof window.renderUsers==='function'){ window.renderUsers=usListRender; }
+
+    function openUserModal(u){
+      _usEditing=u||null;
+      var f=function(id,v){var e=$id(id); if(e)e.value=v||''};
+      f('us-name',u&&u.name); f('us-phone',u&&u.phone); f('us-mail',u&&u.mail);
+      var r=$id('us-role'); if(r) r.value=(u&&u.role)||'editor';
+      f('us-login',u&&u.login); f('us-pass','');
+      var pp=$id('us-photo-prev'); if(pp) pp.innerHTML=(u&&u.photo)?'<img src="'+u.photo+'"/>':'';
+      var fi=$id('us-photo'); if(fi) fi.value='';
+      var h=document.querySelector('#modal-user h3'); if(h) h.textContent=u?('✏️ Editar usuário: '+(u.name||'')):'👤 Cadastrar usuário autorizado';
+      var btn=$id('us-add'); if(btn) btn.textContent=u?'💾 Salvar alterações':'＋ Cadastrar usuário';
+      var lg=$id('us-login'); if(lg) lg.disabled=!!u; // login imutável na edição
+      $id('modal-user').classList.add('open');
+    }
+    // "Novo usuário" sempre abre em modo cadastro
+    var openNew=$id('us-open-modal');
+    if(openNew) openNew.onclick=function(){
+      if(!isGestor()){toast('⛔ Apenas o gestor pode cadastrar usuários');return}
+      openUserModal(null);
+    };
+    // Salvar (cadastro OU edição)
+    var usBtn=$id('us-add');
+    if(usBtn) usBtn.onclick=function(){
+      if(!isGestor()){toast('⛔ Apenas o gestor pode gerenciar usuários');return}
+      var name=$id('us-name').value.trim();
+      var phone=$id('us-phone').value.trim();
+      var mail=$id('us-mail').value.trim();
+      var role=$id('us-role').value==='gestor'?'gestor':'editor';
+      var pass=$id('us-pass').value;
+      var photoEl=document.querySelector('#us-photo-prev img');
+      var photo=photoEl?photoEl.src:(_usEditing&&_usEditing.photo)||null;
+      if(!name){toast('Informe o nome');return}
+      if(mail && !/^\S+@\S+\.\S+$/.test(mail)){toast('E-mail inválido');return}
+      if(_usEditing){
+        _usEditing.name=name; _usEditing.phone=phone; _usEditing.mail=mail; _usEditing.role=role;
+        if(photo)_usEditing.photo=photo;
+        if(pass){ if(pass.length<6){toast('Senha mínima de 6 caracteres');return} _usEditing.pass=pass; _usEditing.mustChangePass=false; _usEditing.passChangedAt=Date.now(); }
+        save(); try{syncUserCloud&&syncUserCloud(_usEditing)}catch(e){}
+        toast('✅ Usuário atualizado: '+name);
+      } else {
+        var login=$id('us-login').value.trim().toLowerCase();
+        if(!login||login.length<3){toast('Login mínimo 3 caracteres');return}
+        if(!pass||pass.length<6){toast('Senha mínima de 6 caracteres');return}
+        if(login===ADMIN.user.toLowerCase()){toast('Login reservado');return}
+        if(state.users.some(function(u){return u.login.toLowerCase()===login})){toast('Login já existe');return}
+        var u={id:uid('USR'),name:name,phone:phone,mail:mail,role:role,login:login,pass:pass,photo:photo,mustChangePass:true,createdAt:Date.now(),createdBy:currentUser&&currentUser.login};
+        state.users.push(u);save();try{syncUserCloud&&syncUserCloud(u)}catch(e){}
+        toast('✅ Usuário cadastrado: '+name);
+      }
+      _usEditing=null;
+      var lg=$id('us-login'); if(lg) lg.disabled=false;
+      $id('modal-user').classList.remove('open');
+      usListRender();
+    };
+    usListRender();
+
+    /* ===================== 2) LOGO / RODAPÉ / MODELOS DE TIMBRADO ===================== */
+    function upBox(id,title,hint){
+      return '<label class="filmora-up" id="'+id+'-drop" style="margin-top:8px"><input id="'+id+'" type="file" accept="image/*"/>'
+        +'<div class="fm-body"><div class="fm-icon"><svg viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/></svg></div>'
+        +'<div class="fm-txt"><p class="fm-title">'+title+'</p><div class="fm-hint"><span class="fm-pill">JPG · PNG</span><span>'+hint+'</span></div></div>'
+        +'<div class="fm-cta"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span>Anexar</span></div></div></label>';
+    }
+    function readImg(file,maxMB){ return new Promise(function(res,rej){ if(file.size>(maxMB||4)*1048576){rej('grande');return} var r=new FileReader(); r.onload=function(){res(r.result)}; r.readAsDataURL(file); }); }
+    function renderLogoRodape(){
+      var lp=$id('up-logo-prev'); if(lp) lp.innerHTML=state.logo?('<div class="upv"><img src="'+state.logo.data+'"/><div class="tbm-meta"><div style="font-weight:600">'+escapeHTML(state.logo.name||'logo')+'</div><div class="muted tiny">Logotipo dos relatórios</div></div><button class="btn sm warn" id="up-logo-rm">remover</button></div>'):'';
+      var rp=$id('up-rodape-prev'); if(rp) rp.innerHTML=state.rodape?('<div class="upv"><img src="'+state.rodape.data+'"/><div class="tbm-meta"><div style="font-weight:600">'+escapeHTML(state.rodape.name||'rodapé')+'</div><div class="muted tiny">Rodapé dos relatórios</div></div><button class="btn sm warn" id="up-rodape-rm">remover</button></div>'):'';
+      var lrm=$id('up-logo-rm'); if(lrm) lrm.onclick=function(){state.logo=null;save();renderLogoRodape();toast('Logotipo removido')};
+      var rrm=$id('up-rodape-rm'); if(rrm) rrm.onclick=function(){state.rodape=null;save();renderLogoRodape();toast('Rodapé removido')};
+    }
+    function renderTbmList(){
+      var el=$id('tbm-list'); if(!el) return;
+      if(!state.timbrados.length){ el.innerHTML='<div class="muted tiny" style="padding:6px 2px">Nenhum modelo enviado. O modelo padrão será usado.</div>'; return; }
+      var activeData=state.timbrado&&state.timbrado.data;
+      el.innerHTML=state.timbrados.map(function(t){
+        var isActive=activeData===t.data;
+        return '<div class="tbm-item"><img src="'+t.data+'"/><div class="tbm-meta"><div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+escapeHTML(t.name||'modelo')+'</div><div class="muted tiny">'+(isActive?'Modelo ativo nos laudos':'Modelo armazenado')+'</div></div>'
+          +(isActive?'<span class="badge acc">ATIVO</span>':'<button class="btn sm" data-tbuse="'+t.id+'">Usar</button>')
+          +'<button class="btn sm warn" data-tbrm="'+t.id+'">🗑</button></div>';
+      }).join('');
+      el.querySelectorAll('[data-tbuse]').forEach(function(b){b.onclick=function(){
+        var t=state.timbrados.find(function(x){return x.id===b.dataset.tbuse}); if(!t)return;
+        state.timbrado={name:t.name,data:t.data,isDefault:false}; save();
+        if(window.renderTimbrado)try{renderTimbrado()}catch(e){} renderTbmList(); toast('Modelo ativado: '+(t.name||''));
+      }});
+      el.querySelectorAll('[data-tbrm]').forEach(function(b){b.onclick=function(){
+        state.timbrados=state.timbrados.filter(function(x){return x.id!==b.dataset.tbrm}); save(); renderTbmList(); toast('Modelo removido');
+      }});
+    }
+    function buildDocSection(){
+      var sec=document.querySelector('[data-cfgsec="documentos"]'); if(!sec || sec.dataset.v48) return;
+      sec.dataset.v48='1';
+      var c1=document.createElement('div'); c1.className='card';
+      c1.innerHTML='<h3>🖼 Logotipo &amp; Rodapé</h3><p class="muted tiny">Usados no cabeçalho e rodapé das listas de chamados em PDF (paisagem).</p>'
+        +'<div class="row2" style="margin-top:8px"><div class="field"><label>Logotipo</label>'+upBox('up-logo','Anexar logotipo','até 3MB')+'<div id="up-logo-prev"></div></div>'
+        +'<div class="field"><label>Rodapé</label>'+upBox('up-rodape','Anexar rodapé','até 3MB · faixa larga')+'<div id="up-rodape-prev"></div></div></div>';
+      var c2=document.createElement('div'); c2.className='card';
+      c2.innerHTML='<h3>📄 Modelos de Papel Timbrado</h3><p class="muted tiny">Envie vários modelos (A4). O modelo <b>ativo</b> é aplicado como fundo dos laudos em PDF.</p>'
+        +upBox('up-tbm','Adicionar modelo de timbrado','até 4MB · A4 210×297mm')+'<div id="tbm-list" style="margin-top:6px"></div>';
+      sec.appendChild(c1); sec.appendChild(c2);
+      renderLogoRodape(); renderTbmList();
+    }
+    buildDocSection();
+    // re-tenta caso o menu de config só seja montado depois
+    var bt=setInterval(function(){ if(document.querySelector('[data-cfgsec="documentos"]')){ buildDocSection(); clearInterval(bt); } },200);
+    setTimeout(function(){clearInterval(bt)},6000);
+
+    document.addEventListener('change',function(e){
+      var t=e.target; if(!t||!t.id) return;
+      if(t.id==='up-logo'||t.id==='up-rodape'){
+        var f=t.files&&t.files[0]; if(!f)return;
+        readImg(f,3).then(function(data){ var key=t.id==='up-logo'?'logo':'rodape'; state[key]={name:f.name,data:data}; save(); renderLogoRodape(); toast((key==='logo'?'Logotipo':'Rodapé')+' salvo'); }).catch(function(){toast('Imagem deve ter até 3MB')});
+        t.value='';
+      }
+      if(t.id==='up-tbm'){
+        var ff=t.files&&t.files[0]; if(!ff)return;
+        readImg(ff,4).then(function(data){ var item={id:uid('TBM'),name:ff.name,data:data}; state.timbrados.push(item); if(!state.timbrado||!state.timbrado.data||state.timbrado.isDefault){ state.timbrado={name:ff.name,data:data,isDefault:false}; if(window.renderTimbrado)try{renderTimbrado()}catch(_){ } } save(); renderTbmList(); toast('Modelo de timbrado adicionado'); }).catch(function(){toast('Imagem deve ter até 4MB')});
+        t.value='';
+      }
+    });
+
+    /* ===================== 3) SLA UNIFICADO (horas <-> prazo data/hora) ===================== */
+    function getStart(){ return (typeof editingCh!=='undefined' && editingCh && editingCh.createdAt) || Date.now(); }
+    function prazoVal(){ var d=$id('mch-prazo-d'), h=$id('mch-prazo-h'); if(!d||!d.value) return null; var ts=new Date(d.value+'T'+((h&&h.value)||'23:59')+':00').getTime(); return isNaN(ts)?null:ts; }
+    function setPrazo(ts){ var d=$id('mch-prazo-d'),h=$id('mch-prazo-h'); if(!d||!ts)return; var dt=new Date(ts); d.value=dt.getFullYear()+'-'+pad(dt.getMonth()+1)+'-'+pad(dt.getDate()); if(h)h.value=pad(dt.getHours())+':'+pad(dt.getMinutes()); }
+    function slaToPrazo(){ var s=$id('mch-sla'); var hrs=Number(s&&s.value)||0; if(hrs>0) setPrazo(getStart()+hrs*3600000); }
+    function prazoToSla(){ var ts=prazoVal(); var s=$id('mch-sla'); if(ts&&s){ var h=Math.max(1,Math.round((ts-getStart())/3600000)); s.value=h; } }
+    var slaIn=$id('mch-sla'); if(slaIn&&!slaIn.dataset.v48){ slaIn.dataset.v48='1'; slaIn.addEventListener('input',slaToPrazo); }
+    ['mch-prazo-d','mch-prazo-h'].forEach(function(id){ var e=$id(id); if(e&&!e.dataset.v48){ e.dataset.v48='1'; e.addEventListener('change',prazoToSla); } });
+
+    // slaStatus unificado: usa o prazo quando definido
+    window.slaStatus=function(c){
+      if(c.locked) return {cls:'',pct:100,over:false};
+      var start=c.createdAt||Date.now();
+      var due=c.prazo||(start+((c.sla||24)*3600000));
+      var total=due-start; if(total<=0) total=1;
+      var pct=Math.min(100,(Date.now()-start)/total*100);
+      return {cls:pct>=100?'err':pct>=80?'warn':'ok',pct:pct|0,over:Date.now()>=due};
+    };
+
+    /* ===================== 4) WORKFLOW DE CHAMADOS ===================== */
+    function persistClose(msg){
+      try{save()}catch(e){} try{syncCloud&&syncCloud(editingCh)}catch(e){}
+      var mc=$id('modal-ch'); if(mc) mc.classList.remove('open');
+      var a=document.querySelector('#tabs .active'); try{go(a?a.dataset.tab:'chamados')}catch(e){}
+      if(msg) toast(msg);
+    }
+    function ensureInList(){ if(editingCh && !state.chamados.find(function(c){return c.id===editingCh.id})) state.chamados.unshift(editingCh); }
+    function toggleChButtons(){
+      if(typeof editingCh==='undefined'||!editingCh) return;
+      var st=editingCh.st||'Novo', locked=!!editingCh.locked;
+      var canWork=!locked && st!=='Finalizado' && st!=='Cancelado';
+      var inAtend=st==='Em Atendimento';
+      function S(id,show){var e=$id(id); if(e)e.style.display=show?'':'none'}
+      S('mch-atender', canWork && !inAtend);
+      S('mch-reagendar', canWork && !inAtend);
+      S('mch-finalizar', canWork && inAtend);
+      S('mch-parecer-wrap', canWork && inAtend);
+    }
+    function bindChWorkflow(){
+      var at=$id('mch-atender');
+      if(at) at.onclick=function(){
+        if(!editingCh){toast('Salve o chamado antes');return}
+        if(editingCh.locked){toast('🔒 Chamado travado');return}
+        if(!$id('mch-tt').value.trim()){toast('Preencha o título antes');return}
+        editingCh.tt=$id('mch-tt').value.trim();
+        editingCh.st='Em Atendimento'; $id('mch-st').value='Em Atendimento';
+        editingCh.prazo=prazoVal()||editingCh.prazo;
+        editingCh.tec=$id('mch-tec').value.trim()||editingCh.tec;
+        editingCh.log=editingCh.log||[]; editingCh.log.push({ts:Date.now(),msg:'▶ Em Atendimento iniciado por '+(editingCh.tec||(currentUser&&currentUser.name)||ADMIN.name)});
+        ensureInList(); persistClose('Atendimento iniciado · status: Em Atendimento');
+      };
+      var rg=$id('mch-reagendar');
+      if(rg) rg.onclick=function(){
+        if(!editingCh){toast('Salve o chamado antes');return}
+        if(editingCh.locked){toast('🔒 Chamado travado');return}
+        var dEl=$id('mch-prazo-d');
+        if(!dEl.value){ var v=prompt('Reagendar para qual data? (AAAA-MM-DD)', new Date(Date.now()+864e5).toISOString().slice(0,10)); if(!v) return; dEl.value=v; }
+        var hEl=$id('mch-prazo-h'); if(hEl && !hEl.value) hEl.value='09:00';
+        editingCh.prazo=prazoVal(); prazoToSla(); editingCh.sla=Number($id('mch-sla').value)||editingCh.sla;
+        editingCh.st='Reagendado'; $id('mch-st').value='Reagendado';
+        editingCh.log=editingCh.log||[]; editingCh.log.push({ts:Date.now(),msg:'📅 Reagendado para '+fmtDate(editingCh.prazo)});
+        ensureInList(); persistClose('Chamado reagendado para '+fmtDate(editingCh.prazo));
+      };
+      var fn=$id('mch-finalizar');
+      if(fn) fn.onclick=function(){
+        if(!editingCh){toast('Nada para finalizar');return}
+        if(editingCh.locked){toast('🔒 Já finalizado');return}
+        var par=$id('mch-parecer')?$id('mch-parecer').value.trim():'';
+        if(!par){toast('Preencha o parecer técnico para finalizar'); var p=$id('mch-parecer'); if(p)p.focus(); return}
+        if(!confirm('Finalizar este chamado? Ele será movido para o Histórico e travado.')) return;
+        editingCh.parecer=par;
+        editingCh.st='Finalizado'; $id('mch-st').value='Finalizado';
+        editingCh.closedAt=Date.now(); editingCh.locked=true; editingCh.prazo=prazoVal()||editingCh.prazo;
+        editingCh.log=editingCh.log||[]; editingCh.log.push({ts:Date.now(),msg:'✓ Finalizado · Parecer: '+par});
+        ensureInList(); persistClose('Chamado finalizado · movido para o Histórico');
+      };
+    }
+    // captura parecer/prazo ao salvar manualmente
+    var saveBtn=$id('mch-save');
+    if(saveBtn){ var _ps=saveBtn.onclick; saveBtn.onclick=function(ev){ if(typeof editingCh!=='undefined'&&editingCh){ var pe=$id('mch-parecer'); if(pe)editingCh.parecer=pe.value; var pv=prazoVal(); if(pv)editingCh.prazo=pv; } return _ps&&_ps.call(this,ev); }; }
+
+    // novo chamado abre com status NOVO; ao abrir, sincroniza SLA/prazo, parecer e botões
+    var prevOpenCh=window.openCh;
+    window.openCh=function(id){
+      prevOpenCh && prevOpenCh(id);
+      if(typeof editingCh==='undefined'||!editingCh) return;
+      if(!id && !editingCh.st) editingCh.st='Novo';
+      var pe=$id('mch-parecer'); if(pe) pe.value=editingCh.parecer||'';
+      if(editingCh.prazo){ setPrazo(editingCh.prazo); prazoToSla(); } else { slaToPrazo(); }
+      toggleChButtons();
+      bindChWorkflow();
+    };
+
+    // chamados finalizados saem da lista (vão para o Histórico)
+    var _origCF=window.chamadosFiltrados;
+    if(_origCF){ window.chamadosFiltrados=function(){ var arr=_origCF()||[]; return arr.filter(function(c){return c.st!=='Finalizado'}); }; }
+
+    // rótulo do botão de acesso: "Visualizar"
+    if(window.renderChamados){ var _rc=window.renderChamados; window.renderChamados=function(){ _rc.apply(this,arguments); try{document.querySelectorAll('#tbl-ch [data-edit]').forEach(function(b){b.textContent='Visualizar'})}catch(e){} }; }
+
+    /* ===================== 5) LISTA DE CHAMADOS EM PDF (PAISAGEM, logo + rodapé) ===================== */
+    function chListPDF(){
+      if(!window.jspdf){toast('PDF indisponível');return}
+      var jsPDF=window.jspdf.jsPDF;
+      var doc=new jsPDF({unit:'mm',format:'a4',orientation:'landscape'});
+      var W=297,H=210, ML=12,MR=12;
+      var logo=state.logo&&state.logo.data, rodape=state.rodape&&state.rodape.data;
+      var headerH=26, footerH=rodape?20:12;
+      function header(){
+        if(logo){ try{ var p=doc.getImageProperties(logo); var lh=16, lw=lh*p.width/p.height; doc.addImage(logo,'PNG',ML,6,lw,lh);}catch(e){} }
+        doc.setFont('helvetica','bold'); doc.setFontSize(14); doc.setTextColor(15,40,90);
+        doc.text('Lista de Chamados — Suporte de TI',W/2,14,{align:'center'});
+        doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(90);
+        doc.text('Fortaleza, '+new Date().toLocaleString('pt-BR'),W-MR,12,{align:'right'});
+        doc.setDrawColor(15,40,90); doc.setLineWidth(.5); doc.line(ML,headerH-2,W-MR,headerH-2);
+      }
+      function footer(){
+        if(rodape){ try{ var p=doc.getImageProperties(rodape); var rw=W-ML-MR, rh=rw*p.height/p.width; if(rh>16){rh=16; rw=rh*p.width/p.height;} doc.addImage(rodape,'PNG',(W-rw)/2,H-rh-4,rw,rh);}catch(e){} }
+        else { doc.setDrawColor(15,40,90);doc.setLineWidth(.4);doc.line(ML,H-8,W-MR,H-8); doc.setFontSize(8);doc.setTextColor(110); doc.text('Documento gerado por MODESK OMEGA · Central de Suporte de TI',W/2,H-4,{align:'center'}); }
+      }
+      var arr=(state.chamados||[]).filter(function(c){return c.st!=='Finalizado'});
+      var body=arr.map(function(c){ var s=window.slaStatus(c);
+        return [c.id,(c.tt||'').slice(0,40),(c.sol||'-'),(c.setor||'-')+(c.sala?' · Sala '+c.sala:'')+(c.andar?' · '+c.andar:''),(c.cat||'-'),(c.pri||'-'),(c.st||'-'),s.pct+'%',(c.prazo?fmtDate(c.prazo):'-'),fmtDate(c.createdAt)];
+      });
+      doc.autoTable({
+        head:[['ID','Título','Solicitante','Setor/Local','Categoria','Prioridade','Status','SLA','Prazo','Aberto']],
+        body:body.length?body:[['—','Nenhum chamado ativo','','','','','','','','']],
+        startY:headerH+2, margin:{left:ML,right:MR,top:headerH+2,bottom:footerH+4},
+        theme:'grid', styles:{fontSize:8,cellPadding:2,textColor:30,overflow:'linebreak'},
+        headStyles:{fillColor:[15,40,90],textColor:255,fontStyle:'bold',fontSize:8},
+        alternateRowStyles:{fillColor:[245,248,253]},
+        didDrawPage:function(){ header(); footer(); }
+      });
+      var pages=doc.internal.getNumberOfPages();
+      for(var p=1;p<=pages;p++){doc.setPage(p);doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(90);doc.text('Pág. '+p+'/'+pages,ML,H-4);}
+      var blob=doc.output('blob'), url=URL.createObjectURL(blob);
+      var win=window.open(url,'_blank'); if(!win){toast('Permita pop-ups para abrir o PDF');location.href=url;return}
+      toast('Lista de chamados exportada (paisagem)');
+      setTimeout(function(){URL.revokeObjectURL(url)},60000);
+    }
+    window.chListPDF=chListPDF;
+    var chNew=$id('ch-new');
+    if(chNew && !chNew.dataset.pdfsib){ chNew.dataset.pdfsib='1';
+      var b=document.createElement('button'); b.className='btn sm'; b.type='button'; b.id='ch-list-pdf'; b.textContent='🖨 Lista (PDF)';
+      b.onclick=chListPDF; chNew.parentNode.insertBefore(b,chNew);
+    }
+
+    // refresh inicial
+    try{ if(window.renderChamados)renderChamados(); }catch(e){}
+  });
+})();
+</script>
+
+<!-- ============================================================
+     MODESK OMEGA · PATCH v5.0  (substitui v4.9)
+     · ALERTA DE CHAMADOS VENCIDOS: UM ÚNICO popup flutuante,
+       piscante, com botão "Adiar 10 min" e "Ver agora".
+       Remove TODOS os banners/listas duplicadas (#vencidos-alert,
+       #dash-vencidos, .so-stack, toast v4.9 etc.)
+     · Toasts informativos minimalistas (canto inferior direito)
+     · Botões de upload com paleta dinâmica + visual pill premium
+     · Configurações reorganizadas em abas (Tema · Paleta ·
+       Notificações · Importação · Backup)
+     · Cadastros em popup (Requisição, Pedido, Item, Movimento)
+       com fechamento automático ao salvar
+     · 🪄 Importar inteligente — texto livre, Excel/CSV, PDF,
+       Word (DOCX) e Imagem (OCR) em Lista Prévia, Movimento de
+       Patrimônio, Requisição e Pedido de Compra
+     ============================================================ -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/5.0.4/tesseract.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js"></script>
+<style>
+/* =====================================================
+   1) NEUTRALIZAR TUDO QUE DUPLICAVA O ALERTA DE VENCIDOS
+   ===================================================== */
+#vencidos-alert,
+#dash-vencidos,
+.so-stack,
+#mk-overdue-stack,
+#mk-toasts .mk-toast.warn.blink { display:none !important; }
+/* Toasts antigos do core e da v4.9 também ficam ocultos */
+.toast{ display:none !important; }
+
+/* =====================================================
+   2) TOASTS LEVES (somente confirmações/avisos rápidos)
+   ===================================================== */
+#mkx-toasts{position:fixed;right:20px;bottom:20px;z-index:9998;display:flex;flex-direction:column;gap:8px;max-width:340px;pointer-events:none}
+.mkx-t{pointer-events:auto;font-family:'Manrope',sans-serif;font-size:13px;background:color-mix(in oklab,var(--bg2) 88%, transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);color:var(--fg);border:1px solid var(--line-2);border-left:3px solid var(--acc);padding:10px 32px 10px 12px;border-radius:10px;box-shadow:0 12px 32px rgba(0,0,0,.35);position:relative;animation:mkxIn .25s ease}
+.mkx-t.ok{border-left-color:var(--ok)} .mkx-t.warn{border-left-color:var(--warn)} .mkx-t.err{border-left-color:var(--err)}
+.mkx-t .x{position:absolute;top:6px;right:8px;background:none;border:0;color:var(--fg-mut);cursor:pointer;font-size:16px;line-height:1}
+@keyframes mkxIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes mkxOut{to{opacity:0;transform:translateX(20px)}}
+
+/* =====================================================
+   3) ALERTA ÚNICO DE CHAMADOS VENCIDOS (singleton)
+   ===================================================== */
+#mk-overdue{
+  position:fixed; top:18px; left:50%; transform:translateX(-50%) translateY(-20px);
+  z-index:10000; min-width:380px; max-width:min(560px,calc(100vw - 28px));
+  background:linear-gradient(135deg, color-mix(in oklab,var(--bg2) 92%, transparent), color-mix(in oklab,var(--bg) 92%, transparent));
+  backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
+  border:1px solid rgba(255,93,107,.45);
+  border-radius:16px; padding:14px 18px;
+  display:none; align-items:center; gap:14px;
+  box-shadow:0 24px 60px rgba(0,0,0,.55), 0 0 0 1px rgba(255,93,107,.15) inset;
+  font-family:'Manrope',sans-serif; opacity:0;
+  transition:opacity .35s ease, transform .35s cubic-bezier(.34,1.56,.64,1);
+}
+#mk-overdue.show{ display:flex; opacity:1; transform:translateX(-50%) translateY(0); animation:mkOvPulse 1.6s ease-in-out infinite }
+@keyframes mkOvPulse{
+  0%,100%{ box-shadow:0 24px 60px rgba(0,0,0,.55), 0 0 0 1px rgba(255,93,107,.15) inset, 0 0 0 0 rgba(255,93,107,.0) }
+  50%    { box-shadow:0 24px 60px rgba(0,0,0,.55), 0 0 0 1px rgba(255,93,107,.35) inset, 0 0 0 10px rgba(255,93,107,.10) }
+}
+#mk-overdue .ov-ic{
+  flex:0 0 44px; height:44px; border-radius:12px;
+  display:grid; place-items:center; font-size:22px;
+  background:linear-gradient(135deg,#ff3b4d,#b91c2c); color:#fff;
+  box-shadow:0 8px 18px rgba(255,60,70,.35);
+  animation:mkOvIcon 1.6s ease-in-out infinite;
+}
+@keyframes mkOvIcon{ 0%,100%{transform:scale(1)} 50%{transform:scale(1.08)} }
+#mk-overdue .ov-tx{ flex:1; min-width:0 }
+#mk-overdue .ov-tx b{ display:block; font-family:'Sora',sans-serif; font-weight:700; color:#ff8a93; letter-spacing:.02em; font-size:14px; line-height:1.25 }
+#mk-overdue .ov-tx small{ display:block; color:var(--fg-mut); font-size:11.5px; margin-top:3px; font-family:'JetBrains Mono',monospace }
+#mk-overdue .ov-act{ display:flex; gap:6px; flex-shrink:0 }
+#mk-overdue button{
+  font-family:'Sora',sans-serif; font-weight:600; font-size:11.5px; letter-spacing:.06em;
+  padding:8px 12px; border-radius:9px; cursor:pointer; border:1px solid transparent;
+  transition:transform .15s, filter .15s;
+}
+#mk-overdue button:hover{ transform:translateY(-1px); filter:brightness(1.1) }
+#mk-overdue .ov-go{ background:linear-gradient(135deg,#ff3b4d,#c01f30); color:#fff; box-shadow:0 4px 12px rgba(255,60,70,.3) }
+#mk-overdue .ov-snz{ background:transparent; color:var(--fg-mut); border-color:var(--line-2) }
+#mk-overdue .ov-snz:hover{ color:var(--fg); border-color:var(--acc) }
+
+/* =====================================================
+   4) BOTÕES DE UPLOAD — paleta dinâmica + pill premium
+   ===================================================== */
+.filmora-up, .mk-up, .btn-upload, label.up, .upload-btn{
+  display:inline-flex !important; align-items:center; gap:9px;
+  font-family:'Sora',sans-serif; font-weight:600; font-size:12.5px;
+  letter-spacing:.04em; cursor:pointer;
+  padding:9px 16px; border-radius:999px;
+  color:var(--fg);
+  background:linear-gradient(135deg, color-mix(in oklab,var(--acc) 14%, transparent), color-mix(in oklab,var(--acc) 6%, transparent));
+  border:1px solid color-mix(in oklab,var(--acc) 38%, transparent);
+  transition:all .18s ease;
+  position:relative; overflow:hidden;
+}
+.filmora-up:hover, .mk-up:hover, .btn-upload:hover, label.up:hover, .upload-btn:hover{
+  transform:translateY(-1px);
+  background:linear-gradient(135deg, color-mix(in oklab,var(--acc) 28%, transparent), color-mix(in oklab,var(--acc) 14%, transparent));
+  border-color:var(--acc);
+  box-shadow:0 6px 18px color-mix(in oklab,var(--acc) 35%, transparent);
+}
+.filmora-up::before, .mk-up::before{ content:"⬆"; font-size:14px; color:var(--acc); }
+.filmora-up input, .mk-up input{ display:none !important }
+
+/* =====================================================
+   5) CADASTRO POPUP — modal universal
+   ===================================================== */
+.mkm-back{position:fixed;inset:0;background:rgba(5,8,15,.65);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;z-index:9500;animation:mkmFade .22s ease}
+.mkm-back.open{display:flex}
+.mkm{background:var(--bg2);border:1px solid var(--line-2);border-radius:18px;padding:22px 24px;width:min(680px,calc(100vw - 32px));max-height:90vh;overflow:auto;position:relative;box-shadow:0 30px 80px rgba(0,0,0,.6);animation:mkmIn .28s cubic-bezier(.34,1.56,.64,1)}
+.mkm h3{margin:0 0 14px;font-family:'Sora',sans-serif;font-size:17px;letter-spacing:.02em}
+.mkm .mkm-x{position:absolute;top:10px;right:12px;background:transparent;border:0;color:var(--fg-mut);font-size:22px;line-height:1;cursor:pointer;width:32px;height:32px;border-radius:8px}
+.mkm .mkm-x:hover{background:var(--bg);color:var(--fg)}
+.mkm .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.mkm label{font-size:11.5px;color:var(--fg-mut);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.06em}
+.mkm input,.mkm select,.mkm textarea{width:100%;padding:9px 11px;border-radius:9px;background:var(--bg);border:1px solid var(--line-2);color:var(--fg);font-family:'Manrope',sans-serif;font-size:13.5px;margin-top:4px}
+.mkm input:focus,.mkm select:focus,.mkm textarea:focus{outline:none;border-color:var(--acc);box-shadow:0 0 0 3px color-mix(in oklab,var(--acc) 22%, transparent)}
+.mkm .full{grid-column:1/-1}
+.mkm .acts{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
+@keyframes mkmIn{from{opacity:0;transform:translateY(20px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes mkmFade{from{opacity:0}to{opacity:1}}
+
+/* =====================================================
+   6) IMPORTAR INTELIGENTE — drop-zone
+   ===================================================== */
+.mki-zone{
+  border:2px dashed color-mix(in oklab,var(--acc) 45%, transparent);
+  border-radius:14px; padding:22px; text-align:center; cursor:pointer;
+  background:color-mix(in oklab,var(--acc) 4%, transparent);
+  transition:all .18s ease;
+}
+.mki-zone:hover, .mki-zone.drag{ border-color:var(--acc); background:color-mix(in oklab,var(--acc) 10%, transparent) }
+.mki-zone .mki-ico{font-size:34px;line-height:1;margin-bottom:6px}
+.mki-zone b{display:block;font-family:'Sora';font-size:13px;letter-spacing:.04em}
+.mki-zone small{display:block;color:var(--fg-mut);font-size:11.5px;margin-top:4px;font-family:'JetBrains Mono',monospace}
+.mki-chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:10px}
+.mki-chips span{font-size:10.5px;padding:3px 8px;border-radius:999px;background:color-mix(in oklab,var(--acc) 14%, transparent);color:var(--acc);font-family:'JetBrains Mono',monospace}
+.mki-tx{width:100%;min-height:90px;margin-top:10px;padding:10px;border-radius:10px;background:var(--bg);border:1px solid var(--line-2);color:var(--fg);font-family:'JetBrains Mono',monospace;font-size:12px;resize:vertical}
+.mki-preview{margin-top:12px;max-height:260px;overflow:auto;border:1px solid var(--line-2);border-radius:10px}
+.mki-preview table{width:100%;border-collapse:collapse;font-size:12px}
+.mki-preview th{background:var(--bg);position:sticky;top:0;padding:6px 8px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--fg-mut);text-transform:uppercase;letter-spacing:.06em}
+.mki-preview td{padding:6px 8px;border-top:1px solid var(--line-2)}
+.mki-bar{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.mki-bar .btn{font-size:12px;padding:7px 12px}
+
+/* =====================================================
+   7) CONFIGURAÇÕES em abas
+   ===================================================== */
+.mkc-tabs{display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid var(--line-2);margin-bottom:14px;padding-bottom:0}
+.mkc-tab{background:transparent;border:0;color:var(--fg-mut);font-family:'Sora',sans-serif;font-weight:600;font-size:12.5px;padding:10px 14px;cursor:pointer;border-bottom:2px solid transparent;letter-spacing:.04em}
+.mkc-tab:hover{color:var(--fg)}
+.mkc-tab.active{color:var(--acc);border-bottom-color:var(--acc)}
+.mkc-panel{display:none;animation:mkmFade .22s ease}
+.mkc-panel.active{display:block}
+.mkc-card{background:var(--bg2);border:1px solid var(--line-2);border-radius:14px;padding:16px;margin-bottom:12px}
+.mkc-card h4{margin:0 0 4px;font-family:'Sora';font-size:14px}
+.mkc-card p.muted{margin:0 0 12px;font-size:12px;color:var(--fg-mut)}
+</style>
+
+<script>
+(function(){
+'use strict';
+function $id(x){return document.getElementById(x)}
+function ready(f){if(document.readyState!=='loading')f();else document.addEventListener('DOMContentLoaded',f)}
+
+/* ============================================================
+   TOASTS LEVES (substitui window.toast — sem piscar)
+   ============================================================ */
+var TH = document.createElement('div'); TH.id='mkx-toasts'; document.addEventListener('DOMContentLoaded',function(){document.body.appendChild(TH)});
+window.toast = function(msg, t){
+  if(!msg) return;
+  var kind='info';
+  var m = String(msg);
+  if(/✓|salv|ok|sucess|criad/i.test(m)) kind='ok';
+  else if(/⚠|aviso|atenç|sem |permita/i.test(m)) kind='warn';
+  else if(/erro|falh|❌|inválid/i.test(m)) kind='err';
+  var el = document.createElement('div');
+  el.className='mkx-t '+kind;
+  el.innerHTML = '<button class="x">×</button><span></span>';
+  el.querySelector('span').textContent = m;
+  var close = function(){el.style.animation='mkxOut .22s ease forwards'; setTimeout(function(){el.remove()},220)};
+  el.querySelector('.x').onclick = close;
+  TH.appendChild(el);
+  setTimeout(close, (t||3500));
+};
+
+/* ============================================================
+   ALERTA ÚNICO DE CHAMADOS VENCIDOS (singleton + snooze)
+   ============================================================ */
+var OV = null; var snoozeUntil = 0;
+function ensureOv(){
+  if(OV) return OV;
+  OV = document.createElement('div'); OV.id='mk-overdue';
+  OV.innerHTML =
+    '<div class="ov-ic">⚠</div>'+
+    '<div class="ov-tx"><b>Chamados vencidos</b><small><span id="mk-ov-n">0</span> chamado(s) precisam de resolução imediata</small></div>'+
+    '<div class="ov-act">'+
+      '<button class="ov-go">VER AGORA</button>'+
+      '<button class="ov-snz" title="Adiar 10 minutos">ADIAR</button>'+
+    '</div>';
+  document.body.appendChild(OV);
+  OV.querySelector('.ov-go').onclick = function(){
+    try{ if(typeof go==='function') go('chamados'); }catch(e){}
+    OV.classList.remove('show');
+  };
+  OV.querySelector('.ov-snz').onclick = function(){
+    snoozeUntil = Date.now() + 10*60*1000;
+    OV.classList.remove('show');
+  };
+  return OV;
+}
+function refreshOverdue(){
+  try{
+    var st = window.state;
+    if(!st || !Array.isArray(st.chamados)) return;
+    var now = Date.now();
+    var venc = st.chamados.filter(function(c){
+      if(['Finalizado','Cancelado'].indexOf(c.st)>=0) return false;
+      if(c.prazo && c.prazo<now) return true;
+      // fallback: createdAt + sla horas
+      if(c.createdAt && c.sla){ return (c.createdAt + c.sla*3600000) < now }
+      return false;
+    });
+    var el = ensureOv();
+    if(venc.length && now > snoozeUntil){
+      el.querySelector('#mk-ov-n').textContent = venc.length;
+      if(!el.classList.contains('show')) el.classList.add('show');
+    } else {
+      el.classList.remove('show');
+    }
+  }catch(e){}
+}
+ready(function(){
+  // Mata watchers antigos: esconder os elementos legados se reaparecerem
+  var killer = function(){
+    ['vencidos-alert','dash-vencidos'].forEach(function(id){
+      var n=document.getElementById(id); if(n) n.style.display='none';
+    });
+    document.querySelectorAll('.so-stack,#mk-overdue-stack').forEach(function(n){n.style.display='none'});
+  };
+  setInterval(killer, 1500);
+  setTimeout(refreshOverdue, 2200);
+  setInterval(refreshOverdue, 30000);
+});
+
+/* ============================================================
+   MODAL UNIVERSAL DE CADASTRO
+   ============================================================ */
+window.mkModal = function(opts){
+  // opts: {id, title, fields:[{k,l,t,opts,full,req,val}], onSave(data)}
+  var existing = $id(opts.id);
+  if(existing) existing.remove();
+  var back = document.createElement('div'); back.className='mkm-back'; back.id=opts.id;
+  var m = document.createElement('div'); m.className='mkm';
+  var html = '<button class="mkm-x" type="button">×</button><h3>'+opts.title+'</h3><div class="grid">';
+  (opts.fields||[]).forEach(function(f){
+    var cls = f.full?' class="full"':'';
+    var w = '';
+    var v = f.val==null?'':String(f.val).replace(/"/g,'&quot;');
+    if(f.t==='select'){
+      w='<select data-k="'+f.k+'">'+(f.opts||[]).map(function(o){return '<option '+(o===f.val?'selected':'')+'>'+o+'</option>'}).join('')+'</select>';
+    } else if(f.t==='textarea'){
+      w='<textarea data-k="'+f.k+'" rows="3">'+v+'</textarea>';
+    } else {
+      w='<input data-k="'+f.k+'" type="'+(f.t||'text')+'" value="'+v+'" '+(f.req?'required':'')+'/>';
+    }
+    html += '<div'+cls+'><label>'+f.l+'</label>'+w+'</div>';
+  });
+  html += '</div><div class="acts"><button type="button" class="btn" data-cancel>Cancelar</button><button type="button" class="btn primary" data-save>💾 Salvar</button></div>';
+  m.innerHTML = html;
+  back.appendChild(m);
+  document.body.appendChild(back);
+  var close=function(){back.classList.remove('open'); setTimeout(function(){back.remove()},220)};
+  m.querySelector('.mkm-x').onclick=close;
+  m.querySelector('[data-cancel]').onclick=close;
+  back.addEventListener('click',function(e){if(e.target===back)close()});
+  m.querySelector('[data-save]').onclick=function(){
+    var data={};
+    m.querySelectorAll('[data-k]').forEach(function(n){ data[n.getAttribute('data-k')] = n.value });
+    var miss = (opts.fields||[]).find(function(f){return f.req && !String(data[f.k]||'').trim()});
+    if(miss){ toast('⚠ Preencha: '+miss.l); return }
+    var ok = true;
+    try{ ok = opts.onSave ? opts.onSave(data) : true }catch(e){ ok=false; toast('Erro: '+e.message) }
+    if(ok!==false){ toast('✓ Cadastro salvo'); close(); }
+  };
+  // open with animation
+  requestAnimationFrame(function(){ back.classList.add('open') });
+  // foco no primeiro campo
+  setTimeout(function(){var fi=m.querySelector('input,select,textarea'); if(fi)fi.focus()},100);
+  return back;
+};
+
+/* ============================================================
+   IMPORTAR INTELIGENTE
+   ============================================================ */
+function parseFreeText(txt){
+  // heurística simples linha-a-linha: separa por tabs / ; / multiespaços
+  var lines = String(txt||'').split(/\r?\n/).map(function(l){return l.trim()}).filter(Boolean);
+  var rows = lines.map(function(l){
+    var parts = l.split(/\t|;|\s{2,}|,(?=\s)/).map(function(s){return s.trim()}).filter(Boolean);
+    var row = {raw:l};
+    // tenta detectar padrões
+    parts.forEach(function(p){
+      if(/^\d{6,10}$/.test(p) && !row.patrimonio) row.patrimonio=p;
+      else if(/^(EST|MXM|REQ|PED|CH)[\w-]*$/i.test(p) && !row.codigo) row.codigo=p;
+      else if(/^\d{1,2}[\/-]\d{1,2}[\/-]\d{2,4}$/.test(p) && !row.data) row.data=p;
+      else if(/^\d+([.,]\d+)?$/.test(p) && !row.qtd){ row.qtd=p }
+      else if(!row.descricao) row.descricao=p;
+      else row.descricao+=' '+p;
+    });
+    return row;
+  });
+  return rows;
+}
+
+async function readFileSmart(file){
+  var name = (file.name||'').toLowerCase();
+  if(/\.(txt|csv|tsv)$/.test(name)) return await file.text();
+  if(/\.xlsx?$/.test(name)){
+    if(!window.XLSX){ toast('⚠ Biblioteca XLSX não carregada'); return '' }
+    var buf = await file.arrayBuffer();
+    var wb = window.XLSX.read(buf,{type:'array'});
+    var out=''; wb.SheetNames.forEach(function(n){ out += window.XLSX.utils.sheet_to_csv(wb.Sheets[n])+'\n' });
+    return out;
+  }
+  if(/\.docx$/.test(name)){
+    if(!window.mammoth){ toast('⚠ Mammoth não carregado'); return '' }
+    var b = await file.arrayBuffer();
+    var r = await window.mammoth.extractRawText({arrayBuffer:b});
+    return r.value||'';
+  }
+  if(/\.pdf$/.test(name)){
+    if(!window.pdfjsLib){ toast('⚠ PDF.js não disponível — colando texto livre'); return '' }
+    var ab = await file.arrayBuffer();
+    var pdf = await window.pdfjsLib.getDocument({data:ab}).promise;
+    var out=''; for(var i=1;i<=pdf.numPages;i++){var p=await pdf.getPage(i);var t=await p.getTextContent();out+=t.items.map(function(it){return it.str}).join(' ')+'\n'}
+    return out;
+  }
+  if(/\.(png|jpe?g|webp|bmp)$/.test(name)){
+    if(!window.Tesseract){ toast('⚠ OCR não carregado'); return '' }
+    toast('🔍 Lendo imagem (OCR)…');
+    var url = URL.createObjectURL(file);
+    var res = await window.Tesseract.recognize(url,'por+eng');
+    URL.revokeObjectURL(url);
+    return (res.data&&res.data.text)||'';
+  }
+  return await file.text();
+}
+
+window.mkSmartImport = function(opts){
+  // opts:{title, onApply(rows)}
+  mkModal({
+    id:'mk-import',
+    title:'🪄 '+(opts.title||'Importar inteligente'),
+    fields:[],
+    onSave:function(){return false}
+  });
+  // troca o conteúdo do modal por interface custom
+  var back = $id('mk-import'); if(!back) return;
+  var m = back.querySelector('.mkm');
+  m.innerHTML = '<button class="mkm-x" type="button">×</button>'+
+    '<h3>🪄 '+(opts.title||'Importar inteligente')+'</h3>'+
+    '<div class="mki-zone" id="mki-zone">'+
+      '<div class="mki-ico">📥</div>'+
+      '<b>Arraste arquivos aqui ou clique para selecionar</b>'+
+      '<small>Aceita texto livre, Excel, CSV, PDF, Word (DOCX) e imagens (OCR)</small>'+
+      '<div class="mki-chips"><span>TXT</span><span>CSV</span><span>XLSX</span><span>PDF</span><span>DOCX</span><span>IMG-OCR</span></div>'+
+      '<input type="file" id="mki-file" multiple accept=".txt,.csv,.tsv,.xlsx,.xls,.pdf,.docx,.png,.jpg,.jpeg,.webp,.bmp" style="display:none"/>'+
+    '</div>'+
+    '<textarea class="mki-tx" id="mki-tx" placeholder="…ou cole texto livre aqui (ex: lista copiada de e-mail)"></textarea>'+
+    '<div class="mki-bar">'+
+      '<button class="btn primary" id="mki-parse">🔎 Analisar</button>'+
+      '<button class="btn" id="mki-clear">Limpar</button>'+
+      '<span style="flex:1"></span>'+
+      '<button class="btn ok" id="mki-apply" disabled>✓ Aplicar cadastro</button>'+
+    '</div>'+
+    '<div class="mki-preview" id="mki-prev" style="display:none"></div>';
+  m.querySelector('.mkm-x').onclick=function(){back.classList.remove('open');setTimeout(function(){back.remove()},220)};
+  var z = $id('mki-zone'), fi = $id('mki-file'), tx = $id('mki-tx');
+  var prev = $id('mki-prev'), apply = $id('mki-apply');
+  var parsedRows = [];
+  z.onclick = function(){ fi.click() };
+  ['dragover','dragenter'].forEach(function(e){ z.addEventListener(e,function(ev){ev.preventDefault();z.classList.add('drag')}) });
+  ['dragleave','drop'].forEach(function(e){ z.addEventListener(e,function(ev){ev.preventDefault();z.classList.remove('drag')}) });
+  z.addEventListener('drop',function(ev){ handleFiles(ev.dataTransfer.files) });
+  fi.onchange = function(){ handleFiles(fi.files) };
+  async function handleFiles(list){
+    var all=''; for(var i=0;i<list.length;i++){ try{ all += await readFileSmart(list[i]) + '\n' }catch(e){toast('Erro lendo '+list[i].name)} }
+    if(all){ tx.value = (tx.value?tx.value+'\n':'') + all; toast('✓ Arquivo(s) lidos'); }
+  }
+  $id('mki-parse').onclick = function(){
+    parsedRows = parseFreeText(tx.value);
+    if(!parsedRows.length){ toast('⚠ Nada para analisar'); return }
+    var cols = ['codigo','patrimonio','descricao','qtd','data'];
+    var head = '<tr>'+cols.map(function(c){return '<th>'+c+'</th>'}).join('')+'</tr>';
+    var body = parsedRows.map(function(r){return '<tr>'+cols.map(function(c){return '<td>'+(r[c]||'')+'</td>'}).join('')+'</tr>'}).join('');
+    prev.innerHTML = '<table>'+head+body+'</table>';
+    prev.style.display='block';
+    apply.disabled = false;
+    toast('✓ '+parsedRows.length+' linha(s) reconhecida(s)');
+  };
+  $id('mki-clear').onclick = function(){ tx.value=''; prev.innerHTML=''; prev.style.display='none'; parsedRows=[]; apply.disabled=true };
+  apply.onclick = function(){
+    try{
+      var ok = opts.onApply ? opts.onApply(parsedRows) : true;
+      if(ok!==false){
+        toast('✓ '+parsedRows.length+' item(ns) aplicado(s)');
+        back.classList.remove('open'); setTimeout(function(){back.remove()},220);
+      }
+    }catch(e){ toast('Erro: '+e.message) }
+  };
+};
+
+/* ============================================================
+   PLUG: botão "🪄 Importar" nas seções
+   ============================================================ */
+ready(function(){
+  function addImportBtn(paneSelector, title, onApply){
+    var pane = document.querySelector(paneSelector); if(!pane) return;
+    if(pane.querySelector('.mk-import-btn')) return;
+    var bar = pane.querySelector('.toolbar, .actions, h2, h3, .pane-head');
+    var b = document.createElement('button');
+    b.className='btn sm primary mk-import-btn';
+    b.style.cssText='margin-left:8px';
+    b.textContent='🪄 Importar inteligente';
+    b.onclick = function(){ mkSmartImport({title:title, onApply:onApply}) };
+    if(bar) bar.appendChild(b); else pane.insertBefore(b, pane.firstChild);
+  }
+  setTimeout(function(){
+    addImportBtn('[data-pane="patrimonio"]','Importar Movimentação de Patrimônio', function(rows){
+      try{ if(Array.isArray(state.eventos)){ rows.forEach(function(r){ state.eventos.unshift({id:'EV'+Date.now()+Math.random().toString(36).slice(2,6), pat:r.patrimonio||'', desc:r.descricao||r.raw, data:r.data||new Date().toLocaleDateString('pt-BR'), createdAt:Date.now()}) }); save&&save(); } }catch(e){}
+    });
+    addImportBtn('[data-pane="itens"]','Importar Lista Prévia de Itens', function(rows){
+      try{ rows.forEach(function(r){ state.itens.unshift({id:'IT'+Date.now()+Math.random().toString(36).slice(2,6), cod:r.codigo||'', desc:r.descricao||r.raw, qtd:r.qtd||1, createdAt:Date.now()}) }); save&&save(); }catch(e){}
+    });
+    addImportBtn('[data-pane="requisicoes"]','Importar Requisição Interna', function(rows){
+      try{ state.reqs.unshift({id:'REQ'+Date.now(), itens:rows.map(function(r){return {cod:r.codigo,desc:r.descricao||r.raw,qtd:r.qtd||1}}), createdAt:Date.now(), st:'Aberta'}); save&&save(); }catch(e){}
+    });
+    addImportBtn('[data-pane="pedidos"]','Importar Pedido de Compra', function(rows){
+      try{ state.pedidos.unshift({id:'PED'+Date.now(), itens:rows.map(function(r){return {cod:r.codigo,desc:r.descricao||r.raw,qtd:r.qtd||1}}), createdAt:Date.now(), st:'Aberto'}); save&&save(); }catch(e){}
+    });
+  }, 1500);
+});
+
+/* ============================================================
+   CONFIGURAÇÕES em abas (reorganização visual)
+   ============================================================ */
+ready(function(){
+  setTimeout(function(){
+    var pane = document.querySelector('[data-pane="config"], [data-pane="configuracoes"], [data-pane="settings"]');
+    if(!pane || pane.dataset.mkcDone) return;
+    pane.dataset.mkcDone='1';
+    // agrupa cards filhos em "Tema/Paleta/Notificações/Importação/Backup"
+    var cards = Array.from(pane.querySelectorAll('.card'));
+    if(cards.length<2) return;
+    var tabsDef = [
+      {k:'tema', l:'🎨 Tema', test:/tema|aparênc|modo escuro|modo claro/i},
+      {k:'paleta', l:'🌈 Paleta', test:/paleta|cor|accent/i},
+      {k:'notif', l:'🔔 Notificações', test:/notif|som|beep|alert/i},
+      {k:'import', l:'📥 Importação', test:/import|backup|export/i},
+      {k:'outros', l:'⚙ Outros', test:/.*/ }
+    ];
+    var wrap = document.createElement('div'); wrap.style.marginTop='8px';
+    var nav = document.createElement('div'); nav.className='mkc-tabs';
+    tabsDef.forEach(function(t){
+      var b = document.createElement('button'); b.className='mkc-tab'; b.textContent=t.l; b.dataset.k=t.k;
+      b.onclick=function(){
+        nav.querySelectorAll('.mkc-tab').forEach(function(x){x.classList.remove('active')}); b.classList.add('active');
+        wrap.querySelectorAll('.mkc-panel').forEach(function(p){p.classList.toggle('active', p.dataset.k===t.k)});
+      };
+      nav.appendChild(b);
+    });
+    wrap.appendChild(nav);
+    var panels = {};
+    tabsDef.forEach(function(t){ var p=document.createElement('div'); p.className='mkc-panel'; p.dataset.k=t.k; wrap.appendChild(p); panels[t.k]=p; });
+    cards.forEach(function(c){
+      var txt = (c.textContent||'').slice(0,200);
+      var matched = tabsDef.find(function(t){return t.test.test(txt)}) || tabsDef[tabsDef.length-1];
+      panels[matched.k].appendChild(c);
+    });
+    pane.appendChild(wrap);
+    nav.querySelector('.mkc-tab').classList.add('active');
+    panels[tabsDef[0].k].classList.add('active');
+  }, 2000);
+});
+
 })();
 </script>
 
