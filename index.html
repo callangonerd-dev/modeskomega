@@ -2120,8 +2120,6 @@ window.renderLaudos=function(){_origRenderLaudos&&_origRenderLaudos();renderSign
   animation:pulseBan 1.6s ease-in-out infinite;cursor:pointer}
 #overdue-banner.show{display:flex}
 #overdue-banner .ic{font-size:28px}
-  #overdue-banner {
-    display: none !important;}
 #overdue-banner .ct{flex:1}
 #overdue-banner .ct b{display:block;font-size:18px;font-family:'Sora'}
 #overdue-banner .ct small{opacity:.9;font-weight:500}
@@ -3804,6 +3802,7 @@ window.uploadAnexoDrive = async function(file){
    ===================================================== */
 #vencidos-alert,
 #dash-vencidos,
+#overdue-banner,
 .so-stack,
 #mk-overdue-stack,
 #mk-toasts .mk-toast.warn.blink { display:none !important; }
@@ -3866,7 +3865,8 @@ window.uploadAnexoDrive = async function(file){
    4) BOTÕES DE UPLOAD — paleta dinâmica + pill premium
    ===================================================== */
 .filmora-up, .mk-up, .btn-upload, label.up, .upload-btn{
-  display:inline-flex !important; align-items:center; gap:9px;
+.mk-up, .btn-upload, label.up, .upload-btn{
+  display:inline-flex; align-items:center; gap:9px;
   font-family:'Sora',sans-serif; font-weight:600; font-size:12.5px;
   letter-spacing:.04em; cursor:pointer;
   padding:9px 16px; border-radius:999px;
@@ -3876,14 +3876,19 @@ window.uploadAnexoDrive = async function(file){
   transition:all .18s ease;
   position:relative; overflow:hidden;
 }
-.filmora-up:hover, .mk-up:hover, .btn-upload:hover, label.up:hover, .upload-btn:hover{
+.mk-up:hover, .btn-upload:hover, label.up:hover, .upload-btn:hover{
   transform:translateY(-1px);
   background:linear-gradient(135deg, color-mix(in oklab,var(--acc) 28%, transparent), color-mix(in oklab,var(--acc) 14%, transparent));
   border-color:var(--acc);
   box-shadow:0 6px 18px color-mix(in oklab,var(--acc) 35%, transparent);
 }
-.filmora-up::before, .mk-up::before{ content:"⬆"; font-size:14px; color:var(--acc); }
-.filmora-up input, .mk-up input{ display:none !important }
+.mk-up::before{ content:"⬆"; font-size:14px; color:var(--acc); }
+.mk-up input{ display:none !important }
+/* Recolore as bordas/glow do upload "filmora" conforme a paleta atual */
+.filmora-up{ background:linear-gradient(135deg, var(--acc), var(--acc2, var(--acc)) 45%, var(--acc)) !important; }
+.filmora-up .fm-icon{ background:linear-gradient(135deg, var(--acc), var(--acc2, var(--acc))) !important; box-shadow:0 6px 18px color-mix(in oklab,var(--acc) 55%, transparent), inset 0 -2px 0 rgba(0,0,0,.2) !important; }
+.filmora-up .fm-cta{ background:linear-gradient(135deg, var(--acc), var(--acc2, var(--acc))) !important; box-shadow:0 4px 12px color-mix(in oklab,var(--acc) 45%, transparent) !important; }
+.filmora-up .fm-pill{ background:color-mix(in oklab,var(--acc) 18%, transparent) !important; border:1px solid color-mix(in oklab,var(--acc) 45%, transparent) !important; color:color-mix(in oklab,var(--acc) 85%, white) !important; }
 
 /* =====================================================
    5) CADASTRO POPUP — modal universal
@@ -4016,7 +4021,7 @@ function refreshOverdue(){
 ready(function(){
   // Mata watchers antigos: esconder os elementos legados se reaparecerem
   var killer = function(){
-    ['vencidos-alert','dash-vencidos'].forEach(function(id){
+    ['vencidos-alert','dash-vencidos','overdue-banner'].forEach(function(id){
       var n=document.getElementById(id); if(n) n.style.display='none';
     });
     document.querySelectorAll('.so-stack,#mk-overdue-stack').forEach(function(n){n.style.display='none'});
@@ -4230,43 +4235,172 @@ ready(function(){
    ============================================================ */
 ready(function(){
   setTimeout(function(){
-    var pane = document.querySelector('[data-pane="config"], [data-pane="configuracoes"], [data-pane="settings"]');
-    if(!pane || pane.dataset.mkcDone) return;
-    pane.dataset.mkcDone='1';
-    // agrupa cards filhos em "Tema/Paleta/Notificações/Importação/Backup"
-    var cards = Array.from(pane.querySelectorAll('.card'));
-    if(cards.length<2) return;
-    var tabsDef = [
-      {k:'tema', l:'🎨 Tema', test:/tema|aparênc|modo escuro|modo claro/i},
-      {k:'paleta', l:'🌈 Paleta', test:/paleta|cor|accent/i},
-      {k:'notif', l:'🔔 Notificações', test:/notif|som|beep|alert/i},
-      {k:'import', l:'📥 Importação', test:/import|backup|export/i},
-      {k:'outros', l:'⚙ Outros', test:/.*/ }
-    ];
-    var wrap = document.createElement('div'); wrap.style.marginTop='8px';
-    var nav = document.createElement('div'); nav.className='mkc-tabs';
-    tabsDef.forEach(function(t){
-      var b = document.createElement('button'); b.className='mkc-tab'; b.textContent=t.l; b.dataset.k=t.k;
-      b.onclick=function(){
-        nav.querySelectorAll('.mkc-tab').forEach(function(x){x.classList.remove('active')}); b.classList.add('active');
-        wrap.querySelectorAll('.mkc-panel').forEach(function(p){p.classList.toggle('active', p.dataset.k===t.k)});
-      };
-      nav.appendChild(b);
-    });
-    wrap.appendChild(nav);
-    var panels = {};
-    tabsDef.forEach(function(t){ var p=document.createElement('div'); p.className='mkc-panel'; p.dataset.k=t.k; wrap.appendChild(p); panels[t.k]=p; });
-    cards.forEach(function(c){
-      var txt = (c.textContent||'').slice(0,200);
-      var matched = tabsDef.find(function(t){return t.test.test(txt)}) || tabsDef[tabsDef.length-1];
-      panels[matched.k].appendChild(c);
-    });
-    pane.appendChild(wrap);
-    nav.querySelector('.mkc-tab').classList.add('active');
-    panels[tabsDef[0].k].classList.add('active');
+    // Desativado: o menu interno das Configurações já é montado pelo patch v4.7
+    // (cfg-menu com abas Aparência / Usuários / Timbrado / Alertas).
+    // Este bloco causava menu duplicado — mantido como no-op por compatibilidade.
+    return;
   }, 2000);
 });
 
+})();
+</script>
+
+
+<!-- ============== MODESK OMEGA · PATCH v4.9 (status read-only · pulse overdue · reagendar com data · upload nivelado) ============== -->
+<style>
+/* Esconde o seletor de Status (controlado pelo fluxo dos botões) e mostra um badge read-only */
+#modal-ch #mch-st{display:none !important}
+#modal-ch .mch-st-ro{display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border-radius:99px;
+  font-family:'Sora';font-weight:700;font-size:12px;letter-spacing:.04em;text-transform:uppercase;
+  border:1px solid var(--line-2);background:var(--bg2);color:var(--fg)}
+#modal-ch .mch-st-ro.ok{color:#10b981;border-color:rgba(16,185,129,.45);background:rgba(16,185,129,.08)}
+#modal-ch .mch-st-ro.err{color:#ef4444;border-color:rgba(239,68,68,.45);background:rgba(239,68,68,.08)}
+#modal-ch .mch-st-ro.acc{color:var(--acc);border-color:color-mix(in oklab,var(--acc) 45%, transparent);background:color-mix(in oklab,var(--acc) 12%, transparent)}
+#modal-ch .mch-st-ro.warn{color:#f59e0b;border-color:rgba(245,158,11,.45);background:rgba(245,158,11,.08)}
+#modal-ch .mch-st-hint{display:block;margin-top:4px;font-size:11px;color:var(--fg-mut);font-family:'JetBrains Mono',monospace}
+
+/* Linha piscando na lista de chamados quando vencido */
+@keyframes mkRowPulse{
+  0%,100%{background:rgba(255,60,70,.05);box-shadow:inset 3px 0 0 #ef4444}
+  50%   {background:rgba(255,60,70,.18);box-shadow:inset 3px 0 0 #ff8a95}
+}
+#tbl-ch tbody tr.mk-overdue-row{animation:mkRowPulse 1.4s ease-in-out infinite}
+#tbl-ch tbody tr.mk-overdue-row td:first-child::before{
+  content:"⏰ "; color:#ef4444; font-weight:800
+}
+</style>
+
+<script>
+(function(){
+  'use strict';
+  function $id(x){return document.getElementById(x)}
+  function ready(fn){var t=setInterval(function(){if(typeof state!=='undefined'&&state&&window.renderChamados){clearInterval(t);try{fn()}catch(e){console.error('p49',e)}}},150)}
+
+  ready(function(){
+    /* ---------- 1) Esconder Status do cadastro · mostrar badge read-only ---------- */
+    var stSel=$id('mch-st');
+    if(stSel && !stSel.dataset.ro){
+      stSel.dataset.ro='1';
+      var lbl=stSel.parentNode.querySelector('label');
+      if(lbl) lbl.textContent='Status (automático)';
+      var ro=document.createElement('div');
+      ro.className='mch-st-ro';
+      ro.id='mch-st-ro';
+      ro.textContent='Novo';
+      var hint=document.createElement('small'); hint.className='mch-st-hint';
+      hint.textContent='O status muda conforme as ações: Atender · Reagendar · Finalizar.';
+      stSel.parentNode.appendChild(ro);
+      stSel.parentNode.appendChild(hint);
+    }
+    function syncBadge(){
+      var s=(stSel&&stSel.value)||'Novo';
+      var b=$id('mch-st-ro'); if(!b) return;
+      b.textContent=s;
+      b.className='mch-st-ro '+(
+        s==='Finalizado'?'ok':
+        s==='Cancelado'?'err':
+        s==='Em Atendimento'?'acc':
+        s==='Reagendado'?'warn':'');
+    }
+    // observe mudanças (os botões setam .value diretamente)
+    if(stSel){
+      var mo=new MutationObserver(syncBadge);
+      mo.observe(stSel,{attributes:true,attributeFilter:['value']});
+      stSel.addEventListener('change',syncBadge);
+      // patch dos setters via interval leve
+      setInterval(syncBadge,500);
+      syncBadge();
+    }
+
+    /* ---------- 2) Linha piscando na lista quando vencido ---------- */
+    function isAtivo(c){return c && c.st!=='Finalizado' && c.st!=='Cancelado'}
+    function isOverdue(c){
+      if(!isAtivo(c)) return false;
+      if(c.prazo && c.prazo<Date.now()) return true;
+      try{var s=window.slaStatus&&slaStatus(c); if(s&&s.over) return true;}catch(e){}
+      return false;
+    }
+    function paintOverdueRows(){
+      var rows=document.querySelectorAll('#tbl-ch tbody tr'); if(!rows.length) return;
+      var arr=(typeof chamadosFiltrados==='function')?chamadosFiltrados():(state.chamados||[]);
+      rows.forEach(function(tr,i){
+        var c=arr[i]; if(!c){tr.classList.remove('mk-overdue-row');return}
+        tr.classList.toggle('mk-overdue-row', isOverdue(c));
+      });
+    }
+    if(window.renderChamados){
+      var _rc=window.renderChamados;
+      window.renderChamados=function(){ var r=_rc.apply(this,arguments); setTimeout(paintOverdueRows,30); return r; };
+    }
+    setInterval(paintOverdueRows, 30000);
+    paintOverdueRows();
+
+    /* ---------- 3) Reagendar: modal com data + hora ---------- */
+    function pickDateTime(initIso){
+      return new Promise(function(resolve){
+        var back=document.createElement('div'); back.className='mkm-back open';
+        back.innerHTML=''
+         +'<div class="mkm" style="max-width:420px">'
+         +'<button class="mkm-x" type="button">×</button>'
+         +'<h3>📅 Reagendar chamado</h3>'
+         +'<p class="muted tiny" style="margin:-6px 0 12px">Escolha a nova data e hora do prazo.</p>'
+         +'<div class="grid">'
+         +'  <div><label>Nova data</label><input type="date" id="mkrg-d"></div>'
+         +'  <div><label>Hora</label><input type="time" id="mkrg-h" value="09:00"></div>'
+         +'  <div class="full"><label>Motivo (opcional)</label><input id="mkrg-m" placeholder="Ex.: aguardando peça"></div>'
+         +'</div>'
+         +'<div class="acts">'
+         +'  <button class="btn ghost" id="mkrg-c" type="button">Cancelar</button>'
+         +'  <button class="btn primary" id="mkrg-o" type="button">Confirmar</button>'
+         +'</div></div>';
+        document.body.appendChild(back);
+        var d=back.querySelector('#mkrg-d'), h=back.querySelector('#mkrg-h'), m=back.querySelector('#mkrg-m');
+        var def=initIso?new Date(initIso):new Date(Date.now()+864e5);
+        d.value=def.toISOString().slice(0,10);
+        if(initIso){var hh=String(def.getHours()).padStart(2,'0'); var mm=String(def.getMinutes()).padStart(2,'0'); h.value=hh+':'+mm;}
+        function close(v){back.remove(); resolve(v)}
+        back.querySelector('.mkm-x').onclick=function(){close(null)};
+        back.querySelector('#mkrg-c').onclick=function(){close(null)};
+        back.querySelector('#mkrg-o').onclick=function(){
+          if(!d.value){d.focus();return}
+          close({date:d.value, time:h.value||'09:00', motivo:m.value.trim()});
+        };
+        back.addEventListener('click',function(e){if(e.target===back)close(null)});
+        setTimeout(function(){d.focus()},80);
+      });
+    }
+    // intercepta o botão Reagendar para usar o modal (em vez de prompt)
+    var rg=$id('mch-reagendar');
+    if(rg && !rg.dataset.dtm){
+      rg.dataset.dtm='1';
+      rg.addEventListener('click', function(ev){
+        if(!window.editingCh) return; // fluxo normal
+        ev.preventDefault(); ev.stopImmediatePropagation();
+        var cur=editingCh.prazo||null;
+        pickDateTime(cur).then(function(v){
+          if(!v) return;
+          var dEl=$id('mch-prazo-d'), hEl=$id('mch-prazo-h');
+          if(dEl) dEl.value=v.date;
+          if(hEl) hEl.value=v.time;
+          try{
+            if(typeof prazoVal==='function') editingCh.prazo=prazoVal();
+            if(typeof prazoToSla==='function') prazoToSla();
+            editingCh.sla=Number(($id('mch-sla')||{}).value)||editingCh.sla;
+          }catch(e){}
+          editingCh.st='Reagendado';
+          if($id('mch-st')) $id('mch-st').value='Reagendado';
+          editingCh.log=editingCh.log||[];
+          editingCh.log.push({ts:Date.now(),msg:'📅 Reagendado para '+(v.date+' '+v.time)+(v.motivo?(' · '+v.motivo):'')});
+          if(window.state && !state.chamados.find(function(c){return c.id===editingCh.id})) state.chamados.unshift(editingCh);
+          try{save&&save()}catch(e){}
+          try{$id('modal-ch').classList.remove('open')}catch(e){}
+          try{renderChamados&&renderChamados(); renderKanban&&renderKanban();}catch(e){}
+          try{toast&&toast('Chamado reagendado para '+v.date+' '+v.time)}catch(e){}
+          syncBadge();
+        });
+      }, true); // capture — antes do handler antigo
+    }
+  });
 })();
 </script>
 
