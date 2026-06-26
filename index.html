@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
-<title>MODESK OMEGA v4.7.0 — Inteligência de Importação</title>
+<title>MODESK OMEGA v4.7.5 — Mobile + IA Refinada</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
@@ -300,6 +300,79 @@ html.light .theme-toggle .moon{display:none}
 .signer-row .sg-rm{background:rgba(255,93,107,.18);color:#ff5d6b;border:1px solid rgba(255,93,107,.35);padding:6px 10px;border-radius:8px;cursor:pointer;font-weight:700;font-size:12px}
 .signer-add{background:linear-gradient(135deg,#3b82f6,#5b8cff);color:#fff;border:none;padding:7px 14px;border-radius:8px;cursor:pointer;font-weight:700;font-size:12px;display:inline-flex;align-items:center;gap:6px;margin-top:4px;box-shadow:0 4px 10px rgba(59,130,246,.3)}
 
+/* ===== v4.7.5 — Reestruturação Mobile (anti-overflow global) ===== */
+html, body { max-width: 100vw; overflow-x: hidden; }
+*, *::before, *::after { max-width: 100%; }
+img, video, canvas, svg { max-width: 100%; height: auto; }
+pre, code { white-space: pre-wrap; word-break: break-word; overflow-wrap: anywhere; }
+
+/* Conteúdo principal nunca vaza */
+main.content { min-width: 0; overflow-x: hidden; }
+.card, .pane, section.pane { min-width: 0; }
+
+/* Tabelas: sempre dentro de wrap rolável */
+table.tbl { display: table; min-width: 0; }
+.tbl-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+/* Kanban e calendários horizontais: scroll natural sem empurrar layout */
+.kanban { overflow-x: auto; -webkit-overflow-scrolling: touch; max-width: 100%; }
+
+/* Topbar quebra em mobile */
+@media (max-width: 820px){
+  .topbar{flex-wrap:wrap;align-items:flex-start}
+  .topbar .actions{width:100%;justify-content:flex-start}
+  .search-box{min-width:0;width:100%;max-width:100%}
+}
+
+/* Telefone pequeno (≤ 640px) — reforço total */
+@media (max-width: 640px){
+  body{font-size:14px}
+  main.content{padding:12px 10px}
+  .topbar h1{font-size:17px;line-height:1.25}
+  .topbar .meta{font-size:11.5px}
+  .card{padding:12px;border-radius:12px}
+  .btn{padding:7px 11px;font-size:12.5px}
+  .btn.sm{padding:5px 8px;font-size:11.5px}
+  .kpis{grid-template-columns:1fr 1fr;gap:8px}
+  .kpi{padding:10px 12px}
+  .kpi .val{font-size:22px}
+  .row2,.row3{grid-template-columns:1fr;gap:8px}
+  .field input,.field select,.field textarea{font-size:14px;padding:10px 11px}
+  .modal{padding:14px;border-radius:12px;max-height:94vh}
+  .modal h3{font-size:16px}
+  .inv-form-grid{grid-template-columns:1fr!important}
+  .inv-form-grid .field.col-2,.inv-form-grid .field.col-3,.inv-form-grid .field.col-6{grid-column:span 1!important}
+  .inv-kpis{grid-template-columns:1fr 1fr!important}
+  .signer-row{grid-template-columns:1fr;gap:6px}
+  .step-flow{font-size:10.5px;gap:4px}
+  .step-flow .stp{padding:4px 7px}
+  .kanban{grid-template-columns:repeat(5,82vw)!important;gap:8px}
+  .kcol{min-height:auto}
+  .cal-grid .d{min-height:48px;padding:5px;font-size:11px}
+  table.tbl th,table.tbl td{padding:6px 5px;font-size:11.5px}
+  .flex{gap:6px}
+  .topbar .actions{gap:6px}
+  .topbar .actions .btn{flex:1 1 auto}
+}
+
+/* Mentor IA — menor em telas pequenas, não cobre botões */
+@media (max-width: 640px){
+  #mk47-mentor-fab{right:10px!important;bottom:10px!important;padding:9px 13px!important;font-size:12.5px!important}
+  #mk47-mentor-bk{padding:0!important;align-items:stretch!important}
+  #mk47-mentor-pn{max-width:100%!important;max-height:100vh!important;border-radius:14px 14px 0 0!important}
+  #mk47-mentor-pn .log .me,#mk47-mentor-pn .log .ai{max-width:92%!important}
+}
+
+/* Botão de importar IA em formulários: largura total no mobile */
+@media (max-width: 640px){
+  .mk47-extract-btn{width:100%;justify-content:center}
+  .mk47-form-hdr{margin-bottom:8px}
+}
+
+/* Sidebar mobile cobre toda a tela ao abrir */
+@media (max-width: 980px){
+  aside.sidebar{width:min(280px,86vw)}
+}
 </style>
 </head>
 <body>
@@ -2805,6 +2878,9 @@ window.uploadAnexoDrive = async function(file){
     if(rm) rm.onclick=function(){ invPhoto=null; if(invEditing)invEditing.photo=null; pv.innerHTML=''; };
   }
   function clearForm(){ invPhoto=null; invEditing=null; writeForm({}); var pv=document.getElementById('inv-photo-prev'); if(pv)pv.innerHTML=''; var fi=document.getElementById('inv-photo'); if(fi)fi.value=''; }
+  // Exposição para patches externos (ex.: tabela com colunas customizadas)
+  window.__invEdit=function(it){ if(!it)return; invEditing=it; writeForm(it); window.scrollTo({top:0,behavior:'smooth'}); };
+  window.__invClear=clearForm;
 
   function bindInv(){
     if(!$('inv-add')||$('inv-add').dataset.bound) return;
@@ -2838,14 +2914,31 @@ window.uploadAnexoDrive = async function(file){
       if(!sel.length){toast('Nenhum item marcado para compra');return}
       if(!confirm('Enviar '+sel.length+' item(ns) para a Lista Prévia de Compras?')) return;
       state.itens=Array.isArray(state.itens)?state.itens:[];
-      sel.forEach(i=>{
-        state.itens.unshift({
-          id:uid('IT'), eq:i.desc+(i.marca?' '+i.marca:'')+(i.modelo?' '+i.modelo:''),
-          qtd:i.qtd||1, un:i.un||'un', just:'Inventário Sala de Som — '+(i.cat||''),
-          origem:'invsom:'+i.id, createdAt:Date.now()
-        });
+      // Evita duplicar itens já enviados anteriormente (origem invsom:id)
+      var jaEnviados={};
+      state.itens.forEach(function(it){ if(it && it.origem) jaEnviados[it.origem]=true; });
+      var enviados=0;
+      sel.forEach(function(i){
+        var origem='invsom:'+i.id;
+        if(!jaEnviados[origem]){
+          state.itens.unshift({
+            id:uid('IT'),
+            eq:i.desc+(i.marca?' '+i.marca:'')+(i.modelo?' '+i.modelo:''),
+            qtd:i.qtd||1, un:i.un||'un',
+            just:'Inventário Sala de Som — '+(i.cat||''),
+            st:'Pendente',
+            origem:origem, createdAt:Date.now()
+          });
+          enviados++;
+        }
+        // Limpa o flag para não reenviar acidentalmente no próximo clique
+        i.comp=false;
       });
-      save(); toast('✅ '+sel.length+' item(ns) enviados para Lista Prévia');
+      save();
+      try{ renderInv(); }catch(e){}
+      try{ if(typeof renderItens==='function') renderItens(); }catch(e){}
+      try{ if(typeof renderReqChecklist==='function') renderReqChecklist(); }catch(e){}
+      toast('✅ '+enviados+' novo(s) item(ns) na Lista Prévia'+(enviados<sel.length?' ('+(sel.length-enviados)+' já existia(m))':''));
     };
 
     // Export do inventário agora é controlado pelo patch v4.7 (modal com orientação + colunas)
@@ -3781,8 +3874,7 @@ window.uploadAnexoDrive = async function(file){
        Word (DOCX) e Imagem (OCR) em Lista Prévia, Movimento de
        Patrimônio, Requisição e Pedido de Compra
      ============================================================ -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/5.0.4/tesseract.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js"></script>
+<!-- libs Tesseract/Mammoth carregadas mais abaixo (versões mais recentes) -->
 <style>
 /* =====================================================
    1) NEUTRALIZAR TUDO QUE DUPLICAVA O ALERTA DE VENCIDOS
@@ -4933,8 +5025,7 @@ section.pane[data-pane="config"].mk5.active{display:grid !important}
 <script>
 (function(){
 'use strict';
-function ready(fn){var t=setInterval(function(){if(document.body&&window.jspdf||window.jsPDF){clearInterval(t);try{fn()}catch(e){console.error('p51',e)}}},150);
-  setTimeout(function(){try{fn()}catch(e){}},3000);}
+function ready(fn){var done=false;function run(){if(done)return;done=true;try{fn()}catch(e){console.error('p51',e)}}var t=setInterval(function(){if(document.body&&(window.jspdf||window.jsPDF)){clearInterval(t);run()}},150);setTimeout(function(){clearInterval(t);run()},3000);}
 
 /* =========================================================
    FIX #1 — Garante que a config só apareça na aba certa
@@ -5245,6 +5336,7 @@ ready(function(){
 
     <div class="acts">
       <button class="btn ghost" id="mk47-xt-cancel">Cancelar</button>
+      <button class="btn ghost" id="mk47-xt-hub" title="Configurar IA Hub (Gemini)">⚙ IA Hub</button>
       <button class="btn" id="mk47-xt-analyze">🔍 Analisar</button>
       <button class="btn primary" id="mk47-xt-apply" disabled>✓ Preencher formulário</button>
     </div>
@@ -5366,7 +5458,8 @@ function patchRenderInv(){
     var tbl=document.getElementById('tbl-inv'); if(!tbl) return;
     // Detecta se cabeçalho está customizado
     var ths=tbl.querySelectorAll('thead th');
-    if(ths.length===12){ // versão original 12 colunas — substitui
+    var expected=1 + (cols.indexOf('photo')>=0?1:0) + cols.filter(function(c){return c!=='photo'}).length + 1;
+    if(ths.length!==expected){
       var thRow='<tr><th>✓</th>'+(cols.indexOf('photo')>=0?'<th>Foto</th>':'')+
         cols.filter(function(c){return c!=='photo'}).map(function(k){
           var c=INV_COLS.find(function(x){return x.k===k})||{label:k}; return '<th>'+c.label+'</th>';
@@ -5392,7 +5485,7 @@ function patchRenderInv(){
       }).join('')||'<tr><td colspan="'+(cols.length+2)+'" class="muted tiny" style="text-align:center;padding:18px">Nenhum item no inventário</td></tr>';
       // Re-vincula handlers
       tb.querySelectorAll('[data-cf]').forEach(function(c){c.onchange=function(){var it=state.invsom.find(function(x){return x.id===c.dataset.cf});if(it){it.conf=c.checked;save();window.renderInv()}}});
-      tb.querySelectorAll('[data-ed]').forEach(function(b){b.onclick=function(){var it=state.invsom.find(function(x){return x.id===b.dataset.ed}); if(!it)return; window.scrollTo({top:0,behavior:'smooth'}); /* edição usa fluxo original */ try{ var ev=new MouseEvent('click'); }catch(e){} /* delega: aciona writeForm se exposto */ if(window.__invEdit){window.__invEdit(it)} }});
+      tb.querySelectorAll('[data-ed]').forEach(function(b){b.onclick=function(){var it=state.invsom.find(function(x){return x.id===b.dataset.ed}); if(!it)return; if(typeof window.__invEdit==='function'){ window.__invEdit(it); } else { window.scrollTo({top:0,behavior:'smooth'}); } }});
       tb.querySelectorAll('[data-rm]').forEach(function(b){b.onclick=function(){if(!confirm('Remover item do inventário?'))return; state.invsom=state.invsom.filter(function(x){return x.id!==b.dataset.rm}); save(); window.renderInv()}});
     }
   };
@@ -5602,8 +5695,8 @@ async function readFileToText(file){
   }
   if(ext==='pdf'){
     var ab=await file.arrayBuffer();
-    if(!window['pdfjsLib']&&window['pdfjsLib']!==undefined){}
     var pdfjsLib=window.pdfjsLib||window['pdfjs-dist/build/pdf'];
+    if(!pdfjsLib){ throw new Error('Leitor de PDF indisponível (pdf.js não carregou)'); }
     if(pdfjsLib && pdfjsLib.GlobalWorkerOptions && !pdfjsLib.GlobalWorkerOptions.workerSrc){
       pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
     }
@@ -5663,6 +5756,111 @@ function showDetected(d){
   document.getElementById('mk47-xt-detect').style.display='block';
   document.getElementById('mk47-xt-apply').disabled=false;
 }
+/* ============================================================
+   AI API HUB (Gemini) — integração segura via proxy backend
+   ============================================================ */
+var AI_HUB_DEFAULT='https://ais-pre-h6667srqoumpisnqqnbgdb-372189901411.us-east5.run.app';
+function aiHubUrl(){ try{ return localStorage.getItem('mk47_ai_hub_url') || AI_HUB_DEFAULT; }catch(e){ return AI_HUB_DEFAULT; } }
+function aiHubEnabled(){ try{ return localStorage.getItem('mk47_ai_hub_off')!=='1'; }catch(e){ return true; } }
+function aiHubConfig(){
+  var cur=aiHubUrl();
+  var v=prompt('URL do AI API Hub (Gemini Proxy).\nDeixe em branco para DESLIGAR e usar apenas o parser local.\n\nAtual:', cur);
+  if(v===null) return;
+  v=v.trim();
+  try{
+    if(!v){ localStorage.setItem('mk47_ai_hub_off','1'); toast('IA Hub desligada — usando parser local.'); }
+    else { localStorage.setItem('mk47_ai_hub_url', v.replace(/\/+$/,'')); localStorage.removeItem('mk47_ai_hub_off'); toast('✓ IA Hub configurada: '+v); }
+  }catch(e){}
+}
+window.aiHubConfig=aiHubConfig;
+
+// Schema dinâmico baseado nos campos de cada contexto
+function buildHubSchema(ctx){
+  var props={}, req=[];
+  ctx.fields.forEach(function(f){
+    props[f.key]={type:'string', description:f.label};
+  });
+  return {type:'object', properties:props, required:req};
+}
+function buildHubPrompt(ctx, text){
+  var camposLista=ctx.fields.map(function(f){ return '- '+f.key+' ('+f.label+')'; }).join('\n');
+  return 'Extraia do TEXTO abaixo os seguintes campos (use string vazia "" para o que não estiver presente; NÃO invente dados):\n'+
+         camposLista+'\n\nResponda APENAS com JSON válido seguindo o schema fornecido.\n\n=== TEXTO ===\n'+text;
+}
+/* Tenta extrair um objeto JSON de qualquer string (com cercas ```json, texto extra, etc) */
+function _coerceJSON(x){
+  if(x==null) return null;
+  if(typeof x==='object') return x;
+  if(typeof x!=='string') return null;
+  var s=x.trim();
+  // remove cercas markdown
+  s=s.replace(/^```(?:json)?\s*/i,'').replace(/```\s*$/,'').trim();
+  try{ return JSON.parse(s); }catch(_){}
+  // pega 1º bloco { ... }
+  var m=s.match(/\{[\s\S]*\}/);
+  if(m){ try{ return JSON.parse(m[0]); }catch(_){} }
+  return null;
+}
+/* Procura objeto-resposta em qualquer chave aninhada conhecida */
+function _digHubData(j){
+  if(!j) return null;
+  var keys=['data','response','result','output','content','text','message','answer','json','payload'];
+  for(var i=0;i<keys.length;i++){
+    var v=j[keys[i]];
+    if(v!=null){
+      var c=_coerceJSON(v); if(c && typeof c==='object') return c;
+    }
+  }
+  // tenta no próprio objeto raiz (caso o backend devolva o JSON direto)
+  var clone={}; var any=false;
+  Object.keys(j).forEach(function(k){
+    if(['status','ok','error','meta','model','usage'].indexOf(k)<0){ clone[k]=j[k]; any=true; }
+  });
+  return any?clone:null;
+}
+async function aiHubExtract(ctx, text){
+  if(!aiHubEnabled()) return null;
+  var url=aiHubUrl(); if(!url) return null;
+  var sys='Você é o MENTOR IA do sistema MODESK OMEGA — motor regenerativo de extração e preenchimento para inventário da sala de som, requisições, pedidos de compra, movimentação de patrimônio, laudos de baixa e ordens de serviço de TI/Áudio/AV. Reconheça o que o usuário escreveu (texto livre, OCR, planilha, e-mail), normalize e devolva APENAS os campos solicitados em JSON válido. Regras: datas em DD/MM/AAAA; quantidades como número puro; nunca invente; quando faltar dado use "". Idioma: pt-BR.';
+  var prompt=buildHubPrompt(ctx, text||'');
+  var schemaStr=JSON.stringify(buildHubSchema(ctx));
+  // Tenta múltiplos formatos de corpo aceitos pelo proxy (compatibilidade)
+  var bodies=[
+    { systemInstruction:sys, promptTemplate:prompt, variables:{}, model:'gemini-2.5-flash', responseFormat:'json', jsonSchema:schemaStr },
+    { system:sys, prompt:prompt, model:'gemini-2.5-flash', responseFormat:'json', jsonSchema:schemaStr },
+    { systemInstruction:sys, prompt:prompt, model:'gemini-2.0-flash', responseFormat:'json' },
+    { messages:[{role:'system',content:sys},{role:'user',content:prompt}], model:'gemini-2.5-flash', responseFormat:'json' }
+  ];
+  var endpoints=['/api/v1/query','/api/v1/run/query','/api/v1/generate'];
+  var lastErr=null;
+  for(var ei=0; ei<endpoints.length; ei++){
+    for(var bi=0; bi<bodies.length; bi++){
+      var ctrl=new AbortController(); var to=setTimeout(function(){ctrl.abort()}, 30000);
+      try{
+        var r=await fetch(url+endpoints[ei],{
+          method:'POST',
+          headers:{'Content-Type':'application/json','Accept':'application/json'},
+          body:JSON.stringify(bodies[bi]),
+          signal:ctrl.signal
+        });
+        clearTimeout(to);
+        if(!r.ok){ lastErr='HTTP '+r.status+' em '+endpoints[ei]; if(r.status===404||r.status===405) break; continue; }
+        var j=await r.json().catch(function(){return null});
+        var data=_digHubData(j);
+        if(!data){ lastErr='Resposta sem JSON utilizável'; continue; }
+        Object.keys(data).forEach(function(k){ if(data[k]==null || String(data[k]).trim()==='') delete data[k]; });
+        if(Object.keys(data).length===0){ lastErr='IA não identificou campos'; continue; }
+        return data;
+      }catch(e){
+        lastErr=(e&&e.message)||String(e);
+      }finally{ clearTimeout(to); }
+    }
+  }
+  console.warn('[AI Hub] falhou:', lastErr);
+  try{ window.__mk47_lastHubErr=lastErr; }catch(_){}
+  return null;
+}
+
 async function analyze(){
   var txt=document.getElementById('mk47-xt-text').value||'';
   var f=document.getElementById('mk47-xt-file').files[0];
@@ -5672,11 +5870,26 @@ async function analyze(){
       var ft=await readFileToText(f);
       txt=(txt+'\n'+ft).trim();
     }
+    // 1) tenta IA Hub (Gemini via proxy seguro)
+    var d=null, viaIA=false;
+    if(aiHubEnabled() && txt){
+      setStatus('🧠 Consultando IA (Gemini Hub)...');
+      d=await aiHubExtract(XT.ctx, txt);
+      if(d && Object.keys(d).length){ viaIA=true; }
+    }
+    // 2) fallback / merge com parser local
     setStatus('Analisando...');
-    var d=extractFromText(txt);
+    var local=extractFromText(txt);
+    if(!d) d=local;
+    else { // merge: IA tem prioridade, heurística preenche lacunas
+      Object.keys(local).forEach(function(k){ if(d[k]==null||d[k]==='') d[k]=local[k]; });
+    }
     XT._raw=txt;
     showDetected(d);
-    setStatus('');
+    var msg = viaIA ? '<span style="color:#27d39f">✓ Mentor IA (Gemini) — '+Object.keys(d).length+' campos</span>'
+                    : (aiHubEnabled() ? '<span style="color:#ffb454">⚠ IA Hub indisponível ('+(window.__mk47_lastHubErr||'sem resposta')+') — usando parser local</span>'
+                                      : '<span class="muted">Parser local</span>');
+    setStatus(msg);
   }catch(e){
     console.error(e); setStatus(''); toast('Falha ao processar: '+(e.message||e));
   }
@@ -5697,6 +5910,7 @@ function applyExtract(){
 document.getElementById('mk47-xt-cancel').onclick=function(){document.getElementById('mk47-xt-bk').classList.remove('open')};
 document.getElementById('mk47-xt-analyze').onclick=analyze;
 document.getElementById('mk47-xt-apply').onclick=applyExtract;
+document.getElementById('mk47-xt-hub').onclick=aiHubConfig;
 document.getElementById('mk47-xt-drop').addEventListener('click',function(e){ if(e.target.tagName!=='INPUT') document.getElementById('mk47-xt-file').click(); });
 document.getElementById('mk47-xt-file').onchange=function(){
   var f=this.files[0]; if(f) document.getElementById('mk47-xt-fname').textContent='📎 '+f.name+' ('+(Math.round(f.size/1024))+' KB)';
@@ -5730,15 +5944,34 @@ function addExtractButton(targetSelector, ctxKey){
 
 function installButtons(){
   // Inventário Sala de Som — card "Adicionar / atualizar item"
-  var invCard=document.querySelector('section.pane[data-pane="invsom"] .card[style*="bg2"]') ||
-              Array.from(document.querySelectorAll('section.pane[data-pane="invsom"] .card')).find(function(c){return /Adicionar.*item/i.test(c.textContent)});
+  // O card foi movido para dentro do #modal-invsom pelo patch v4.8; procuramos em ambos os locais.
+  var invCard = (document.getElementById('inv-add') && document.getElementById('inv-add').closest('.card'))
+             || document.querySelector('#modal-invsom .card')
+             || document.querySelector('section.pane[data-pane="invsom"] .card[style*="bg2"]')
+             || Array.from(document.querySelectorAll('section.pane[data-pane="invsom"] .card, #modal-invsom .card')).find(function(c){return /Adicionar.*item/i.test(c.textContent)});
   if(invCard && !invCard.dataset.mk47btn){
     invCard.dataset.mk47btn='1';
     var b=document.createElement('button'); b.type='button'; b.className='mk47-extract-btn';
-    b.innerHTML='<span class="ic">🪄</span> Importar / Extrair';
+    b.innerHTML='<span class="ic">🪄</span> Importar / Extrair de PDF, Word, Excel, Imagem ou Texto';
     b.onclick=function(){ openExtract('invsom'); };
     var h=document.createElement('div'); h.className='mk47-form-hdr'; h.appendChild(b);
     invCard.insertBefore(h, invCard.firstChild);
+  }
+  // Também expõe o botão no cabeçalho da aba, para acesso direto sem abrir "Novo Item"
+  var invPaneHdr = document.querySelector('section.pane[data-pane="invsom"] .flex.between .flex')
+                || document.querySelector('section.pane[data-pane="invsom"] .flex.between');
+  if(invPaneHdr && !invPaneHdr.dataset.mk47btn){
+    invPaneHdr.dataset.mk47btn='1';
+    var bh=document.createElement('button'); bh.type='button'; bh.className='btn';
+    bh.style.marginRight='6px';
+    bh.innerHTML='🪄 Importar inteligente';
+    bh.title='Reconhecer texto livre, PDF, Word, Excel ou imagem e preencher o inventário automaticamente';
+    bh.onclick=function(){
+      var clr=document.getElementById('inv-clear'); if(clr) clr.click();
+      if(typeof openModal==='function'){ openModal('modal-invsom'); }
+      setTimeout(function(){ openExtract('invsom'); }, 50);
+    };
+    invPaneHdr.insertBefore(bh, invPaneHdr.firstChild);
   }
 
   // Requisição interna — card "Nova Requisição Interna"
@@ -5817,6 +6050,161 @@ document.addEventListener('click', function(){ setTimeout(installButtons, 80); }
 // Bind inicial do export do inventário (caso patchRenderInv não tenha sido chamado)
 setTimeout(function(){ try{ window.MK_INV_EXPORT && window.MK_INV_EXPORT.bind(); }catch(e){} }, 1500);
 
+/* ============================================================
+   🧠 MENTOR IA — assistente regenerativo global (Gemini Hub)
+   Comanda o site por linguagem natural: detecta o contexto,
+   abre o formulário certo, executa a IA e preenche.
+   ============================================================ */
+window.MentorIA = {
+  open: function(prefill){ openMentor(prefill||''); },
+  ask:  function(text, ctxKey){ return runMentor(text, ctxKey); }
+};
+
+var MENTOR_KEYWORDS = [
+  {k:'invsom',  rx:/invent[áa]rio|sala de som|equipamento da sala|cadastr(?:ar|e).*(?:item|equip)/i, label:'Inventário Sala de Som'},
+  {k:'itens',   rx:/lista pr[ée]via|item de compra|requisi[çc][aã]o pr[ée]via/i, label:'Lista Prévia'},
+  {k:'req',     rx:/requisi[çc][aã]o(?! pr[ée]via)/i, label:'Requisição Interna'},
+  {k:'ped',     rx:/pedido(?: de)? compra|or[çc]amento/i, label:'Pedido de Compra'},
+  {k:'mp',      rx:/movimenta[çc][aã]o|transfer[êe]ncia (?:de )?patrim[ôo]nio/i, label:'Movimentação de Patrimônio'},
+  {k:'ld',      rx:/laudo|baixa de patrim[ôo]nio/i, label:'Laudo de Baixa'},
+  {k:'mn',      rx:/manuten[çc][aã]o|os de servi[çc]o|ordem de servi[çc]o|reparo/i, label:'Manutenção / OS'}
+];
+function detectCtxFromText(t){
+  for(var i=0;i<MENTOR_KEYWORDS.length;i++) if(MENTOR_KEYWORDS[i].rx.test(t)) return MENTOR_KEYWORDS[i];
+  return null;
+}
+
+/* UI flutuante */
+function buildMentorUI(){
+  if(document.getElementById('mk47-mentor-fab')) return;
+  var css='#mk47-mentor-fab{position:fixed;right:18px;bottom:18px;z-index:9998;background:linear-gradient(135deg,#7c3aed,#27d39f);color:#fff;border:none;border-radius:50px;padding:12px 18px;font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,.35);cursor:pointer;display:flex;align-items:center;gap:8px;font-size:14px}'
+    +'#mk47-mentor-fab:hover{transform:translateY(-2px)}'
+    +'#mk47-mentor-bk{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.55);display:none;align-items:flex-end;justify-content:center;padding:20px}'
+    +'#mk47-mentor-bk.open{display:flex}'
+    +'#mk47-mentor-pn{background:#1a1f2e;color:#e8ecf3;border:1px solid #2a3142;border-radius:16px;width:100%;max-width:560px;max-height:80vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 16px 48px rgba(0,0,0,.5)}'
+    +'#mk47-mentor-pn .hd{padding:14px 16px;border-bottom:1px solid #2a3142;display:flex;justify-content:space-between;align-items:center;background:linear-gradient(135deg,#7c3aed22,#27d39f22)}'
+    +'#mk47-mentor-pn .hd b{font-size:15px}'
+    +'#mk47-mentor-pn .log{flex:1;overflow:auto;padding:12px 16px;font-size:13px;line-height:1.5}'
+    +'#mk47-mentor-pn .log .me{background:#2a3142;border-radius:10px;padding:8px 12px;margin:6px 0 6px auto;max-width:80%;white-space:pre-wrap}'
+    +'#mk47-mentor-pn .log .ai{background:#27d39f22;border-left:3px solid #27d39f;border-radius:10px;padding:8px 12px;margin:6px auto 6px 0;max-width:90%;white-space:pre-wrap}'
+    +'#mk47-mentor-pn .log .sys{color:#8a93a8;font-size:11px;text-align:center;margin:6px 0}'
+    +'#mk47-mentor-pn .ft{border-top:1px solid #2a3142;padding:10px;display:flex;gap:8px;align-items:flex-end}'
+    +'#mk47-mentor-pn textarea{flex:1;background:#0f1320;color:#e8ecf3;border:1px solid #2a3142;border-radius:10px;padding:9px 12px;resize:none;min-height:42px;max-height:120px;font-size:13px;font-family:inherit}'
+    +'#mk47-mentor-pn .send{background:#7c3aed;color:#fff;border:none;border-radius:10px;padding:10px 16px;cursor:pointer;font-weight:700}'
+    +'#mk47-mentor-pn .send:disabled{opacity:.5;cursor:not-allowed}'
+    +'#mk47-mentor-pn .chips{display:flex;flex-wrap:wrap;gap:6px;padding:8px 12px 0}'
+    +'#mk47-mentor-pn .chip{background:#2a3142;color:#cfd5e3;border:none;border-radius:20px;padding:5px 10px;font-size:11px;cursor:pointer}'
+    +'#mk47-mentor-pn .chip:hover{background:#3a4258}';
+  var st=document.createElement('style'); st.textContent=css; document.head.appendChild(st);
+
+  var fab=document.createElement('button'); fab.id='mk47-mentor-fab';
+  fab.innerHTML='🧠 <span>Mentor IA</span>';
+  fab.title='Assistente Gemini — diga em linguagem natural o que cadastrar';
+  fab.onclick=function(){ openMentor(''); };
+  document.body.appendChild(fab);
+
+  var bk=document.createElement('div'); bk.id='mk47-mentor-bk';
+  bk.innerHTML='<div id="mk47-mentor-pn">'
+    +'<div class="hd"><b>🧠 Mentor IA · Gemini</b>'
+      +'<div><button class="chip" id="mk47-mentor-cfg" title="Configurar Hub">⚙</button> '
+      +'<button class="chip" id="mk47-mentor-cl" title="Limpar">🗑</button> '
+      +'<button class="chip" id="mk47-mentor-x">✕</button></div></div>'
+    +'<div class="chips">'
+      +'<button class="chip" data-q="Cadastre no inventário da sala de som: microfone Shure SM58, 2 unidades, em bom estado, localização Palco">📦 Inventário</button>'
+      +'<button class="chip" data-q="Criar requisição interna de 10 pilhas AA tamanho médio para a sala de som">📝 Requisição</button>'
+      +'<button class="chip" data-q="Abrir pedido de compra para fornecedor JBL, 1 mesa Yamaha MG10XU, R$ 2300">🛒 Pedido</button>'
+      +'<button class="chip" data-q="Registrar manutenção: caixa JBL EON 615, defeito no woofer, parecer trocar alto-falante">🔧 OS</button>'
+    +'</div>'
+    +'<div class="log" id="mk47-mentor-log"><div class="sys">Olá! Sou o Mentor IA. Diga em linguagem natural o que deseja cadastrar — ex.: <i>"adicione 3 microfones Sennheiser e565 ao inventário, em ótimo estado"</i>. Eu identifico o formulário, consulto o Gemini e preencho automaticamente.</div></div>'
+    +'<div class="ft"><textarea id="mk47-mentor-in" placeholder="Diga ao Mentor o que fazer..." rows="1"></textarea>'
+    +'<button class="send" id="mk47-mentor-go">Enviar</button></div>'
+    +'</div>';
+  document.body.appendChild(bk);
+
+  bk.addEventListener('click', function(e){ if(e.target===bk) bk.classList.remove('open'); });
+  document.getElementById('mk47-mentor-x').onclick=function(){ bk.classList.remove('open'); };
+  document.getElementById('mk47-mentor-cfg').onclick=function(){ if(window.aiHubConfig) window.aiHubConfig(); };
+  document.getElementById('mk47-mentor-cl').onclick=function(){ document.getElementById('mk47-mentor-log').innerHTML=''; };
+  document.getElementById('mk47-mentor-go').onclick=function(){ sendMentor(); };
+  document.getElementById('mk47-mentor-in').addEventListener('keydown',function(e){
+    if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendMentor(); }
+  });
+  Array.prototype.forEach.call(bk.querySelectorAll('.chip[data-q]'), function(c){
+    c.onclick=function(){ document.getElementById('mk47-mentor-in').value=c.dataset.q; sendMentor(); };
+  });
+}
+function openMentor(prefill){
+  buildMentorUI();
+  document.getElementById('mk47-mentor-bk').classList.add('open');
+  var ta=document.getElementById('mk47-mentor-in');
+  if(prefill){ ta.value=prefill; }
+  setTimeout(function(){ ta.focus(); },100);
+}
+function mentorLog(role, html){
+  var log=document.getElementById('mk47-mentor-log'); if(!log) return;
+  var d=document.createElement('div'); d.className=role; d.innerHTML=html;
+  log.appendChild(d); log.scrollTop=log.scrollHeight;
+}
+async function sendMentor(){
+  var ta=document.getElementById('mk47-mentor-in');
+  var txt=(ta.value||'').trim(); if(!txt) return;
+  ta.value=''; mentorLog('me', escapeHTML(txt));
+  var btn=document.getElementById('mk47-mentor-go'); btn.disabled=true;
+  try{ await runMentor(txt, null); }
+  finally{ btn.disabled=false; }
+}
+async function runMentor(text, forcedCtxKey){
+  var match = forcedCtxKey ? {k:forcedCtxKey,label:(CONTEXTS[forcedCtxKey]||{}).title||forcedCtxKey} : detectCtxFromText(text);
+  if(!match){
+    mentorLog('ai','🤔 Não identifiquei o formulário. Mencione um destes: <b>inventário</b>, <b>lista prévia</b>, <b>requisição</b>, <b>pedido</b>, <b>movimentação</b>, <b>laudo</b> ou <b>manutenção</b>.');
+    return;
+  }
+  var ctx=CONTEXTS[match.k];
+  if(!ctx){ mentorLog('ai','⚠ Contexto "'+match.k+'" não encontrado.'); return; }
+  mentorLog('sys','→ Formulário: <b>'+ctx.title+'</b>');
+  if(!aiHubEnabled()){
+    mentorLog('ai','⚠ Mentor IA desligado. Abra ⚙ e configure a URL do Gemini Hub.');
+    return;
+  }
+  mentorLog('sys','🧠 Consultando Gemini...');
+  var data = await aiHubExtract(ctx, text);
+  if(!data || !Object.keys(data).length){
+    // tenta heurística local também
+    var loc=extractFromText(text);
+    if(loc && Object.keys(loc).length){ data=loc; mentorLog('sys','(IA indisponível — usei o parser local)'); }
+    else { mentorLog('ai','❌ Não consegui extrair campos. '+(window.__mk47_lastHubErr?'<br><small>'+escapeHTML(window.__mk47_lastHubErr)+'</small>':'')); return; }
+  }
+  // abre o formulário-alvo
+  try{
+    if(match.k==='invsom' && typeof openModal==='function'){
+      var clr=document.getElementById('inv-clear'); if(clr) clr.click();
+      openModal('modal-invsom');
+    }
+  }catch(_){}
+  // aplica no formulário ao vivo
+  var filled=0;
+  ctx.fields.forEach(function(f){
+    var el=document.getElementById(f.id); if(!el) return;
+    var v=data[f.key]; if(v==null||v==='') return;
+    el.value=v;
+    el.dispatchEvent(new Event('input',{bubbles:true}));
+    el.dispatchEvent(new Event('change',{bubbles:true}));
+    filled++;
+  });
+  // monta resumo
+  var resumo=ctx.fields.filter(function(f){return data[f.key]!=null && data[f.key]!==''})
+    .map(function(f){return '• <b>'+escapeHTML(f.label)+':</b> '+escapeHTML(String(data[f.key]));}).join('<br>');
+  if(filled>0){
+    mentorLog('ai','✅ Preenchi <b>'+filled+'</b> campos em <i>'+ctx.title+'</i>:<br>'+resumo+'<br><br><small>Revise e salve no formulário.</small>');
+  }else{
+    mentorLog('ai','⚠ A IA entendeu mas não encontrou os campos visíveis na tela. Abra o formulário de <i>'+ctx.title+'</i> manualmente; os dados extraídos:<br>'+resumo);
+  }
+}
+
+// Inicializa o FAB logo após o app montar
+setTimeout(buildMentorUI, 800);
+
 })();
 </script>
+
 
