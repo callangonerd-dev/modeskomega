@@ -1222,11 +1222,86 @@ function canDelete(it){return isGestor() || isTestItem(it)}
 window.isGestor=isGestor;window.canDelete=canDelete;window.isTestItem=isTestItem;
 
 let _cloudApplying=false,_cloudSaveTimer=null;
+/* ---------- IndexedDB p/ Inventário (sem limite prático de fotos) ---------- */
+const IDB_NAME='modesk_omega_idb', IDB_STORE='inventario', IDB_VER=1;
+function idbOpen(){
+  return new Promise((res,rej)=>{
+    const rq=indexedDB.open(IDB_NAME,IDB_VER);
+    rq.onupgradeneeded=()=>{ const db=rq.result; if(!db.objectStoreNames.contains(IDB_STORE)) db.createObjectStore(IDB_STORE,{keyPath:'id'}); };
+    rq.onsuccess=()=>res(rq.result); rq.onerror=()=>rej(rq.error);
+  });
+}
+async function idbSaveAllInv(list){
+  try{
+    const db=await idbOpen();
+    await new Promise((res,rej)=>{
+      const tx=db.transaction(IDB_STORE,'readwrite');
+      const st=tx.objectStore(IDB_STORE);
+      st.clear();
+      (list||[]).forEach(it=>{ try{ st.put(it); }catch(_){} });
+      tx.oncomplete=res; tx.onerror=()=>rej(tx.error); tx.onabort=()=>rej(tx.error);
+    });
+  }catch(e){ console.warn('[IDB] save inventario falhou',e); }
+}
+async function idbLoadAllInv(){
+  try{
+    const db=await idbOpen();
+    return await new Promise((res,rej)=>{
+      const tx=db.transaction(IDB_STORE,'readonly');
+      const rq=tx.objectStore(IDB_STORE).getAll();
+      rq.onsuccess=()=>res(rq.result||[]); rq.onerror=()=>rej(rq.error);
+    });
+  }catch(e){ console.warn('[IDB] load inventario falhou',e); return []; }
+}
+function invStamp(it){ return Number((it&&it.updatedAt)||(it&&it.ts)||0); }
+function mergeInventoryLists(localList, incomingList){
+  const byId=new Map();
+  (incomingList||[]).forEach(x=>{ if(x&&x.id) byId.set(x.id,x); });
+  (localList||[]).forEach(x=>{
+    if(!x||!x.id) return;
+    const old=byId.get(x.id);
+    if(!old || x.foto || invStamp(x)>=invStamp(old)){
+      const merged=Object.assign({},old||{},x);
+      if(!x.foto && old && old.foto) merged.foto=old.foto;
+      byId.set(x.id,merged);
+    }
+  });
+  return Array.from(byId.values()).sort((a,b)=>invStamp(b)-invStamp(a));
+}
+function compactInventoryForStorage(list){
+  return (list||[]).map(it=>{
+    const o=Object.assign({},it);
+    if(o.foto && String(o.foto).startsWith('data:image/')) o.foto=null;
+    return o;
+  });
+}
+let _inventoryIDBReady=false;
+function persistInventoryNow(){
+  clearTimeout(_saveInvTimer);
+  const list=state.inventario||[];
+  if(!_inventoryIDBReady && !list.length) return Promise.resolve();
+  return idbSaveAllInv(list);
+}
+window.idbSaveAllInv=idbSaveAllInv; window.idbLoadAllInv=idbLoadAllInv;
+window.persistInventoryNow=persistInventoryNow;
+
+let _saveInvTimer=null;
 function save(){
-  // Guard: nunca salvar antes do login/load (evita sobrescrever usuários cadastrados
-  // com o state em memória recém-inicializado e vazio).
   if(!window.currentUser && !state.__loaded){ return; }
-  try{localStorage.setItem(LS_KEY,JSON.stringify(state))}catch(e){}
+  clearTimeout(_saveInvTimer);
+  if(_inventoryIDBReady || (state.inventario||[]).length){
+    _saveInvTimer=setTimeout(()=>{ idbSaveAllInv(state.inventario||[]); },150);
+  }
+  try{
+    const clone=Object.assign({},state);
+    clone.inventario=compactInventoryForStorage(state.inventario||[]);
+    localStorage.setItem(LS_KEY,JSON.stringify(clone));
+  }catch(e){
+    if(e && (e.name==='QuotaExceededError' || String(e.message||'').toLowerCase().includes('quota'))){
+      try{ toast('Armazenamento local cheio. Exporte/limpe dados antigos.',5000);}catch(_){}
+      console.error('[SAVE] Quota excedida no localStorage',e);
+    } else { console.warn('[SAVE] erro',e); }
+  }
   if(!_cloudApplying) scheduleCloudStateSync();
 }
 
@@ -1237,9 +1312,9 @@ function scheduleCloudStateSync(){
     try{
       window.db.collection('modesk_omega_sync').doc('planilhas').set({
         itens:state.itens||[], reqs:state.reqs||[], pedidos:state.pedidos||[],
-        inventario:state.inventario||[], laudos:state.laudos||[], manut:state.manut||[],
+        inventario:compactInventoryForStorage(state.inventario||[]), laudos:state.laudos||[], manut:state.manut||[],
         eventos:state.eventos||[], updatedAt:new Date()
-      },{merge:true}).catch(()=>{});
+      },{merge:true}).catch(err=>{ console.warn('[CLOUD] inventário/listas não sincronizaram',err); });
     }catch(e){}
   },700);
 }
@@ -1254,9 +1329,34 @@ function publicUserProfile(u){
   };
 }
 function load(){
-  try{const v=localStorage.getItem(LS_KEY);if(v)Object.assign(state,JSON.parse(v))}catch(e){}
+  try{
+    const v=localStorage.getItem(LS_KEY);
+    if(v){
+      const parsed=JSON.parse(v);
+      const currentInv=Array.isArray(state.inventario)?state.inventario:[];
+      Object.assign(state,parsed);
+      if(currentInv.length && (!parsed.inventario || !parsed.inventario.length)){
+        state.inventario=currentInv;
+      }
+    }
+  }catch(e){}
   if(!Array.isArray(state.users)) state.users=[];
+  if(!Array.isArray(state.inventario)) state.inventario=[];
   state.__loaded=true;
+  (async()=>{
+    try{
+      const idbList=await idbLoadAllInv();
+      if(idbList && idbList.length){
+        state.inventario=mergeInventoryLists(state.inventario||[],idbList);
+        try{ if(typeof renderInventario==='function') renderInventario(); }catch(_){}
+      } else if((state.inventario||[]).length){
+        await idbSaveAllInv(state.inventario);
+      }
+    }catch(_){
+    }finally{
+      _inventoryIDBReady=true;
+    }
+  })();
   // seedDefaultUsers desativado: somente o gestor cadastra usuários
   // Migração v6.4: limpa usuários semeados anteriormente (uma única vez)
   try{
@@ -2278,9 +2378,15 @@ function renderInventario(){
   </tr>`).join('')||'<tr><td colspan="12" class="muted" style="text-align:center;padding:20px">Nenhum equipamento cadastrado.</td></tr>';
   tb.querySelectorAll('[data-inv-edit]').forEach(b=>b.onclick=()=>openInv(b.dataset.invEdit));
   tb.querySelectorAll('[data-inv-view]').forEach(b=>b.onclick=()=>openInvView(b.dataset.invView));
-  tb.querySelectorAll('[data-inv-del]').forEach(b=>b.onclick=()=>{if(!confirm('Excluir equipamento do inventário?'))return;state.inventario=state.inventario.filter(x=>x.id!==b.dataset.invDel);save();renderInventario()});
+  tb.querySelectorAll('[data-inv-del]').forEach(b=>b.onclick=()=>{if(!confirm('Excluir equipamento do inventário?'))return;state.inventario=state.inventario.filter(x=>x.id!==b.dataset.invDel);persistInventoryNow();save();renderInventario()});
   tb.querySelectorAll('[data-inv-check]').forEach(c=>c.onchange=()=>{const it=state.inventario.find(x=>x.id===c.dataset.invCheck);if(it){it.checked=c.checked;it.checkedAt=Date.now();save();}});
-  const note=$('inv-sync-note'); if(note) note.textContent=window.db?'☁️ planilha sincronizada':'☁️ modo local';
+  const note=$('inv-sync-note'); if(note){
+    const total=(state.inventario||[]).length;
+    const shown=rows.length;
+    const totQtd=(state.inventario||[]).reduce((a,i)=>a+(Number(i.qtd)||0),0);
+    const cloud=window.db?'☁️ planilha sincronizada':'☁️ modo local';
+    note.innerHTML=`<b>${shown}</b> exibidos · <b>${total}</b> itens cadastrados · <b>${totQtd}</b> unidades &nbsp;·&nbsp; ${cloud}`;
+  }
   tb.querySelectorAll('[data-inv-photo]').forEach(img=>img.onclick=()=>{const it=state.inventario.find(x=>x.id===img.dataset.invPhoto); if(it){openInvView(it.id)}});
   tb.querySelectorAll('[data-inv-photo-add]').forEach(b=>b.onclick=()=>openInv(b.dataset.invPhotoAdd));
 }
@@ -2324,6 +2430,7 @@ if($('inv-save'))$('inv-save').onclick=()=>{
   Object.assign(editingInv,{cat:$('inv-cat').value,patr:$('inv-patr').value,tag:$('inv-tag').value.trim()||'SEM FP',desc:$('inv-desc').value.trim(),qtd:Number($('inv-qtd').value)||1,st:$('inv-st').value,local:$('inv-local').value.trim(),obs:$('inv-obs').value.trim(),foto:($('inv-foto-prev').getAttribute('data-src')||editingInv.foto||null),updatedAt:Date.now()});
   if(!editingInv.desc){toast('Informe o equipamento');return}
   if(!state.inventario.find(x=>x.id===editingInv.id))state.inventario.unshift(editingInv);
+  persistInventoryNow();
   save();$('modal-inv').classList.remove('open');renderInventario();toast('Equipamento salvo na planilha');
 };
 if($('inv-send-buy'))$('inv-send-buy').onclick=()=>{
@@ -2775,7 +2882,7 @@ if($('ia-send'))$('ia-send').onclick=()=>{
   if(dest==='auto') dest=iaRows.some(r=>r.patrimonio)?'inventario':'compras';
   if(dest==='inventario'){
     iaRows.forEach(r=>state.inventario.unshift({id:uid('INV'),cat:'Som',patr:r.patrimonio?'Sim':'Não',tag:r.patrimonio||'SEM FP',desc:r.desc||r.equipamento||'Item importado',qtd:Number(r.qtd)||1,st:'OK',local:'Auditório',obs:[r.nf,r.valor].filter(Boolean).join(' · '),checked:false,ts:Date.now(),origem:'Importação Inteligente'}));
-    save();renderInventario();toast('Enviado para Inventário Sala de Som');
+    persistInventoryNow();save();renderInventario();toast('Enviado para Inventário Sala de Som');
   }else if(dest==='laudos'){
     iaRows.forEach(r=>state.laudos.unshift({id:uid('LD'),tag:r.patrimonio||'SEM FP',eq:r.desc||'Item importado',defeito:'Importado para avaliação',sol:'Pendente de parecer técnico',ts:Date.now()}));
     save();renderLaudos();toast('Enviado para Laudos de Baixa');
@@ -3078,10 +3185,14 @@ function applyCloudPlanilhas(data){
   if(!data) return;
   if(!window.currentUser && !state.__loaded) return; // não sobrescrever LS antes do login
   _cloudApplying=true;
-  ['itens','reqs','pedidos','inventario','laudos','manut','eventos'].forEach(k=>{
+  ['itens','reqs','pedidos','laudos','manut','eventos'].forEach(k=>{
     if(Array.isArray(data[k])) state[k]=data[k];
   });
-  try{localStorage.setItem(LS_KEY,JSON.stringify(state))}catch(e){}
+  if(Array.isArray(data.inventario)){
+    state.inventario=mergeInventoryLists(state.inventario||[],data.inventario||[]);
+    try{ persistInventoryNow(); }catch(_){}
+  }
+  try{ save(); }catch(e){}
   _cloudApplying=false;
   try{renderItens&&renderItens()}catch(e){}
   try{renderReqs&&renderReqs()}catch(e){}
@@ -6444,7 +6555,7 @@ aside.sidebar{background:var(--bg1)!important;backdrop-filter:none!important;-we
   };
   // Bootstrap: se existe cópia no IDB e localStorage está vazio (após limpeza), restaura
   (function restore(){
-    var candidates = ['modesk_state_v6','modesk.state','modesk_state','state','MODESK_STATE','modesk_users_v64'];
+    var candidates = ['modesk_omega_v44','modesk_state_v6','modesk.state','modesk_state','state','MODESK_STATE','modesk_users_v64'];
     candidates.forEach(function(k){
       idbGet(k).then(function(v){
         if(v && !_lsGet(k)){
