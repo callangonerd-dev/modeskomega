@@ -739,7 +739,7 @@ table.tbl { display: table; min-width: 0; }
           <div class="tiny muted" id="inv-sync-note">☁️ aguardando sincronização</div>
         </div>
         <div class="tbl-wrap"><table class="tbl" id="tbl-inv"><thead><tr>
-          <th><input type="checkbox" id="inv-all"/></th><th>Conferido</th><th>Categoria</th><th>Patrimônio</th><th>Equipamento</th><th>Tipo</th><th>Qtd</th><th>Status</th><th>Local</th><th>Obs.</th><th>Ações</th>
+          <th><input type="checkbox" id="inv-all"/></th><th>Conferido</th><th>Categoria</th><th>Patrimônio</th><th>Equipamento</th><th>Foto</th><th>Tipo</th><th>Qtd</th><th>Status</th><th>Local</th><th>Obs.</th><th>Ações</th>
         </tr></thead><tbody></tbody></table></div>
       </div>
     </section>
@@ -1127,6 +1127,7 @@ table.tbl { display: table; min-width: 0; }
     <div class="field"><label>Status</label><select id="inv-st"><option>OK</option><option>Inservível</option><option>Faltando</option><option>Manutenção</option></select></div>
     <div class="field"><label>Local</label><input id="inv-local" placeholder="Ex.: Rack técnico / Auditório"/></div>
   </div>
+  <div class="field"><label>Foto do Equipamento</label><div id="inv-foto-drop" class="filmora-up" style="padding:10px" tabindex="0"><input id="inv-foto-file" type="file" accept="image/png,image/jpeg,image/jpg,image/webp,image/gif,image/bmp,image/svg+xml,image/*" style="display:none"/><div class="fm-body" style="align-items:center;gap:10px"><img id="inv-foto-prev" alt="" style="display:none;max-width:120px;max-height:90px;border-radius:8px;object-fit:cover;border:1px solid var(--line-2)"/><div class="fm-txt"><p class="fm-title" style="margin:0">Clique, arraste ou cole (Ctrl+V) uma imagem</p><div class="fm-hint"><span class="fm-pill">PNG · JPG · JPEG · WEBP · GIF</span><span id="inv-foto-info">nenhuma imagem</span></div></div><button type="button" class="btn sm warn" id="inv-foto-clear" style="display:none">Remover</button></div></div></div>
   <div class="field"><label>Observações</label><textarea id="inv-obs" placeholder="Condição física, acessórios, cabos, fonte etc."></textarea></div>
   <div class="flex between">
     <button class="btn ghost" data-close>Cancelar</button>
@@ -2252,6 +2253,7 @@ function openInv(id){
   $('inv-st').value=editingInv.st||'OK';
   $('inv-local').value=editingInv.local||'Auditório';
   $('inv-obs').value=editingInv.obs||'';
+  setInvFotoPreview(editingInv.foto||'');
   $('modal-inv').classList.add('open');
 }
 function renderInventario(){
@@ -2264,24 +2266,60 @@ function renderInventario(){
     <td>${escapeHTML(i.cat||'-')}</td>
     <td>${escapeHTML(i.tag||'SEM FP')}</td>
     <td>${escapeHTML(i.desc||'-')}</td>
+    <td>${i.foto?`<img src="${escapeHTML(i.foto)}" alt="" style="width:44px;height:44px;object-fit:cover;border-radius:6px;cursor:pointer" data-inv-photo="${escapeHTML(i.id)}"/>`:`<button class="btn sm" data-inv-photo-add="${escapeHTML(i.id)}" title="Adicionar foto">📷</button>`}</td>
     <td><span class="badge ${i.patr==='Sim'?'acc':'semfp'}">${i.patr==='Sim'?'Patrimoniado':'Não patrimoniado'}</span></td>
     <td>${Number(i.qtd)||1}</td>
     <td><span class="badge ${i.st==='OK'?'ok':i.st==='Faltando'||i.st==='Inservível'?'err':'warn'}">${escapeHTML(i.st||'OK')}</span></td>
     <td>${escapeHTML(i.local||'-')}</td>
     <td class="tiny">${escapeHTML(i.obs||'-')}</td>
-    <td><div class="flex" style="gap:4px"><button class="btn sm" data-inv-edit="${escapeHTML(i.id)}">✎</button><button class="btn sm warn" data-inv-del="${escapeHTML(i.id)}">🗑</button></div></td>
-  </tr>`).join('')||'<tr><td colspan="11" class="muted" style="text-align:center;padding:20px">Nenhum equipamento cadastrado.</td></tr>';
+    <td><div class="flex" style="gap:4px"><button class="btn sm" data-inv-view="${escapeHTML(i.id)}" title="Visualizar item">👁</button><button class="btn sm" data-inv-edit="${escapeHTML(i.id)}">✎</button><button class="btn sm warn" data-inv-del="${escapeHTML(i.id)}">🗑</button></div></td>
+  </tr>`).join('')||'<tr><td colspan="12" class="muted" style="text-align:center;padding:20px">Nenhum equipamento cadastrado.</td></tr>';
   tb.querySelectorAll('[data-inv-edit]').forEach(b=>b.onclick=()=>openInv(b.dataset.invEdit));
+  tb.querySelectorAll('[data-inv-view]').forEach(b=>b.onclick=()=>openInvView(b.dataset.invView));
   tb.querySelectorAll('[data-inv-del]').forEach(b=>b.onclick=()=>{if(!confirm('Excluir equipamento do inventário?'))return;state.inventario=state.inventario.filter(x=>x.id!==b.dataset.invDel);save();renderInventario()});
   tb.querySelectorAll('[data-inv-check]').forEach(c=>c.onchange=()=>{const it=state.inventario.find(x=>x.id===c.dataset.invCheck);if(it){it.checked=c.checked;it.checkedAt=Date.now();save();}});
   const note=$('inv-sync-note'); if(note) note.textContent=window.db?'☁️ planilha sincronizada':'☁️ modo local';
+  tb.querySelectorAll('[data-inv-photo]').forEach(img=>img.onclick=()=>{const it=state.inventario.find(x=>x.id===img.dataset.invPhoto); if(it){openInvView(it.id)}});
+  tb.querySelectorAll('[data-inv-photo-add]').forEach(b=>b.onclick=()=>openInv(b.dataset.invPhotoAdd));
+}
+function openInvView(id){
+  const it=(state.inventario||[]).find(x=>x.id===id); if(!it) return;
+  let bk=$('modal-inv-view');
+  if(!bk){
+    bk=document.createElement('div'); bk.className='modal-back'; bk.id='modal-inv-view';
+    bk.innerHTML='<div class="modal" style="max-width:640px"><div class="flex between" style="align-items:center;margin-bottom:10px"><h3 style="margin:0">👁 Visualizar Equipamento</h3><button class="btn sm" id="inv-view-close">Fechar</button></div><div id="inv-view-body"></div></div>';
+    document.body.appendChild(bk);
+    bk.addEventListener('click',e=>{if(e.target===bk)bk.classList.remove('open')});
+    $('inv-view-close').onclick=()=>bk.classList.remove('open');
+  }
+  const st=it.st||'OK';
+  const stCls=st==='OK'?'ok':(st==='Faltando'||st==='Inservível')?'err':'warn';
+  const patrCls=it.patr==='Sim'?'acc':'semfp';
+  const patrTxt=it.patr==='Sim'?'Patrimoniado':'Não patrimoniado';
+  $('inv-view-body').innerHTML=`
+    <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-start">
+      <div style="flex:0 0 200px">
+        ${it.foto?`<img src="${escapeHTML(it.foto)}" alt="" style="width:100%;max-width:200px;border-radius:10px;border:1px solid var(--line-2);object-fit:cover;cursor:zoom-in" onclick="window.open('${escapeHTML(it.foto)}','_blank')"/>`:`<div class="muted tiny" style="padding:30px;border:1px dashed var(--line-2);border-radius:10px;text-align:center">Sem foto</div>`}
+      </div>
+      <div style="flex:1;min-width:220px;display:grid;grid-template-columns:1fr 1fr;gap:8px 14px">
+        <div><div class="tiny muted">Categoria</div><div>${escapeHTML(it.cat||'-')}</div></div>
+        <div><div class="tiny muted">Patrimônio</div><div><span class="badge ${patrCls}">${patrTxt}</span></div></div>
+        <div><div class="tiny muted">FP / TAG</div><div>${escapeHTML(it.tag||'SEM FP')}</div></div>
+        <div><div class="tiny muted">Status</div><div><span class="badge ${stCls}">${escapeHTML(st)}</span></div></div>
+        <div style="grid-column:1/-1"><div class="tiny muted">Equipamento</div><div>${escapeHTML(it.desc||'-')}</div></div>
+        <div><div class="tiny muted">Quantidade</div><div>${Number(it.qtd)||1}</div></div>
+        <div><div class="tiny muted">Local</div><div>${escapeHTML(it.local||'-')}</div></div>
+        <div style="grid-column:1/-1"><div class="tiny muted">Observações</div><div>${escapeHTML(it.obs||'-')}</div></div>
+      </div>
+    </div>`;
+  bk.classList.add('open');
 }
 if($('inv-new-open'))$('inv-new-open').onclick=()=>openInv(null);
 if($('inv-filter-cat'))$('inv-filter-cat').onchange=renderInventario;
 if($('inv-filter-st'))$('inv-filter-st').onchange=renderInventario;
 if($('inv-all'))$('inv-all').onchange=e=>document.querySelectorAll('[data-inv-sel]').forEach(c=>c.checked=e.target.checked);
 if($('inv-save'))$('inv-save').onclick=()=>{
-  Object.assign(editingInv,{cat:$('inv-cat').value,patr:$('inv-patr').value,tag:$('inv-tag').value.trim()||'SEM FP',desc:$('inv-desc').value.trim(),qtd:Number($('inv-qtd').value)||1,st:$('inv-st').value,local:$('inv-local').value.trim(),obs:$('inv-obs').value.trim(),updatedAt:Date.now()});
+  Object.assign(editingInv,{cat:$('inv-cat').value,patr:$('inv-patr').value,tag:$('inv-tag').value.trim()||'SEM FP',desc:$('inv-desc').value.trim(),qtd:Number($('inv-qtd').value)||1,st:$('inv-st').value,local:$('inv-local').value.trim(),obs:$('inv-obs').value.trim(),foto:($('inv-foto-prev').getAttribute('data-src')||editingInv.foto||null),updatedAt:Date.now()});
   if(!editingInv.desc){toast('Informe o equipamento');return}
   if(!state.inventario.find(x=>x.id===editingInv.id))state.inventario.unshift(editingInv);
   save();$('modal-inv').classList.remove('open');renderInventario();toast('Equipamento salvo na planilha');
@@ -2309,6 +2347,115 @@ if($('inv-export'))$('inv-export').onclick=()=>{
   const blob=new Blob([lines.join('\n')],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob);
   const a=document.createElement('a');a.href=url;a.download='inventario-sala-de-som.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),5000);
 };
+
+/* ---- INVENTARIO FOTO helpers (paste/upload) ---- */
+function setInvFotoPreview(dataUrl){
+  const img=$('inv-foto-prev'), info=$('inv-foto-info'), clr=$('inv-foto-clear');
+  if(!img) return;
+  if(dataUrl){ img.src=dataUrl; img.setAttribute('data-src',dataUrl); img.style.display='inline-block'; if(info)info.textContent='imagem anexada'; if(clr)clr.style.display='inline-flex'; }
+  else{ img.removeAttribute('src'); img.removeAttribute('data-src'); img.style.display='none'; if(info)info.textContent='nenhuma imagem'; if(clr)clr.style.display='none'; }
+}
+function fileToDataURL(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file)})}
+function isImageFile(f){return f && f.type && f.type.startsWith('image/')}
+async function handleImageInput(fileOrItem){
+  const file = fileOrItem instanceof File ? fileOrItem : (fileOrItem && fileOrItem.getAsFile ? fileOrItem.getAsFile() : null);
+  if(!file){toast('Nenhuma imagem detectada');return null}
+  if(!isImageFile(file)){toast('Formato não suportado');return null}
+  if(file.size>8*1024*1024){toast('Imagem muito grande (máx 8MB)');return null}
+  return await fileToDataURL(file);
+}
+(function(){
+  const drop=$('inv-foto-drop'), file=$('inv-foto-file'), clr=$('inv-foto-clear');
+  if(!drop) return;
+  drop.addEventListener('click',e=>{ if(e.target===clr) return; file.click(); });
+  drop.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){e.preventDefault();file.click()} });
+  file.addEventListener('change',async e=>{ const f=e.target.files&&e.target.files[0]; if(!f)return; const d=await handleImageInput(f); if(d)setInvFotoPreview(d); file.value=''; });
+  drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('drag')});
+  drop.addEventListener('dragleave',()=>drop.classList.remove('drag'));
+  drop.addEventListener('drop',async e=>{e.preventDefault();drop.classList.remove('drag'); const f=e.dataTransfer.files&&e.dataTransfer.files[0]; if(!f)return; const d=await handleImageInput(f); if(d)setInvFotoPreview(d);});
+  if(clr) clr.addEventListener('click',e=>{e.stopPropagation();setInvFotoPreview('')});
+  // Paste (Ctrl+V) when modal is open
+  document.addEventListener('paste',async e=>{
+    if(!$('modal-inv').classList.contains('open')) return;
+    const items=e.clipboardData&&e.clipboardData.items; if(!items) return;
+    for(const it of items){ if(it.type&&it.type.startsWith('image/')){ const f=it.getAsFile(); if(f){ const d=await handleImageInput(f); if(d){setInvFotoPreview(d); toast('Imagem colada'); e.preventDefault(); return;} } } }
+  });
+})();
+
+/* ---- Toolbar: adicionar foto a itens selecionados (upload/paste) ---- */
+function openInvPhotoFor(id){
+  const it=(state.inventario||[]).find(x=>x.id===id); if(!it){toast('Item não encontrado');return}
+  window._invPhotoTargets=[id];
+  showInvPhotoPicker('Foto para: '+(it.desc||it.tag||'equipamento'));
+}
+function showInvPhotoPicker(title){
+  let bk=$('modal-inv-photo');
+  if(!bk){
+    bk=document.createElement('div');
+    bk.className='modal-back'; bk.id='modal-inv-photo';
+    bk.innerHTML='<div class="modal" style="max-width:520px">'
+      +'<button class="close" data-close>×</button>'
+      +'<h3 id="invph-title">Adicionar Foto</h3>'
+      +'<p class="muted tiny" id="invph-sub">Cole com Ctrl+V, arraste ou selecione um arquivo de imagem.</p>'
+      +'<div id="invph-drop" class="filmora-up" tabindex="0">'
+      +'<input id="invph-file" type="file" accept="image/png,image/jpeg,image/jpg,image/webp,image/gif,image/bmp,image/svg+xml,image/*" style="display:none"/>'
+      +'<div class="fm-body" style="align-items:center;gap:10px">'
+      +'<img id="invph-prev" alt="" style="display:none;max-width:160px;max-height:120px;border-radius:8px;object-fit:cover;border:1px solid var(--line-2)"/>'
+      +'<div class="fm-txt"><p class="fm-title">Clique, arraste ou cole (Ctrl+V)</p>'
+      +'<div class="fm-hint"><span class="fm-pill">PNG · JPG · JPEG · WEBP · GIF</span><span id="invph-info">nenhuma imagem</span></div></div>'
+      +'</div></div>'
+      +'<div class="flex between" style="margin-top:12px">'
+      +'<button class="btn ghost" data-close>Cancelar</button>'
+      +'<button class="btn primary" id="invph-save" disabled>💾 Aplicar Foto</button>'
+      +'</div></div>';
+    document.body.appendChild(bk);
+    bk.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>bk.classList.remove('open'));
+    const drop=bk.querySelector('#invph-drop'), file=bk.querySelector('#invph-file'), prev=bk.querySelector('#invph-prev'), info=bk.querySelector('#invph-info'), btnSave=bk.querySelector('#invph-save');
+    let dataUrl=null;
+    const setPrev=d=>{dataUrl=d; if(d){prev.src=d;prev.style.display='inline-block';info.textContent='imagem pronta';btnSave.disabled=false} else {prev.removeAttribute('src');prev.style.display='none';info.textContent='nenhuma imagem';btnSave.disabled=true}};
+    drop.addEventListener('click',()=>file.click());
+    drop.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();file.click()}});
+    file.addEventListener('change',async e=>{const f=e.target.files&&e.target.files[0]; if(!f)return; const d=await handleImageInput(f); if(d)setPrev(d); file.value='';});
+    drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('drag')});
+    drop.addEventListener('dragleave',()=>drop.classList.remove('drag'));
+    drop.addEventListener('drop',async e=>{e.preventDefault();drop.classList.remove('drag'); const f=e.dataTransfer.files&&e.dataTransfer.files[0]; if(!f)return; const d=await handleImageInput(f); if(d)setPrev(d);});
+    document.addEventListener('paste',async e=>{
+      if(!bk.classList.contains('open')) return;
+      const items=e.clipboardData&&e.clipboardData.items; if(!items) return;
+      for(const it of items){ if(it.type&&it.type.startsWith('image/')){ const f=it.getAsFile(); if(f){ const d=await handleImageInput(f); if(d){setPrev(d); toast('Imagem colada'); e.preventDefault(); return;} } } }
+    });
+    btnSave.onclick=()=>{
+      if(!dataUrl){toast('Selecione uma imagem');return}
+      const ids=window._invPhotoTargets||[]; let n=0;
+      ids.forEach(id=>{const it=state.inventario.find(x=>x.id===id); if(it){it.foto=dataUrl; it.updatedAt=Date.now(); n++;}});
+      save && (btnSave.disabled=true);
+      setPrev(null);
+      bk.classList.remove('open');
+      window._invPhotoTargets=[];
+      window.save && window.save();
+      try{ (typeof save2==='function') && save2(); }catch(_){}
+      try{ (window.state && typeof window.save==='function') && window.save(); }catch(_){}
+      // call top-level save() defined in the app
+      try{ save(); }catch(_){}
+      renderInventario();
+      toast(n+' foto(s) aplicada(s)');
+    };
+    // fallback: also try global save()
+    btnSave.addEventListener('click',()=>{ try{ if(typeof window.save==='function'){} }catch(_){} });
+  }
+  $('invph-title').textContent=title||'Adicionar Foto';
+  const prev=$('invph-prev'), info=$('invph-info'), sv=$('invph-save');
+  prev.removeAttribute('src'); prev.style.display='none'; info.textContent='nenhuma imagem'; sv.disabled=true;
+  bk.classList.add('open');
+}
+if($('inv-photo-open'))$('inv-photo-open').onclick=()=>{
+  const ids=[...document.querySelectorAll('[data-inv-sel]:checked')].map(c=>c.dataset.invSel);
+  if(!ids.length){toast('Marque um ou mais equipamentos na tabela para anexar foto');return}
+  window._invPhotoTargets=ids;
+  showInvPhotoPicker('Adicionar foto a '+ids.length+' equipamento(s)');
+};
+
+
 
 /* ==================== IMPORTACAO INTELIGENTE ==================== */
 let iaRows=[],iaRaw='',iaCollapsed={},iaDrag=null;
