@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
-<title>MODESK OMEGA v6.3 — Refatorado</title>
+<title>MODESK OMEGA v6.4 — Patched (grade PDF · scroll isolado · IDB · itens cadastrados)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
@@ -6289,6 +6289,268 @@ aside.sidebar{background:var(--bg1)!important;backdrop-filter:none!important;-we
 })();
 </script>
 
+
+
+<!-- ================= MODESK PATCH v6.4 (Lovable) ================= -->
+<style id="modesk-patch-css">
+/* Scroll das tabelas isolado (roda do mouse não vaza pra tela toda) */
+.tbl-wrap{overscroll-behavior:contain !important;max-height:70vh}
+.tbl-wrap:hover{scroll-snap-type:none}
+#modesk-fab{position:fixed;right:18px;bottom:18px;z-index:9998;background:linear-gradient(135deg,#5b8cff,#3b82f6);
+  color:#fff;border:0;border-radius:999px;padding:12px 16px;font-weight:700;cursor:pointer;
+  box-shadow:0 10px 30px rgba(59,130,246,.45);display:inline-flex;gap:8px;align-items:center;font-size:13px}
+#modesk-fab:hover{filter:brightness(1.08)}
+#ic-modal{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:99999;display:none;padding:20px;place-items:center}
+#ic-modal.open{display:grid}
+#ic-modal .box{background:var(--bg1);color:var(--fg);border-radius:14px;max-width:1100px;width:100%;
+  max-height:88vh;display:flex;flex-direction:column;border:1px solid var(--line-2);overflow:hidden}
+#ic-modal header{padding:14px 18px;border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+#ic-modal header h3{margin:0;flex:1}
+#ic-modal input.q{padding:8px 10px;border-radius:8px;border:1px solid var(--line-2);background:var(--bg2);color:var(--fg);min-width:220px}
+#ic-modal .close{background:#ff5d6b;color:#fff;border:0;border-radius:8px;padding:8px 12px;cursor:pointer;font-weight:600}
+#ic-modal .body{overflow:auto;flex:1;padding:0}
+#ic-modal table{width:100%;border-collapse:collapse;font-size:13px}
+#ic-modal th,#ic-modal td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+#ic-modal th{background:var(--bg2);position:sticky;top:0;color:var(--fg-mut);font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+#ic-modal img.thumb{width:44px;height:44px;object-fit:cover;border-radius:6px;border:1px solid var(--line-2);cursor:zoom-in}
+.badge-src{padding:2px 8px;border-radius:6px;color:#fff;font-size:11px;font-weight:700;white-space:nowrap}
+.badge-src.inv{background:#3b82f6}
+.badge-src.lst{background:#27d39f}
+.lp-paste-hint{padding:8px 12px;margin:8px 0;border:1px dashed var(--line-2);border-radius:10px;
+  color:var(--fg-mut);font-size:12px;background:var(--bg2)}
+</style>
+
+<div id="ic-modal" role="dialog" aria-modal="true">
+  <div class="box">
+    <header>
+      <h3>📚 Itens Cadastrados <span id="ic-count" style="color:var(--fg-mut);font-weight:400;font-size:13px"></span></h3>
+      <input class="q" id="ic-q" placeholder="Buscar por nome, tag, fonte, status..."/>
+      <select id="ic-src" class="q" style="min-width:auto">
+        <option value="">Todas as fontes</option>
+        <option value="inv">Inventário Sala de Som</option>
+        <option value="lst">Lista Prévia</option>
+      </select>
+      <button class="close" id="ic-close">Fechar</button>
+    </header>
+    <div class="body"><table><thead>
+      <tr><th>Fonte</th><th>Foto</th><th>Descrição</th><th>Tag / Detalhes</th><th>Qtd</th><th>Status</th></tr>
+    </thead><tbody id="ic-body"></tbody></table></div>
+  </div>
+</div>
+
+<button id="modesk-fab" type="button" title="Ver todos os itens cadastrados (inventário + lista prévia)">
+  📚 Itens Cadastrados <span id="modesk-fab-count" style="background:rgba(255,255,255,.22);padding:2px 8px;border-radius:999px;font-size:11px">0</span>
+</button>
+
+<script>
+/* ================= MODESK PATCH v6.4 (Lovable) =================
+   1) PDF: força grade forte (linhas + colunas visíveis) em TODOS os autoTable
+   2) Scroll das planilhas isolado (roda do mouse não interfere na tela toda)
+   3) IndexedDB como storage principal (sem limite de ~5MB do localStorage)
+      + espelho opcional para o Apps Script (DRIVE_ENDPOINT) já existente
+   4) Botão flutuante "Itens Cadastrados" que reúne tudo (inventário + lista prévia)
+   5) Ctrl+V cola foto direto no item da Lista Prévia em edição
+================================================================== */
+(function(){
+  'use strict';
+
+  // -------- 1) Grade forte em TODOS os autoTable ----------
+  function patchAutoTable(){
+    if(!window.jspdf || !window.jspdf.jsPDF || !window.jspdf.jsPDF.API || !window.jspdf.jsPDF.API.autoTable){
+      return setTimeout(patchAutoTable, 80);
+    }
+    var API = window.jspdf.jsPDF.API;
+    if(API.autoTable.__modeskPatched) return;
+    var orig = API.autoTable;
+    var wrapped = function(opts){
+      opts = opts || {};
+      // Sempre grade visível
+      opts.theme = 'grid';
+      opts.styles = Object.assign({
+        lineColor:[15,23,42], lineWidth:0.35, textColor:20,
+        fontSize:9, cellPadding:2.5, overflow:'linebreak', valign:'middle'
+      }, opts.styles||{});
+      opts.headStyles = Object.assign({
+        fillColor:[15,40,90], textColor:255, fontStyle:'bold',
+        lineColor:[15,23,42], lineWidth:0.45, halign:'center'
+      }, opts.headStyles||{});
+      opts.bodyStyles = Object.assign({
+        lineColor:[60,72,96], lineWidth:0.3, textColor:20
+      }, opts.bodyStyles||{});
+      opts.alternateRowStyles = Object.assign({
+        fillColor:[240,244,251]
+      }, opts.alternateRowStyles||{});
+      opts.tableLineColor = [15,23,42];
+      opts.tableLineWidth = 0.5;
+      return orig.call(this, opts);
+    };
+    wrapped.__modeskPatched = true;
+    API.autoTable = wrapped;
+    console.log('[MODESK] autoTable com grade forte aplicado.');
+  }
+  patchAutoTable();
+
+  // -------- 2) Scroll das tabelas isolado (mouse wheel contido) ----------
+  document.addEventListener('wheel', function(e){
+    var wrap = e.target.closest && e.target.closest('.tbl-wrap');
+    if(!wrap) return;
+    var dy = e.deltaY;
+    var canScrollDown = (wrap.scrollTop + wrap.clientHeight) < (wrap.scrollHeight - 1);
+    var canScrollUp   = wrap.scrollTop > 0;
+    if((dy > 0 && canScrollDown) || (dy < 0 && canScrollUp)){
+      e.stopPropagation();
+    }
+  }, {passive:true, capture:true});
+
+  // -------- 3) IndexedDB storage (sem limite prático) + espelho Apps Script ----------
+  var DB='modesk_db', STORE='kv';
+  function idbOpen(){return new Promise(function(res,rej){
+    var r=indexedDB.open(DB,1);
+    r.onupgradeneeded=function(){r.result.createObjectStore(STORE)};
+    r.onsuccess=function(){res(r.result)};
+    r.onerror=function(){rej(r.error)};
+  });}
+  function idbSet(k,v){return idbOpen().then(function(db){return new Promise(function(res,rej){
+    var tx=db.transaction(STORE,'readwrite');
+    tx.objectStore(STORE).put(v,k);
+    tx.oncomplete=function(){res()}; tx.onerror=function(){rej(tx.error)};
+  })});}
+  function idbGet(k){return idbOpen().then(function(db){return new Promise(function(res,rej){
+    var tx=db.transaction(STORE,'readonly');
+    var rq=tx.objectStore(STORE).get(k);
+    rq.onsuccess=function(){res(rq.result)}; rq.onerror=function(){rej(rq.error)};
+  })});}
+  window.__modeskIDB = {set:idbSet, get:idbGet};
+
+  // Intercepta localStorage.setItem: quando estoura quota, salva em IDB automaticamente
+  var _lsSet = localStorage.setItem.bind(localStorage);
+  var _lsGet = localStorage.getItem.bind(localStorage);
+  localStorage.setItem = function(k, v){
+    try { return _lsSet(k, v); }
+    catch(err){
+      console.warn('[MODESK] localStorage cheio, salvando em IndexedDB:', k, err && err.name);
+      idbSet(k, v).catch(function(e){console.error('[MODESK] IDB falhou', e)});
+      try { _lsSet(k+'__idb', '1'); } catch(_){}
+      // Espelha em Apps Script se disponível
+      try {
+        var url = window.DRIVE_ENDPOINT || window.APPSCRIPT_URL;
+        if(url && k.length < 200){
+          fetch(url, {method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain'},
+            body: JSON.stringify({action:'saveState', key:k, size:(v||'').length, ts:Date.now()})}).catch(function(){});
+        }
+      } catch(_){}
+      return;
+    }
+  };
+  // Bootstrap: se existe cópia no IDB e localStorage está vazio (após limpeza), restaura
+  (function restore(){
+    var candidates = ['modesk_state_v6','modesk.state','modesk_state','state','MODESK_STATE','modesk_users_v64'];
+    candidates.forEach(function(k){
+      idbGet(k).then(function(v){
+        if(v && !_lsGet(k)){
+          try{ _lsSet(k, v); console.log('[MODESK] restaurado do IDB:', k); }catch(_){}
+        }
+      }).catch(function(){});
+    });
+  })();
+
+  // -------- 4) Botão + modal "Itens Cadastrados" ----------
+  function collectAll(){
+    var s = window.state || {};
+    var out = [];
+    (s.inventario||[]).forEach(function(i){
+      out.push({
+        src:'inv', srcLabel:'Inventário Sala de Som',
+        desc: i.desc || i.equipamento || i.eq || '-',
+        tag: [i.cat, i.tag, i.local, i.obs].filter(Boolean).join(' · ') || '-',
+        qtd: i.qtd || 1,
+        st: i.st || 'OK',
+        foto: (i.foto && (i.foto.data||i.foto.url)) || i.foto || null
+      });
+    });
+    (s.itens||[]).forEach(function(i){
+      out.push({
+        src:'lst', srcLabel:'Lista Prévia',
+        desc: i.desc || '-',
+        tag: [i.det, i.tipo, i.origem].filter(Boolean).join(' · ') || '-',
+        qtd: i.qtd || 1,
+        st: i.st || 'Pendente',
+        foto: (i.foto && (i.foto.data||i.foto.url)) || null
+      });
+    });
+    return out;
+  }
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]});}
+  function renderIC(){
+    var all = collectAll();
+    var q = (document.getElementById('ic-q').value||'').toLowerCase().trim();
+    var src = document.getElementById('ic-src').value;
+    var rows = all.filter(function(r){
+      if(src && r.src!==src) return false;
+      if(!q) return true;
+      return [r.srcLabel,r.desc,r.tag,r.st].join(' ').toLowerCase().indexOf(q)>=0;
+    });
+    document.getElementById('ic-count').textContent = '· '+rows.length+' de '+all.length;
+    var body = document.getElementById('ic-body');
+    body.innerHTML = rows.length ? rows.map(function(r){
+      return '<tr>'
+       + '<td><span class="badge-src '+r.src+'">'+esc(r.srcLabel)+'</span></td>'
+       + '<td>'+(r.foto?'<img class="thumb" src="'+esc(r.foto)+'" onclick="window.open(this.src,\'_blank\')"/>':'—')+'</td>'
+       + '<td><b>'+esc(r.desc)+'</b></td>'
+       + '<td style="color:var(--fg-mut);font-size:12px">'+esc(r.tag)+'</td>'
+       + '<td style="text-align:center">'+esc(r.qtd)+'</td>'
+       + '<td>'+esc(r.st)+'</td>'
+       + '</tr>';
+    }).join('') : '<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--fg-mut)">Nenhum item cadastrado ainda</td></tr>';
+    var fabC = document.getElementById('modesk-fab-count');
+    if(fabC) fabC.textContent = all.length;
+  }
+  function openIC(){ renderIC(); document.getElementById('ic-modal').classList.add('open'); }
+  function closeIC(){ document.getElementById('ic-modal').classList.remove('open'); }
+  document.getElementById('modesk-fab').onclick = openIC;
+  document.getElementById('ic-close').onclick = closeIC;
+  document.getElementById('ic-modal').addEventListener('click', function(e){
+    if(e.target.id==='ic-modal') closeIC();
+  });
+  document.getElementById('ic-q').addEventListener('input', renderIC);
+  document.getElementById('ic-src').addEventListener('change', renderIC);
+  // atualiza contador do FAB a cada 3s
+  setInterval(function(){ try{ var fabC=document.getElementById('modesk-fab-count'); if(fabC) fabC.textContent = collectAll().length; }catch(_){} }, 3000);
+  window.openItensCadastrados = openIC;
+
+  // -------- 5) Ctrl+V cola foto no item da lista prévia em edição ----------
+  document.addEventListener('paste', function(e){
+    var modal = document.getElementById('modal-it');
+    if(!modal) return;
+    var visible = modal.offsetParent !== null;
+    if(!visible) return;
+    var items = e.clipboardData && e.clipboardData.items;
+    if(!items) return;
+    for(var i=0;i<items.length;i++){
+      var it = items[i];
+      if(it.type && it.type.indexOf('image/')===0){
+        var file = it.getAsFile();
+        if(!file) continue;
+        var input = document.getElementById('it-foto');
+        if(input){
+          try{
+            var dt = new DataTransfer();
+            dt.items.add(file);
+            input.files = dt.files;
+            input.dispatchEvent(new Event('change', {bubbles:true}));
+            if(window.toast) window.toast('📷 Foto colada da área de transferência');
+          }catch(err){ console.warn(err); }
+        }
+        e.preventDefault();
+        break;
+      }
+    }
+  });
+
+  console.log('[MODESK] Patch v6.4 aplicado: PDF-grid, scroll-isolado, IDB-storage, itens-cadastrados, paste-foto.');
+})();
+</script>
+<!-- =============== FIM MODESK PATCH v6.4 =============== -->
 
 </body>
 </html>
