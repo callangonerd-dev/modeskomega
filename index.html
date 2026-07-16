@@ -11,6 +11,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.6.0/jspdf.plugin.autotable.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -726,7 +727,8 @@ table.tbl { display: table; min-width: 0; }
           <div class="flex" style="gap:8px;flex-wrap:wrap">
             <button class="btn sm primary" id="inv-new-open">＋ Novo Equipamento</button>
             <button class="btn sm" id="inv-send-buy">🛒 Enviar selecionados para compras</button>
-            <button class="btn sm" id="inv-export">📊 Exportar CSV</button>
+            <button class="btn sm" id="inv-export">📊 Exportar XLSX</button>
+            <button class="btn sm" id="inv-export-pdf">📄 Exportar PDF</button>
           </div>
         </div>
         <div class="flex" style="margin-bottom:10px;gap:8px;flex-wrap:wrap">
@@ -2341,11 +2343,85 @@ if($('inv-send-buy'))$('inv-send-buy').onclick=()=>{
   try{ if(typeof go==='function') go('compras'); }catch(_){}
   toast(n+' item(ns) enviados para Lista Prévia de Compras');
 };
-if($('inv-export'))$('inv-export').onclick=()=>{
-  const header=['categoria','patrimonio','equipamento','tipo','quantidade','status','local','observacoes'];
-  const lines=[header.join(';')].concat((state.inventario||[]).map(i=>[i.cat,i.tag,i.desc,i.patr,i.qtd,i.st,i.local,i.obs].map(v=>'"'+String(v||'').replace(/"/g,'""')+'"').join(';')));
-  const blob=new Blob([lines.join('\n')],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob);
-  const a=document.createElement('a');a.href=url;a.download='inventario-sala-de-som.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),5000);
+function invGetFotoExt(dataUrl){
+  const m=/^data:image\/([a-zA-Z0-9+.-]+);base64,/.exec(dataUrl||'');
+  if(!m) return null;
+  let ext=m[1].toLowerCase();
+  if(ext==='jpeg') ext='jpeg';
+  else if(ext==='jpg') ext='jpeg';
+  else if(ext==='png') ext='png';
+  else if(ext==='gif') ext='gif';
+  else return null; // exceljs supports png/jpeg/gif
+  return ext;
+}
+if($('inv-export'))$('inv-export').onclick=async()=>{
+  const items=state.inventario||[];
+  if(!window.ExcelJS){ toast('Biblioteca ExcelJS não carregada'); return; }
+  const wb=new ExcelJS.Workbook();
+  const ws=wb.addWorksheet('Inventário');
+  ws.columns=[
+    {header:'Categoria',key:'cat',width:14},
+    {header:'Patrimônio',key:'tag',width:16},
+    {header:'Equipamento',key:'desc',width:32},
+    {header:'FP/TAG',key:'patr',width:14},
+    {header:'Quantidade',key:'qtd',width:12},
+    {header:'Status',key:'st',width:14},
+    {header:'Local',key:'local',width:18},
+    {header:'Observações',key:'obs',width:28},
+    {header:'Foto',key:'foto',width:22},
+  ];
+  ws.getRow(1).font={bold:true};
+  items.forEach((i,idx)=>{
+    const row=ws.addRow({cat:i.cat||'',tag:i.tag||'',desc:i.desc||'',patr:i.patr||'',qtd:i.qtd||'',st:i.st||'',local:i.local||'',obs:i.obs||'',foto:''});
+    const rowNum=idx+2;
+    ws.getRow(rowNum).height=90;
+    const ext=invGetFotoExt(i.foto);
+    if(ext){
+      try{
+        const b64=i.foto.split(',')[1];
+        const imgId=wb.addImage({base64:b64,extension:ext});
+        ws.addImage(imgId,{tl:{col:8.1,row:rowNum-1+0.05},ext:{width:110,height:110}});
+      }catch(e){ console.warn('img',e); }
+    }
+  });
+  const buf=await wb.xlsx.writeBuffer();
+  const blob=new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='inventario-sala-de-som.xlsx';a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),5000);
+  toast('Planilha XLSX exportada com fotos');
+};
+if($('inv-export-pdf'))$('inv-export-pdf').onclick=()=>{
+  const items=state.inventario||[];
+  if(!window.jspdf){ toast('jsPDF indisponível'); return; }
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({unit:'mm',format:'a4',orientation:'landscape'});
+  doc.setFontSize(14); doc.text('Inventário · Sala de Som',14,14);
+  doc.setFontSize(9); doc.text('Emitido em '+new Date().toLocaleString('pt-BR'),14,20);
+  const head=[['Categoria','Patrimônio','Equipamento','FP/TAG','Qtd','Status','Local','Observações','Foto']];
+  const body=items.map(i=>[i.cat||'',i.tag||'',i.desc||'',i.patr||'',String(i.qtd||''),i.st||'',i.local||'',i.obs||'','']);
+  doc.autoTable({
+    head, body, startY:24, styles:{fontSize:8,cellPadding:2,valign:'middle',minCellHeight:22},
+    headStyles:{fillColor:[30,41,59]},
+    columnStyles:{8:{cellWidth:26}},
+    didDrawCell:(data)=>{
+      if(data.section==='body' && data.column.index===8){
+        const it=items[data.row.index];
+        if(it && it.foto){
+          try{
+            const fmt=/^data:image\/(png|jpeg|jpg)/i.exec(it.foto);
+            const type=fmt?fmt[1].toUpperCase().replace('JPG','JPEG'):'PNG';
+            const size=20;
+            const x=data.cell.x+(data.cell.width-size)/2;
+            const y=data.cell.y+(data.cell.height-size)/2;
+            doc.addImage(it.foto,type,x,y,size,size);
+          }catch(e){ console.warn('pdf img',e); }
+        }
+      }
+    }
+  });
+  doc.save('inventario-sala-de-som.pdf');
+  toast('PDF exportado com fotos');
 };
 
 /* ---- INVENTARIO FOTO helpers (paste/upload) ---- */
