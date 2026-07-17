@@ -1041,8 +1041,12 @@ table.tbl { display: table; min-width: 0; }
       <span class="muted tiny">📎 Confira manualmente os itens conforme o documento anexo. A inserção é individual.</span>
     </div>
   </div>
-  <div class="field"><label>Itens vinculados (Lista Prévia)</label>
-    <div id="rq-checklist" style="max-height:200px;overflow:auto;border:1px solid var(--line);padding:8px;border-radius:8px;background:var(--bg2)"></div>
+  <div class="field"><label>Itens vinculados (Lista Prévia) <span class="tiny muted">· clique no 📷 para anexar foto do item</span></label>
+    <div id="rq-checklist" style="max-height:220px;overflow:auto;border:1px solid var(--line);padding:8px;border-radius:8px;background:var(--bg2)"></div>
+  </div>
+  <div class="field"><label>Fotos dos itens (adicionais) <span class="tiny muted">· múltiplas · até 2MB cada</span></label>
+    <input id="rq-fotos" type="file" accept="image/*" multiple/>
+    <div id="rq-fotos-prev" class="flex" style="gap:6px;flex-wrap:wrap;margin-top:8px"></div>
   </div>
   <div class="flex between">
     <button class="btn ghost" data-close>Cancelar</button>
@@ -1067,6 +1071,10 @@ table.tbl { display: table; min-width: 0; }
   <div class="field"><label>Status</label><select id="pd-st"><option>Em Trânsito</option><option>Aguardando</option><option>Entregue</option><option>Cancelado</option></select></div>
   <div class="field"><label>Anexo (PDF, XLSX, DOCX, JPG, PNG · até 25MB)</label>
     <input id="pd-file" type="file" accept=".pdf,.xlsx,.xls,.docx,.doc,.csv,.jpg,.jpeg,.png"/>
+  </div>
+  <div class="field"><label>Fotos dos itens <span class="tiny muted">· múltiplas · até 2MB cada</span></label>
+    <input id="pd-fotos" type="file" accept="image/*" multiple/>
+    <div id="pd-fotos-prev" class="flex" style="gap:6px;flex-wrap:wrap;margin-top:8px"></div>
   </div>
   <div class="flex between">
     <button class="btn ghost" data-close>Cancelar</button>
@@ -2097,8 +2105,40 @@ $('rq-search').onclick=()=>{
 function renderReqChecklist(){
   const cont=$('rq-checklist');
   const pend=state.itens.filter(i=>i.st==='Pendente');
-  cont.innerHTML=pend.map(i=>`<label style="display:flex;gap:6px;padding:4px 0;font-size:12.5px"><input type="checkbox" value="${i.id}"/> <b>${escapeHTML(i.id)}</b> · ${escapeHTML(i.desc)} <span class="muted">(qtd ${i.qtd})</span></label>`).join('')||'<div class="muted tiny">Nenhum item pendente.</div>';
+  cont.innerHTML=pend.map(i=>`<div class="flex" style="gap:6px;align-items:center;padding:4px 0;font-size:12.5px;border-bottom:1px dashed var(--line)">
+    <label class="flex" style="gap:6px;flex:1;cursor:pointer"><input type="checkbox" value="${i.id}"/> <b>${escapeHTML(i.id)}</b> · ${escapeHTML(i.desc)} <span class="muted">(qtd ${i.qtd})</span></label>
+    ${i.foto?`<img src="${i.foto.data}" title="${escapeHTML(i.foto.name||'foto')}" style="width:28px;height:28px;object-fit:cover;border-radius:5px;border:1px solid var(--line-2);cursor:pointer" data-rq-img="${i.id}"/>`:''}
+    <label class="btn sm" title="Anexar/alterar foto deste item" style="cursor:pointer;padding:2px 8px">📷<input type="file" accept="image/*" data-rq-itfoto="${i.id}" style="display:none"/></label>
+  </div>`).join('')||'<div class="muted tiny">Nenhum item pendente.</div>';
+  cont.querySelectorAll('[data-rq-itfoto]').forEach(inp=>{
+    inp.onchange=async e=>{
+      const f=e.target.files[0]; if(!f) return;
+      if(f.size>2*1024*1024){ toast('Foto deve ter até 2MB'); e.target.value=''; return; }
+      const it=state.itens.find(x=>x.id===inp.dataset.rqItfoto); if(!it) return;
+      try{ it.foto=await window.uploadAnexoDrive(f); }
+      catch(_){ it.foto=await readAnexoResiliente(f); }
+      save(); renderItens && renderItens(); renderReqChecklist();
+      toast('📷 Foto anexada ao item '+it.id);
+    };
+  });
+  cont.querySelectorAll('[data-rq-img]').forEach(im=>im.onclick=()=>{const it=state.itens.find(x=>x.id===im.dataset.rqImg);if(it&&it.foto)window.open(it.foto.url||it.foto.data,'_blank')});
 }
+/* Preview de fotos extras da requisição interna */
+window._rqExtraFotos=[];
+(function(){
+  const inp=document.getElementById('rq-fotos'), prev=document.getElementById('rq-fotos-prev');
+  if(!inp||!prev) return;
+  inp.addEventListener('change',async ()=>{
+    for(const f of Array.from(inp.files||[])){
+      if(f.size>2*1024*1024){ toast('Foto "'+f.name+'" ignorada (>2MB)'); continue; }
+      let ph; try{ ph=await window.uploadAnexoDrive(f); }catch(_){ ph=await readAnexoResiliente(f); }
+      window._rqExtraFotos.push(ph);
+    }
+    inp.value='';
+    prev.innerHTML=window._rqExtraFotos.map((ph,idx)=>`<div style="position:relative"><img src="${ph.data}" style="width:52px;height:52px;object-fit:cover;border-radius:6px;border:1px solid var(--line-2)"/><button type="button" data-rmfoto="${idx}" title="Remover" style="position:absolute;top:-6px;right:-6px;background:var(--err);color:#fff;border:0;border-radius:50%;width:18px;height:18px;font-size:11px;cursor:pointer;line-height:1">×</button></div>`).join('');
+    prev.querySelectorAll('[data-rmfoto]').forEach(b=>b.onclick=()=>{ window._rqExtraFotos.splice(+b.dataset.rmfoto,1); inp.dispatchEvent(new Event('change')); });
+  });
+})();
 /* Tenta enviar ao Drive; se falhar (CORS/rede), faz fallback p/ Base64 local — assim "Salvar" nunca trava. */
 async function readAnexoResiliente(file){
   try { return await window.uploadAnexoDrive(file); }
@@ -2122,12 +2162,14 @@ $('rq-save').onclick=async()=>{
     catch(e){ toast('⚠ Falha ao processar anexo: '+e.message); }
   }
   const prev=state.reqs.find(r=>r.num===num);
-  const rq={tipo:$('rq-tipo').value,num,data,sol:$('rq-sol').value.trim(),desc:$('rq-desc').value,itens:ids,anexo:anexo||(prev&&prev.anexo)||null,ts:Date.now(),st:'Aberta'};
-  if(!ids.length && !anexo){toast('Selecione itens ou anexe documento');return}
+  const fotosExtras=(window._rqExtraFotos||[]).slice();
+  const rq={tipo:$('rq-tipo').value,num,data,sol:$('rq-sol').value.trim(),desc:$('rq-desc').value,itens:ids,anexo:anexo||(prev&&prev.anexo)||null,fotos:fotosExtras.length?fotosExtras:((prev&&prev.fotos)||[]),ts:Date.now(),st:'Aberta'};
+  if(!ids.length && !anexo && !fotosExtras.length){toast('Selecione itens, anexe documento ou fotos');return}
   const i=state.reqs.findIndex(r=>r.num===num);if(i>=0)state.reqs[i]=rq;else state.reqs.unshift(rq);
   state.itens.forEach(it=>{if(ids.includes(it.id)){it.st='Incluído em Req.';it.req=num}});
-  save();renderReqs();renderReqChecklist();toast('Requisição salva');
+  save();renderReqs();renderReqChecklist();toast('Requisição salva'+(fotosExtras.length?' · '+fotosExtras.length+' foto(s) anexada(s)':''));
   $('rq-num').value='';$('rq-desc').value='';$('rq-sol').value='';$('rq-file').value='';
+  window._rqExtraFotos=[]; const rqPrev=document.getElementById('rq-fotos-prev'); if(rqPrev) rqPrev.innerHTML='';
   try{ $('modal-rq').classList.remove('open'); }catch(_){}
 };
 
@@ -2251,7 +2293,8 @@ function renderReqs(){
              </tr>`).join('')}</tbody>
            </table>`
         : `<div class="muted tiny" style="padding:6px">Esta requisição não possui itens vinculados.</div>`;
-      rows.push(`<tr class="rq-expand" data-exp="${escapeHTML(r.num)}"><td colspan="7" style="background:var(--bg2);padding:10px 14px;border-top:1px dashed var(--line-2)">${inner}</td></tr>`);
+      const fotosExtra=(r.fotos||[]).length?`<div style="margin-top:8px"><div class="tiny muted" style="margin-bottom:4px">📷 Fotos adicionais dos itens (${r.fotos.length})</div><div class="flex" style="gap:6px;flex-wrap:wrap">${r.fotos.map(ph=>`<img src="${ph.data}" title="${escapeHTML(ph.name||'foto')}" style="width:52px;height:52px;object-fit:cover;border-radius:6px;border:1px solid var(--line-2);cursor:pointer" data-fzoom="${escapeHTML(ph.url||ph.data)}"/>`).join('')}</div></div>`:'';
+      rows.push(`<tr class="rq-expand" data-exp="${escapeHTML(r.num)}"><td colspan="7" style="background:var(--bg2);padding:10px 14px;border-top:1px dashed var(--line-2)">${inner}${fotosExtra}</td></tr>`);
     }
   });
   tb.innerHTML = rows.join('') || '<tr><td colspan="7" class="muted" style="text-align:center;padding:20px">Sem requisições.</td></tr>';
@@ -2263,6 +2306,7 @@ function renderReqs(){
   tb.querySelectorAll('[data-anx]').forEach(b=>b.onclick=()=>{const r=state.reqs.find(x=>x.num===b.dataset.anx);if(r&&r.anexo){ if(r.anexo.url){ window.open(r.anexo.url,'_blank'); } else if(r.anexo.data){ const a=document.createElement('a');a.href=r.anexo.data;a.download=r.anexo.name;a.click(); } }});
   tb.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{if(!confirm('Excluir requisição '+b.dataset.del+'?'))return;state.reqs=state.reqs.filter(r=>r.num!==b.dataset.del);save();renderReqs()});
   tb.querySelectorAll('[data-img]').forEach(im=>im.onclick=()=>{const it=state.itens.find(x=>x.id===im.dataset.img);if(it&&it.foto)window.open(it.foto.url||it.foto.data,'_blank')});
+  tb.querySelectorAll('[data-fzoom]').forEach(im=>im.onclick=()=>window.open(im.dataset.fzoom,'_blank'));
   tb.querySelectorAll('[data-est02]').forEach(b=>b.onclick=()=>{
     const num=b.dataset.est02;
     try{ $('pd-req').value=num; }catch(_){}
@@ -2273,16 +2317,34 @@ function renderReqs(){
 }
 
 /* ==================== PEDIDOS DE COMPRA ==================== */
+/* Preview de fotos dos itens no pedido de compra */
+window._pdExtraFotos=[];
+(function(){
+  const inp=document.getElementById('pd-fotos'), prev=document.getElementById('pd-fotos-prev');
+  if(!inp||!prev) return;
+  inp.addEventListener('change',async ()=>{
+    for(const f of Array.from(inp.files||[])){
+      if(f.size>2*1024*1024){ toast('Foto "'+f.name+'" ignorada (>2MB)'); continue; }
+      let ph; try{ ph=await window.uploadAnexoDrive(f); }catch(_){ ph=await readAnexoResiliente(f); }
+      window._pdExtraFotos.push(ph);
+    }
+    inp.value='';
+    prev.innerHTML=window._pdExtraFotos.map((ph,idx)=>`<div style="position:relative"><img src="${ph.data}" style="width:52px;height:52px;object-fit:cover;border-radius:6px;border:1px solid var(--line-2)"/><button type="button" data-rmpdfoto="${idx}" title="Remover" style="position:absolute;top:-6px;right:-6px;background:var(--err);color:#fff;border:0;border-radius:50%;width:18px;height:18px;font-size:11px;cursor:pointer;line-height:1">×</button></div>`).join('');
+    prev.querySelectorAll('[data-rmpdfoto]').forEach(b=>b.onclick=()=>{ window._pdExtraFotos.splice(+b.dataset.rmpdfoto,1); inp.dispatchEvent(new Event('change')); });
+  });
+})();
 $('pd-save').onclick=async()=>{
   const num=$('pd-num').value.trim();if(!num){toast('Nº Controle EST02 obrigatório');return}
   const req=$('pd-req').value;if(!req){toast('Vincule uma Requisição Interna');return}
   let anexo=null; const fEl=$('pd-file'); const f=fEl&&fEl.files&&fEl.files[0];
   if(f){ if(f.size>25*1024*1024){toast('Anexo deve ter até 25MB');return} try{ anexo=await readAnexoResiliente(f); }catch(e){ toast('Falha ao processar anexo: '+e.message); } }
   const prev=state.pedidos.find(p=>p.num===num);
-  const pd={num,data:$('pd-data').value||todayISO(),req,forn:$('pd-forn').value,prev:$('pd-prev').value,st:$('pd-st').value,anexo:anexo||(prev&&prev.anexo)||null,ts:Date.now()};
+  const fotosExtras=(window._pdExtraFotos||[]).slice();
+  const pd={num,data:$('pd-data').value||todayISO(),req,forn:$('pd-forn').value,prev:$('pd-prev').value,st:$('pd-st').value,anexo:anexo||(prev&&prev.anexo)||null,fotos:fotosExtras.length?fotosExtras:((prev&&prev.fotos)||[]),ts:Date.now()};
   const i=state.pedidos.findIndex(p=>p.num===num);if(i>=0)state.pedidos[i]=pd;else state.pedidos.unshift(pd);
-  save();renderPedidos();toast('Requisição de Compra salva');
+  save();renderPedidos();toast('Requisição de Compra salva'+(fotosExtras.length?' · '+fotosExtras.length+' foto(s)':''));
   $('pd-num').value='';$('pd-forn').value='';$('pd-prev').value=''; if(fEl) fEl.value='';
+  window._pdExtraFotos=[]; const pdPrev=document.getElementById('pd-fotos-prev'); if(pdPrev) pdPrev.innerHTML='';
   try{ $('modal-pd').classList.remove('open'); }catch(_){}
 };
 function renderPedidos(){
@@ -2322,7 +2384,8 @@ function renderPedidos(){
              </tr>`).join('')}</tbody>
            </table>`
         : `<div class="muted tiny" style="padding:6px">Sem itens vinculados à requisição interna.</div>`;
-      rows.push(`<tr class="pd-expand" data-exp="${escapeHTML(p.num)}"><td colspan="8" style="background:var(--bg2);padding:10px 14px;border-top:1px dashed var(--line-2)">${inner}</td></tr>`);
+      const pdFotosExtra=(p.fotos||[]).length?`<div style="margin-top:8px"><div class="tiny muted" style="margin-bottom:4px">📷 Fotos dos itens (${p.fotos.length})</div><div class="flex" style="gap:6px;flex-wrap:wrap">${p.fotos.map(ph=>`<img src="${ph.data}" title="${escapeHTML(ph.name||'foto')}" style="width:52px;height:52px;object-fit:cover;border-radius:6px;border:1px solid var(--line-2);cursor:pointer" data-fzoom="${escapeHTML(ph.url||ph.data)}"/>`).join('')}</div></div>`:'';
+      rows.push(`<tr class="pd-expand" data-exp="${escapeHTML(p.num)}"><td colspan="8" style="background:var(--bg2);padding:10px 14px;border-top:1px dashed var(--line-2)">${inner}${pdFotosExtra}</td></tr>`);
     }
   });
   tb.innerHTML = rows.join('') || '<tr><td colspan="8" class="muted" style="text-align:center;padding:20px">Sem requisições de compra.</td></tr>';
@@ -2333,6 +2396,7 @@ function renderPedidos(){
   tb.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{if(!confirm('Excluir requisição de compra '+b.dataset.del+'?'))return;state.pedidos=state.pedidos.filter(p=>p.num!==b.dataset.del);save();renderPedidos()});
   tb.querySelectorAll('[data-anx]').forEach(b=>b.onclick=()=>{const p=state.pedidos.find(x=>x.num===b.dataset.anx);if(p&&p.anexo){ if(p.anexo.url){ window.open(p.anexo.url,'_blank'); } else if(p.anexo.data){ const a=document.createElement('a');a.href=p.anexo.data;a.download=p.anexo.name||'anexo';a.click(); } }});
   tb.querySelectorAll('[data-img]').forEach(im=>im.onclick=()=>{const it=state.itens.find(x=>x.id===im.dataset.img);if(it&&it.foto)window.open(it.foto.url||it.foto.data,'_blank')});
+  tb.querySelectorAll('[data-fzoom]').forEach(im=>im.onclick=()=>window.open(im.dataset.fzoom,'_blank'));
   tb.querySelectorAll('[data-recv]').forEach(b=>b.onclick=()=>{
     const p=state.pedidos.find(x=>x.num===b.dataset.recv); if(!p) return;
     p.st='Entregue'; p.recvAt=Date.now();
