@@ -449,6 +449,8 @@ table.tbl { display: table; min-width: 0; }
 
       <div class="cat">Compras</div>
       <button data-tab="compras"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/><path d="M2 3h3l2.4 12.2a2 2 0 0 0 2 1.6h8.8a2 2 0 0 0 2-1.6L22 7H6"/></svg></span>Compras (Lista · Req · Pedido)</button>
+      <button data-tab="biblioteca"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 4h6v16H4z"/><path d="M14 4h6v16h-6z"/><path d="M4 10h16"/></svg></span>Biblioteca de Itens</button>
+
 
       <div class="cat">Sistema</div>
       <button data-tab="config"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></span>Configurações</button>
@@ -795,7 +797,33 @@ table.tbl { display: table; min-width: 0; }
       </div>
     </section>
 
-    <!-- IMPORTACAO INTELIGENTE -->
+    <!-- BIBLIOTECA DE ITENS -->
+    <section class="pane" data-pane="biblioteca">
+      <div class="card">
+        <div class="flex between" style="margin-bottom:10px;gap:10px;flex-wrap:wrap">
+          <div>
+            <h3 style="margin:0">📚 Biblioteca de Itens</h3>
+            <p class="muted tiny" style="margin:4px 0 0">Catálogo unificado compilado a partir da Lista Prévia, Requisições, Inventário e cadastros manuais. Ao adicionar um novo item em qualquer módulo, ele passa a existir aqui automaticamente.</p>
+          </div>
+          <div class="flex" style="gap:8px;flex-wrap:wrap">
+            <button class="btn sm primary" id="bib-new-open">＋ Novo Item na Biblioteca</button>
+            <button class="btn sm" id="bib-send-lista">🛒 Enviar selecionados para Lista Prévia</button>
+          </div>
+        </div>
+        <div class="flex" style="margin-bottom:10px;gap:8px;flex-wrap:wrap">
+          <input id="bib-filter-q" placeholder="Buscar nome, detalhes, categoria..." style="background:var(--bg2);border:1px solid var(--line-2);color:var(--fg);padding:8px 10px;border-radius:9px;min-width:220px"/>
+          <select id="bib-filter-cat" style="background:var(--bg2);border:1px solid var(--line-2);color:var(--fg);padding:8px 10px;border-radius:9px">
+            <option value="">Todas as categorias</option>
+            <option>Som</option><option>TI</option><option>Audiovisual</option><option>Cabos</option><option>Mobiliário</option><option>Outros</option>
+          </select>
+          <div class="tiny muted" id="bib-count">0 itens</div>
+        </div>
+        <div class="tbl-wrap"><table class="tbl" id="tbl-bib"><thead><tr>
+          <th><input type="checkbox" id="bib-all"/></th><th>Foto</th><th>Nome</th><th>Categoria</th><th>Detalhes</th><th>Unid.</th><th>Origem</th><th>Usos</th><th>Ações</th>
+        </tr></thead><tbody></tbody></table></div>
+      </div>
+    </section>
+
     <section class="pane" data-pane="importia">
       <div class="grid" style="grid-template-columns:1fr 1fr">
         <div class="card">
@@ -1145,6 +1173,26 @@ table.tbl { display: table; min-width: 0; }
   </div>
 </div></div>
 
+<!-- MODAL BIBLIOTECA DE ITENS -->
+<div class="modal-back" id="modal-bib"><div class="modal" style="max-width:560px">
+  <button class="close" data-close>×</button>
+  <h3 id="bib-modal-title">Item da Biblioteca</h3>
+  <div class="row2">
+    <div class="field"><label>Categoria</label><select id="bib-cat"><option>Som</option><option>TI</option><option>Audiovisual</option><option>Cabos</option><option>Mobiliário</option><option>Outros</option></select></div>
+    <div class="field"><label>Unidade</label><select id="bib-unid"><option>UN</option><option>PC</option><option>CX</option><option>KIT</option><option>M</option><option>PAR</option></select></div>
+  </div>
+  <div class="field"><label>Nome do item</label><input id="bib-nome" placeholder="Ex.: Microfone sem fio Shure SM58"/></div>
+  <div class="field"><label>Detalhes / Especificações</label><textarea id="bib-det" placeholder="Marca, modelo, especificações, observações padrão..."></textarea></div>
+  <div class="field"><label>Foto do item <span class="tiny muted">· até 2MB</span></label>
+    <input id="bib-foto" type="file" accept="image/*"/>
+    <div id="bib-foto-prev" style="margin-top:8px"></div>
+  </div>
+  <div class="flex between">
+    <button class="btn ghost" data-close>Cancelar</button>
+    <button class="btn primary" id="bib-save">💾 Salvar na Biblioteca</button>
+  </div>
+</div></div>
+
 <!-- MODAL JSON IMPORTACAO -->
 <div class="modal-back" id="modal-ia-json"><div class="modal" style="max-width:720px">
   <button class="close" data-close>×</button>
@@ -1201,7 +1249,7 @@ const todayISO=()=>new Date().toISOString().slice(0,10);
 const ADMIN={user:"marciooliveira",name:"Marcio Oliveira",role:"gestor",pass:"Deadpool365*",mail:"paulooliveira@ce.senac.br",phone:"",builtin:true};
 const LS_KEY="modesk_omega_v44";
 let state={
-  chamados:[], laudos:[], manut:[], itens:[], reqs:[], pedidos:[], eventos:[], inventario:[], imports:[], premiumMails:[ADMIN.mail],
+  chamados:[], laudos:[], manut:[], itens:[], reqs:[], pedidos:[], eventos:[], inventario:[], biblioteca:[], imports:[], premiumMails:[ADMIN.mail],
   users:[], fb:{apiKey:"",projectId:"",authDomain:"",appId:""}, sound:true
 };
 window.state=state;
@@ -1600,6 +1648,7 @@ var PAGE_META=window.PAGE_META||{
   movpat:["Patrimônio · Movimentação de TI","Controle de baixa e transferência entre unidades do Senac"],
   manut:["Registro de Serviço","Envio para manutenção externa · MXM / OS / fornecedor"],
   inventario:["Inventário Sala de Som","Planilha sincronizada da sala de som do auditório"],
+  biblioteca:["Biblioteca de Itens","Catálogo unificado alimentado por todos os cadastros do sistema"],
   agenda:["Agenda Operacional","Calendário, escala e prazos"],
   compras:["Compras","Lista Prévia · Requisição Interna · Requisição de Compra (mesma tela)"],
   historico:["Histórico","Auditoria, backup e restauração"],
@@ -1619,6 +1668,7 @@ function go(tab,anchor){
   if(tab==='movpat')renderMovPat();
   if(tab==='manut')renderManut();
   if(tab==='inventario')renderInventario();
+  if(tab==='biblioteca')renderBiblioteca();
   if(tab==='agenda')renderAgenda();
   if(tab==='compras'){renderItens();renderReqs();renderReqChecklist();renderPedidos()}
   if(tab==='historico')renderHistorico();
@@ -6726,6 +6776,232 @@ aside.sidebar{background:var(--bg1)!important;backdrop-filter:none!important;-we
 })();
 </script>
 <!-- =============== FIM MODESK PATCH v6.4 =============== -->
+
+<!-- =============== BIBLIOTECA DE ITENS · v6.4-lib =============== -->
+<script>
+(function(){
+  if(!window.state) return;
+  if(!Array.isArray(state.biblioteca)) state.biblioteca=[];
+  const $=id=>document.getElementById(id);
+  const esc=window.escapeHTML||(s=>String(s??''));
+
+  /* ---- Helpers ---- */
+  function normKey(s){ return String(s||'').toLowerCase().trim().replace(/\s+/g,' '); }
+  function fotoData(f){ if(!f) return ''; if(typeof f==='string') return f; return f.data||f.url||''; }
+
+  window.bibFind=function(nome){
+    if(!nome) return null;
+    const k=normKey(nome);
+    return (state.biblioteca||[]).find(b=>normKey(b.nome)===k)||null;
+  };
+
+  /* Upsert vindo de qualquer módulo. entry = {nome, cat, det, unid, foto, origem} */
+  window.bibUpsert=function(entry){
+    if(!entry||!entry.nome) return null;
+    if(!Array.isArray(state.biblioteca)) state.biblioteca=[];
+    const k=normKey(entry.nome);
+    let it=state.biblioteca.find(b=>normKey(b.nome)===k);
+    if(!it){
+      it={id:(window.uid?uid('BIB'):'BIB-'+Date.now().toString(36)),nome:entry.nome.trim(),cat:entry.cat||'Outros',det:entry.det||'',unid:entry.unid||'UN',foto:fotoData(entry.foto)||'',origem:entry.origem||'',usos:1,createdAt:Date.now(),updatedAt:Date.now()};
+      state.biblioteca.unshift(it);
+    }else{
+      if(entry.cat && (!it.cat||it.cat==='Outros')) it.cat=entry.cat;
+      if(entry.det && !it.det) it.det=entry.det;
+      if(entry.unid && !it.unid) it.unid=entry.unid;
+      const fd=fotoData(entry.foto); if(fd && !it.foto) it.foto=fd;
+      if(entry.origem){
+        const origens=String(it.origem||'').split(' · ').filter(Boolean);
+        if(!origens.includes(entry.origem)) origens.push(entry.origem);
+        it.origem=origens.join(' · ');
+      }
+      it.usos=(it.usos||0)+1;
+      it.updatedAt=Date.now();
+    }
+    try{ window.save && window.save(); }catch(_){}
+    try{ if(document.querySelector('.pane[data-pane="biblioteca"].active')) renderBiblioteca(); }catch(_){}
+    return it;
+  };
+
+  /* ---- Render ---- */
+  window.renderBiblioteca=function(){
+    const tb=$('tbl-bib')&&$('tbl-bib').querySelector('tbody'); if(!tb) return;
+    const q=normKey(($('bib-filter-q')&&$('bib-filter-q').value)||'');
+    const cat=($('bib-filter-cat')&&$('bib-filter-cat').value)||'';
+    const rows=(state.biblioteca||[]).filter(b=>{
+      if(cat && b.cat!==cat) return false;
+      if(!q) return true;
+      return normKey(b.nome).includes(q)||normKey(b.det).includes(q)||normKey(b.cat).includes(q)||normKey(b.origem).includes(q);
+    });
+    tb.innerHTML=rows.map(b=>`<tr>
+      <td><input type="checkbox" data-bib-sel="${esc(b.id)}"/></td>
+      <td>${b.foto?`<img src="${esc(b.foto)}" style="width:44px;height:44px;object-fit:cover;border-radius:6px;cursor:pointer" data-bib-img="${esc(b.id)}"/>`:'<span class="muted tiny">—</span>'}</td>
+      <td><b>${esc(b.nome)}</b></td>
+      <td><span class="badge">${esc(b.cat||'Outros')}</span></td>
+      <td class="tiny">${esc(b.det||'-')}</td>
+      <td>${esc(b.unid||'UN')}</td>
+      <td class="tiny muted">${esc(b.origem||'-')}</td>
+      <td>${Number(b.usos||1)}</td>
+      <td><div class="flex" style="gap:4px">
+        <button class="btn sm" data-bib-edit="${esc(b.id)}">✎</button>
+        <button class="btn sm warn" data-bib-del="${esc(b.id)}">🗑</button>
+      </div></td>
+    </tr>`).join('')||'<tr><td colspan="9" class="muted" style="text-align:center;padding:20px">Biblioteca vazia. Cadastre itens ou salve algo em Inventário/Lista Prévia/Requisições.</td></tr>';
+    tb.querySelectorAll('[data-bib-edit]').forEach(b=>b.onclick=()=>openBib(b.dataset.bibEdit));
+    tb.querySelectorAll('[data-bib-del]').forEach(b=>b.onclick=()=>{if(!confirm('Excluir este item da biblioteca?'))return;state.biblioteca=state.biblioteca.filter(x=>x.id!==b.dataset.bibDel);try{window.save&&window.save()}catch(_){}renderBiblioteca()});
+    tb.querySelectorAll('[data-bib-img]').forEach(im=>im.onclick=()=>{const b=state.biblioteca.find(x=>x.id===im.dataset.bibImg);if(b&&b.foto)window.open(b.foto,'_blank')});
+    const c=$('bib-count'); if(c) c.textContent=`${rows.length} exibidos · ${(state.biblioteca||[]).length} no total`;
+    refreshBibDatalist();
+  };
+
+  /* ---- Modal ---- */
+  let editingBib=null;
+  function openBib(id){
+    editingBib=id?(state.biblioteca||[]).find(x=>x.id===id):null;
+    if(!editingBib){
+      editingBib={id:(window.uid?uid('BIB'):'BIB-'+Date.now().toString(36)),nome:'',cat:'Outros',det:'',unid:'UN',foto:'',origem:'Cadastro manual',usos:0,createdAt:Date.now()};
+    }
+    $('bib-modal-title').textContent=(id?'Editar':'Novo')+' Item da Biblioteca';
+    $('bib-cat').value=editingBib.cat||'Outros';
+    $('bib-unid').value=editingBib.unid||'UN';
+    $('bib-nome').value=editingBib.nome||'';
+    $('bib-det').value=editingBib.det||'';
+    $('bib-foto').value='';
+    $('bib-foto-prev').innerHTML=editingBib.foto?`<img src="${esc(editingBib.foto)}" style="max-width:120px;max-height:90px;border-radius:8px;border:1px solid var(--line-2);object-fit:cover"/>`:'';
+    $('modal-bib').classList.add('open');
+  }
+  window.openBib=openBib;
+
+  if($('bib-new-open')) $('bib-new-open').onclick=()=>openBib(null);
+  if($('bib-filter-q')) $('bib-filter-q').addEventListener('input',renderBiblioteca);
+  if($('bib-filter-cat')) $('bib-filter-cat').onchange=renderBiblioteca;
+  if($('bib-all')) $('bib-all').onchange=e=>document.querySelectorAll('[data-bib-sel]').forEach(c=>c.checked=e.target.checked);
+  if($('bib-foto')) $('bib-foto').onchange=async e=>{
+    const f=e.target.files[0]; if(!f) return;
+    if(f.size>2*1024*1024){ try{window.toast&&window.toast('Foto deve ter até 2MB')}catch(_){}; $('bib-foto').value=''; return; }
+    let ph; try{ ph=await window.uploadAnexoDrive(f); }catch(_){ ph=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res({data:r.result,name:f.name});r.onerror=()=>rej(r.error);r.readAsDataURL(f);}); }
+    editingBib.foto=ph.data||ph.url||'';
+    $('bib-foto-prev').innerHTML=`<img src="${esc(editingBib.foto)}" style="max-width:120px;max-height:90px;border-radius:8px;border:1px solid var(--line-2);object-fit:cover"/>`;
+  };
+  if($('bib-save')) $('bib-save').onclick=()=>{
+    const nome=$('bib-nome').value.trim();
+    if(!nome){ try{window.toast&&window.toast('Informe o nome do item')}catch(_){}; return; }
+    Object.assign(editingBib,{nome,cat:$('bib-cat').value,unid:$('bib-unid').value,det:$('bib-det').value.trim(),updatedAt:Date.now()});
+    if(!state.biblioteca.find(x=>x.id===editingBib.id)) state.biblioteca.unshift(editingBib);
+    try{ window.save && window.save(); }catch(_){}
+    $('modal-bib').classList.remove('open');
+    renderBiblioteca();
+    try{window.toast&&window.toast('📚 Item salvo na biblioteca')}catch(_){}
+  };
+
+  /* Enviar selecionados para a Lista Prévia */
+  if($('bib-send-lista')) $('bib-send-lista').onclick=()=>{
+    const ids=[...document.querySelectorAll('[data-bib-sel]:checked')].map(c=>c.dataset.bibSel);
+    if(!ids.length){ try{window.toast&&window.toast('Selecione ao menos um item')}catch(_){}; return; }
+    const list=(state.biblioteca||[]).filter(b=>ids.includes(b.id));
+    let n=0;
+    list.forEach(b=>{
+      if((state.itens||[]).some(x=>normKey(x.desc)===normKey(b.nome)&&x.st==='Pendente')) return;
+      const foto=b.foto?{data:b.foto,name:b.nome+'.jpg'}:null;
+      state.itens.unshift({id:(window.uid?uid('IT'):'IT-'+Date.now().toString(36)+Math.random().toString(36).slice(2,5)),desc:b.nome,det:b.det||'',qtd:1,tipo:b.cat||'Outros',foto,st:'Pendente',req:null,origem:'Biblioteca de Itens',createdAt:Date.now()});
+      n++;
+    });
+    try{ window.save && window.save(); }catch(_){}
+    try{ window.renderItens && window.renderItens(); }catch(_){}
+    try{ window.renderReqChecklist && window.renderReqChecklist(); }catch(_){}
+    try{window.toast&&window.toast(n+' item(ns) enviados para Lista Prévia')}catch(_){}
+  };
+
+  /* ---- Datalist global para autocomplete dos formulários ---- */
+  function refreshBibDatalist(){
+    let dl=document.getElementById('bib-suggest');
+    if(!dl){ dl=document.createElement('datalist'); dl.id='bib-suggest'; document.body.appendChild(dl); }
+    dl.innerHTML=(state.biblioteca||[]).map(b=>`<option value="${esc(b.nome)}" label="${esc(b.cat||'')} · ${esc(b.det||'')}"></option>`).join('');
+  }
+  refreshBibDatalist();
+
+  /* Vincula datalist no campo "Item" da Lista Prévia + prefill quando o usuário seleciona um item existente */
+  (function wireItemModal(){
+    const desc=$('it-desc'); if(!desc) return;
+    // adiciona a biblioteca no datalist existente
+    const dl=$('it-desc-suggest');
+    const origRefresh=window.refreshItemSuggest;
+    window.refreshItemSuggest=function(){
+      try{ origRefresh && origRefresh(); }catch(_){}
+      if(!dl) return;
+      const extra=(state.biblioteca||[]).map(b=>`<option value="${esc(b.nome)}" label="📚 ${esc(b.cat||'')} · ${esc(b.det||'')}"></option>`).join('');
+      dl.insertAdjacentHTML('beforeend',extra);
+    };
+    desc.addEventListener('change',()=>{
+      const hit=window.bibFind(desc.value);
+      if(!hit) return;
+      const det=$('it-det'); if(det && !det.value) det.value=hit.det||'';
+      const tipo=$('it-tipo'); if(tipo && hit.cat){ const opts=[...tipo.options].map(o=>o.value); if(opts.includes(hit.cat)) tipo.value=hit.cat; }
+      if(hit.foto && window.editingIt && !window.editingIt.foto){
+        window.editingIt.foto={data:hit.foto,name:hit.nome+'.jpg'};
+        const prev=$('it-foto-prev'); if(prev) prev.innerHTML=`<div class="fm-thumb"><img src="${esc(hit.foto)}"/><div class="cap">📚 ${esc(hit.nome)}</div></div>`;
+      }
+      try{window.toast&&window.toast('📚 Preenchido a partir da Biblioteca')}catch(_){}
+    });
+  })();
+
+  /* ---- Hooks: alimenta a biblioteca a partir dos outros módulos ---- */
+  function hookSave(id, buildEntry){
+    const btn=$(id); if(!btn) return;
+    const prev=btn.onclick;
+    btn.onclick=function(...args){
+      let ret;
+      try{ ret=prev&&prev.apply(this,args); }catch(e){ console.error(e); }
+      Promise.resolve(ret).then(()=>{ try{ const e=buildEntry(); if(e) window.bibUpsert(e); }catch(err){ console.warn('[BIB hook]',err); } });
+      return ret;
+    };
+  }
+
+  // Lista Prévia (modal item)
+  hookSave('it-save',()=>{
+    const it=window.editingIt; if(!it||!it.desc) return null;
+    return {nome:it.desc, cat:it.tipo||'Outros', det:it.det||'', unid:'UN', foto:it.foto, origem:'Lista Prévia'};
+  });
+  // Inventário Sala de Som
+  hookSave('inv-save',()=>{
+    const it=window.editingInv; if(!it||!it.desc) return null;
+    const fotoPrev=$('inv-foto-prev'); const fotoSrc=(fotoPrev&&fotoPrev.getAttribute('data-src'))||it.foto||'';
+    return {nome:it.desc, cat:it.cat||'Som', det:[it.tag,it.obs].filter(Boolean).join(' · '), unid:'UN', foto:fotoSrc, origem:'Inventário Sala de Som'};
+  });
+  // Requisição Interna — cadastra os itens selecionados (já existem em state.itens, mas registra origem "Requisição Interna")
+  hookSave('rq-save',()=>{
+    const ids=[...document.querySelectorAll('#rq-checklist input:checked')].map(i=>i.value);
+    (ids||[]).forEach(id=>{
+      const it=(state.itens||[]).find(x=>x.id===id); if(!it) return;
+      window.bibUpsert({nome:it.desc, cat:it.tipo||'Outros', det:it.det||'', foto:it.foto, origem:'Requisição Interna'});
+    });
+    return null;
+  });
+  // Requisição de Compra
+  hookSave('pd-save',()=>{
+    // pd usa a requisição interna vinculada; marca origem em todos os itens dessa req.
+    const rqSel=$('pd-req-sel')||$('pd-req')||$('pd-rq-num');
+    let num=(rqSel&&rqSel.value)||'';
+    const rq=(state.reqs||[]).find(r=>r.num===num||r.id===num);
+    if(!rq) return null;
+    ((rq.itens)||[]).forEach(id=>{
+      const it=(state.itens||[]).find(x=>x.id===id); if(!it) return;
+      window.bibUpsert({nome:it.desc, cat:it.tipo||'Outros', det:it.det||'', foto:it.foto, origem:'Requisição de Compra'});
+    });
+    return null;
+  });
+
+  /* ---- Backfill inicial: popula a biblioteca com o que já existe ---- */
+  function backfillOnce(){
+    if(state.biblioteca && state.biblioteca.length) return;
+    (state.itens||[]).forEach(it=>{ if(it&&it.desc) window.bibUpsert({nome:it.desc,cat:it.tipo||'Outros',det:it.det||'',foto:it.foto,origem:'Lista Prévia'}); });
+    (state.inventario||[]).forEach(i=>{ if(i&&i.desc) window.bibUpsert({nome:i.desc,cat:i.cat||'Som',det:[i.tag,i.obs].filter(Boolean).join(' · '),foto:i.foto,origem:'Inventário Sala de Som'}); });
+  }
+  setTimeout(backfillOnce, 800);
+
+  console.log('[MODESK] Biblioteca de Itens carregada.');
+})();
+</script>
+<!-- =============== FIM BIBLIOTECA DE ITENS =============== -->
 
 </body>
 </html>
