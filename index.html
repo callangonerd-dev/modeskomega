@@ -448,7 +448,7 @@ table.tbl { display: table; min-width: 0; }
       <button data-tab="inventario"><span class="ic"><svg viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg></span>Inventário Sala de Som</button>
 
       <div class="cat">Compras</div>
-      <button data-tab="compras"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/><path d="M2 3h3l2.4 12.2a2 2 0 0 0 2 1.6h8.8a2 2 0 0 0 2-1.6L22 7H6"/></svg></span>Compras (Lista · Req · Pedido)</button>
+      <button data-tab="compras"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/><path d="M2 3h3l2.4 12.2a2 2 0 0 0 2 1.6h8.8a2 2 0 0 0 2-1.6L22 7H6"/></svg></span>Compras</button>
       <button data-tab="biblioteca"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 4h6v16H4z"/><path d="M14 4h6v16h-6z"/><path d="M4 10h16"/></svg></span>Biblioteca de Itens</button>
 
 
@@ -806,6 +806,10 @@ table.tbl { display: table; min-width: 0; }
             <p class="muted tiny" style="margin:4px 0 0">Catálogo unificado compilado a partir da Lista Prévia, Requisições, Inventário e cadastros manuais. Ao adicionar um novo item em qualquer módulo, ele passa a existir aqui automaticamente.</p>
           </div>
           <div class="flex" style="gap:8px;flex-wrap:wrap">
+            <div class="flex" id="bib-view-toggle" style="gap:0;border:1px solid var(--line-2);border-radius:9px;overflow:hidden">
+              <button class="btn sm" data-bib-view="list" style="border-radius:0;border:0">☰ Lista</button>
+              <button class="btn sm primary" data-bib-view="grid" style="border-radius:0;border:0">▦ Grade</button>
+            </div>
             <button class="btn sm primary" id="bib-new-open">＋ Novo Item na Biblioteca</button>
             <button class="btn sm" id="bib-send-lista">🛒 Enviar selecionados para Lista Prévia</button>
           </div>
@@ -818,9 +822,30 @@ table.tbl { display: table; min-width: 0; }
           </select>
           <div class="tiny muted" id="bib-count">0 itens</div>
         </div>
-        <div class="tbl-wrap"><table class="tbl" id="tbl-bib"><thead><tr>
+        <div id="bib-list-wrap" class="tbl-wrap" style="display:none"><table class="tbl" id="tbl-bib"><thead><tr>
           <th><input type="checkbox" id="bib-all"/></th><th>Foto</th><th>Nome</th><th>Categoria</th><th>Detalhes</th><th>Unid.</th><th>Origem</th><th>Usos</th><th>Ações</th>
         </tr></thead><tbody></tbody></table></div>
+        <div id="bib-grid-wrap" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px"></div>
+      </div>
+
+      <div class="card" style="margin-top:14px">
+        <div class="flex between" style="gap:10px;flex-wrap:wrap;margin-bottom:10px">
+          <div>
+            <h3 style="margin:0">📥 Itens Cadastrados <span id="ic-count" style="color:var(--fg-mut);font-weight:400;font-size:13px"></span></h3>
+            <p class="muted tiny" style="margin:4px 0 0">Todos os itens registrados no sistema — Inventário Sala de Som + Lista Prévia — reunidos aqui.</p>
+          </div>
+          <div class="flex" style="gap:8px;flex-wrap:wrap">
+            <input class="q" id="ic-q" placeholder="Buscar por nome, tag, fonte, status..." style="padding:8px 10px;border-radius:9px;border:1px solid var(--line-2);background:var(--bg2);color:var(--fg);min-width:220px"/>
+            <select id="ic-src" class="q" style="padding:8px 10px;border-radius:9px;border:1px solid var(--line-2);background:var(--bg2);color:var(--fg)">
+              <option value="">Todas as fontes</option>
+              <option value="inv">Inventário Sala de Som</option>
+              <option value="lst">Lista Prévia</option>
+            </select>
+          </div>
+        </div>
+        <div class="tbl-wrap"><table class="tbl"><thead>
+          <tr><th>Fonte</th><th>Foto</th><th>Descrição</th><th>Tag / Detalhes</th><th>Qtd</th><th>Status</th></tr>
+        </thead><tbody id="ic-body"></tbody></table></div>
       </div>
     </section>
 
@@ -1192,6 +1217,15 @@ table.tbl { display: table; min-width: 0; }
     <button class="btn primary" id="bib-save">💾 Salvar na Biblioteca</button>
   </div>
 </div></div>
+
+<!-- MODAL · VER ITEM DA BIBLIOTECA -->
+<div class="modal-back" id="modal-bib-view"><div class="modal" style="max-width:640px">
+  <button class="close" data-close>×</button>
+  <div id="bib-view-body"></div>
+  <div class="flex between" style="margin-top:14px">
+    <button class="btn ghost" data-close>Fechar</button>
+    <button class="btn primary" id="bib-view-edit">✎ Editar</button>
+  </div>
 
 <!-- MODAL JSON IMPORTACAO -->
 <div class="modal-back" id="modal-ia-json"><div class="modal" style="max-width:720px">
@@ -1650,7 +1684,7 @@ var PAGE_META=window.PAGE_META||{
   inventario:["Inventário Sala de Som","Planilha sincronizada da sala de som do auditório"],
   biblioteca:["Biblioteca de Itens","Catálogo unificado alimentado por todos os cadastros do sistema"],
   agenda:["Agenda Operacional","Calendário, escala e prazos"],
-  compras:["Compras","Lista Prévia · Requisição Interna · Requisição de Compra (mesma tela)"],
+  compras:["Compras",""],
   historico:["Histórico","Auditoria, backup e restauração"],
   importia:["Importação Inteligente","Leitura assistida de documentos e envio para módulos"],
   config:["Configurações","Login local, sincronização Firebase, alertas e preferências"]
@@ -6545,27 +6579,7 @@ aside.sidebar{background:var(--bg1)!important;backdrop-filter:none!important;-we
   color:var(--fg-mut);font-size:12px;background:var(--bg2)}
 </style>
 
-<div id="ic-modal" role="dialog" aria-modal="true">
-  <div class="box">
-    <header>
-      <h3>📚 Itens Cadastrados <span id="ic-count" style="color:var(--fg-mut);font-weight:400;font-size:13px"></span></h3>
-      <input class="q" id="ic-q" placeholder="Buscar por nome, tag, fonte, status..."/>
-      <select id="ic-src" class="q" style="min-width:auto">
-        <option value="">Todas as fontes</option>
-        <option value="inv">Inventário Sala de Som</option>
-        <option value="lst">Lista Prévia</option>
-      </select>
-      <button class="close" id="ic-close">Fechar</button>
-    </header>
-    <div class="body"><table><thead>
-      <tr><th>Fonte</th><th>Foto</th><th>Descrição</th><th>Tag / Detalhes</th><th>Qtd</th><th>Status</th></tr>
-    </thead><tbody id="ic-body"></tbody></table></div>
-  </div>
-</div>
-
-<button id="modesk-fab" type="button" title="Ver todos os itens cadastrados (inventário + lista prévia)">
-  📚 Itens Cadastrados <span id="modesk-fab-count" style="background:rgba(255,255,255,.22);padding:2px 8px;border-radius:999px;font-size:11px">0</span>
-</button>
+<!-- Itens Cadastrados agora vive dentro da aba Biblioteca de Itens -->
 
 <script>
 /* ================= MODESK PATCH v6.4 (Lovable) =================
@@ -6730,18 +6744,14 @@ aside.sidebar{background:var(--bg1)!important;backdrop-filter:none!important;-we
     var fabC = document.getElementById('modesk-fab-count');
     if(fabC) fabC.textContent = all.length;
   }
-  function openIC(){ renderIC(); document.getElementById('ic-modal').classList.add('open'); }
-  function closeIC(){ document.getElementById('ic-modal').classList.remove('open'); }
-  document.getElementById('modesk-fab').onclick = openIC;
-  document.getElementById('ic-close').onclick = closeIC;
-  document.getElementById('ic-modal').addEventListener('click', function(e){
-    if(e.target.id==='ic-modal') closeIC();
-  });
-  document.getElementById('ic-q').addEventListener('input', renderIC);
-  document.getElementById('ic-src').addEventListener('change', renderIC);
-  // atualiza contador do FAB a cada 3s
-  setInterval(function(){ try{ var fabC=document.getElementById('modesk-fab-count'); if(fabC) fabC.textContent = collectAll().length; }catch(_){} }, 3000);
-  window.openItensCadastrados = openIC;
+  var _fab=document.getElementById('modesk-fab'); if(_fab) _fab.onclick=renderIC;
+  var _icc=document.getElementById('ic-close'); if(_icc) _icc.onclick=function(){ var m=document.getElementById('ic-modal'); if(m) m.classList.remove('open'); };
+  var _icq=document.getElementById('ic-q'); if(_icq) _icq.addEventListener('input', renderIC);
+  var _ics=document.getElementById('ic-src'); if(_ics) _ics.addEventListener('change', renderIC);
+  // Re-renderiza o painel embutido quando a Biblioteca fica ativa e periodicamente
+  setInterval(function(){ try{ if(document.querySelector('.pane[data-pane="biblioteca"].active')) renderIC(); }catch(_){} }, 3000);
+  window.openItensCadastrados = function(){ try{ if(window.go) go('biblioteca'); }catch(_){}; setTimeout(renderIC,60); };
+  window.renderItensCadastrados = renderIC;
 
   // -------- 5) Ctrl+V cola foto no item da lista prévia em edição ----------
   document.addEventListener('paste', function(e){
@@ -6823,8 +6833,43 @@ aside.sidebar{background:var(--bg1)!important;backdrop-filter:none!important;-we
   };
 
   /* ---- Render ---- */
+  let BIB_VIEW=(localStorage.getItem('bib_view')||'grid');
+  function setBibView(v){
+    BIB_VIEW=v; try{localStorage.setItem('bib_view',v)}catch(_){}
+    document.querySelectorAll('#bib-view-toggle [data-bib-view]').forEach(b=>b.classList.toggle('primary',b.dataset.bibView===v));
+    const lw=$('bib-list-wrap'), gw=$('bib-grid-wrap');
+    if(lw) lw.style.display=(v==='list')?'':'none';
+    if(gw) gw.style.display=(v==='grid')?'grid':'none';
+  }
+  window.setBibView=setBibView;
+  document.querySelectorAll('#bib-view-toggle [data-bib-view]').forEach(b=>b.onclick=()=>{setBibView(b.dataset.bibView);renderBiblioteca()});
+
+  function openBibView(id){
+    const b=(state.biblioteca||[]).find(x=>x.id===id); if(!b) return;
+    const body=$('bib-view-body'); if(!body) return;
+    body.innerHTML=`
+      <h3 style="margin:0 0 4px">${esc(b.nome||'—')}</h3>
+      <div class="tiny muted" style="margin-bottom:12px"><span class="badge">${esc(b.cat||'Outros')}</span> · ${esc(b.unid||'UN')} · ${esc(b.origem||'-')}</div>
+      <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-start">
+        <div style="flex:0 0 220px">${b.foto?`<img src="${esc(b.foto)}" style="width:220px;height:220px;object-fit:cover;border-radius:12px;border:1px solid var(--line-2);cursor:zoom-in" onclick="window.open('${esc(b.foto)}','_blank')"/>`:`<div style="width:220px;height:220px;display:flex;align-items:center;justify-content:center;border:1px dashed var(--line-2);border-radius:12px;color:var(--fg-dim)">Sem foto</div>`}</div>
+        <div style="flex:1 1 220px;min-width:200px">
+          <div class="tiny muted" style="margin-bottom:4px">Detalhes / Especificações</div>
+          <div style="white-space:pre-wrap">${esc(b.det||'—')}</div>
+          <hr class="sep"/>
+          <div class="tiny muted">Usos: <b style="color:var(--fg)">${Number(b.usos||1)}</b></div>
+          ${b.createdAt?`<div class="tiny muted">Cadastrado: ${new Date(b.createdAt).toLocaleString('pt-BR')}</div>`:''}
+          ${b.updatedAt?`<div class="tiny muted">Atualizado: ${new Date(b.updatedAt).toLocaleString('pt-BR')}</div>`:''}
+        </div>
+      </div>`;
+    const ed=$('bib-view-edit'); if(ed) ed.onclick=()=>{$('modal-bib-view').classList.remove('open');openBib(id)};
+    $('modal-bib-view').classList.add('open');
+  }
+  window.openBibView=openBibView;
+
   window.renderBiblioteca=function(){
-    const tb=$('tbl-bib')&&$('tbl-bib').querySelector('tbody'); if(!tb) return;
+    setBibView(BIB_VIEW);
+    const tb=$('tbl-bib')&&$('tbl-bib').querySelector('tbody');
+    const gw=$('bib-grid-wrap');
     const q=normKey(($('bib-filter-q')&&$('bib-filter-q').value)||'');
     const cat=($('bib-filter-cat')&&$('bib-filter-cat').value)||'';
     const rows=(state.biblioteca||[]).filter(b=>{
@@ -6832,25 +6877,50 @@ aside.sidebar{background:var(--bg1)!important;backdrop-filter:none!important;-we
       if(!q) return true;
       return normKey(b.nome).includes(q)||normKey(b.det).includes(q)||normKey(b.cat).includes(q)||normKey(b.origem).includes(q);
     });
-    tb.innerHTML=rows.map(b=>`<tr>
-      <td><input type="checkbox" data-bib-sel="${esc(b.id)}"/></td>
-      <td>${b.foto?`<img src="${esc(b.foto)}" style="width:44px;height:44px;object-fit:cover;border-radius:6px;cursor:pointer" data-bib-img="${esc(b.id)}"/>`:'<span class="muted tiny">—</span>'}</td>
-      <td><b>${esc(b.nome)}</b></td>
-      <td><span class="badge">${esc(b.cat||'Outros')}</span></td>
-      <td class="tiny">${esc(b.det||'-')}</td>
-      <td>${esc(b.unid||'UN')}</td>
-      <td class="tiny muted">${esc(b.origem||'-')}</td>
-      <td>${Number(b.usos||1)}</td>
-      <td><div class="flex" style="gap:4px">
-        <button class="btn sm" data-bib-edit="${esc(b.id)}">✎</button>
-        <button class="btn sm warn" data-bib-del="${esc(b.id)}">🗑</button>
-      </div></td>
-    </tr>`).join('')||'<tr><td colspan="9" class="muted" style="text-align:center;padding:20px">Biblioteca vazia. Cadastre itens ou salve algo em Inventário/Lista Prévia/Requisições.</td></tr>';
-    tb.querySelectorAll('[data-bib-edit]').forEach(b=>b.onclick=()=>openBib(b.dataset.bibEdit));
-    tb.querySelectorAll('[data-bib-del]').forEach(b=>b.onclick=()=>{if(!confirm('Excluir este item da biblioteca?'))return;state.biblioteca=state.biblioteca.filter(x=>x.id!==b.dataset.bibDel);try{window.save&&window.save()}catch(_){}renderBiblioteca()});
-    tb.querySelectorAll('[data-bib-img]').forEach(im=>im.onclick=()=>{const b=state.biblioteca.find(x=>x.id===im.dataset.bibImg);if(b&&b.foto)window.open(b.foto,'_blank')});
+    if(tb){
+      tb.innerHTML=rows.map(b=>`<tr style="cursor:pointer" data-bib-row="${esc(b.id)}">
+        <td onclick="event.stopPropagation()"><input type="checkbox" data-bib-sel="${esc(b.id)}"/></td>
+        <td>${b.foto?`<img src="${esc(b.foto)}" style="width:44px;height:44px;object-fit:cover;border-radius:6px"/>`:'<span class="muted tiny">—</span>'}</td>
+        <td><b>${esc(b.nome)}</b></td>
+        <td><span class="badge">${esc(b.cat||'Outros')}</span></td>
+        <td class="tiny">${esc(b.det||'-')}</td>
+        <td>${esc(b.unid||'UN')}</td>
+        <td class="tiny muted">${esc(b.origem||'-')}</td>
+        <td>${Number(b.usos||1)}</td>
+        <td onclick="event.stopPropagation()"><div class="flex" style="gap:4px">
+          <button class="btn sm" data-bib-edit="${esc(b.id)}">✎</button>
+          <button class="btn sm warn" data-bib-del="${esc(b.id)}">🗑</button>
+        </div></td>
+      </tr>`).join('')||'<tr><td colspan="9" class="muted" style="text-align:center;padding:20px">Biblioteca vazia. Cadastre itens ou salve algo em Inventário/Lista Prévia/Requisições.</td></tr>';
+      tb.querySelectorAll('[data-bib-row]').forEach(r=>r.onclick=()=>openBibView(r.dataset.bibRow));
+      tb.querySelectorAll('[data-bib-edit]').forEach(b=>b.onclick=e=>{e.stopPropagation();openBib(b.dataset.bibEdit)});
+      tb.querySelectorAll('[data-bib-del]').forEach(b=>b.onclick=e=>{e.stopPropagation();if(!confirm('Excluir este item da biblioteca?'))return;state.biblioteca=state.biblioteca.filter(x=>x.id!==b.dataset.bibDel);try{window.save&&window.save()}catch(_){}renderBiblioteca()});
+    }
+    if(gw){
+      gw.innerHTML=rows.map(b=>`
+        <div class="card" data-bib-card="${esc(b.id)}" style="padding:10px;cursor:pointer;display:flex;flex-direction:column;gap:8px;transition:transform .12s ease,border-color .12s ease" onmouseover="this.style.transform='translateY(-2px)';this.style.borderColor='var(--acc)'" onmouseout="this.style.transform='';this.style.borderColor=''">
+          <div style="position:relative;width:100%;aspect-ratio:1/1;border-radius:10px;overflow:hidden;background:var(--bg2);border:1px solid var(--line)">
+            ${b.foto?`<img src="${esc(b.foto)}" style="width:100%;height:100%;object-fit:cover"/>`:`<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--fg-dim);font-size:28px">📦</div>`}
+            <label onclick="event.stopPropagation()" style="position:absolute;top:6px;left:6px;background:rgba(0,0,0,.55);padding:3px 6px;border-radius:6px"><input type="checkbox" data-bib-sel="${esc(b.id)}" style="margin:0"/></label>
+            <span style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,.55);color:#fff;padding:2px 8px;border-radius:999px;font-size:11px">${esc(b.cat||'Outros')}</span>
+          </div>
+          <div style="min-height:34px"><b style="font-size:13.5px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${esc(b.nome||'-')}</b></div>
+          <div class="tiny muted" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:28px">${esc(b.det||'—')}</div>
+          <div class="flex between" style="gap:4px">
+            <span class="tiny muted">${esc(b.unid||'UN')} · ${Number(b.usos||1)} uso(s)</span>
+            <div class="flex" style="gap:4px" onclick="event.stopPropagation()">
+              <button class="btn sm" data-bib-edit="${esc(b.id)}" title="Editar">✎</button>
+              <button class="btn sm warn" data-bib-del="${esc(b.id)}" title="Excluir">🗑</button>
+            </div>
+          </div>
+        </div>`).join('')||'<div class="muted" style="grid-column:1/-1;text-align:center;padding:24px">Biblioteca vazia. Cadastre itens ou salve algo em Inventário/Lista Prévia/Requisições.</div>';
+      gw.querySelectorAll('[data-bib-card]').forEach(c=>c.onclick=()=>openBibView(c.dataset.bibCard));
+      gw.querySelectorAll('[data-bib-edit]').forEach(b=>b.onclick=e=>{e.stopPropagation();openBib(b.dataset.bibEdit)});
+      gw.querySelectorAll('[data-bib-del]').forEach(b=>b.onclick=e=>{e.stopPropagation();if(!confirm('Excluir este item da biblioteca?'))return;state.biblioteca=state.biblioteca.filter(x=>x.id!==b.dataset.bibDel);try{window.save&&window.save()}catch(_){}renderBiblioteca()});
+    }
     const c=$('bib-count'); if(c) c.textContent=`${rows.length} exibidos · ${(state.biblioteca||[]).length} no total`;
     refreshBibDatalist();
+    try{ if(typeof window.renderItensCadastrados==='function') window.renderItensCadastrados(); }catch(_){}
   };
 
   /* ---- Modal ---- */
