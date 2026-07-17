@@ -7073,5 +7073,83 @@ aside.sidebar{background:var(--bg1)!important;backdrop-filter:none!important;-we
 </script>
 <!-- =============== FIM BIBLIOTECA DE ITENS =============== -->
 
+<script>
+/* ============================================================
+   PASTE (Ctrl+V) universal para inputs de imagem em Compras
+   e Biblioteca — replica o comportamento do Inventário Sala de Som.
+   Quando um modal alvo está aberto e o usuário cola uma imagem
+   (ou o "último item copiado"), o arquivo é injetado no input
+   correspondente e seu evento "change" é disparado, reutilizando
+   toda a lógica de preview/upload já existente.
+   ============================================================ */
+(function(){
+  // Ordem importa: primeiro modal aberto na lista é o alvo
+  const TARGETS = [
+    { modal:'modal-it',  input:'it-foto'   },
+    { modal:'modal-req', input:'rq-fotos'  },
+    { modal:'modal-ped', input:'pd-fotos'  },
+    { modal:'modal-bib', input:'bib-foto'  }
+  ];
+  function findActiveTarget(){
+    for(const t of TARGETS){
+      const m=document.getElementById(t.modal);
+      if(m && m.classList.contains('open')) return t;
+    }
+    return null;
+  }
+  function injectFileIntoInput(inputEl, file){
+    try{
+      const dt=new DataTransfer();
+      // Se o input é múltiplo, preserva arquivos existentes
+      if(inputEl.multiple && inputEl.files){
+        for(const f of Array.from(inputEl.files)) dt.items.add(f);
+      }
+      dt.items.add(file);
+      inputEl.files=dt.files;
+    }catch(_){
+      // Fallback: define apenas o arquivo colado
+      try{ const dt=new DataTransfer(); dt.items.add(file); inputEl.files=dt.files; }catch(__){}
+    }
+    inputEl.dispatchEvent(new Event('change',{bubbles:true}));
+  }
+  function niceName(type){
+    const ext=(type||'image/png').split('/')[1]||'png';
+    return 'colado-'+Date.now()+'.'+ext;
+  }
+  document.addEventListener('paste', async function(e){
+    const target=findActiveTarget();
+    if(!target) return;
+    const cd=e.clipboardData; if(!cd) return;
+    // 1) Procura por arquivo de imagem direto no clipboard
+    let file=null;
+    if(cd.files && cd.files.length){
+      for(const f of Array.from(cd.files)){
+        if(f && f.type && f.type.startsWith('image/')){ file=f; break; }
+      }
+    }
+    // 2) Fallback para clipboardData.items (último item de imagem copiado)
+    if(!file && cd.items){
+      for(const it of Array.from(cd.items)){
+        if(it.kind==='file' && it.type && it.type.startsWith('image/')){
+          const f=it.getAsFile();
+          if(f){ file=f; break; }
+        }
+      }
+    }
+    if(!file) return;
+    const inputEl=document.getElementById(target.input);
+    if(!inputEl) return;
+    e.preventDefault();
+    // Normaliza nome quando o clipboard não fornece um
+    if(!file.name || file.name==='image.png' || file.name==='blob'){
+      try{ file=new File([file], niceName(file.type), {type:file.type}); }catch(_){}
+    }
+    injectFileIntoInput(inputEl, file);
+    try{ window.toast && window.toast('📋 Imagem colada'); }catch(_){}
+  });
+  console.log('[MODESK] Paste universal (Compras/Biblioteca) ativo.');
+})();
+</script>
+
 </body>
 </html>
