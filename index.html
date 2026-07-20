@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
-<title>MODESK OMEGA v6.4 — Patched (grade PDF · scroll isolado · IDB · itens cadastrados)</title>
+<title>MODESK OMEGA v6.6 — Patched (foto instantânea · Requisições Internas · realtime)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
@@ -446,10 +446,10 @@ table.tbl { display: table; min-width: 0; }
       <button data-tab="movpat"><span class="ic"><svg viewBox="0 0 24 24"><path d="M3 7h13l-3-3M21 17H8l3 3"/><rect x="3" y="10" width="6" height="4" rx="1"/><rect x="15" y="14" width="6" height="4" rx="1"/></svg></span>Movimentação</button>
       <button data-tab="manut"><span class="ic"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-2.4z"/></svg></span>Registro de Serviço</button>
       <button data-tab="inventario"><span class="ic"><svg viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg></span>Inventário Sala de Som</button>
+      <button data-tab="biblioteca"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 4h6v16H4z"/><path d="M14 4h6v16h-6z"/><path d="M4 10h16"/></svg></span>Biblioteca de Itens</button>
 
       <div class="cat">Compras</div>
       <button data-tab="compras"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/><path d="M2 3h3l2.4 12.2a2 2 0 0 0 2 1.6h8.8a2 2 0 0 0 2-1.6L22 7H6"/></svg></span>Compras</button>
-      <button data-tab="biblioteca"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 4h6v16H4z"/><path d="M14 4h6v16h-6z"/><path d="M4 10h16"/></svg></span>Biblioteca de Itens</button>
 
 
       <div class="cat">Sistema</div>
@@ -712,8 +712,8 @@ table.tbl { display: table; min-width: 0; }
           </div>
         </div>
         <div class="tbl-wrap"><table class="tbl" id="tbl-hs"><thead><tr>
-          <!-- Tabela D (v6.4): NÚMERO | TIPO | DATA | ITEM + COD. | DESCRIÇÃO | REQUISIÇÃO VINCULADA | STATUS | RECEBIDO -->
-          <th>NÚMERO</th><th>TIPO</th><th>DATA</th><th>ITEM + COD.</th><th>DESCRIÇÃO</th><th>REQUISIÇÃO VINCULADA</th><th>STATUS</th><th>RECEBIDO</th>
+          <!-- Tabela D (v6.4): NÚMERO | TIPO | DATA | ITEM | DESCRIÇÃO | REQUISIÇÃO VINCULADA | STATUS | RECEBIDO -->
+          <th>NÚMERO</th><th>TIPO</th><th>DATA</th><th>ITEM</th><th>DESCRIÇÃO</th><th>REQUISIÇÃO VINCULADA</th><th>STATUS</th><th>RECEBIDO</th>
         </tr></thead><tbody></tbody></table></div>
       </div>
     </section>
@@ -855,7 +855,7 @@ table.tbl { display: table; min-width: 0; }
           </div>
         </div>
         <div class="tbl-wrap"><table class="tbl"><thead>
-          <tr><th>Fonte</th><th>Foto</th><th>Descrição</th><th>Tag / Detalhes</th><th>Qtd</th><th>Status</th></tr>
+          <tr><th>Foto</th><th>Descrição</th><th>Detalhes</th><th>Usos</th><th>Origem</th></tr>
         </thead><tbody id="ic-body"></tbody></table></div>
       </div>
     </section>
@@ -1078,45 +1078,227 @@ table.tbl { display: table; min-width: 0; }
 </div></div>
 
 
-<!-- MODAL NOVA REQUISIÇÃO (v4.8) -->
-<div class="modal-back" id="modal-rq"><div class="modal" style="max-width:680px">
+<!-- MODAL NOVA REQUISIÇÃO (v6.7 · compact) -->
+<style>
+.modal.rq-compact{max-width:640px;padding:16px}
+.modal.rq-compact h3{margin:0 0 2px;font-size:16px}
+.modal.rq-compact .rq-sub{color:var(--fg-mut);font-size:11.5px;margin:0 0 10px}
+.modal.rq-compact .field{margin-bottom:8px}
+.modal.rq-compact .field label{font-size:10.5px;letter-spacing:.05em}
+.modal.rq-compact .field input,.modal.rq-compact .field select,.modal.rq-compact .field textarea{padding:6px 9px;font-size:12.5px;border-radius:8px}
+.modal.rq-compact .field textarea{min-height:40px}
+.modal.rq-compact .row2{gap:8px}
+.modal.rq-compact hr.sep{margin:8px 0;border:0;border-top:1px dashed var(--line-2)}
+.rq-picker-tabs{display:flex;gap:4px;background:var(--bg2);padding:3px;border-radius:9px;border:1px solid var(--line-2);margin-bottom:8px}
+.rq-picker-tabs button{flex:1;padding:5px 8px;font-size:11.5px;border:0;background:transparent;color:var(--fg-mut);border-radius:6px;cursor:pointer;font-weight:600}
+.rq-picker-tabs button.on{background:var(--acc);color:#fff}
+.rq-panel{display:none;padding:8px;background:var(--bg2);border:1px solid var(--line);border-radius:8px}
+.rq-panel.on{display:block}
+.rq-panel input,.rq-panel select{background:var(--bg1);border:1px solid var(--line-2);color:var(--fg);padding:6px 8px;border-radius:7px;font-size:12.5px}
+.rq-sel-list{max-height:160px;overflow:auto;border:1px solid var(--line);border-radius:8px;background:var(--bg2);padding:4px}
+.rq-sel-row{display:grid;grid-template-columns:1fr 60px auto;gap:6px;align-items:center;padding:5px 6px;border-bottom:1px dashed var(--line);font-size:12.5px}
+.rq-sel-row:last-child{border-bottom:0}
+.rq-sel-row .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rq-sel-row .nm small{display:block;color:var(--fg-mut);font-size:10.5px}
+.rq-sel-row input[type=number]{width:100%;background:var(--bg1);border:1px solid var(--line-2);color:var(--fg);padding:3px 6px;border-radius:6px;font-size:12px}
+.rq-lp-list-wrap{border:1px solid var(--line-2);border-radius:8px;background:var(--bg1);padding:4px;max-height:220px;overflow:auto}
+.rq-lp-chk{display:grid;grid-template-columns:auto 40px 1fr auto;gap:10px;align-items:center;padding:8px 10px;font-size:12.5px;border-bottom:1px solid var(--line);border-radius:6px;transition:background .15s;cursor:pointer}
+.rq-lp-chk:hover{background:var(--bg2)}
+.rq-lp-chk:last-child{border-bottom:0}
+.rq-lp-chk input[type=checkbox]{width:16px;height:16px;flex-shrink:0;accent-color:var(--acc)}
+.rq-lp-chk .rq-lp-thumb{width:40px;height:40px;border-radius:6px;object-fit:cover;border:1px solid var(--line-2);background:var(--bg2)}
+.rq-lp-chk .rq-lp-thumb.placeholder{display:grid;place-items:center;font-size:16px;color:var(--fg-dim)}
+.rq-lp-chk .rq-lp-info{min-width:0;display:flex;flex-direction:column;gap:2px}
+.rq-lp-chk .rq-lp-info b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;color:var(--fg)}
+.rq-lp-chk .rq-lp-info small{color:var(--fg-mut);font-size:10.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rq-lp-chk .rq-lp-qtd{background:var(--bg3);border:1px solid var(--line-2);border-radius:99px;padding:2px 10px;font-size:11px;font-weight:600;color:var(--fg);white-space:nowrap}
+.modal.rq-compact .filmora-up{border-radius:10px;padding:1px}
+.modal.rq-compact .filmora-up .fm-body{min-height:44px !important;padding:6px 10px !important}
+/* Wizard 3-etapas (v6.8 FIX3) */
+.rq-wiz-steps{display:flex;gap:6px;margin:2px 0 12px}
+.rq-wiz-steps .stp{flex:1;display:flex;align-items:center;gap:6px;padding:6px 8px;border:1px solid var(--line-2);border-radius:8px;background:var(--bg2);font-size:11.5px;color:var(--fg-mut);font-weight:600}
+.rq-wiz-steps .stp .num{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:var(--line-2);color:var(--fg);font-size:10.5px}
+.rq-wiz-steps .stp.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.rq-wiz-steps .stp.on .num{background:rgba(255,255,255,.25);color:#fff}
+.rq-wiz-steps .stp.done{border-color:var(--acc)}
+.rq-step{display:none}
+.rq-step.on{display:block}
+</style>
+<div class="modal-back" id="modal-rq"><div class="modal rq-compact">
   <button class="close" data-close>×</button>
-  <h3>Nova Requisição Interna</h3>
-  <p class="muted tiny">Documento (EST01, EST04, etc.) com itens vindos da Lista Prévia ou do MXM.</p>
+  <h3>＋ Nova Requisição Interna</h3>
+  <p class="rq-sub">Cadastro em 3 etapas: dados · itens (opcional) · documento MXM.</p>
+  <div class="rq-wiz-steps" id="rq-wiz-steps">
+    <div class="stp on" data-stp="1"><span class="num">1</span> Requisição</div>
+    <div class="stp"    data-stp="2"><span class="num">2</span> Itens (opcional)</div>
+    <div class="stp"    data-stp="3"><span class="num">3</span> Documento MXM</div>
+  </div>
+
+  <!-- ETAPA 1 -->
+  <div class="rq-step on" data-step="1">
   <div class="row2">
     <div class="field"><label>Tipo</label><select id="rq-tipo"><option>EST01</option><option>EST04</option><option>Outros</option></select></div>
-    <div class="field"><label>Nº de Controle</label>
-      <div class="flex"><input id="rq-num" style="flex:1;background:var(--bg2);border:1px solid var(--line-2);color:var(--fg);padding:9px 11px;border-radius:9px" placeholder="EST01-2025-001"/>
-      <button class="btn search-pill" id="rq-search" title="Buscar no Outlook">🔍</button></div>
+    <div class="field"><label>Nº Controle</label>
+      <div class="flex" style="gap:4px"><input id="rq-num" style="flex:1" placeholder="EST01-2025-001"/><button class="btn sm" id="rq-search" title="Enviar para email do almoxarifado" aria-label="Enviar para email do almoxarifado">✉️</button></div>
     </div>
   </div>
   <div class="row2">
     <div class="field"><label>Data</label><input id="rq-data" type="date"/></div>
     <div class="field"><label>Solicitante / Setor</label><input id="rq-sol" placeholder="Nome — Setor"/></div>
   </div>
-  <div class="field"><label>Descrição / Objeto</label><textarea id="rq-desc"></textarea></div>
-  <div class="field"><label>Documento Anexo</label>
-    <input id="rq-file" type="file" accept=".pdf,.xls,.xlsx,.csv,.png,.jpg"/>
-    <label id="rq-attach-wrap" class="flex" style="gap:6px;margin-top:6px;font-size:12.5px;display:none">
-      <input type="checkbox" id="rq-attach-confirm" checked/>
-      <span>Salvar e anexar o arquivo enviado a esta requisição (<b id="rq-attach-name">-</b>)</span>
-    </label>
-    <div class="flex" style="gap:8px;margin-top:8px;flex-wrap:wrap">
-      <span class="muted tiny">📎 Confira manualmente os itens conforme o documento anexo. A inserção é individual.</span>
+  <div class="field"><label>Descrição / Objeto</label><textarea id="rq-desc" placeholder="Objeto da requisição"></textarea></div>
+  </div>
+
+  <!-- ETAPA 2 -->
+  <div class="rq-step" data-step="2">
+  <label class="flex" style="gap:8px;align-items:center;padding:8px;border:1px dashed var(--line-2);border-radius:8px;margin-bottom:10px;font-size:12.5px;cursor:pointer">
+    <input type="checkbox" id="rq-itens-noanexo"/>
+    <span>📎 <b>Itens constam na requisição anexada</b> — pular seleção de itens nesta etapa.</span>
+  </label>
+  <div id="rq-itens-wrap">
+  <div class="field" style="margin-bottom:6px"><label style="display:flex;justify-content:space-between;align-items:center">📦 Itens da requisição <span class="tiny muted" id="rq-sel-count" style="text-transform:none;letter-spacing:0">0 selecionado(s)</span></label>
+    <div class="rq-picker-tabs" id="rq-picker-tabs">
+      <button type="button" data-rq-tab="bib" class="on">📚 Biblioteca</button>
+      <button type="button" data-rq-tab="lp">📋 Lista Prévia</button>
+      <button type="button" data-rq-tab="new">＋ Novo Item</button>
+    </div>
+    <div class="rq-panel on" data-rq-panel="bib">
+      <div class="flex" style="gap:6px;align-items:center">
+        <input id="rq-bib-search" list="bib-suggest" placeholder="Buscar item na biblioteca..." style="flex:1"/>
+        <input id="rq-bib-qtd" type="number" min="1" value="1" style="width:70px" title="Qtd"/>
+        <button type="button" class="btn sm primary" id="rq-bib-add">Adicionar</button>
+      </div>
+      <div class="tiny muted" style="margin-top:4px">Digite e escolha um item já cadastrado. Se não existir, use aba <b>+ Novo Item</b>.</div>
+    </div>
+    <div class="rq-panel" data-rq-panel="lp">
+      <div id="rq-lp-list" class="rq-lp-list-wrap"></div>
+      <div class="flex between" style="margin-top:6px;gap:6px">
+        <span class="tiny muted">Marque os pendentes que entram nesta requisição.</span>
+        <button type="button" class="btn sm primary" id="rq-lp-add">Adicionar marcados</button>
+      </div>
+    </div>
+    <div class="rq-panel" data-rq-panel="new">
+      <div class="row2" style="gap:6px;margin-bottom:6px">
+        <input id="rq-new-nome" placeholder="Nome do item"/>
+        <select id="rq-new-cat"><option>Som</option><option>TI</option><option>Audiovisual</option><option>Cabos</option><option>Mobiliário</option><option selected>Outros</option></select>
+      </div>
+      <div class="row2" style="gap:6px;margin-bottom:6px">
+        <input id="rq-new-det" placeholder="Detalhes (marca, modelo)"/>
+        <input id="rq-new-qtd" type="number" min="1" value="1" placeholder="Qtd"/>
+      </div>
+      <div class="flex between">
+        <span class="tiny muted">Salva na Biblioteca ↔ Lista Prévia e já vincula.</span>
+        <button type="button" class="btn sm primary" id="rq-new-add">＋ Adicionar</button>
+      </div>
+    </div>
+    <div style="margin-top:8px">
+      <div class="tiny muted" style="margin-bottom:4px">Itens selecionados</div>
+      <div id="rq-sel-list" class="rq-sel-list"><div class="muted tiny" style="padding:8px;text-align:center">Nenhum item ainda.</div></div>
     </div>
   </div>
-  <div class="field"><label>Itens vinculados (Lista Prévia) <span class="tiny muted">· clique no 📷 para anexar foto do item</span></label>
-    <div id="rq-checklist" style="max-height:220px;overflow:auto;border:1px solid var(--line);padding:8px;border-radius:8px;background:var(--bg2)"></div>
   </div>
-  <div class="field"><label>Fotos dos itens (adicionais) <span class="tiny muted">· múltiplas · até 2MB cada</span></label>
-    <input id="rq-fotos" type="file" accept="image/*" multiple/>
-    <div id="rq-fotos-prev" class="flex" style="gap:6px;flex-wrap:wrap;margin-top:8px"></div>
   </div>
-  <div class="flex between">
-    <button class="btn ghost" data-close>Cancelar</button>
-    <button class="btn primary" id="rq-save">💾 Salvar Requisição</button>
+
+  <!-- ETAPA 3 -->
+  <div class="rq-step" data-step="3">
+  <p class="tiny muted" style="margin:0 0 10px">Anexe o <b>PDF da requisição gerada no MXM</b> (documento de controle). Fotos adicionais são opcionais.</p>
+  <div class="field">
+    <label>Documento MXM (PDF da requisição)</label>
+    <label class="filmora-up" id="rq-file-drop" style="display:block">
+      <input id="rq-file" type="file" accept=".pdf,.xls,.xlsx,.csv,.png,.jpg"/>
+      <div class="fm-body">
+        <div class="fm-icon"><svg viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M12 12v6"/><path d="M9 15l3-3 3 3"/></svg></div>
+        <div class="fm-txt">
+          <p class="fm-title">Documento MXM</p>
+          <div class="fm-hint"><span class="fm-pill">PDF · XLS · CSV</span><span id="rq-file-info">Clique ou arraste o arquivo</span></div>
+        </div>
+        <span class="fm-cta">Selecionar</span>
+      </div>
+    </label>
+    <label id="rq-attach-wrap" class="flex" style="gap:6px;margin-top:6px;font-size:11.5px;display:none;align-items:center">
+      <input type="checkbox" id="rq-attach-confirm" checked/><span>Anexar (<b id="rq-attach-name">-</b>)</span>
+    </label>
+  </div>
+  <div class="field" style="margin-top:10px">
+    <label>Fotos adicionais (até 2MB)</label>
+    <label class="filmora-up" id="rq-fotos-drop" style="display:block">
+      <input id="rq-fotos" type="file" accept="image/*" multiple/>
+      <div class="fm-body">
+        <div class="fm-icon"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10.5" r="1.5"/><path d="M21 17l-5-5-9 9"/></svg></div>
+        <div class="fm-txt">
+          <p class="fm-title">Fotos adicionais</p>
+          <div class="fm-hint"><span class="fm-pill">PNG · JPG · WEBP</span><span>Opcional — múltiplas imagens</span></div>
+        </div>
+        <span class="fm-cta">Selecionar</span>
+      </div>
+    </label>
+    <div id="rq-fotos-prev" class="flex" style="gap:6px;flex-wrap:wrap;margin:8px 0 0"></div>
+  </div>
+  </div>
+
+  <!-- checklist legado mantido oculto: alguns fluxos internos ainda leem esses inputs -->
+  <div id="rq-checklist" style="display:none"></div>
+
+  <div class="flex between" style="margin-top:10px;gap:6px">
+    <div class="flex" style="gap:6px">
+      <button class="btn ghost" data-close>Cancelar</button>
+      <button class="btn" id="rq-wiz-back" style="display:none">← Voltar</button>
+    </div>
+    <div class="flex" style="gap:6px">
+      <button class="btn primary" id="rq-wiz-next">Próximo →</button>
+      <button class="btn primary" id="rq-save" style="display:none">💾 Salvar Requisição</button>
+    </div>
   </div>
 </div></div>
+<script>
+/* Wizard 3-etapas Nova Requisição (v6.8 FIX3) */
+(function(){
+  var modal=document.getElementById('modal-rq'); if(!modal) return;
+  var cur=1, max=3;
+  var steps=modal.querySelectorAll('.rq-step');
+  var chips=modal.querySelectorAll('#rq-wiz-steps .stp');
+  var btnBack=document.getElementById('rq-wiz-back');
+  var btnNext=document.getElementById('rq-wiz-next');
+  var btnSave=document.getElementById('rq-save');
+  var chkNoAnexo=document.getElementById('rq-itens-noanexo');
+  var wrapItens=document.getElementById('rq-itens-wrap');
+  if(chkNoAnexo && wrapItens){
+    chkNoAnexo.addEventListener('change',function(){ wrapItens.style.display=chkNoAnexo.checked?'none':''; });
+  }
+  function show(n){
+    cur=Math.max(1,Math.min(max,n));
+    steps.forEach(function(s){ s.classList.toggle('on', +s.dataset.step===cur); });
+    chips.forEach(function(c){
+      var i=+c.dataset.stp;
+      c.classList.toggle('on', i===cur);
+      c.classList.toggle('done', i<cur);
+    });
+    btnBack.style.display = cur>1 ? '' : 'none';
+    btnNext.style.display = cur<max ? '' : 'none';
+    btnSave.style.display = cur===max ? '' : 'none';
+  }
+  function validate(step){
+    if(step===1){
+      var num=(document.getElementById('rq-num').value||'').trim();
+      if(!num){ try{toast('Informe o Nº de Controle')}catch(_){alert('Informe o Nº de Controle')} return false; }
+      var d=document.getElementById('rq-data'); if(d && !d.value) d.value=(new Date()).toISOString().slice(0,10);
+    }
+    return true;
+  }
+  btnNext.addEventListener('click',function(){ if(validate(cur)) show(cur+1); });
+  btnBack.addEventListener('click',function(){ show(cur-1); });
+  // Reset ao abrir
+  var obs=new MutationObserver(function(){
+    if(modal.classList.contains('open')){
+      show(1);
+      if(chkNoAnexo){ chkNoAnexo.checked=false; if(wrapItens) wrapItens.style.display=''; }
+    }
+  });
+  obs.observe(modal,{attributes:true,attributeFilter:['class']});
+})();
+</script>
+
+
 
 <!-- MODAL NOVA REQUISIÇÃO DE COMPRA (v4.8) -->
 <div class="modal-back" id="modal-pd"><div class="modal" style="max-width:560px">
@@ -1178,6 +1360,12 @@ table.tbl { display: table; min-width: 0; }
     </label>
   </div>
 <div id="it-foto-prev" class="fm-preview"></div>
+  <div id="it-foto-actions" class="flex" style="gap:6px;margin-top:6px;display:none;flex-wrap:wrap">
+    <button type="button" class="btn sm" id="it-foto-view" title="Visualizar em tamanho real">👁 Ver</button>
+    <button type="button" class="btn sm" id="it-foto-replace" title="Substituir imagem">🔄 Substituir</button>
+    <button type="button" class="btn sm warn" id="it-foto-remove" title="Remover imagem">🗑 Remover</button>
+    <span class="tiny muted" style="align-self:center">· ou cole com <b>Ctrl+V</b></span>
+  </div>
   <div class="flex between">
     <button class="btn ghost" data-close>Cancelar</button>
     <button class="btn primary" id="it-save">💾 Salvar</button>
@@ -1209,6 +1397,68 @@ table.tbl { display: table; min-width: 0; }
   </div>
 </div></div>
 
+
+<!-- MODAL · ENVIAR ITEM PARA REQUISIÇÃO INTERNA (v6.5) -->
+<div class="modal-back" id="modal-send-req"><div class="modal" style="max-width:520px">
+  <button class="x" onclick="document.getElementById('modal-send-req').classList.remove('open')">×</button>
+  <h3>📤 Enviar para Requisição Interna</h3>
+  <p class="muted tiny">Informe o tipo e o número da requisição que receberá este item.</p>
+  <div class="field"><label>Item</label>
+    <div id="sr-info" class="tiny" style="padding:8px 10px;background:var(--bg2);border:1px solid var(--line-2);border-radius:8px">-</div>
+  </div>
+  <div class="grid-2">
+    <div class="field"><label>Tipo de Requisição</label>
+      <div class="flex" style="gap:6px">
+        <select id="sr-tipo" style="flex:1"></select>
+        <button type="button" class="btn sm" id="sr-tipo-new" title="Cadastrar novo tipo na biblioteca">＋ Novo</button>
+      </div>
+      <div class="tiny muted" style="margin-top:4px">Ex.: EST01, EST02, EST04, COMP01, COMP04…</div>
+    </div>
+    <div class="field"><label>Número da Requisição</label>
+      <input id="sr-num" placeholder="EST01-2025-001"/>
+      <div class="tiny muted" style="margin-top:4px">Deixe em branco para criar como <b>PENDENTE</b> e preencher depois.</div>
+    </div>
+  </div>
+  <div class="flex" style="justify-content:flex-end;gap:8px;margin-top:10px">
+    <button class="btn" onclick="document.getElementById('modal-send-req').classList.remove('open')">Cancelar</button>
+    <button class="btn primary" id="sr-save">💾 Vincular à Requisição</button>
+  </div>
+</div></div>
+<script>
+(function(){
+  function $(id){return document.getElementById(id)}
+  function bind(){
+    var tipoSel=$('sr-tipo'); if(!tipoSel) return setTimeout(bind,200);
+    tipoSel.addEventListener('change', function(){ try{ window.srSuggestNumero && window.srSuggestNumero(); }catch(_){}} );
+    $('sr-tipo-new').onclick=function(){
+      var t=prompt('Novo tipo de requisição (ex.: EST05, COMP02):','');
+      if(t===null) return;
+      t=(t||'').trim().toUpperCase();
+      if(!t){ try{window.toast&&window.toast('Tipo inválido')}catch(_){}; return; }
+      window.reqTiposAdd(t);
+      var list=window.reqTiposList();
+      tipoSel.innerHTML=list.map(function(x){return '<option value="'+x+'"'+(x===t?' selected':'')+'>'+x+'</option>';}).join('');
+      try{ window.srSuggestNumero && window.srSuggestNumero(); }catch(_){}
+      try{window.toast&&window.toast('✅ Tipo "'+t+'" salvo na biblioteca de tipos')}catch(_){}
+    };
+    $('sr-save').onclick=function(){
+      var bk=$('modal-send-req'); var id=bk.dataset.itemId; if(!id) return;
+      var it=(window.state.itens||[]).find(function(x){return x.id===id}); if(!it) return;
+      var tipo=tipoSel.value||'';
+      var num=($('sr-num').value||'').trim();
+      if(!num){ num='PENDENTE-'+tipo+'-'+Date.now().toString(36).toUpperCase(); }
+      it.req=num; it.reqTipo=tipo; it.st='Incluído em Req.';
+      try{ window.save && window.save(); }catch(_){}
+      try{ window.renderItens && window.renderItens(); }catch(_){}
+      bk.classList.remove('open');
+      var vw=$('modal-item-view'); if(vw) vw.classList.remove('open');
+      try{ window.toast && window.toast('📤 Item vinculado a '+num); }catch(_){}
+    };
+  }
+  bind();
+})();
+</script>
+
 <!-- MODAL BIBLIOTECA DE ITENS -->
 <div class="modal-back" id="modal-bib"><div class="modal" style="max-width:560px">
   <button class="close" data-close>×</button>
@@ -1237,6 +1487,9 @@ table.tbl { display: table; min-width: 0; }
     <button class="btn ghost" data-close>Fechar</button>
     <button class="btn primary" id="bib-view-edit">✎ Editar</button>
   </div>
+</div></div>
+
+
 
 <!-- MODAL JSON IMPORTACAO -->
 <div class="modal-back" id="modal-ia-json"><div class="modal" style="max-width:720px">
@@ -1286,7 +1539,14 @@ table.tbl { display: table; min-width: 0; }
 /* ==================== CORE UTILS ==================== */
 const $=id=>document.getElementById(id);
 const escapeHTML=s=>String(s??"").replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const uid=p=>p+"-"+Date.now().toString(36)+Math.random().toString(36).slice(2,6).toUpperCase();
+const uid=p=>{
+  if(p==='IT'){
+    let max=0;
+    try{(window.state&&state.itens||[]).forEach(i=>{const n=parseInt(String(i.id||'').replace(/\D/g,''),10); if(!isNaN(n)&&n>max) max=n;});}catch(_){}
+    return String(max+1).padStart(4,'0');
+  }
+  return p+"-"+Date.now().toString(36)+Math.random().toString(36).slice(2,6).toUpperCase();
+};
 const fmtDate=d=>{if(!d)return"-";const x=new Date(d);return x.toLocaleString('pt-BR')};
 const fmtDay=d=>{if(!d)return"-";const x=new Date(d);return x.toLocaleDateString('pt-BR')};
 const todayISO=()=>new Date().toISOString().slice(0,10);
@@ -1294,7 +1554,7 @@ const todayISO=()=>new Date().toISOString().slice(0,10);
 const ADMIN={user:"marciooliveira",name:"Marcio Oliveira",role:"gestor",pass:"Deadpool365*",mail:"paulooliveira@ce.senac.br",phone:"",builtin:true};
 const LS_KEY="modesk_omega_v44";
 let state={
-  chamados:[], laudos:[], manut:[], itens:[], reqs:[], pedidos:[], eventos:[], inventario:[], biblioteca:[], imports:[], premiumMails:[ADMIN.mail],
+  chamados:[], laudos:[], manut:[], itens:[], reqs:[], pedidos:[], eventos:[], inventario:[], biblioteca:[], imports:[], premiumMails:[ADMIN.mail], reqTipos:['EST01','EST02','EST04','COMP01','COMP04'],
   users:[], fb:{apiKey:"",projectId:"",authDomain:"",appId:""}, sound:true
 };
 window.state=state;
@@ -1406,16 +1666,41 @@ function save(){
   if(!_cloudApplying) scheduleCloudStateSync();
 }
 
+// FIX: remove blobs base64 antes de sincronizar (Firestore aceita no máx ~1MB por doc).
+function __stripFotoBlob(f){
+  if(!f) return f;
+  if(typeof f==='string'){ return f.startsWith('data:')? null : f; }
+  var url=f.url||(typeof f.data==='string'&&!f.data.startsWith('data:')?f.data:'');
+  if(!url) return null; // sem URL remota -> descarta blob local (fica apenas no dispositivo)
+  return {name:f.name||'foto', size:f.size||0, mimetype:f.mimetype||'', url:url, data:url};
+}
+function __sanitizeForCloud(arr){
+  if(!Array.isArray(arr)) return [];
+  return arr.map(function(x){
+    if(!x||typeof x!=='object') return x;
+    var c=Object.assign({},x);
+    if('foto' in c) c.foto=__stripFotoBlob(c.foto);
+    if(Array.isArray(c.fotosExtras)) c.fotosExtras=c.fotosExtras.map(__stripFotoBlob).filter(Boolean);
+    if(Array.isArray(c.fotos)) c.fotos=c.fotos.map(__stripFotoBlob).filter(Boolean);
+    return c;
+  });
+}
 function scheduleCloudStateSync(){
   if(!window.db) return;
   clearTimeout(_cloudSaveTimer);
   _cloudSaveTimer=setTimeout(()=>{
     try{
-      window.db.collection('modesk_omega_sync').doc('planilhas').set({
-        itens:state.itens||[], reqs:state.reqs||[], pedidos:state.pedidos||[],
-        inventario:compactInventoryForStorage(state.inventario||[]), laudos:state.laudos||[], manut:state.manut||[],
+      var payload={
+        itens:__sanitizeForCloud(state.itens||[]),
+        reqs:__sanitizeForCloud(state.reqs||[]),
+        pedidos:__sanitizeForCloud(state.pedidos||[]),
+        inventario:__sanitizeForCloud(compactInventoryForStorage(state.inventario||[])),
+        laudos:__sanitizeForCloud(state.laudos||[]),
+        manut:__sanitizeForCloud(state.manut||[]),
         eventos:state.eventos||[], updatedAt:new Date()
-      },{merge:true}).catch(err=>{ console.warn('[CLOUD] inventário/listas não sincronizaram',err); });
+      };
+      window.db.collection('modesk_omega_sync').doc('planilhas').set(payload,{merge:true})
+        .catch(err=>{ console.warn('[CLOUD] inventário/listas não sincronizaram',err); try{toast&&toast('⚠️ Sincronização falhou: '+(err.code||err.message||''))}catch(_){} });
     }catch(e){}
   },700);
 }
@@ -1443,6 +1728,18 @@ function load(){
   }catch(e){}
   if(!Array.isArray(state.users)) state.users=[];
   if(!Array.isArray(state.inventario)) state.inventario=[];
+  // Migração: converter IDs antigos (IT-xxxxxx) em sequenciais numéricos
+  try{
+    if(Array.isArray(state.itens) && state.itens.length){
+      const ordenados=state.itens.slice().sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));
+      let mudou=false;
+      ordenados.forEach((it,idx)=>{
+        const novo=String(idx+1).padStart(4,'0');
+        if(it.id!==novo){ it.id=novo; mudou=true; }
+      });
+      if(mudou){ try{localStorage.setItem(LS_KEY,JSON.stringify(state));}catch(_){} }
+    }
+  }catch(_){}
   state.__loaded=true;
   (async()=>{
     try{
@@ -2139,19 +2436,24 @@ function openItem(id){
   if(id){
     const e=state.itens.find(x=>x.id===id);if(!e)return;
     editingIt=e;
+    window.editingIt=editingIt;
     if($('it-tipo')) $('it-tipo').value=e.tipo||'Outros';
     $('it-desc').value=e.desc||'';$('it-det').value=e.det||'';$('it-qtd').value=e.qtd||1;$('it-foto').value='';
-    $('it-foto-prev').innerHTML=e.foto?`<div class="fm-thumb"><img src="${(e.foto.data||e.foto.url||'')}"/><div class="cap">${escapeHTML(e.foto.name||'foto')}</div></div>`:'';
-    fmReset('it-foto-drop','Anexar foto do equipamento');if(e.foto)fmMarkFilled('it-foto-drop',e.foto.name);
+    const src=fotoSrcOf(e.foto);
+    $('it-foto-prev').innerHTML=src?`<div class="fm-thumb"><img src="${src}"/><div class="cap">${escapeHTML((e.foto&&e.foto.name)||'foto')}</div></div>`:'';
+    fmReset('it-foto-drop','Anexar foto do equipamento');if(src)fmMarkFilled('it-foto-drop',(e.foto&&e.foto.name)||'foto anexada');
     document.querySelector('#modal-it h3').textContent='Editar Item · '+e.id;
   }else{
     editingIt={id:uid('IT'),desc:'',det:'',qtd:1,tipo:'Outros',foto:null,st:'Pendente',req:null};
+    window.editingIt=editingIt;
     if($('it-tipo')) $('it-tipo').value='Outros';
     $('it-desc').value='';$('it-det').value='';$('it-qtd').value=1;$('it-foto').value='';$('it-foto-prev').innerHTML='';fmReset('it-foto-drop','Anexar foto do equipamento');
     document.querySelector('#modal-it h3').textContent='Item da Lista Prévia';
   }
   refreshItemSuggest();
+  try{ itFotoRefreshUI(); }catch(_){}
   $('modal-it').classList.add('open');
+
 }
 $('it-new').onclick=()=>openItem(null);
 if($('it-tipo')) $('it-tipo').addEventListener('change',()=>{ refreshItemSuggest(); });
@@ -2162,11 +2464,44 @@ if($('it-desc')) $('it-desc').addEventListener('input',()=>{
   const m=arr.find(x=>(x.desc||'').toLowerCase()===$('it-desc').value.toLowerCase().trim());
   if(m && m.det && !$('it-det').value) $('it-det').value=m.det;
 });
+function itFotoRefreshUI(){
+  const acts=$('it-foto-actions'); if(!acts) return;
+  const src=editingIt ? fotoSrcOf(editingIt.foto) : '';
+  const has=!!src;
+  acts.style.display=has?'flex':'none';
+  if(has){
+    $('it-foto-prev').innerHTML=`<div class="fm-thumb"><img src="${src}" style="cursor:zoom-in" id="it-foto-thumb"/><div class="cap">${escapeHTML((editingIt.foto&&editingIt.foto.name)||'foto')}</div></div>`;
+    fmMarkFilled('it-foto-drop', (editingIt.foto&&editingIt.foto.name)||'foto anexada');
+    const th=document.getElementById('it-foto-thumb'); if(th) th.onclick=()=>window.open(src,'_blank');
+  }else{
+    $('it-foto-prev').innerHTML='';
+    fmReset('it-foto-drop','Anexar foto do equipamento');
+  }
+}
 $('it-foto').onchange=async e=>{
   const f=e.target.files[0];if(!f)return;
-  if(f.size>2*1024*1024){toast('Foto deve ter até 2MB');$('it-foto').value='';return}
-  editingIt.foto=await window.uploadAnexoDrive(f);
-  $('it-foto-prev').innerHTML=`<div class="fm-thumb"><img src="${(editingIt.foto.data||editingIt.foto.url||'')}"/><div class="cap">${escapeHTML(editingIt.foto.name||'foto')}</div></div>`;fmMarkFilled('it-foto-drop',editingIt.foto.name);
+  if(f.size>8*1024*1024){toast('Foto deve ter até 8MB');$('it-foto').value='';return}
+  try{
+    editingIt.foto=await window.uploadAnexoDrive(f);
+    itFotoRefreshUI();
+    toast('📷 Foto anexada ao item (sincronizada)');
+  }catch(err){
+    // FIX: não salvamos mais base64 local — sem upload não há sincronização entre usuários
+    console.warn('Upload da foto falhou',err);
+    $('it-foto').value='';
+    toast('❌ Falha ao enviar a foto. Verifique a conexão e tente novamente — a foto NÃO foi anexada.',5000);
+  }
+};
+if($('it-foto-view')) $('it-foto-view').onclick=()=>{
+  if(!editingIt||!editingIt.foto) return;
+  const src=fotoSrcOf(editingIt.foto); if(src) window.open(src,'_blank');
+};
+if($('it-foto-replace')) $('it-foto-replace').onclick=()=>{ $('it-foto').value=''; $('it-foto').click(); };
+if($('it-foto-remove')) $('it-foto-remove').onclick=()=>{
+  if(!editingIt) return;
+  if(!confirm('Remover a foto deste item?')) return;
+  editingIt.foto=null; $('it-foto').value=''; itFotoRefreshUI();
+  toast('Foto removida');
 };
 $('it-save').onclick=()=>{
   const tipo=($('it-tipo')&&$('it-tipo').value)||'Outros';
@@ -2177,6 +2512,7 @@ $('it-save').onclick=()=>{
   save();$('modal-it').classList.remove('open');renderItens();toast('✅ Item salvo no catálogo ('+tipo+')');
 };
 $('it-filter').onchange=renderItens;
+function fotoSrcOf(f){ if(!f) return ''; if(typeof f==='string') return f; return f.data||f.url||f.src||''; }
 function renderItens(){
   const f=$('it-filter').value;const tb=$('tbl-it').querySelector('tbody');
   const all=state.itens.filter(i=>!f||i.st===f);
@@ -2187,8 +2523,8 @@ function renderItens(){
     <td>${escapeHTML(i.desc)}</td>
     <td class="tiny">${escapeHTML(i.det||'-')}</td>
     <td>${i.qtd}</td>
-    <td>${i.foto?`<img src="${(i.foto.data||i.foto.url||'')}" style="width:42px;height:42px;object-fit:cover;border-radius:6px;border:1px solid var(--line-2);cursor:pointer" data-img="${i.id}"/>`:'-'}</td>
-    <td><span class="badge ${i.st==='Pendente'?'warn':'ok'}">${escapeHTML(i.st)}</span>${i.req?'<div class="tiny muted">'+escapeHTML(i.req)+'</div>':''}</td>
+    <td>${(function(){var s=fotoSrcOf(i.foto);return s?`<img src="${s}" style="width:42px;height:42px;object-fit:cover;border-radius:6px;border:1px solid var(--line-2);cursor:pointer" data-img="${i.id}"/>`:'-';})()}</td>
+    <td><span class="badge ${i.st==='Pendente'?'warn':'ok'}">${escapeHTML(i.st)}</span></td>
     <td><div class="flex" style="gap:4px"><button class="btn sm" data-view-it="${i.id}" title="Visualizar item">👁</button><button class="btn sm" data-edit="${i.id}" title="Editar">✎</button><button class="btn sm" data-send-req="${i.id}" title="Enviar para Requisição Interna">📤</button>${canDeleteLista(i)?`<button class="btn sm warn" data-del="${i.id}">🗑</button>`:''}</div></td>
   </tr>`).join('')||'<tr><td colspan="6" class="muted" style="text-align:center;padding:20px">Sem itens.</td></tr>';
   tb.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>openItem(b.dataset.edit));
@@ -2200,7 +2536,7 @@ function renderItens(){
   const gw=$('it-grid-wrap');
   if(gw){
     gw.innerHTML=list.map(i=>{
-      const foto=i.foto?`<img src="${(i.foto.data||i.foto.url||'')}" style="width:100%;height:120px;object-fit:cover;border-radius:8px 8px 0 0;cursor:pointer"/>`:`<div style="height:120px;display:grid;place-items:center;background:var(--bg3);border-radius:8px 8px 0 0;color:var(--fg-dim);font-size:11px">Sem foto</div>`;
+      const _fs1=fotoSrcOf(i.foto); const foto=_fs1?`<img src="${_fs1}" style="width:100%;height:120px;object-fit:cover;border-radius:8px 8px 0 0;cursor:pointer"/>`:`<div style="height:120px;display:grid;place-items:center;background:var(--bg3);border-radius:8px 8px 0 0;color:var(--fg-dim);font-size:11px">Sem foto</div>`;
       const stCls=i.st==='Pendente'?'warn':'ok';
       return `<div style="background:var(--bg2);border:1px solid var(--line);border-radius:10px;overflow:hidden;transition:.15s" onmouseover="this.style.borderColor='var(--acc)'" onmouseout="this.style.borderColor='var(--line)'">
         <div data-view-it="${escapeHTML(i.id)}" style="cursor:pointer">${foto}</div>
@@ -2216,83 +2552,53 @@ function renderItens(){
     gw.querySelectorAll('[data-send-req]').forEach(b=>b.onclick=ev=>{ev.stopPropagation();sendItemToReq(b.dataset.sendReq)});
     gw.querySelectorAll('[data-edit]').forEach(b=>b.onclick=ev=>{ev.stopPropagation();openItem(b.dataset.edit)});
   }
-  // Groups (grouped by req number)
-  const gp=$('it-groups-wrap');
-  if(gp){
-    const keys=Object.keys(grouped);
-    gp.innerHTML=keys.map(k=>{
-      const items=grouped[k];
-      const pend=k.startsWith('PENDENTE-');
-      const label=pend?`⏳ Requisição pendente <code>${escapeHTML(k)}</code>`:`📦 Requisição <code>${escapeHTML(k)}</code>`;
-      const cards=items.map(i=>{
-        const foto=i.foto?`<img src="${(i.foto.data||i.foto.url||'')}" style="width:100%;height:100px;object-fit:cover;border-radius:6px 6px 0 0"/>`:`<div style="height:100px;display:grid;place-items:center;background:var(--bg3);border-radius:6px 6px 0 0;color:var(--fg-dim);font-size:11px">Sem foto</div>`;
-        return `<div data-view-it="${escapeHTML(i.id)}" style="background:var(--bg2);border:1px solid var(--line);border-radius:8px;overflow:hidden;cursor:pointer">${foto}<div style="padding:6px 8px"><div style="font-weight:600;font-size:12.5px">${escapeHTML(i.desc||'-')}</div><div class="tiny muted">Qtd ${i.qtd||1}</div></div></div>`;
-      }).join('');
-      const rows=items.map(i=>`<tr><td>${escapeHTML(i.desc)}</td><td class="tiny">${escapeHTML(i.det||'-')}</td><td>${i.qtd}</td><td>${i.foto?`<img src="${(i.foto.data||i.foto.url||'')}" data-img="${i.id}" style="width:36px;height:36px;object-fit:cover;border-radius:5px;cursor:pointer"/>`:'-'}</td><td><button class="btn sm" data-view-it="${i.id}">👁</button></td></tr>`).join('');
-      return `<div class="card" style="padding:10px;border:1px solid var(--line-2)">
-        <div class="flex between" style="align-items:center;cursor:pointer" data-toggle="${escapeHTML(k)}">
-          <div>${label} <span class="muted tiny">· ${items.length} item(ns)</span></div>
-          <div class="flex" style="gap:6px">
-            <div class="flex" style="gap:0;border:1px solid var(--line-2);border-radius:7px;overflow:hidden" data-gview="${escapeHTML(k)}">
-              <button class="btn sm primary" data-gv="list" style="border-radius:0;border:0" onclick="event.stopPropagation()">☰</button>
-              <button class="btn sm" data-gv="grid" style="border-radius:0;border:0" onclick="event.stopPropagation()">▦</button>
-            </div>
-            ${pend?`<button class="btn sm primary" data-set-num="${escapeHTML(k)}" onclick="event.stopPropagation()">✎ Nº Req.</button>`:`<button class="btn sm" data-set-num="${escapeHTML(k)}" onclick="event.stopPropagation()">Alterar nº</button>`}
-            <span style="font-weight:700" data-caret="${escapeHTML(k)}">▾</span>
-          </div>
-        </div>
-        <div data-body="${escapeHTML(k)}" style="margin-top:10px">
-          <div data-body-list="${escapeHTML(k)}"><table class="tbl"><thead><tr><th>Item</th><th>Detalhes</th><th>Qtd</th><th>Foto</th><th>Ações</th></tr></thead><tbody>${rows}</tbody></table></div>
-          <div data-body-grid="${escapeHTML(k)}" style="display:none;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px">${cards}</div>
-        </div>
-      </div>`;
-    }).join('');
-    // toggle drawer
-    gp.querySelectorAll('[data-toggle]').forEach(h=>h.onclick=()=>{
-      const k=h.dataset.toggle;
-      const body=gp.querySelector(`[data-body="${CSS.escape(k)}"]`);
-      const car=gp.querySelector(`[data-caret="${CSS.escape(k)}"]`);
-      const open=body.style.display!=='none';
-      body.style.display=open?'none':'';
-      if(car) car.textContent=open?'▸':'▾';
-    });
-    // list/grid toggle per group
-    gp.querySelectorAll('[data-gview]').forEach(wrap=>{
-      const k=wrap.dataset.gview;
-      wrap.querySelectorAll('[data-gv]').forEach(btn=>btn.onclick=(ev)=>{
-        ev.stopPropagation();
-        const v=btn.dataset.gv;
-        wrap.querySelectorAll('[data-gv]').forEach(b=>b.classList.toggle('primary',b.dataset.gv===v));
-        const lw=gp.querySelector(`[data-body-list="${CSS.escape(k)}"]`);
-        const gw2=gp.querySelector(`[data-body-grid="${CSS.escape(k)}"]`);
-        if(lw) lw.style.display=v==='list'?'':'none';
-        if(gw2) gw2.style.display=v==='grid'?'grid':'none';
-      });
-    });
-    gp.querySelectorAll('[data-view-it]').forEach(c=>c.onclick=(ev)=>{ev.stopPropagation();openItemView(c.dataset.viewIt)});
-    gp.querySelectorAll('[data-img]').forEach(im=>im.onclick=(ev)=>{ev.stopPropagation();openItemView(im.dataset.img)});
-    gp.querySelectorAll('[data-set-num]').forEach(b=>b.onclick=(ev)=>{ev.stopPropagation();renameReqGroup(b.dataset.setNum)});
-  }
+  // v6.8 — os grupos “📦 Requisição” foram removidos da Lista Prévia
+  // (todos os itens vinculados vivem em Requisições Internas)
+  const gp=$('it-groups-wrap'); if(gp) gp.innerHTML='';
 }
 
 /* Envia um item da Lista Prévia para uma Requisição Interna (existente, nova, ou pendente) */
+function reqTiposList(){
+  if(!Array.isArray(state.reqTipos)||!state.reqTipos.length){
+    state.reqTipos=['EST01','EST02','EST04','COMP01','COMP04'];
+  }
+  return state.reqTipos;
+}
+window.reqTiposList=reqTiposList;
+function reqTiposAdd(t){
+  t=(t||'').trim().toUpperCase();
+  if(!t) return null;
+  const list=reqTiposList();
+  if(!list.includes(t)){ list.push(t); try{save&&save()}catch(_){}}
+  return t;
+}
+window.reqTiposAdd=reqTiposAdd;
+function reqTiposRefreshSelect(sel, selected){
+  if(!sel) return;
+  const list=reqTiposList();
+  sel.innerHTML=list.map(t=>`<option value="${t}"${t===selected?' selected':''}>${t}</option>`).join('');
+}
 function sendItemToReq(id){
   const it=(state.itens||[]).find(x=>x.id===id); if(!it) return;
-  const existentes=(state.reqs||[]).map(r=>r.num).filter(Boolean);
-  const pendentes=[...new Set((state.itens||[]).filter(x=>x.req&&x.req.startsWith('PENDENTE-')).map(x=>x.req))];
-  const opts=[...existentes,...pendentes];
-  let msg='Enviar "'+(it.desc||'item')+'" para Requisição Interna.\n\n';
-  if(opts.length) msg+='Existentes/pendentes:\n· '+opts.join('\n· ')+'\n\n';
-  msg+='Digite o número da requisição, ou deixe em branco para criar uma PENDENTE (para preencher depois).';
-  const ans=prompt(msg,'');
-  if(ans===null) return;
-  let num=(ans||'').trim();
-  if(!num){ num='PENDENTE-'+Date.now().toString(36).toUpperCase(); }
-  it.req=num; it.st='Incluído em Req.';
-  save(); renderItens();
-  const bk=document.getElementById('modal-item-view'); if(bk) bk.classList.remove('open');
-  try{toast('📤 Item vinculado à requisição '+num)}catch(_){}
+  const bk=document.getElementById('modal-send-req'); if(!bk){ alert('Modal indisponível'); return; }
+  bk.dataset.itemId=id;
+  const info=document.getElementById('sr-info');
+  if(info) info.textContent=(it.desc||'item')+(it.det?(' · '+it.det):'');
+  reqTiposRefreshSelect(document.getElementById('sr-tipo'), reqTiposList()[0]);
+  // Sugere próximo número no formato TIPO-YYYY-### baseado nos existentes
+  srSuggestNumero();
+  bk.classList.add('open');
 }
+function srSuggestNumero(){
+  const tipo=(document.getElementById('sr-tipo')||{}).value||'';
+  const ano=new Date().getFullYear();
+  const nums=(state.reqs||[]).map(r=>r.num||'').concat((state.itens||[]).map(i=>i.req||''));
+  const re=new RegExp('^'+tipo.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'-'+ano+'-(\\d+)$');
+  let max=0; nums.forEach(n=>{ const m=re.exec(n||''); if(m){ const v=parseInt(m[1],10); if(v>max) max=v; }});
+  const seq=String(max+1).padStart(3,'0');
+  const inp=document.getElementById('sr-num'); if(inp) inp.value=tipo+'-'+ano+'-'+seq;
+}
+window.srSuggestNumero=srSuggestNumero;
 window.sendItemToReq=sendItemToReq;
 
 /* Renomeia (ou preenche o número real de) um grupo de itens vinculados à mesma requisição */
@@ -2331,14 +2637,13 @@ function openItemView(id){
   }
   const sendBtn=document.getElementById('item-view-sendreq');
   if(sendBtn){ sendBtn.onclick=()=>sendItemToReq(id); sendBtn.style.display=it.req?'none':''; }
-  const fotoSrc = it.foto ? (it.foto.url||(it.foto.data||it.foto.url||'')) : '';
+  const fotoSrc = (typeof fotoSrcOf==='function') ? fotoSrcOf(it.foto) : (it.foto ? (it.foto.url||it.foto.data||(typeof it.foto==='string'?it.foto:'')) : '');
   $('item-view-body').innerHTML=`
     <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-start">
       <div style="flex:0 0 200px">
-        ${it.foto?`<img src="${(it.foto.data||it.foto.url||'')}" alt="" style="width:100%;max-width:200px;border-radius:10px;border:1px solid var(--line-2);object-fit:cover;cursor:zoom-in" onclick="window.open('${escapeHTML(fotoSrc)}','_blank')"/>`:`<div class="muted tiny" style="padding:30px;border:1px dashed var(--line-2);border-radius:10px;text-align:center">Sem foto</div>`}
+        ${fotoSrc?`<img src="${fotoSrc}" alt="" style="width:100%;max-width:200px;border-radius:10px;border:1px solid var(--line-2);object-fit:cover;cursor:zoom-in" onclick="window.open('${escapeHTML(fotoSrc)}','_blank')"/>`:`<div class="muted tiny" style="padding:30px;border:1px dashed var(--line-2);border-radius:10px;text-align:center">Sem foto</div>`}
       </div>
       <div style="flex:1;min-width:220px;display:grid;grid-template-columns:1fr 1fr;gap:8px 14px">
-        <div><div class="tiny muted">Código</div><div><code>${escapeHTML(it.id)}</code></div></div>
         <div><div class="tiny muted">Tipo</div><div>${escapeHTML(it.tipo||'-')}</div></div>
         <div style="grid-column:1/-1"><div class="tiny muted">Item</div><div style="font-weight:600">${escapeHTML(it.desc||'-')}</div></div>
         <div><div class="tiny muted">Quantidade</div><div>${it.qtd||1}</div></div>
@@ -2354,17 +2659,22 @@ window.openItemView=openItemView;
 
 /* ==================== REQUISIÇÕES INTERNAS ==================== */
 $('rq-search').onclick=()=>{
-  const q=$('rq-num').value.trim();if(!q){toast('Informe o número');return}
-  window.open('https://outlook.office.com/mail/search?q='+encodeURIComponent(q),'_blank');
+  const q=$('rq-num').value.trim();if(!q){toast('Informe o Nº de Controle');return}
+  const to='almoxarifado@empresa.com';
+  const subject='Requisição '+q;
+  const body='Prezados do Almoxarifado,%0D%0A%0D%0ASegue solicitação referente à requisição '+encodeURIComponent(q)+'.%0D%0A%0D%0AAtenciosamente.';
+  window.open('https://outlook.office.com/mail/deeplink/compose?to='+encodeURIComponent(to)+'&subject='+encodeURIComponent(subject)+'&body='+body,'_blank');
 };
 function renderReqChecklist(){
   const cont=$('rq-checklist');
-  const pend=state.itens.filter(i=>i.st==='Pendente');
+  const editNum=window._rqEditingNum||null;
+  const pend=state.itens.filter(i=>i.st==='Pendente' || (editNum && i.req===editNum));
   cont.innerHTML=pend.map(i=>`<div class="flex" style="gap:6px;align-items:center;padding:4px 0;font-size:12.5px;border-bottom:1px dashed var(--line)">
-    <label class="flex" style="gap:6px;flex:1;cursor:pointer"><input type="checkbox" value="${i.id}"/> <b>${escapeHTML(i.id)}</b> · ${escapeHTML(i.desc)} <span class="muted">(qtd ${i.qtd})</span></label>
+    <label class="flex" style="gap:6px;flex:1;cursor:pointer"><input type="checkbox" value="${i.id}" ${editNum && i.req===editNum?'checked':''}/> ${escapeHTML(i.desc)} <span class="muted">(qtd ${i.qtd})</span></label>
     ${i.foto?`<img src="${(i.foto.data||i.foto.url||'')}" title="${escapeHTML(i.foto.name||'foto')}" style="width:28px;height:28px;object-fit:cover;border-radius:5px;border:1px solid var(--line-2);cursor:pointer" data-rq-img="${i.id}"/>`:''}
     <label class="btn sm" title="Anexar/alterar foto deste item" style="cursor:pointer;padding:2px 8px">📷<input type="file" accept="image/*" data-rq-itfoto="${i.id}" style="display:none"/></label>
   </div>`).join('')||'<div class="muted tiny">Nenhum item pendente.</div>';
+
   cont.querySelectorAll('[data-rq-itfoto]').forEach(inp=>{
     inp.onchange=async e=>{
       const f=e.target.files[0]; if(!f) return;
@@ -2421,12 +2731,18 @@ $('rq-save').onclick=async()=>{
   const rq={tipo:$('rq-tipo').value,num,data,sol:$('rq-sol').value.trim(),desc:$('rq-desc').value,itens:ids,anexo:anexo||(prev&&prev.anexo)||null,fotos:fotosExtras.length?fotosExtras:((prev&&prev.fotos)||[]),ts:Date.now(),st:'Aberta'};
   if(!ids.length && !anexo && !fotosExtras.length){toast('Selecione itens, anexe documento ou fotos');return}
   const i=state.reqs.findIndex(r=>r.num===num);if(i>=0)state.reqs[i]=rq;else state.reqs.unshift(rq);
+  // Desvincula itens que estavam nesta requisição e foram removidos na edição
+  const prevIds=(prev&&Array.isArray(prev.itens))?prev.itens:[];
+  prevIds.forEach(pid=>{ if(!ids.includes(pid)){ const it=state.itens.find(x=>x.id===pid); if(it){ it.st='Pendente'; it.req=null; } } });
   state.itens.forEach(it=>{if(ids.includes(it.id)){it.st='Incluído em Req.';it.req=num}});
   save();renderReqs();renderReqChecklist();toast('Requisição salva'+(fotosExtras.length?' · '+fotosExtras.length+' foto(s) anexada(s)':''));
   $('rq-num').value='';$('rq-desc').value='';$('rq-sol').value='';$('rq-file').value='';
   window._rqExtraFotos=[]; const rqPrev=document.getElementById('rq-fotos-prev'); if(rqPrev) rqPrev.innerHTML='';
+  window._rqEditingNum=null;
+  try{ document.querySelector('#modal-rq h3').textContent='＋ Nova Requisição Interna'; }catch(_){}
   try{ $('modal-rq').classList.remove('open'); }catch(_){}
 };
+
 
 /* === v6.4 fixes: confirmação de anexo + Importação Inteligente dentro da Requisição === */
 (function(){
@@ -2446,13 +2762,13 @@ $('rq-save').onclick=async()=>{
       if(mNum) out.numero=mNum[1];
       const mSol=String(texto||'').match(/REQUISITANTE[\s\S]{0,160}?\n([^\n]+)/i);
       if(mSol) out.solicitante=(mSol[1]||'').trim();
-      const blocos=String(texto||'').split(/ITEM\s+\d+\s+C[ÓO]D\.?/gi);
+      const blocos=String(texto||'').split(/ITEM\s+\d+/gi);
       blocos.slice(1).forEach(bloco=>{
         const mCod=bloco.match(/\s*(\d{3,})/);
         const mDesc=bloco.match(/DESCRI[ÇC][ÃA]O\s*([\s\S]*?)(?=GRP\.?\s*DE\s*COTA[ÇC][ÃA]O|QNT\.?\s*REQUISITADA|$)/i);
         const mQnt=bloco.match(/QNT\.?\s*REQUISITADA\s*[:\-]?\s*(\d+)/i)||bloco.match(/QTD\.?\s*REQUISITADA\s*[:\-]?\s*(\d+)/i);
         out.itens.push({
-          codigo:(mCod&&mCod[1])||'',
+          codigo:'',
           desc:((mDesc&&mDesc[1])||'').replace(/\s+/g,' ').trim(),
           qtd:Number((mQnt&&mQnt[1])||1)||1
         });
@@ -2485,18 +2801,18 @@ $('rq-save').onclick=async()=>{
       }
       const txt=lines.join('\n');
       const parsed=window.parseRequisicaoPDF(txt);
-      if(!parsed.itens.length){ toast('Nenhum item reconhecido (padrão ITEM X CÓD. Y não encontrado)'); return; }
+      if(!parsed.itens.length){ toast('Nenhum item reconhecido (padrão ITEM X não encontrado)'); return; }
       if(parsed.numero && !$('rq-num').value) $('rq-num').value=parsed.numero;
       if(parsed.solicitante && !$('rq-sol').value) $('rq-sol').value=parsed.solicitante;
       // Cria itens na Lista Prévia (Pendente) — apenas os solicitados na planilha/PDF
       // e marca somente esses no checklist (não todos os pendentes existentes).
       const novosIds=[];
       parsed.itens.forEach(it=>{
-        const desc=it.desc||('Item '+it.codigo);
+        const desc=it.desc||'Item importado';
         const ja=state.itens.find(x=>(x.desc||'').toLowerCase()===desc.toLowerCase() && x.st==='Pendente');
         if(ja){ novosIds.push(ja.id); return; }
         const novoId=uid('IT');
-        state.itens.unshift({id:novoId,desc,det:'COD '+it.codigo,qtd:it.qtd||1,foto:null,st:'Pendente',req:null,origem:'Importação Inteligente · Requisição '+(parsed.numero||''),createdAt:Date.now()});
+        state.itens.unshift({id:novoId,desc,det:'',qtd:it.qtd||1,foto:null,st:'Pendente',req:null,origem:'Importação Inteligente · Requisição '+(parsed.numero||''),createdAt:Date.now()});
         novosIds.push(novoId);
       });
       save(); renderItens(); renderReqChecklist();
@@ -2532,20 +2848,21 @@ function renderReqs(){
       <td>${firstFoto?`<img src="${(firstFoto.foto.data||firstFoto.foto.url||'')}" style="width:42px;height:42px;object-fit:cover;border-radius:6px;border:1px solid var(--line-2);cursor:pointer" data-img="${firstFoto.id}"/>`:'-'}</td>
       <td>${r.anexo?`<button class="btn sm" data-anx="${escapeHTML(r.num)}">📎 ${escapeHTML(r.anexo.name||'arquivo')}</button>`:'-'}</td>
       <td><span class="badge acc">${escapeHTML(r.st)}</span></td>
-      <td><div class="flex" style="gap:4px"><button class="btn sm" data-est02="${escapeHTML(r.num)}" title="Enviar para EST02">📤 EST02</button>${isGestor()?`<button class="btn sm warn" data-del="${escapeHTML(r.num)}">🗑</button>`:''}</div></td>
+      <td><div class="flex" style="gap:4px"><button class="btn sm" data-edit-rq="${escapeHTML(r.num)}" title="Editar requisição">✏️</button><button class="btn sm" data-est02="${escapeHTML(r.num)}" title="Enviar para EST02">📤 EST02</button>${isGestor()?`<button class="btn sm warn" data-del="${escapeHTML(r.num)}">🗑</button>`:''}</div></td>
+
     </tr>`);
     // Linha expandida — somente quando aberta, lista APENAS os itens dessa requisição
     if(open){
       const inner = its.length
         ? `<table style="width:100%;border-collapse:collapse;font-size:12.5px">
-             <thead><tr style="color:var(--fg-mut)"><th style="text-align:left;padding:4px">#</th><th style="text-align:left;padding:4px">Item</th><th style="text-align:left;padding:4px">Detalhe</th><th style="text-align:left;padding:4px">Qtd</th><th style="text-align:left;padding:4px">Foto</th></tr></thead>
+             <thead><tr style="color:var(--fg-mut)"><th style="text-align:left;padding:4px">Item</th><th style="text-align:left;padding:4px">Detalhe</th><th style="text-align:left;padding:4px">Qtd</th><th style="text-align:left;padding:4px">Foto</th></tr></thead>
              <tbody>${its.map((x,i)=>`<tr data-view-it="${escapeHTML(x.id)}" style="cursor:pointer" title="Clique para visualizar o item">
-                <td style="padding:4px"><code>${escapeHTML(x.id)}</code></td>
                 <td style="padding:4px">${escapeHTML(x.desc||'-')}</td>
                 <td style="padding:4px" class="muted">${escapeHTML(x.det||'-')}</td>
                 <td style="padding:4px">${x.qtd||1}</td>
                 <td style="padding:4px">${x.foto?`<img src="${(x.foto.data||x.foto.url||'')}" style="width:34px;height:34px;object-fit:cover;border-radius:5px;border:1px solid var(--line-2)"/>`:'-'}</td>
-                <td style="padding:4px;text-align:right"><button class="btn sm" data-view-it="${escapeHTML(x.id)}" title="Visualizar item">👁</button></td>
+                <td style="padding:4px;text-align:right" onclick="event.stopPropagation()"><button class="btn sm" data-edit-it="${escapeHTML(x.id)}" title="Editar item">✏️</button> <button class="btn sm" data-view-it="${escapeHTML(x.id)}" title="Visualizar item">👁</button></td>
+
              </tr>`).join('')}</tbody>
            </table>`
         : `<div class="muted tiny" style="padding:6px">Esta requisição não possui itens vinculados.</div>`;
@@ -2563,15 +2880,42 @@ function renderReqs(){
   tb.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{if(!confirm('Excluir requisição '+b.dataset.del+'?'))return;state.reqs=state.reqs.filter(r=>r.num!==b.dataset.del);save();renderReqs()});
   tb.querySelectorAll('[data-img]').forEach(im=>im.onclick=()=>openItemView(im.dataset.img));
   tb.querySelectorAll('[data-view-it]').forEach(el=>el.addEventListener('click',ev=>{ ev.stopPropagation(); openItemView(el.dataset.viewIt); }));
+  tb.querySelectorAll('[data-edit-it]').forEach(el=>el.addEventListener('click',ev=>{ ev.stopPropagation(); const it=state.itens.find(x=>x.id===el.dataset.editIt); if(it) openItem(it); }));
+  tb.querySelectorAll('[data-edit-rq]').forEach(b=>b.onclick=ev=>{ ev.stopPropagation(); openReqEdit(b.dataset.editRq); });
+
   tb.querySelectorAll('[data-fzoom]').forEach(im=>im.onclick=()=>window.open(im.dataset.fzoom,'_blank'));
   tb.querySelectorAll('[data-est02]').forEach(b=>b.onclick=()=>{
     const num=b.dataset.est02;
+    // Garante que o select tenha a opção da requisição interna ANTES de fixar o valor.
+    try{ if(window.refreshPdReqSelect) window.refreshPdReqSelect(num); }catch(_){}
     try{ $('pd-req').value=num; }catch(_){}
     try{ $('pd-num').value=''; $('pd-data').value=todayISO(); $('pd-forn').value=''; $('pd-prev').value=''; }catch(_){}
     $('modal-pd').classList.add('open');
+    // Reforça a seleção após o modal abrir (evita perda por re-render de outros handlers)
+    try{ setTimeout(()=>{ const s=$('pd-req'); if(s && s.value!==num){ if(window.refreshPdReqSelect) window.refreshPdReqSelect(num); try{ s.value=num; }catch(_){} } }, 50); }catch(_){}
   });
   $('pd-req').innerHTML='<option value="">—</option>'+state.reqs.map(r=>`<option>${escapeHTML(r.num)}</option>`).join('');
 }
+
+/* ===== Edição de Requisição existente ===== */
+function openReqEdit(num){
+  const r=(state.reqs||[]).find(x=>x.num===num); if(!r){ toast('Requisição não encontrada'); return; }
+  window._rqEditingNum=num;
+  window._rqExtraFotos=(r.fotos||[]).slice();
+  try{ $('rq-tipo').value=r.tipo||'EST01'; }catch(_){}
+  $('rq-num').value=r.num||'';
+  $('rq-data').value=r.data||todayISO();
+  $('rq-sol').value=r.sol||'';
+  $('rq-desc').value=r.desc||'';
+  const rqPrev=document.getElementById('rq-fotos-prev');
+  if(rqPrev) rqPrev.innerHTML=(window._rqExtraFotos||[]).map((ph,idx)=>`<div style="position:relative"><img src="${ph.data||ph.url||''}" style="width:52px;height:52px;object-fit:cover;border-radius:6px;border:1px solid var(--line-2)"/><button type="button" data-rmfoto="${idx}" title="Remover" style="position:absolute;top:-6px;right:-6px;background:var(--err);color:#fff;border:0;border-radius:50%;width:18px;height:18px;font-size:11px;cursor:pointer;line-height:1">×</button></div>`).join('');
+  try{ renderReqChecklist(); }catch(_){}
+  try{ document.querySelector('#modal-rq h3').textContent='✏️ Editar Requisição · '+r.num; }catch(_){}
+  const m=document.getElementById('modal-rq'); if(m) m.classList.add('open');
+}
+window.openReqEdit=openReqEdit;
+
+
 
 /* ==================== PEDIDOS DE COMPRA ==================== */
 /* Preview de fotos dos itens no pedido de compra */
@@ -2631,9 +2975,8 @@ function renderPedidos(){
     if(open){
       const inner = its.length
         ? `<table style="width:100%;border-collapse:collapse;font-size:12.5px">
-             <thead><tr style="color:var(--fg-mut)"><th style="text-align:left;padding:4px">#</th><th style="text-align:left;padding:4px">Item</th><th style="text-align:left;padding:4px">Detalhe</th><th style="text-align:left;padding:4px">Qtd</th><th style="text-align:left;padding:4px">Foto</th></tr></thead>
+             <thead><tr style="color:var(--fg-mut)"><th style="text-align:left;padding:4px">Item</th><th style="text-align:left;padding:4px">Detalhe</th><th style="text-align:left;padding:4px">Qtd</th><th style="text-align:left;padding:4px">Foto</th></tr></thead>
              <tbody>${its.map(x=>`<tr data-view-it="${escapeHTML(x.id)}" style="cursor:pointer" title="Clique para visualizar o item">
-                <td style="padding:4px"><code>${escapeHTML(x.id)}</code></td>
                 <td style="padding:4px">${escapeHTML(x.desc||'-')}</td>
                 <td style="padding:4px" class="muted">${escapeHTML(x.det||'-')}</td>
                 <td style="padding:4px">${x.qtd||1}</td>
@@ -3001,7 +3344,7 @@ let iaRows=[],iaRaw='',iaCollapsed={},iaDrag=null;
 const IA_FIELDS=[
   {k:'desc',label:'Descrição',w:'minmax(220px,2fr)'},
   {k:'qtd',label:'Qtd',w:'70px'},
-  {k:'codigo',label:'Código',w:'120px'},
+  
   {k:'patrimonio',label:'Patrimônio',w:'130px'},
   {k:'nf',label:'NF',w:'110px'},
   {k:'valor',label:'Valor',w:'110px'}
@@ -3540,6 +3883,14 @@ let fbApp=null,db=null,unsub=null;
 function applyCloudPlanilhas(data){
   if(!data) return;
   if(!window.currentUser && !state.__loaded) return; // não sobrescrever LS antes do login
+  // FIX: se o modal de edição está aberto, adia o merge para não fazer a linha 'piscar' nem perder o que o usuário está digitando
+  var _mIt=document.getElementById('modal-it');
+  var _mInv=document.getElementById('modal-inv');
+  var _mReq=document.getElementById('modal-req');
+  if((_mIt&&_mIt.classList.contains('open')) || (_mInv&&_mInv.classList.contains('open')) || (_mReq&&_mReq.classList.contains('open'))){
+    window.__cloudPending=data;
+    return;
+  }
   _cloudApplying=true;
   ['itens','reqs','pedidos','laudos','manut','eventos'].forEach(k=>{
     if(Array.isArray(data[k])) state[k]=data[k];
@@ -3559,6 +3910,22 @@ function applyCloudPlanilhas(data){
   try{renderManut&&renderManut()}catch(e){}
 }
 
+function __flushCloudPending(){
+  try{
+    var d=window.__cloudPending; if(!d) return;
+    var mIt=document.getElementById('modal-it');
+    var mInv=document.getElementById('modal-inv');
+    var mReq=document.getElementById('modal-req');
+    if((mIt&&mIt.classList.contains('open'))||(mInv&&mInv.classList.contains('open'))||(mReq&&mReq.classList.contains('open'))) return;
+    window.__cloudPending=null;
+    applyCloudPlanilhas(d);
+  }catch(e){}
+}
+document.addEventListener('click',function(e){
+  var t=e.target; if(!t) return;
+  // clique em fechar/cancelar modal ou fora do card
+  setTimeout(__flushCloudPending,50);
+},true);
 function mdCloudInit(){
   const cfg=state.fb;if(!cfg.apiKey||!cfg.projectId){toast('Configure Firebase');return}
   try{
@@ -3577,6 +3944,7 @@ function mdCloudInit(){
       renderChamados();renderKanban();renderDashboard();
     },err=>{$('cloud-status').textContent='⚠️ Erro: '+err.code;});
     db.collection('modesk_omega_sync').doc('planilhas').onSnapshot(doc=>{
+      if(doc.metadata && doc.metadata.hasPendingWrites) return; // FIX: ignora eco da própria gravação
       if(doc.exists) applyCloudPlanilhas(doc.data());
     },err=>{$('cloud-status').textContent='⚠️ Sincronizacao: '+err.code;});
     $('cloud-status').textContent='☁️ Conectando...';
@@ -3833,6 +4201,7 @@ window.renderLaudos=function(){_origRenderLaudos&&_origRenderLaudos();renderSign
         if(st) st.textContent='☁️ Dados sincronizados · '+cloud.length+' chamados';
       },err=>{ if(st) st.textContent='⚠️ Sincronizacao: '+err.code });
       window.db.collection('modesk_omega_sync').doc('planilhas').onSnapshot(doc=>{
+        if(doc.metadata && doc.metadata.hasPendingWrites) return; // FIX: ignora eco da própria gravação
         if(doc.exists && typeof window.applyCloudPlanilhas==='function') window.applyCloudPlanilhas(doc.data());
       },err=>{ if(st) st.textContent='⚠️ Sincronizacao: '+err.code });
       console.log('[MODESK] Sincronizador Firebase de dados ativo');
@@ -5527,7 +5896,8 @@ ready(function(){
   function closeModal(id){ var m=document.getElementById(id); if(m) m.classList.remove('open'); }
   document.addEventListener('click', function(ev){
     var t = ev.target;
-    if(t && t.id === 'rq-new-open'){ try{ window.renderReqChecklist && window.renderReqChecklist(); }catch(e){} openModal('modal-rq'); }
+    if(t && t.id === 'rq-new-open'){ window._rqEditingNum=null; try{ document.querySelector('#modal-rq h3').textContent='＋ Nova Requisição Interna'; }catch(_){} try{ window.renderReqChecklist && window.renderReqChecklist(); }catch(e){} openModal('modal-rq'); }
+
     if(t && t.id === 'pd-new-open'){ openModal('modal-pd'); }
     if(t && t.matches && t.matches('[data-close]')){
       var back = t.closest('.modal-back'); if(back) back.classList.remove('open');
@@ -5633,7 +6003,7 @@ ready(function(){
         return (x.desc||'').toLowerCase() === desc.toLowerCase();
       });
       if(dup) return;
-      var id = 'IT-'+Date.now().toString(36)+Math.random().toString(36).slice(2,5).toUpperCase();
+      var id = uid('IT');
       window.state && window.state.itens && window.state.itens.unshift({id:id,desc:desc,det:det,qtd:r.qde||1,foto:null,st:'Pendente',req:null});
       n++;
     });
@@ -5987,16 +6357,16 @@ ready(function(){
 <div class="mo49-modal-bg" id="mo49AttachModal" role="dialog" aria-modal="true">
   <div class="mo49-modal">
     <h3>Anexar arquivo</h3>
-    <p>Escolha de onde quer pegar o arquivo:</p>
+    <p>Escolha se quer usar o último arquivo copiado/arrastado ou fazer upload:</p>
     <div class="opts">
       <div class="opt" data-act="last">
         <span class="ic">🕘</span>
-        <div class="tt">Usar último anexo</div>
+        <div class="tt">Usar copiado/arrastado</div>
         <div class="sub" id="mo49LastName">nenhum salvo ainda</div>
       </div>
       <div class="opt" data-act="pick">
         <span class="ic">💻</span>
-        <div class="tt">Importar do computador</div>
+        <div class="tt">Fazer upload</div>
         <div class="sub">JPG · PNG · PDF · DOC · DOCX</div>
       </div>
     </div>
@@ -6108,6 +6478,7 @@ ready(function(){
       fileToDataURL(f).then(function(data){
         setLast({name:f.name, size:f.size, type:f.type, data:data});
       }).catch(function(){});
+      if(inp.closest && inp.closest('.filmora-up')) return;
       // preview
       var host = inp.parentNode;
       var pv = host.querySelector(':scope > .mo49-preview');
@@ -6134,6 +6505,7 @@ ready(function(){
   ready(function(){
     function decorate(inp){
       if(inp.__mo49deco) return; inp.__mo49deco = true;
+      if(inp.closest && inp.closest('.filmora-up')) return;
       var accept = (inp.accept||'').toLowerCase();
       if(!accept){
         inp.accept = '.jpg,.jpeg,.png,.pdf,.doc,.docx';
@@ -6948,7 +7320,7 @@ aside.sidebar{background:var(--bg1)!important;backdrop-filter:none!important;-we
        + '<td style="text-align:center">'+esc(r.qtd)+'</td>'
        + '<td>'+esc(r.st)+'</td>'
        + '</tr>';
-    }).join('') : '<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--fg-mut)">Nenhum item cadastrado ainda</td></tr>';
+    }).join('') : '<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--fg-mut)">Nenhum item cadastrado ainda</td></tr>';
     var fabC = document.getElementById('modesk-fab-count');
     if(fabC) fabC.textContent = all.length;
   }
@@ -7180,7 +7552,7 @@ aside.sidebar{background:var(--bg1)!important;backdrop-filter:none!important;-we
     list.forEach(b=>{
       if((state.itens||[]).some(x=>normKey(x.desc)===normKey(b.nome)&&x.st==='Pendente')) return;
       const foto=b.foto?{data:b.foto,name:b.nome+'.jpg'}:null;
-      state.itens.unshift({id:(window.uid?uid('IT'):'IT-'+Date.now().toString(36)+Math.random().toString(36).slice(2,5)),desc:b.nome,det:b.det||'',qtd:1,tipo:b.cat||'Outros',foto,st:'Pendente',req:null,origem:'Biblioteca de Itens',createdAt:Date.now()});
+      state.itens.unshift({id:uid('IT'),desc:b.nome,det:b.det||'',qtd:1,tipo:b.cat||'Outros',foto,st:'Pendente',req:null,origem:'Biblioteca de Itens',createdAt:Date.now()});
       n++;
     });
     try{ window.save && window.save(); }catch(_){}
@@ -7294,8 +7666,8 @@ aside.sidebar{background:var(--bg1)!important;backdrop-filter:none!important;-we
   // Ordem importa: primeiro modal aberto na lista é o alvo
   const TARGETS = [
     { modal:'modal-it',  input:'it-foto'   },
-    { modal:'modal-req', input:'rq-fotos'  },
-    { modal:'modal-ped', input:'pd-fotos'  },
+    { modal:'modal-rq',  input:'rq-fotos'  },
+    { modal:'modal-pd',  input:'pd-fotos'  },
     { modal:'modal-bib', input:'bib-foto'  }
   ];
   function findActiveTarget(){
@@ -7358,6 +7730,1653 @@ aside.sidebar{background:var(--bg1)!important;backdrop-filter:none!important;-we
   console.log('[MODESK] Paste universal (Compras/Biblioteca) ativo.');
 })();
 </script>
+
+<!-- =============== MODESK v6.5 · Fix persistência de foto (Lista Prévia → Apps Script) =============== -->
+<script>
+(function(){
+  'use strict';
+
+  // 1) URL do Apps Script (mesmo endpoint já configurado no app).
+  //    Pode ser sobrescrito em runtime por window.DRIVE_ENDPOINT.
+  function _endpoint(){
+    return window.DRIVE_ENDPOINT || window.APPSCRIPT_URL ||
+      "https://script.google.com/macros/s/AKfycbyThYBJgwlITrPeJUPtaEabrPEEGXu2LbmgRtk1rtR5U9-rpI5PhlftfAEpgSFo_Ilp/exec";
+  }
+
+  // 2) Helpers.
+  function _isDataURL(s){ return typeof s==='string' && s.indexOf('data:')===0; }
+  function _fileToB64(file){
+    return new Promise(function(res,rej){
+      var r=new FileReader();
+      r.onload=function(){ var v=r.result; res(v && v.indexOf(',')>=0 ? v.split(',')[1] : v); };
+      r.onerror=function(){ rej(r.error); };
+      r.readAsDataURL(file);
+    });
+  }
+
+  // 3) Upload robusto ao Apps Script — sempre devolve {url,name,...}.
+  //    Se falhar, LANÇA erro (não devolve base64) para impedir que o item
+  //    seja salvo com data:image no localStorage.
+  async function uploadFotoAppsScript(file){
+    if(!file) return null;
+    var url=_endpoint();
+    if(!url) throw new Error('DRIVE_ENDPOINT não configurado');
+    try{ window.toast && window.toast('⏳ Enviando '+file.name+' para o Drive...'); }catch(_){}
+    var b64=await _fileToB64(file);
+    var body=JSON.stringify({action:'uploadFoto', file:b64, filename:file.name, mimetype:file.type||'application/octet-stream'});
+    var resp=await fetch(url,{method:'POST',mode:'cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:body});
+    if(!resp.ok) throw new Error('HTTP '+resp.status+' do Apps Script');
+    var txt=await resp.text();
+    var data; try{ data=JSON.parse(txt); }catch(_){ throw new Error('Resposta inválida do Apps Script'); }
+    if(!data || !data.url) throw new Error(data && data.error ? data.error : 'Apps Script não retornou URL');
+    try{ window.toast && window.toast('✅ Foto salva no Drive'); }catch(_){}
+    return { name:file.name, size:file.size, mimetype:file.type, url:data.url, id:data.id||null };
+  }
+  window.uploadFotoAppsScript = uploadFotoAppsScript;
+
+  function _fotoSrc(foto){
+    if(!foto) return '';
+    if(typeof foto==='string') return foto;
+    return foto.url || foto.data || foto.src || '';
+  }
+
+  function _syncEditingFoto(foto){
+    if(!foto) return;
+    if(window.editingIt) window.editingIt.foto=foto;
+    try{ if(typeof editingIt!=='undefined' && editingIt) editingIt.foto=foto; }catch(_){}
+  }
+
+  // 4) Sanitizador: preserva fotos da Lista Prévia (URL ou base64 local) ao gravar.
+  function _stripBase64(foto){
+    if(!foto) return null;
+    if(typeof foto==='string') return foto;
+    var src = foto.url || foto.data || foto.src || '';
+    if(!src) return null;
+    var out={ name:foto.name||'foto', size:foto.size||0, mimetype:foto.mimetype||foto.type||'', id:foto.id||null };
+    if(_isDataURL(src)) out.data=src; else out.url=src;
+    return out;
+  }
+  function _sanitizeItens(){
+    try{
+      var st=window.state; if(!st || !Array.isArray(st.itens)) return;
+      for(var i=0;i<st.itens.length;i++){
+        var it=st.itens[i]; if(!it) continue;
+        it.foto=_stripBase64(it.foto);
+      }
+    }catch(_){}
+  }
+  window.__sanitizeListaPreviaFotos=_sanitizeItens;
+
+  // 5) Envelopa save() para sanear ANTES de escrever no localStorage.
+  function _wrapSave(){
+    var orig=window.save; if(typeof orig!=='function' || orig.__modeskWrapped) return false;
+    var wrapped=function(){ _sanitizeItens(); return orig.apply(this,arguments); };
+    wrapped.__modeskWrapped=true; window.save=wrapped; return true;
+  }
+
+  // 6) Substitui handler do input it-foto: upload com fallback local preservado.
+  function _rebindFotoInput(){
+    var input=document.getElementById('it-foto'); if(!input) return false;
+    // Remove listeners antigos clonando o nó
+    var clone=input.cloneNode(true);
+    input.parentNode.replaceChild(clone,input);
+    clone.addEventListener('change', async function(e){
+      var f=e.target.files && e.target.files[0]; if(!f) return;
+      var current=window.editingIt; try{ if(!current && typeof editingIt!=='undefined') current=editingIt; }catch(_){}
+      if(!current){ try{ window.toast&&window.toast('Abra um item antes de anexar foto'); }catch(_){} clone.value=''; return; }
+      if(f.size>8*1024*1024){ try{ window.toast&&window.toast('Foto deve ter até 8MB'); }catch(_){}; clone.value=''; return; }
+      try{
+        var foto;
+        try{ foto=await uploadFotoAppsScript(f); }
+        catch(uploadErr){
+          foto=await new Promise(function(res,rej){ var r=new FileReader(); r.onload=function(){res({data:r.result,name:f.name,size:f.size,mimetype:f.type});}; r.onerror=function(){rej(r.error||uploadErr);}; r.readAsDataURL(f); });
+          try{ window.toast && window.toast('📷 Foto salva localmente no item'); }catch(_){}
+        }
+        _syncEditingFoto(foto);
+        try{ window.itFotoRefreshUI && window.itFotoRefreshUI(); }catch(_){}
+        var prev=document.getElementById('it-foto-prev');
+        if(prev) prev.innerHTML='<div class="fm-thumb"><img src="'+_fotoSrc(foto)+'"/><div class="cap">'+(foto.name||'foto')+'</div></div>';
+        try{ window.fmMarkFilled && window.fmMarkFilled('it-foto-drop', foto.name||'foto anexada'); }catch(_){}
+      }catch(err){
+        console.error('[MODESK] Falha no upload da foto:',err);
+        try{ window.toast && window.toast('❌ Não foi possível enviar a foto: '+(err.message||err)+'. Verifique a URL do Apps Script.',6000); }catch(_){}
+        clone.value=''; // não deixa arquivo pendurado
+      }
+    });
+    var drop=document.getElementById('it-foto-drop');
+    if(drop && !drop.__listaPreviaFotoDropFix){
+      drop.__listaPreviaFotoDropFix=true;
+      ['dragenter','dragover'].forEach(function(ev){ drop.addEventListener(ev,function(e){ e.preventDefault(); e.stopPropagation(); drop.classList.add('drag'); },true); });
+      drop.addEventListener('dragleave',function(e){ e.preventDefault(); e.stopPropagation(); drop.classList.remove('drag'); },true);
+      drop.addEventListener('drop',function(e){
+        e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); drop.classList.remove('drag');
+        var f=e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]; if(!f) return;
+        try{ clone.files=e.dataTransfer.files; clone.dispatchEvent(new Event('change',{bubbles:true})); }catch(_){ }
+      },true);
+    }
+    return true;
+  }
+
+  // 7) Bootstrap com retry até os handlers originais existirem.
+  function _boot(){
+    var okSave=_wrapSave();
+    var okFoto=_rebindFotoInput();
+    if(!okSave || !okFoto){ setTimeout(_boot, 500); }
+    else { console.log('[MODESK v6.5] Persistência de foto da Lista Prévia agora usa Apps Script.'); }
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', _boot);
+  else _boot();
+
+  // 8) Normalização inicial: mantém fotos existentes em qualquer formato aceito.
+  setTimeout(function(){
+    try{
+      var st=window.state; if(!st || !Array.isArray(st.itens)) return;
+      var dirty=false;
+      st.itens.forEach(function(it){
+        if(it && it.foto){
+          var clean=_stripBase64(it.foto);
+          if(JSON.stringify(clean)!==JSON.stringify(it.foto)){ it.foto=clean; dirty=true; }
+        }
+      });
+      if(dirty){
+        try{ window.save && window.save(); }catch(_){}
+        console.warn('[MODESK v6.5] Fotos da Lista Prévia normalizadas.');
+      }
+    }catch(_){}
+  }, 2000);
+})();
+</script>
+<!-- =============== FIM MODESK v6.5 · Fix persistência de foto =============== -->
+
+<!-- =============== MODESK v6.5 · Importação Inteligente (PDF/Excel) para Inventário =============== -->
+<style>
+  #imp-modal{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:9999;padding:16px}
+  #imp-modal.open{display:flex}
+  #imp-modal .imp-card{background:var(--bg1);border:1px solid var(--line-2);border-radius:14px;width:min(1100px,100%);max-height:92vh;display:flex;flex-direction:column;box-shadow:var(--shadow)}
+  #imp-modal .imp-hd{padding:14px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+  #imp-modal .imp-bd{padding:14px 18px;overflow:auto;flex:1}
+  #imp-modal .imp-ft{padding:12px 18px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+  #imp-modal .drop{border:2px dashed var(--line-2);border-radius:12px;padding:26px;text-align:center;color:var(--fg-mut);cursor:pointer;transition:.2s}
+  #imp-modal .drop:hover,#imp-modal .drop.drag{border-color:var(--acc);color:var(--fg);background:rgba(91,140,255,.06)}
+  #imp-modal .mapg{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;margin:12px 0}
+  #imp-modal .mapg label{display:flex;flex-direction:column;font-size:11px;color:var(--fg-mut);gap:3px}
+  #imp-modal .mapg select{background:var(--bg2);border:1px solid var(--line-2);color:var(--fg);padding:6px 8px;border-radius:8px;font-size:12px}
+  #imp-modal table.prev{width:100%;border-collapse:collapse;font-size:12px}
+  #imp-modal table.prev th,#imp-modal table.prev td{border:1px solid var(--line);padding:5px 7px;text-align:left;vertical-align:top;max-width:220px;overflow:hidden;text-overflow:ellipsis}
+  #imp-modal table.prev thead th{background:var(--bg3);position:sticky;top:0}
+  #imp-modal table.prev img{max-width:48px;max-height:48px;border-radius:4px;object-fit:cover}
+  #imp-modal .badge-src{padding:2px 6px;border-radius:6px;font-size:10px;background:var(--bg3);color:var(--fg-mut)}
+  #imp-modal .step{display:none}
+  #imp-modal .step.on{display:block}
+  #imp-modal .log{font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--bg0);border:1px solid var(--line);border-radius:8px;padding:10px;max-height:160px;overflow:auto;color:var(--fg-mut);white-space:pre-wrap}
+</style>
+
+<div id="imp-modal" role="dialog" aria-modal="true">
+  <div class="imp-card">
+    <div class="imp-hd">
+      <div>
+        <b>📥 Importação Inteligente de Inventário</b>
+        <div class="tiny muted">PDF ou Excel · reconhecimento automático de colunas, linhas e imagens</div>
+      </div>
+      <button class="btn sm" id="imp-close">✕</button>
+    </div>
+    <div class="imp-bd">
+      <div class="step on" data-step="pick">
+        <div class="drop" id="imp-drop">
+          <div style="font-size:34px;line-height:1">📄📊</div>
+          <div style="margin-top:6px"><b>Arraste um arquivo aqui</b> ou clique para escolher</div>
+          <div class="tiny muted" style="margin-top:4px">Formatos: <b>.pdf</b>, <b>.xlsx</b>, <b>.xls</b>, <b>.csv</b></div>
+          <input type="file" id="imp-file" accept=".pdf,.xlsx,.xls,.csv" style="display:none"/>
+        </div>
+        <div class="log" id="imp-log" style="margin-top:10px;display:none"></div>
+      </div>
+
+      <div class="step" data-step="map">
+        <div class="flex" style="gap:12px;align-items:center;flex-wrap:wrap">
+          <span class="badge-src" id="imp-src">-</span>
+          <span class="tiny muted" id="imp-info">-</span>
+        </div>
+        <div style="margin-top:10px">
+          <b>Mapeamento de colunas</b>
+          <div class="tiny muted">O sistema tentou identificar sozinho. Ajuste se necessário.</div>
+          <div class="mapg" id="imp-map"></div>
+        </div>
+        <div>
+          <b>Prévia (<span id="imp-count">0</span> linhas detectadas)</b>
+          <div style="max-height:360px;overflow:auto;border:1px solid var(--line);border-radius:8px;margin-top:6px">
+            <table class="prev" id="imp-prev"><thead></thead><tbody></tbody></table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="imp-ft">
+      <button class="btn sm" id="imp-back" style="display:none">← Voltar</button>
+      <button class="btn sm primary" id="imp-confirm" style="display:none">✅ Importar para o Inventário</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+
+  // ---------- helpers ----------
+  var CANONICAL = [
+    {key:'desc',   label:'Equipamento / Descrição *', aliases:['equipamento','descricao','descrição','desc','item','produto','material','nome','denominacao','denominação']},
+    {key:'cat',    label:'Categoria',                  aliases:['categoria','cat','tipo','classe','grupo']},
+    {key:'tag',    label:'Patrimônio / TAG',           aliases:['patrimonio','patrimônio','tag','fp','plaqueta','tombamento','codigo','código','cod','sku','id']},
+    {key:'qtd',    label:'Quantidade',                 aliases:['qtd','quantidade','quant','qte','qty','q']},
+    {key:'st',     label:'Status',                     aliases:['status','situacao','situação','condicao','condição','estado']},
+    {key:'local',  label:'Localização',                aliases:['local','localizacao','localização','setor','sala','ambiente','area','área']},
+    {key:'obs',    label:'Observações',                aliases:['obs','observacao','observação','observacoes','observações','nota','notas','descricao_detalhada','detalhe','detalhes']},
+    {key:'foto',   label:'Foto (URL)',                 aliases:['foto','imagem','image','picture','url','link','foto_url']}
+  ];
+  function norm(s){ return String(s==null?'':s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim(); }
+  function guessKey(header){
+    var h=norm(header); if(!h) return '';
+    for(var i=0;i<CANONICAL.length;i++){
+      var c=CANONICAL[i];
+      if(h===c.key) return c.key;
+      for(var j=0;j<c.aliases.length;j++){
+        var a=norm(c.aliases[j]);
+        if(h===a || h.indexOf(a)>=0 || a.indexOf(h)>=0) return c.key;
+      }
+    }
+    return '';
+  }
+  function log(msg){
+    var el=document.getElementById('imp-log'); if(!el) return;
+    el.style.display='block'; el.textContent += (el.textContent?'\n':'') + msg;
+  }
+  function showStep(name){
+    document.querySelectorAll('#imp-modal .step').forEach(function(s){ s.classList.toggle('on', s.dataset.step===name); });
+    document.getElementById('imp-back').style.display   = name==='map' ? '' : 'none';
+    document.getElementById('imp-confirm').style.display= name==='map' ? '' : 'none';
+  }
+
+  // ---------- state ----------
+  var PARSED = { headers:[], rows:[], src:'', filename:'', images:[] };
+  var MAP = {}; // colIndex -> canonicalKey
+
+  // ---------- Excel/CSV parsing ----------
+  async function parseExcel(file){
+    if(!window.XLSX){ throw new Error('Biblioteca XLSX não carregada'); }
+    var buf = await file.arrayBuffer();
+    var wb  = XLSX.read(buf,{type:'array'});
+    var ws  = wb.Sheets[wb.SheetNames[0]];
+    var aoa = XLSX.utils.sheet_to_json(ws,{header:1,defval:'',blankrows:false});
+    if(!aoa.length) throw new Error('Planilha vazia');
+    // Detecta linha de cabeçalho: a primeira linha com >=2 células não-numéricas curtas
+    var headerRow = 0;
+    for(var r=0;r<Math.min(aoa.length,10);r++){
+      var row=aoa[r]; if(!row) continue;
+      var textCount=row.filter(function(v){ return typeof v==='string' && v.trim() && isNaN(Number(v)); }).length;
+      if(textCount>=2){ headerRow=r; break; }
+    }
+    var headers = (aoa[headerRow]||[]).map(function(h,i){ return String(h||('col'+(i+1))).trim(); });
+    var rows    = aoa.slice(headerRow+1).filter(function(r){ return r && r.some(function(v){ return String(v||'').trim(); }); })
+                     .map(function(r){ return headers.map(function(_,i){ return r[i]==null?'':r[i]; }); });
+    PARSED = { headers:headers, rows:rows, src:'Excel', filename:file.name, images:[] };
+    log('Planilha: '+wb.SheetNames[0]+' · '+headers.length+' colunas · '+rows.length+' linhas.');
+  }
+
+  // ---------- PDF parsing (heurística de colunas por posição X) ----------
+  async function parsePDF(file){
+    if(!window.pdfjsLib && window['pdfjs-dist/build/pdf']) window.pdfjsLib=window['pdfjs-dist/build/pdf'];
+    if(!window.pdfjsLib) throw new Error('PDF.js não carregado');
+    try{ pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'; }catch(_){}
+    var buf = await file.arrayBuffer();
+    var pdf = await pdfjsLib.getDocument({data:buf}).promise;
+    log('PDF carregado · '+pdf.numPages+' página(s). Extraindo texto...');
+
+    var allLines=[]; // {y,items:[{x,str}]}
+    for(var p=1;p<=pdf.numPages;p++){
+      var page=await pdf.getPage(p);
+      var tc  =await page.getTextContent();
+      var lineMap={};
+      tc.items.forEach(function(it){
+        if(!it.str) return;
+        var y=Math.round(it.transform[5]);
+        // agrupa Y próximos (±2)
+        var k=null; var keys=Object.keys(lineMap);
+        for(var i=0;i<keys.length;i++){ if(Math.abs(Number(keys[i])-y)<=2){ k=keys[i]; break; } }
+        if(k===null){ k=String(y); lineMap[k]=[]; }
+        lineMap[k].push({x:it.transform[4], str:it.str});
+      });
+      Object.keys(lineMap).sort(function(a,b){return Number(b)-Number(a);}).forEach(function(k){
+        var items=lineMap[k].sort(function(a,b){return a.x-b.x;});
+        allLines.push({y:Number(k), page:p, items:items});
+      });
+    }
+    log('Linhas extraídas: '+allLines.length+'. Detectando colunas...');
+
+    // Detecta cabeçalho: primeira linha cujo texto normalizado bate com >=2 aliases canônicos
+    var headerIdx=-1, headerXs=[], headerNames=[];
+    for(var i=0;i<Math.min(allLines.length,60);i++){
+      var ln=allLines[i];
+      var strs=ln.items.map(function(it){return it.str.trim();}).filter(Boolean);
+      var hits=strs.filter(function(s){ return !!guessKey(s); }).length;
+      if(hits>=2 && strs.length>=2){
+        headerIdx=i;
+        headerXs = ln.items.filter(function(it){return it.str.trim();}).map(function(it){return it.x;});
+        headerNames = ln.items.filter(function(it){return it.str.trim();}).map(function(it){return it.str.trim();});
+        break;
+      }
+    }
+    if(headerIdx<0){
+      // Fallback: usa primeira linha com muitos tokens
+      var pick=null; for(i=0;i<allLines.length;i++){ if(allLines[i].items.length>=3){ pick=i; break; } }
+      if(pick===null) throw new Error('Não foi possível detectar colunas no PDF');
+      headerIdx=pick;
+      headerXs=allLines[pick].items.map(function(it){return it.x;});
+      headerNames=allLines[pick].items.map(function(it,idx){return it.str.trim()||('col'+(idx+1));});
+    }
+    log('Cabeçalho na linha '+(headerIdx+1)+': '+headerNames.join(' | '));
+
+    // Mapeia cada item de linha subsequente à coluna mais próxima
+    function colOf(x){
+      var best=0, dist=Infinity;
+      for(var c=0;c<headerXs.length;c++){ var d=Math.abs(x-headerXs[c]); if(d<dist){dist=d;best=c;} }
+      return best;
+    }
+    var rows=[];
+    for(i=headerIdx+1;i<allLines.length;i++){
+      var buf2=new Array(headerXs.length).fill('');
+      allLines[i].items.forEach(function(it){
+        var c=colOf(it.x);
+        buf2[c] = (buf2[c] ? buf2[c]+' ' : '') + it.str.trim();
+      });
+      if(buf2.some(function(v){return v && v.length;})) rows.push(buf2);
+    }
+    PARSED = { headers:headerNames, rows:rows, src:'PDF', filename:file.name, images:[] };
+    log('Registros detectados: '+rows.length+'.');
+  }
+
+  // ---------- UI: mapeamento e prévia ----------
+  function renderMapAndPreview(){
+    // Auto-map
+    MAP = {};
+    PARSED.headers.forEach(function(h,i){
+      var k=guessKey(h);
+      if(k && !Object.values(MAP).includes(k)) MAP[i]=k;
+    });
+
+    var mapEl=document.getElementById('imp-map'); mapEl.innerHTML='';
+    PARSED.headers.forEach(function(h,i){
+      var opts=['<option value="">— ignorar —</option>'].concat(CANONICAL.map(function(c){
+        return '<option value="'+c.key+'"'+(MAP[i]===c.key?' selected':'')+'>'+c.label+'</option>';
+      })).join('');
+      var lb=document.createElement('label');
+      lb.innerHTML='<span title="'+String(h).replace(/"/g,'&quot;')+'">Col '+(i+1)+': <b>'+String(h||'—').slice(0,32)+'</b></span><select data-col="'+i+'">'+opts+'</select>';
+      mapEl.appendChild(lb);
+    });
+    mapEl.querySelectorAll('select').forEach(function(sel){
+      sel.onchange=function(){
+        var col=Number(sel.dataset.col), val=sel.value;
+        Object.keys(MAP).forEach(function(k){ if(MAP[k]===val) delete MAP[k]; });
+        if(val) MAP[col]=val; else delete MAP[col];
+        renderPreview();
+      };
+    });
+
+    document.getElementById('imp-src').textContent  = PARSED.src+' · '+PARSED.filename;
+    document.getElementById('imp-info').textContent = PARSED.headers.length+' colunas · '+PARSED.rows.length+' linhas brutas';
+    document.getElementById('imp-count').textContent= PARSED.rows.length;
+    renderPreview();
+  }
+
+  function rowToItem(row){
+    var it={ id:'INV'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),
+             cat:'Outros', patr:'Não', tag:'SEM FP', desc:'', qtd:1, st:'OK',
+             local:'Auditório', obs:'', checked:false, ts:Date.now(),
+             origem:'Importado ('+PARSED.src+')' };
+    Object.keys(MAP).forEach(function(colIdx){
+      var key=MAP[colIdx]; var raw=String(row[colIdx]==null?'':row[colIdx]).trim();
+      if(!raw) return;
+      if(key==='qtd'){ var n=parseInt(raw.replace(/\D/g,''),10); it.qtd=isNaN(n)?1:n; }
+      else if(key==='tag'){ it.tag=raw; it.patr=(raw && raw.toLowerCase()!=='sem fp')?'Sim':'Não'; }
+      else if(key==='foto'){ if(/^https?:|^data:image/i.test(raw)) it.foto=raw; }
+      else if(key==='st'){
+        var v=norm(raw);
+        if(v.indexOf('ok')>=0||v.indexOf('bom')>=0||v.indexOf('operacional')>=0) it.st='OK';
+        else if(v.indexOf('falt')>=0) it.st='Faltando';
+        else if(v.indexOf('inserv')>=0||v.indexOf('quebr')>=0||v.indexOf('danif')>=0) it.st='Inservível';
+        else if(v.indexOf('manut')>=0||v.indexOf('conser')>=0) it.st='Manutenção';
+        else it.st=raw.slice(0,24);
+      }
+      else it[key]=raw;
+    });
+    return it;
+  }
+
+  function renderPreview(){
+    var head=document.querySelector('#imp-prev thead');
+    var body=document.querySelector('#imp-prev tbody');
+    var cols=CANONICAL.filter(function(c){ return Object.values(MAP).includes(c.key); });
+    if(!cols.find(function(c){return c.key==='desc';})){ cols.unshift({key:'desc',label:'Equipamento *'}); }
+    head.innerHTML='<tr>'+cols.map(function(c){return '<th>'+c.label+'</th>';}).join('')+'</tr>';
+    var items = PARSED.rows.map(rowToItem).filter(function(it){return it.desc && it.desc.length>1;});
+    body.innerHTML = items.slice(0,200).map(function(it){
+      return '<tr>'+cols.map(function(c){
+        if(c.key==='foto' && it.foto) return '<td><img src="'+it.foto+'"/></td>';
+        return '<td>'+String(it[c.key]==null?'':it[c.key]).replace(/[<>&]/g,function(x){return {'<':'&lt;','>':'&gt;','&':'&amp;'}[x];})+'</td>';
+      }).join('')+'</tr>';
+    }).join('') || '<tr><td colspan="'+cols.length+'" style="text-align:center;padding:24px;color:var(--fg-mut)">Nenhuma linha válida — ajuste o mapeamento (é obrigatório definir a coluna de "Equipamento").</td></tr>';
+    document.getElementById('imp-count').textContent = items.length + ' válidas de ' + PARSED.rows.length;
+    document.getElementById('imp-confirm').disabled = items.length===0;
+  }
+
+  // ---------- Confirmar importação ----------
+  function doImport(){
+    var items = PARSED.rows.map(rowToItem).filter(function(it){return it.desc && it.desc.length>1;});
+    if(!items.length){ try{window.toast&&toast('Nada para importar');}catch(_){} return; }
+    window.state = window.state || {};
+    window.state.inventario = Array.isArray(window.state.inventario) ? window.state.inventario : [];
+    items.forEach(function(it){ window.state.inventario.unshift(it); });
+    try{ window.persistInventoryNow && window.persistInventoryNow(); }catch(_){}
+    try{ window.save && window.save(); }catch(_){}
+    try{ window.renderInventario && window.renderInventario(); }catch(_){}
+    try{ window.toast && toast('✅ '+items.length+' item(ns) importado(s) para o Inventário'); }catch(_){}
+    close();
+  }
+
+  // ---------- Modal open/close ----------
+  function open(){
+    PARSED={headers:[],rows:[],src:'',filename:'',images:[]}; MAP={};
+    document.getElementById('imp-log').textContent=''; document.getElementById('imp-log').style.display='none';
+    document.getElementById('imp-file').value='';
+    showStep('pick');
+    document.getElementById('imp-modal').classList.add('open');
+  }
+  function close(){ document.getElementById('imp-modal').classList.remove('open'); }
+
+  async function handleFile(file){
+    if(!file) return;
+    try{
+      log('Processando '+file.name+' ('+Math.round(file.size/1024)+' KB)...');
+      var name=file.name.toLowerCase();
+      if(name.endsWith('.pdf')) await parsePDF(file);
+      else if(name.endsWith('.xlsx')||name.endsWith('.xls')||name.endsWith('.csv')) await parseExcel(file);
+      else throw new Error('Formato não suportado: '+file.name);
+      showStep('map');
+      renderMapAndPreview();
+    }catch(err){
+      console.error(err); log('❌ '+(err.message||err));
+      try{window.toast&&toast('Falha ao ler arquivo: '+(err.message||err),5000);}catch(_){}
+    }
+  }
+
+  // ---------- Wiring ----------
+  function inject(){
+    // Botão na barra de ferramentas do Inventário
+    var section=document.querySelector('section.pane[data-pane="inventario"] .flex.between');
+    if(section && !document.getElementById('inv-import-btn')){
+      var toolbar=section.querySelector('.flex:last-child');
+      if(toolbar){
+        var b=document.createElement('button');
+        b.id='inv-import-btn'; b.className='btn sm'; b.textContent='📥 Importar (PDF/Excel)';
+        b.title='Importação inteligente com reconhecimento de colunas';
+        b.onclick=open;
+        toolbar.insertBefore(b, toolbar.firstChild);
+      }
+    }
+
+    var drop=document.getElementById('imp-drop');
+    var input=document.getElementById('imp-file');
+    if(drop && !drop.__wired){
+      drop.__wired=true;
+      drop.onclick=function(){ input.click(); };
+      drop.addEventListener('dragover',function(e){ e.preventDefault(); drop.classList.add('drag'); });
+      drop.addEventListener('dragleave',function(){ drop.classList.remove('drag'); });
+      drop.addEventListener('drop',function(e){
+        e.preventDefault(); drop.classList.remove('drag');
+        var f=e.dataTransfer.files&&e.dataTransfer.files[0]; if(f){ input.files=e.dataTransfer.files; handleFile(f); }
+      });
+      input.onchange=function(){ handleFile(input.files&&input.files[0]); };
+      document.getElementById('imp-close').onclick=close;
+      document.getElementById('imp-back').onclick=function(){ showStep('pick'); };
+      document.getElementById('imp-confirm').onclick=doImport;
+    }
+  }
+
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', inject);
+  else inject();
+  // Retry por segurança se o painel ainda não estiver montado
+  var tries=0; var iv=setInterval(function(){ inject(); if(document.getElementById('inv-import-btn') || ++tries>20) clearInterval(iv); }, 600);
+
+  window.openInventarioImport = open;
+  console.log('[MODESK v6.5] Importação inteligente (PDF/Excel) do Inventário pronta.');
+})();
+</script>
+<!-- =============== FIM · Importação Inteligente =============== -->
+
+<!-- =============== MODESK v6.6 · Patch: foto instantânea + Requisições Internas + realtime =============== -->
+<script>
+(function(){
+  'use strict';
+  var LOG='[MODESK v6.6]';
+
+  /* ------------------------------------------------------------------
+     1) SINCRONIZAÇÃO EM TEMPO REAL AGRESSIVA
+        - Reduz o debounce do Firestore de 700ms para 150ms
+        - Garante push imediato após uploads de fotos
+     ------------------------------------------------------------------ */
+  function _fastCloudSync(){
+    try{
+      if(!window.db || !window.state) return;
+      clearTimeout(window._cloudSaveTimer);
+      window._cloudSaveTimer = setTimeout(function(){
+        try{
+          window.db.collection('modesk_omega_sync').doc('planilhas').set({
+            itens: window.state.itens||[],
+            reqs:  window.state.reqs||[],
+            pedidos: window.state.pedidos||[],
+            inventario: (typeof compactInventoryForStorage==='function'
+                          ? compactInventoryForStorage(window.state.inventario||[])
+                          : (window.state.inventario||[])),
+            laudos: window.state.laudos||[],
+            manut:  window.state.manut||[],
+            eventos: window.state.eventos||[],
+            updatedAt: new Date()
+          },{merge:true}).catch(function(err){
+            console.warn(LOG,'sync falhou',err);
+          });
+        }catch(e){ console.warn(LOG,'sync erro',e); }
+      }, 150);
+    }catch(e){}
+  }
+  window._fastCloudSync = _fastCloudSync;
+
+  // Envelopa save() para forçar push no Firestore assim que qualquer coisa mudar,
+  // independentemente do usuário ou dispositivo.
+  function _wrapSaveForRealtime(){
+    var orig = window.save;
+    if(typeof orig!=='function' || orig.__modeskRealtimeWrapped) return false;
+    var wrapped = function(){
+      var r = orig.apply(this, arguments);
+      try{ _fastCloudSync(); }catch(_){}
+      return r;
+    };
+    wrapped.__modeskRealtimeWrapped = true;
+    // Preserva o marcador do wrapper v6.5 (sanitize) se existir
+    if(orig.__modeskWrapped) wrapped.__modeskWrapped = true;
+    window.save = wrapped;
+    return true;
+  }
+
+  /* ------------------------------------------------------------------
+     2) FIX: FOTO DO ITEM APARECE NA PRIMEIRA GRAVAÇÃO
+        - Persiste (save + render) assim que o upload termina, sem esperar
+          o usuário clicar em "Salvar" novamente.
+        - Rastreia promessa pendente para que it-save aguarde o upload.
+     ------------------------------------------------------------------ */
+  window._itFotoPending = null;
+
+  function _persistItemNow(){
+    try{
+      var ed = window.editingIt; if(!ed) return;
+      // Garante que o item esteja no estado, mesmo em criação
+      if(window.state && Array.isArray(window.state.itens)){
+        if(!window.state.itens.find(function(x){return x.id===ed.id})){
+          window.state.itens.unshift(ed);
+        }
+      }
+      if(typeof window.save==='function') window.save();
+      if(typeof window.renderItens==='function') window.renderItens();
+      if(typeof window.renderReqChecklist==='function') window.renderReqChecklist();
+    }catch(e){ console.warn(LOG,'persist item',e); }
+  }
+
+  function _rebindFotoAutoSave(){
+    var input = document.getElementById('it-foto');
+    if(!input) return false;
+    // Recria o input para remover handlers anteriores
+    var clone = input.cloneNode(true);
+    input.parentNode.replaceChild(clone, input);
+
+    clone.addEventListener('change', function(e){
+      var f = e.target.files && e.target.files[0]; if(!f) return;
+      var current = window.editingIt;
+      if(!current){
+        try{ window.toast && window.toast('Abra um item antes de anexar foto'); }catch(_){}
+        clone.value=''; return;
+      }
+      if(f.size > 8*1024*1024){
+        try{ window.toast && window.toast('Foto deve ter até 8MB'); }catch(_){}
+        clone.value=''; return;
+      }
+
+      var pending = (async function(){
+        var foto = null;
+        // Preferência: Apps Script → Drive
+        try{
+          if(typeof window.uploadFotoAppsScript==='function'){
+            foto = await window.uploadFotoAppsScript(f);
+          } else if(typeof window.uploadAnexoDrive==='function'){
+            foto = await window.uploadAnexoDrive(f);
+          }
+        }catch(_){ foto = null; }
+        // Fallback local (base64) — não bloqueia a exibição
+        if(!foto){
+          foto = await new Promise(function(res, rej){
+            var r = new FileReader();
+            r.onload  = function(){ res({data:r.result, name:f.name, size:f.size, mimetype:f.type}); };
+            r.onerror = function(){ rej(r.error); };
+            r.readAsDataURL(f);
+          });
+          try{ window.toast && window.toast('📷 Foto anexada localmente'); }catch(_){}
+        } else {
+          try{ window.toast && window.toast('📷 Foto anexada ao item'); }catch(_){}
+        }
+
+        if(window.editingIt) window.editingIt.foto = foto;
+
+        // Atualiza UI do modal
+        try{ window.itFotoRefreshUI && window.itFotoRefreshUI(); }catch(_){}
+        try{
+          var prev = document.getElementById('it-foto-prev');
+          var src  = (typeof fotoSrcOf==='function' ? fotoSrcOf(foto) : (foto.url||foto.data||''));
+          if(prev && src){
+            prev.innerHTML = '<div class="fm-thumb"><img src="'+src+'"/><div class="cap">'+
+              (foto.name||'foto')+'</div></div>';
+          }
+          window.fmMarkFilled && window.fmMarkFilled('it-foto-drop', foto.name||'foto anexada');
+        }catch(_){}
+
+        // 🔑 PERSISTE DE IMEDIATO — resolve o "salvar duas vezes"
+        _persistItemNow();
+        return foto;
+      })();
+
+      window._itFotoPending = pending;
+      pending.finally(function(){
+        if(window._itFotoPending === pending) window._itFotoPending = null;
+      });
+    });
+
+    // Drag & drop
+    var drop = document.getElementById('it-foto-drop');
+    if(drop && !drop.__modesk66Drop){
+      drop.__modesk66Drop = true;
+      ['dragenter','dragover'].forEach(function(ev){
+        drop.addEventListener(ev, function(e){ e.preventDefault(); e.stopPropagation(); drop.classList.add('drag'); }, true);
+      });
+      drop.addEventListener('dragleave', function(e){ e.preventDefault(); e.stopPropagation(); drop.classList.remove('drag'); }, true);
+      drop.addEventListener('drop', function(e){
+        e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); drop.classList.remove('drag');
+        var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]; if(!f) return;
+        try{ clone.files = e.dataTransfer.files; clone.dispatchEvent(new Event('change',{bubbles:true})); }catch(_){}
+      }, true);
+    }
+    return true;
+  }
+
+  // Envelopa it-save para aguardar upload pendente antes de gravar
+  function _wrapItSave(){
+    var btn = document.getElementById('it-save'); if(!btn) return false;
+    if(btn.__modesk66) return true;
+    var orig = btn.onclick;
+    btn.onclick = async function(ev){
+      if(window._itFotoPending){
+        try{ window.toast && window.toast('⏳ Aguardando upload da foto...'); }catch(_){}
+        try{ await window._itFotoPending; }catch(_){}
+      }
+      if(typeof orig==='function') return orig.call(this, ev);
+    };
+    btn.__modesk66 = true;
+    return true;
+  }
+
+  /* ------------------------------------------------------------------
+     3) FIX: ITEM ENVIADO PARA REQUISIÇÃO APARECE EM "REQUISIÇÕES INTERNAS"
+        - Além de marcar o item, cria/atualiza a entrada em state.reqs
+     ------------------------------------------------------------------ */
+  function _ensureReqInterna(num, tipo, itemId){
+    if(!window.state) return;
+    if(!Array.isArray(window.state.reqs)) window.state.reqs = [];
+    var reqs = window.state.reqs;
+    var r = reqs.find(function(x){ return x.num===num; });
+    var isPend = String(num||'').toUpperCase().indexOf('PENDENTE-')===0;
+    if(!r){
+      r = {
+        tipo: tipo||'',
+        num: num,
+        data: (typeof todayISO==='function' ? todayISO() : new Date().toISOString().slice(0,10)),
+        sol: (window.currentUser && window.currentUser.name) || '',
+        desc: isPend ? 'Requisição criada automaticamente ao vincular item' : '',
+        itens: [],
+        anexo: null,
+        fotos: [],
+        ts: Date.now(),
+        st: isPend ? 'Pendente' : 'Aberta',
+        origem: 'Enviado da Lista Prévia'
+      };
+      reqs.unshift(r);
+    } else {
+      if(tipo && !r.tipo) r.tipo = tipo;
+    }
+    if(!Array.isArray(r.itens)) r.itens = [];
+    if(itemId && r.itens.indexOf(itemId)<0) r.itens.push(itemId);
+  }
+
+  function _wrapSrSave(){
+    var btn = document.getElementById('sr-save'); if(!btn) return false;
+    if(btn.__modesk66) return true;
+    var orig = btn.onclick;
+    btn.onclick = function(ev){
+      var bk = document.getElementById('modal-send-req');
+      var id = bk && bk.dataset && bk.dataset.itemId;
+      var tipoSel = document.getElementById('sr-tipo');
+      var numEl   = document.getElementById('sr-num');
+      var tipo = (tipoSel && tipoSel.value) || '';
+      var num  = ((numEl && numEl.value) || '').trim();
+      if(!num) num = 'PENDENTE-'+tipo+'-'+Date.now().toString(36).toUpperCase();
+
+      // Executa handler original (marca item.req/reqTipo/st)
+      var r;
+      if(typeof orig==='function'){
+        // Garante que o número gerado seja o mesmo que o original usará
+        if(numEl && !numEl.value) numEl.value = num;
+        r = orig.call(this, ev);
+      }
+
+      // Cria/atualiza a requisição interna e sincroniza
+      try{
+        _ensureReqInterna(num, tipo, id);
+        if(typeof window.save==='function') window.save();
+        if(typeof window.renderReqs==='function') window.renderReqs();
+        if(typeof window.renderReqChecklist==='function') window.renderReqChecklist();
+        try{ window.toast && window.toast('📥 Requisição '+num+' disponível em Requisições Internas'); }catch(_){}
+      }catch(e){ console.warn(LOG,'sr-save',e); }
+      return r;
+    };
+    btn.__modesk66 = true;
+    return true;
+  }
+
+  /* ------------------------------------------------------------------
+     Bootstrap com retry — os elementos podem ser criados após o login
+     ------------------------------------------------------------------ */
+  function _boot(){
+    var a = _wrapSaveForRealtime();
+    var b = _rebindFotoAutoSave();
+    var c = _wrapItSave();
+    var d = _wrapSrSave();
+    if(!(a && b && c && d)) setTimeout(_boot, 500);
+    else console.log(LOG,'Patch aplicado: foto instantânea, Requisições Internas e realtime.');
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', _boot);
+  else _boot();
+
+  // Reaplica handlers sempre que o modal de item ou de envio for aberto
+  document.addEventListener('click', function(ev){
+    var t = ev.target;
+    if(!t) return;
+    // Reaplica em qualquer abertura de modal ou re-render
+    setTimeout(function(){ _rebindFotoAutoSave(); _wrapItSave(); _wrapSrSave(); }, 50);
+  }, true);
+})();
+</script>
+<!-- =============== FIM MODESK v6.6 =============== -->
+
+<!-- =============== MODESK v6.7 PATCH =============== -->
+<style>
+/* Compactar bloco "Itens vinculados (Lista Prévia)" */
+#rq-checklist{
+  display:grid !important;
+  grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+  gap:6px !important;
+  max-height:200px !important;
+  padding:8px !important;
+}
+#rq-checklist > div{
+  border-bottom:0 !important;
+  padding:6px 8px !important;
+  background:var(--bg1,#0f172a);
+  border:1px solid var(--line-2,#1f2937);
+  border-radius:8px;
+  display:flex;align-items:center;gap:6px;
+  font-size:12px !important;
+  overflow:hidden;
+}
+#rq-checklist > div label{font-size:12px !important}
+#rq-checklist > div b{font-size:11.5px;opacity:.85}
+#rq-checklist-toggle-wrap{margin-bottom:6px}
+/* Widget unificado de anexo */
+#rq-anx-wrap{
+  border:1px dashed var(--line-2,#334155);
+  border-radius:10px;
+  padding:10px;
+  background:var(--bg2,#0b1220);
+}
+#rq-anx-wrap .rq-anx-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px}
+#rq-anx-wrap select,#rq-anx-wrap input[type=file]{
+  background:var(--bg1);border:1px solid var(--line-2);color:var(--fg);
+  padding:7px 9px;border-radius:8px;font-size:12.5px;
+}
+#rq-anx-list{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+#rq-anx-list .chip{
+  display:flex;align-items:center;gap:6px;
+  background:var(--bg1);border:1px solid var(--line-2);
+  border-radius:8px;padding:4px 8px;font-size:11.5px;
+}
+#rq-anx-list .chip img{width:26px;height:26px;object-fit:cover;border-radius:4px}
+#rq-anx-list .chip button{
+  background:transparent;border:0;color:var(--err,#ef4444);
+  cursor:pointer;font-size:14px;line-height:1;
+}
+#rq-additem-btn{margin-top:6px}
+</style>
+<script>
+/* =====================================================================
+   MODESK v6.7 — Fluxo unificado de Requisições Internas
+   ===================================================================== */
+(function(){
+  var LOG='[MODESK v6.7]';
+  function $(id){return document.getElementById(id)}
+
+  /* ---------- 1) Widget de anexo compacto (v6.8) ------------------------ */
+  function _unifyAttachments(){
+    var docWrap = $('rq-file'); if(!docWrap) return false;
+    var docField = docWrap.closest && docWrap.closest('.field');
+    var fotosInput = $('rq-fotos');
+    var fotosField = fotosInput && fotosInput.closest && fotosInput.closest('.field');
+    if(!docField || !fotosField) return false;
+    if(docField.dataset.v67) return true;
+
+    // Injeta CSS compacto uma vez
+    if(!document.getElementById('rq-anx-css68')){
+      var st=document.createElement('style'); st.id='rq-anx-css68';
+      st.textContent = ''
+        + '#rq-anx-host{margin-bottom:8px}'
+        + '#rq-anx-host>label{display:flex;align-items:center;gap:6px;font-size:10.5px;letter-spacing:.05em;margin-bottom:4px;color:var(--fg-mut)}'
+        + '.rq-anx-seg{display:flex;gap:3px;background:var(--bg2);border:1px solid var(--line-2);border-radius:8px;padding:3px}'
+        + '.rq-anx-seg button{flex:1;background:transparent;border:0;color:var(--fg-mut);padding:5px 6px;font-size:11.5px;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;justify-content:center;gap:4px;line-height:1}'
+        + '.rq-anx-seg button.on{background:var(--acc);color:#fff}'
+        + '.rq-anx-body{display:flex;gap:6px;align-items:center;margin-top:6px}'
+        + '.rq-anx-body select,.rq-anx-body input[type=file]{flex:1;min-width:0;background:var(--bg1);border:1px solid var(--line-2);color:var(--fg);padding:5px 8px;border-radius:7px;font-size:12px}'
+        + '.rq-anx-body input[type=file]::-webkit-file-upload-button{background:var(--bg3);color:var(--fg);border:0;padding:3px 8px;border-radius:5px;margin-right:6px;cursor:pointer;font-size:11px}'
+        + '#rq-anx-hint{font-size:10.5px;color:var(--fg-mut);margin-top:4px;line-height:1.3}'
+        + '#rq-anx-list{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}'
+        + '#rq-anx-list .chip{display:inline-flex;align-items:center;gap:4px;background:var(--bg2);border:1px solid var(--line);padding:3px 6px;border-radius:99px;font-size:11px;max-width:100%}'
+        + '#rq-anx-list .chip img{width:18px;height:18px;object-fit:cover;border-radius:3px}'
+        + '#rq-anx-list .chip button{background:transparent;border:0;color:var(--err);cursor:pointer;font-size:14px;line-height:1;padding:0 2px}';
+      document.head.appendChild(st);
+    }
+
+    docField.style.display='none';
+    fotosField.style.display='none';
+    docField.dataset.v67='1';
+
+    var host=document.createElement('div');
+    host.className='field';
+    host.id='rq-anx-host';
+    host.innerHTML=''
+      +'<label>📎 Anexos <span class="tiny muted" style="letter-spacing:0;text-transform:none">· documento, foto extra ou foto de item</span></label>'
+      +'<div class="rq-anx-seg" id="rq-anx-seg">'
+      +'  <button type="button" data-anx="doc" class="on" title="Documento oficial (PDF/XLS)">📄 <span>Documento</span></button>'
+      +'  <button type="button" data-anx="foto-extra" title="Foto extra da requisição">📷 <span>Foto extra</span></button>'
+      +'  <button type="button" data-anx="foto-item" title="Foto de um item específico">🖼 <span>Foto do item</span></button>'
+      +'</div>'
+      +'<div class="rq-anx-body">'
+      +'  <select id="rq-anx-target" style="display:none"></select>'
+      +'  <input id="rq-anx-file" type="file"/>'
+      +'</div>'
+      +'<div id="rq-anx-hint">Documento oficial (PDF/XLS/CSV) — anexado à requisição.</div>'
+      +'<div id="rq-anx-list"></div>';
+    docField.parentNode.insertBefore(host, docField);
+
+    var seg=$('rq-anx-seg'), targetSel=$('rq-anx-target'),
+        fileInp=$('rq-anx-file'), hint=$('rq-anx-hint'), list=$('rq-anx-list');
+    var current='doc';
+
+    function refreshTargets(){
+      var items=(window.state && window.state.itens)||[];
+      var num=($('rq-num')&&$('rq-num').value||'').trim();
+      var pool=items.filter(function(i){return i.st==='Pendente' || (num && i.req===num);});
+      targetSel.innerHTML=pool.map(function(i){
+        return '<option value="'+i.id+'">'+i.id+' · '+(i.desc||'').replace(/</g,'&lt;').slice(0,40)+'</option>';
+      }).join('') || '<option value="">— sem itens disponíveis —</option>';
+    }
+    function refreshUI(){
+      seg.querySelectorAll('button').forEach(function(b){ b.classList.toggle('on', b.dataset.anx===current); });
+      if(current==='foto-item'){ targetSel.style.display=''; refreshTargets();
+        hint.textContent='A foto será anexada ao item selecionado.';
+        fileInp.accept='image/*';
+      } else if(current==='foto-extra'){ targetSel.style.display='none';
+        hint.textContent='Foto adicional geral (Galeria da requisição · até 2MB).';
+        fileInp.accept='image/*';
+      } else { targetSel.style.display='none';
+        hint.textContent='Documento oficial (PDF/XLS/CSV · até 25MB).';
+        fileInp.accept='.pdf,.xls,.xlsx,.csv,.png,.jpg';
+      }
+    }
+    seg.querySelectorAll('button').forEach(function(b){
+      b.onclick=function(){ current=b.dataset.anx; refreshUI(); };
+    });
+    refreshUI();
+
+    var numEl=$('rq-num'); if(numEl) numEl.addEventListener('input', function(){ if(current==='foto-item') refreshTargets(); });
+
+    function renderChips(){
+      var chips=[];
+      var f=$('rq-file'); var df=f && f.files && f.files[0];
+      if(df) chips.push('<span class="chip">📄 '+df.name+' <button data-clear="doc" title="Remover">×</button></span>');
+      (window._rqExtraFotos||[]).forEach(function(ph,idx){
+        chips.push('<span class="chip"><img src="'+(ph.data||ph.url||'')+'"/>'+(ph.name||'foto')+' <button data-clear="foto-extra" data-idx="'+idx+'">×</button></span>');
+      });
+      var items=(window.state && window.state.itens)||[];
+      items.forEach(function(it){
+        if(it && it.foto && it._v67linkedReq){
+          var src=(it.foto.data||it.foto.url||'');
+          chips.push('<span class="chip"><img src="'+src+'"/>'+it.id+' <button data-clear="foto-item" data-id="'+it.id+'">×</button></span>');
+        }
+      });
+      list.innerHTML=chips.join('') || '<span class="tiny muted">Nenhum anexo ainda.</span>';
+      list.querySelectorAll('button[data-clear]').forEach(function(b){
+        b.onclick=function(){
+          var kind=b.dataset.clear;
+          if(kind==='doc'){ $('rq-file').value=''; var w=$('rq-attach-wrap'); if(w) w.style.display='none'; }
+          else if(kind==='foto-extra'){ (window._rqExtraFotos||[]).splice(+b.dataset.idx,1); }
+          else if(kind==='foto-item'){
+            var it=(window.state.itens||[]).find(function(x){return x.id===b.dataset.id});
+            if(it){ it.foto=null; delete it._v67linkedReq; try{window.save&&window.save()}catch(_){} try{window.renderItens&&window.renderItens()}catch(_){} }
+          }
+          renderChips();
+        };
+      });
+    }
+    window._v67RenderChips=renderChips;
+
+    fileInp.addEventListener('change', async function(){
+      var f=fileInp.files && fileInp.files[0]; if(!f) return;
+      var t=current;
+      try{
+        if(t==='doc'){
+          if(f.size>25*1024*1024){ window.toast&&window.toast('Documento >25MB'); fileInp.value=''; return; }
+          var dt=new DataTransfer(); dt.items.add(f);
+          $('rq-file').files=dt.files;
+          $('rq-file').dispatchEvent(new Event('change',{bubbles:true}));
+          window.toast && window.toast('📎 Documento pronto para salvar');
+        } else if(t==='foto-extra'){
+          if(f.size>2*1024*1024){ window.toast&&window.toast('Foto >2MB'); fileInp.value=''; return; }
+          var ph; try{ ph=await window.uploadAnexoDrive(f);}catch(_){ ph=await window.readAnexoResiliente(f);}
+          window._rqExtraFotos=window._rqExtraFotos||[]; window._rqExtraFotos.push(ph);
+          window.toast && window.toast('📷 Foto extra anexada');
+        } else if(t==='foto-item'){
+          if(f.size>2*1024*1024){ window.toast&&window.toast('Foto >2MB'); fileInp.value=''; return; }
+          var id=targetSel.value; if(!id){ window.toast&&window.toast('Selecione um item alvo'); return; }
+          var it=(window.state.itens||[]).find(function(x){return x.id===id}); if(!it) return;
+          try{ it.foto=await window.uploadAnexoDrive(f);}catch(_){ it.foto=await window.readAnexoResiliente(f);}
+          it._v67linkedReq=true;
+          try{window.save&&window.save()}catch(_){}
+          try{window.renderItens&&window.renderItens()}catch(_){}
+          window.toast && window.toast('📷 Foto anexada ao item '+id);
+        }
+      }catch(e){ window.toast && window.toast('Falha: '+e.message); }
+      fileInp.value='';
+      renderChips();
+    });
+
+    renderChips();
+    return true;
+  }
+
+
+  /* ---------- 2) Botão "+ Adicionar item novo" dentro do modal-rq ---------- */
+  function _injectAddItemBtn(){
+    var checklist=$('rq-checklist'); if(!checklist) return false;
+    if($('rq-additem-btn')) return true;
+    // v6.8 — a caixa "Vincular itens da Lista Prévia" foi removida (duplicava a aba 📋 do picker).
+    // Mantido só o botão para criar item novo direto na requisição.
+    var wrap=document.createElement('div');
+    wrap.id='rq-checklist-toggle-wrap';
+    wrap.className='flex';
+    wrap.style.cssText='gap:8px;align-items:center;justify-content:flex-end;margin:2px 0 6px;flex-wrap:wrap';
+    wrap.innerHTML='<button type="button" class="btn sm" id="rq-additem-btn" title="Cria um item novo já vinculado a esta requisição (também vai para a Biblioteca)">＋ Item novo direto na requisição</button>';
+    checklist.parentNode.insertBefore(wrap, checklist);
+
+
+    $('rq-additem-btn').onclick=function(){
+      var num=($('rq-num')&&$('rq-num').value||'').trim();
+      if(!num){ window.toast && window.toast('Defina o Nº de Controle da requisição primeiro'); $('rq-num')&&$('rq-num').focus(); return; }
+      // Abre modal-it em modo novo, com marcação para vincular
+      try{
+        if(typeof window.openItem==='function') window.openItem(null);
+        else $('modal-it') && $('modal-it').classList.add('open');
+      }catch(_){}
+      if(window.editingIt){
+        window.editingIt.pendingReqNum=num;
+        window.editingIt.pendingReqTipo=($('rq-tipo')&&$('rq-tipo').value)||'';
+      }
+      // Ajusta título do modal
+      var h=document.querySelector('#modal-it h3'); if(h) h.textContent='Novo item vinculado à '+num;
+    };
+    return true;
+  }
+
+  /* ---------- 3) Envolver it-save para vincular item à requisição pendente --- */
+  function _wrapItSaveForReqBinding(){
+    var btn=$('it-save'); if(!btn) return false;
+    if(btn.__v67) return true;
+    var orig=btn.onclick;
+    btn.onclick=function(ev){
+      var pendingNum = window.editingIt && window.editingIt.pendingReqNum;
+      var pendingTipo= window.editingIt && window.editingIt.pendingReqTipo;
+      var itemId = window.editingIt && window.editingIt.id;
+      var r;
+      try{ r = (typeof orig==='function') ? orig.call(this,ev) : undefined; }catch(e){ console.warn(LOG,e); }
+      if(pendingNum && itemId){
+        try{
+          var it=(window.state.itens||[]).find(function(x){return x.id===itemId});
+          if(it){
+            it.req=pendingNum; it.reqTipo=pendingTipo||''; it.st='Incluído em Req.';
+            // Garante entrada em state.reqs
+            if(typeof window._ensureReqInterna67==='function') window._ensureReqInterna67(pendingNum, pendingTipo||'', itemId);
+            try{window.save&&window.save()}catch(_){}
+            try{window.renderItens&&window.renderItens()}catch(_){}
+            try{window.renderReqs&&window.renderReqs()}catch(_){}
+            try{window.renderReqChecklist&&window.renderReqChecklist()}catch(_){}
+            window.toast && window.toast('✅ Item vinculado à requisição '+pendingNum);
+            // Reabre modal-rq
+            setTimeout(function(){ $('modal-rq') && $('modal-rq').classList.add('open'); }, 100);
+          }
+        }catch(e){ console.warn(LOG,e); }
+      }
+      return r;
+    };
+    btn.__v67=true;
+    return true;
+  }
+
+  /* Utilitário compartilhado */
+  window._ensureReqInterna67=function(num, tipo, itemId){
+    if(!window.state) return;
+    if(!Array.isArray(window.state.reqs)) window.state.reqs=[];
+    var r=window.state.reqs.find(function(x){return x.num===num});
+    if(!r){
+      r={ tipo:tipo||'', num:num,
+          data:(typeof todayISO==='function'?todayISO():new Date().toISOString().slice(0,10)),
+          sol:'', desc:'', itens:[], anexo:null, fotos:[],
+          ts:Date.now(), st:'Aberta', origem:'Criada via envio de item' };
+      window.state.reqs.unshift(r);
+    }
+    if(!Array.isArray(r.itens)) r.itens=[];
+    if(itemId && r.itens.indexOf(itemId)<0) r.itens.push(itemId);
+  };
+
+  /* ---------- 4) Interceptar botões "Enviar para Requisição" -------------- */
+  function _openReqModalWithItem(itemId){
+    // Fecha modais de item
+    ['modal-item-view','modal-it','modal-send-req'].forEach(function(mid){
+      var m=document.getElementById(mid); if(m) m.classList.remove('open');
+    });
+    // Abre modal-rq
+    try{ if(typeof window.renderReqChecklist==='function') window.renderReqChecklist(); }catch(_){}
+    var bk=$('modal-rq'); if(!bk){ window.toast && window.toast('Modal de requisição não encontrado'); return; }
+    bk.classList.add('open');
+    // Injeta melhorias, garante widget e botão + item
+    setTimeout(function(){
+      _unifyAttachments(); _injectAddItemBtn();
+      // Marca o item na checklist
+      var cont=$('rq-checklist'); if(cont){
+        var chk=cont.querySelector('input[type=checkbox][value="'+itemId+'"]');
+        if(chk){ chk.checked=true; chk.scrollIntoView({block:'center',behavior:'smooth'}); }
+      }
+      // Foco no número da requisição
+      var n=$('rq-num'); if(n && !n.value){ n.focus(); }
+      window.toast && window.toast('📝 Informe o Nº da Requisição e salve para vincular o item');
+    }, 60);
+  }
+  window._openReqModalWithItem=_openReqModalWithItem;
+
+  // Delegação global para [data-send-req] e #item-view-sendreq
+  document.addEventListener('click', function(ev){
+    var t=ev.target && ev.target.closest && ev.target.closest('[data-send-req],#item-view-sendreq');
+    if(!t) return;
+    var id=t.getAttribute('data-send-req');
+    if(!id){
+      // botão dentro do modal-item-view: extrai do dataset do modal
+      var vw=document.getElementById('modal-item-view');
+      id = vw && vw.dataset && vw.dataset.itemId;
+      // fallback: primeiro item marcado no state visualizado
+    }
+    if(!id){
+      // Tenta ler do handler original que guarda em sendItemToReq via dataset
+      var bk=document.getElementById('modal-send-req');
+      id = bk && bk.dataset && bk.dataset.itemId;
+    }
+    if(!id) return;
+    ev.preventDefault(); ev.stopPropagation();
+    _openReqModalWithItem(id);
+  }, true);
+
+  /* ---------- Bootstrap ------------------------------------------------- */
+  function _boot(){
+    var a=_unifyAttachments();
+    var b=_injectAddItemBtn();
+    var c=_wrapItSaveForReqBinding();
+    if(!(a && b && c)) setTimeout(_boot, 500);
+    else console.log(LOG,'Patch v6.7 aplicado: envio→modal-rq, +item na req, anexo unificado, checklist compacta.');
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', _boot);
+  else _boot();
+
+  // v6.8 — antes havia um setTimeout(120ms) em CADA clique do documento reexecutando
+  // _unifyAttachments / _injectAddItemBtn / _wrapItSaveForReqBinding, o que fazia
+  // linhas da Lista Prévia "piscarem" ao clicar. Substituímos por um MutationObserver
+  // que só dispara quando o modal de Nova Requisição realmente abre.
+  var _mrq=document.getElementById('modal-rq');
+  if(_mrq){
+    new MutationObserver(function(){
+      if(_mrq.classList.contains('open')){
+        _unifyAttachments(); _injectAddItemBtn(); _wrapItSaveForReqBinding();
+        if(typeof window._v67RenderChips==='function') window._v67RenderChips();
+      }
+    }).observe(_mrq,{attributes:true,attributeFilter:['class']});
+  }
+})();
+
+</script>
+<!-- =============== FIM MODESK v6.7 =============== -->
+
+<!-- =============== MODESK v6.7-fix · picker unificado Nova Requisição =============== -->
+<script>
+(function(){
+  var LOG='[MODESK v6.7-fix]';
+  function $(id){return document.getElementById(id)}
+  function esc(s){return (window.escapeHTML||function(x){return String(x==null?'':x)})(s)}
+  function normKey(s){ return String(s||'').toLowerCase().trim().replace(/\s+/g,' '); }
+
+  /* ============ FIX 1: sr-save cria/atualiza state.reqs ============ */
+  function patchSrSave(){
+    var btn=$('sr-save'); if(!btn || btn.__srFixed) return;
+    var orig=btn.onclick;
+    btn.onclick=function(ev){
+      var bk=$('modal-send-req'); var itemId=bk && bk.dataset && bk.dataset.itemId;
+      var tipo=($('sr-tipo')||{}).value||'';
+      var numRaw=($('sr-num')||{}).value||'';
+      var r=(typeof orig==='function')?orig.call(this,ev):undefined;
+      try{
+        if(itemId){
+          var it=(window.state && window.state.itens||[]).find(function(x){return x.id===itemId});
+          var num=(numRaw||'').trim() || (it && it.req) || '';
+          if(num && window._ensureReqInterna67){
+            window._ensureReqInterna67(num, tipo, itemId);
+            try{ window.save && window.save(); }catch(_){}
+            try{ window.renderReqs && window.renderReqs(); }catch(_){}
+          }
+        }
+      }catch(e){ console.warn(LOG,'sr-save fix',e); }
+      return r;
+    };
+    btn.__srFixed=true;
+  }
+
+  /* ============ FIX 2: Picker Nova Requisição ============ */
+  window._rqSelected = window._rqSelected || []; // [{id,desc,det,qtd,foto,tipo,fromLP:boolean}]
+
+  function renderRqSel(){
+    var box=$('rq-sel-list'); if(!box) return;
+    var arr=window._rqSelected||[];
+    var cnt=$('rq-sel-count'); if(cnt) cnt.textContent=arr.length+' selecionado(s)';
+    if(!arr.length){ box.innerHTML='<div class="muted tiny" style="padding:8px;text-align:center">Nenhum item ainda.</div>'; }
+    else{
+      box.innerHTML=arr.map(function(x,i){
+        var foto=x.foto&&(x.foto.data||x.foto.url||(typeof x.foto==='string'?x.foto:''))||'';
+        return '<div class="rq-sel-row">'
+          + '<div class="nm">'+(foto?'<img src="'+esc(foto)+'" style="width:22px;height:22px;object-fit:cover;border-radius:4px;vertical-align:middle;margin-right:6px"/>':'')
+          + '<b>'+esc(x.desc||'-')+'</b>'+(x.det?' <small>'+esc(x.det)+'</small>':'')+'</div>'
+          + '<input type="number" min="1" value="'+(x.qtd||1)+'" data-rq-qi="'+i+'"/>'
+          + '<button type="button" class="btn sm warn" data-rq-rm="'+i+'" title="Remover">🗑</button>'
+          + '</div>';
+      }).join('');
+      box.querySelectorAll('[data-rq-rm]').forEach(function(b){
+        b.onclick=function(){ window._rqSelected.splice(+b.dataset.rqRm,1); renderRqSel(); syncHiddenChecklist(); };
+      });
+      box.querySelectorAll('[data-rq-qi]').forEach(function(inp){
+        inp.onchange=function(){ var i=+inp.dataset.rqQi; window._rqSelected[i].qtd=Math.max(1,Number(inp.value)||1); syncHiddenChecklist(); };
+      });
+    }
+    syncHiddenChecklist();
+  }
+
+  /* Mantém #rq-checklist (usado pelo rq-save legado) em sincronia com _rqSelected */
+  function syncHiddenChecklist(){
+    var cont=$('rq-checklist'); if(!cont) return;
+    var arr=window._rqSelected||[];
+    cont.innerHTML=arr.map(function(x){
+      return '<label><input type="checkbox" value="'+esc(x.id)+'" checked/></label>';
+    }).join('');
+  }
+
+  function ensureItemInLista(nome, cat, det, foto, origem){
+    if(!window.state) return null;
+    if(!Array.isArray(state.itens)) state.itens=[];
+    var k=normKey(nome);
+    var it=state.itens.find(function(x){ return normKey(x.desc)===k && x.st==='Pendente' && !x.req; });
+    if(it) return it;
+    var id=uid('IT');
+    it={id:id, desc:nome, det:det||'', qtd:1, tipo:cat||'Outros', foto:foto||null, st:'Pendente', req:null, origem:origem||'Nova Requisição', createdAt:Date.now()};
+    state.itens.unshift(it);
+    return it;
+  }
+
+  function refreshLpList(){
+    var cont=$('rq-lp-list'); if(!cont||!window.state) return;
+    var pend=(state.itens||[]).filter(function(i){return i.st==='Pendente' && !i.req;});
+    var selIds=new Set((window._rqSelected||[]).map(function(x){return x.id;}));
+    cont.innerHTML=pend.length? pend.map(function(i){
+      var foto=i.foto&&(i.foto.data||i.foto.url||'')||'';
+      var det=i.det||i.tipo||'';
+      var thumb=foto
+        ? '<img class="rq-lp-thumb" src="'+esc(foto)+'" alt=""/>'
+        : '<span class="rq-lp-thumb placeholder">📦</span>';
+      return '<label class="rq-lp-chk">'
+        +'<input type="checkbox" value="'+esc(i.id)+'" '+(selIds.has(i.id)?'checked':'')+'/>'
+        +thumb
+        +'<span class="rq-lp-info"><b>'+esc(i.desc||'-')+'</b>'
+        +(det?'<small>'+esc(det)+'</small>':'')
+        +'</span>'
+        +'<span class="rq-lp-qtd">qtd '+(i.qtd||1)+'</span>'
+        +'</label>';
+    }).join('') : '<div class="muted tiny" style="padding:16px;text-align:center">Nenhum item pendente na Lista Prévia.</div>';
+  }
+
+  function bindPicker(){
+    var tabs=$('rq-picker-tabs'); if(!tabs || tabs.__bound) return;
+    tabs.__bound=true;
+    tabs.querySelectorAll('[data-rq-tab]').forEach(function(b){
+      b.onclick=function(){
+        tabs.querySelectorAll('[data-rq-tab]').forEach(function(x){x.classList.toggle('on', x===b);});
+        document.querySelectorAll('[data-rq-panel]').forEach(function(p){p.classList.toggle('on', p.dataset.rqPanel===b.dataset.rqTab);});
+        if(b.dataset.rqTab==='lp') refreshLpList();
+      };
+    });
+
+    // Biblioteca add
+    var bAdd=$('rq-bib-add');
+    if(bAdd) bAdd.onclick=function(){
+      var inp=$('rq-bib-search'); var q=(inp.value||'').trim(); if(!q){ window.toast&&toast('Digite o nome do item'); return; }
+      var hit=(window.bibFind && window.bibFind(q)) || (window.state.biblioteca||[]).find(function(b){return normKey(b.nome)===normKey(q)});
+      if(!hit){ window.toast&&toast('Item não encontrado na biblioteca. Use "+ Novo Item".'); return; }
+      var qtd=Math.max(1,Number($('rq-bib-qtd').value)||1);
+      var foto=hit.foto?{data:hit.foto,name:hit.nome+'.jpg'}:null;
+      var it=ensureItemInLista(hit.nome, hit.cat, hit.det, foto, 'Biblioteca de Itens');
+      if(!(window._rqSelected||[]).some(function(x){return x.id===it.id;})){
+        window._rqSelected.push({id:it.id,desc:it.desc,det:it.det,qtd:qtd,foto:it.foto,tipo:it.tipo});
+      }
+      inp.value=''; $('rq-bib-qtd').value=1;
+      try{ hit.usos=(hit.usos||0)+1; window.save&&save(); }catch(_){}
+      renderRqSel();
+      window.toast&&toast('📚 Item adicionado da biblioteca');
+    };
+
+    // Lista prévia — adicionar marcados
+    var lpAdd=$('rq-lp-add');
+    if(lpAdd) lpAdd.onclick=function(){
+      var picks=[].slice.call(($('rq-lp-list')||document).querySelectorAll('input[type=checkbox]:checked'));
+      if(!picks.length){ window.toast&&toast('Marque ao menos um item pendente'); return; }
+      var added=0;
+      picks.forEach(function(c){
+        var id=c.value;
+        if((window._rqSelected||[]).some(function(x){return x.id===id;})) return;
+        var it=(state.itens||[]).find(function(x){return x.id===id;});
+        if(!it) return;
+        window._rqSelected.push({id:it.id,desc:it.desc,det:it.det,qtd:it.qtd||1,foto:it.foto,tipo:it.tipo});
+        added++;
+      });
+      renderRqSel();
+      window.toast&&toast('📋 '+added+' item(ns) adicionados da Lista Prévia');
+    };
+
+    // Novo item — insere em biblioteca + lista prévia + selected
+    var nAdd=$('rq-new-add');
+    if(nAdd) nAdd.onclick=function(){
+      var nome=($('rq-new-nome').value||'').trim();
+      if(!nome){ window.toast&&toast('Informe o nome do item'); return; }
+      var cat=$('rq-new-cat').value||'Outros';
+      var det=($('rq-new-det').value||'').trim();
+      var qtd=Math.max(1,Number($('rq-new-qtd').value)||1);
+      // 1) Biblioteca
+      var b=null; try{ b=window.bibUpsert&&window.bibUpsert({nome:nome,cat:cat,det:det,unid:'UN',foto:'',origem:'Nova Requisição'}); }catch(_){}
+      // 2) Lista Prévia
+      var it=ensureItemInLista(nome, cat, det, null, 'Nova Requisição');
+      it.qtd=qtd;
+      // 3) Selected
+      if(!(window._rqSelected||[]).some(function(x){return x.id===it.id;})){
+        window._rqSelected.push({id:it.id,desc:it.desc,det:it.det,qtd:qtd,foto:it.foto,tipo:it.tipo});
+      }
+      try{ window.save&&save(); }catch(_){}
+      try{ window.renderItens&&renderItens(); }catch(_){}
+      try{ window.renderBiblioteca&&renderBiblioteca(); }catch(_){}
+      $('rq-new-nome').value=''; $('rq-new-det').value=''; $('rq-new-qtd').value=1;
+      renderRqSel();
+      window.toast&&toast('✅ Novo item criado, salvo na Biblioteca e vinculado');
+    };
+  }
+
+  /* Reset ao abrir o modal (via botão principal). Não reseta se já há itens vindos de fluxos externos. */
+  function onOpenModalRq(){
+    bindPicker();
+    // Se abertura “limpa” (sem número), reseta selection
+    var n=$('rq-num'); var hasExternal=(window._rqSelected||[]).length>0;
+    if(!hasExternal && n && !n.value){
+      window._rqSelected=[];
+    }
+    // Se algum fluxo externo marcou checkboxes no #rq-checklist (v6.7 patch), migra para selected
+    try{
+      var cont=$('rq-checklist');
+      if(cont){
+        var ids=[].slice.call(cont.querySelectorAll('input[type=checkbox]:checked')).map(function(c){return c.value;});
+        ids.forEach(function(id){
+          if((window._rqSelected||[]).some(function(x){return x.id===id;})) return;
+          var it=(window.state.itens||[]).find(function(x){return x.id===id;});
+          if(it) window._rqSelected.push({id:it.id,desc:it.desc,det:it.det,qtd:it.qtd||1,foto:it.foto,tipo:it.tipo});
+        });
+      }
+    }catch(_){}
+    renderRqSel();
+    refreshLpList();
+  }
+
+  // Detecta abertura do modal-rq
+  var mrq=$('modal-rq');
+  if(mrq){
+    var mo=new MutationObserver(function(){
+      if(mrq.classList.contains('open')) onOpenModalRq();
+    });
+    mo.observe(mrq,{attributes:true,attributeFilter:['class']});
+  }
+
+  /* Após rq-save (bem-sucedido), limpa a seleção */
+  function patchRqSaveReset(){
+    var btn=$('rq-save'); if(!btn||btn.__rqReset) return;
+    var orig=btn.onclick;
+    btn.onclick=async function(ev){
+      // Antes de salvar: propaga qtd editada do picker para os itens de state.itens
+      try{
+        (window._rqSelected||[]).forEach(function(x){
+          var it=(window.state.itens||[]).find(function(y){return y.id===x.id;});
+          if(it){ it.qtd=x.qtd||1; }
+        });
+      }catch(_){}
+      var r;
+      try{ r = (typeof orig==='function')? orig.call(this,ev) : undefined; }catch(e){ console.warn(LOG,e); }
+      try{ await Promise.resolve(r); }catch(_){}
+      window._rqSelected=[];
+      renderRqSel();
+      return r;
+    };
+    btn.__rqReset=true;
+  }
+
+  function boot(){
+    patchSrSave();
+    bindPicker();
+    patchRqSaveReset();
+    // v6.8 — loop setTimeout(boot,1500) removido (causava re-render em background).
+    // Reforço apenas na abertura do modal-rq:
+    var mrq=document.getElementById('modal-rq');
+    if(mrq){
+      new MutationObserver(function(){
+        if(mrq.classList.contains('open')){ patchSrSave(); bindPicker(); patchRqSaveReset(); }
+      }).observe(mrq,{attributes:true,attributeFilter:['class']});
+    }
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot);
+  else boot();
+
+})();
+</script>
+
+<!-- =============== MODESK v6.8 · FIX4 (EST02 dedup+link · foto biblioteca · itens cadastrados unificados · sync biblioteca) =============== -->
+<script>
+(function(){
+  'use strict';
+  if(window.__MODESK_FIX4__) return; window.__MODESK_FIX4__=true;
+  const $=id=>document.getElementById(id);
+  const norm=s=>String(s||'').toLowerCase().trim().replace(/\s+/g,' ');
+  const esc=window.escapeHTML||(s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])));
+
+  /* -----------------------------------------------------------------
+     FIX A · Remove UPLOAD DUPLICADO de foto colada (Ctrl+V)
+     Havia dois handlers 'paste' em modal-it/modal-pd que injetavam o
+     MESMO arquivo no input duas vezes seguidas — resultado: dois
+     uploads para o Drive e duas fotos anexadas.
+     Este handler roda em CAPTURE e engole o segundo paste idêntico.
+     ---------------------------------------------------------------- */
+  (function(){
+    let lastKey='', lastAt=0;
+    document.addEventListener('paste', function(e){
+      try{
+        const cd=e.clipboardData; if(!cd) return;
+        const f=(cd.files&&cd.files[0])||null; if(!f) return;
+        const key=(f.name||'')+'|'+(f.size||0)+'|'+(f.type||'');
+        const now=Date.now();
+        if(key===lastKey && (now-lastAt)<500){ e.stopImmediatePropagation(); return; }
+        lastKey=key; lastAt=now;
+      }catch(_){}
+    }, true);
+  })();
+
+  /* -----------------------------------------------------------------
+     FIX B · Vincular Requisição Interna no EST02 (Nova Req. de Compra)
+     O select "pd-req" só era populado dentro de renderReqs(). Se o
+     usuário abrisse o modal a partir da aba Pedidos, o select ficava
+     vazio e o save bloqueava com "Vincule uma Requisição Interna".
+     ---------------------------------------------------------------- */
+  function refreshPdReqSelect(preserve){
+    const sel=$('pd-req'); if(!sel) return;
+    const cur=preserve||sel.value||'';
+    const reqs=(window.state&&state.reqs)||[];
+    sel.innerHTML='<option value="">— selecione a Requisição Interna —</option>'+
+      reqs.map(r=>{
+        const label=(r.num||'')+(r.sol?(' · '+r.sol):'')+(r.data?(' · '+r.data):'');
+        return `<option value="${esc(r.num)}">${esc(label)}</option>`;
+      }).join('');
+    if(cur){ try{ sel.value=cur; }catch(_){} }
+  }
+  window.refreshPdReqSelect=refreshPdReqSelect;
+  document.addEventListener('click', function(e){
+    const t=e.target && e.target.closest && e.target.closest('#pd-new-open, [data-est02]');
+    if(!t) return;
+    // Repopula SINCRONAMENTE na fase de captura, antes do handler do botão setar sel.value.
+    // Isso garante que o value fixado pelo [data-est02] corresponda a uma <option> real,
+    // mesmo que renderReqs() ainda não tenha sido chamado (usuário abrindo o modal
+    // direto pela aba Pedidos).
+    try{ refreshPdReqSelect(t.getAttribute && (t.getAttribute('data-est02')||'')); }catch(_){}
+    // Segunda passada para cobrir casos em que outro handler limpa o select depois.
+    setTimeout(()=>{ try{ refreshPdReqSelect(t.getAttribute && (t.getAttribute('data-est02')||'')); }catch(_){} }, 30);
+  }, true);
+
+  // Guarda contra clique duplo em salvar (evita gravar/uploadar 2×)
+  (function guardDoubleSave(){
+    ['pd-save','rq-save','it-save','bib-save'].forEach(id=>{
+      const btn=$(id); if(!btn) return;
+      const prev=btn.onclick;
+      btn.onclick=function(...args){
+        if(btn.__busy) return;
+        btn.__busy=true; btn.setAttribute('disabled','disabled');
+        let ret; try{ ret=prev&&prev.apply(this,args); }catch(e){ console.error(e); }
+        Promise.resolve(ret).finally(()=>setTimeout(()=>{ btn.__busy=false; btn.removeAttribute('disabled'); }, 700));
+        return ret;
+      };
+    });
+  })();
+
+  /* -----------------------------------------------------------------
+     FIX C · Foto herdada do cadastro (Biblioteca) nos itens da
+     Requisição Interna e do EST02.
+     Se o item em state.itens não tem foto mas existe um cadastro com
+     o mesmo nome na Biblioteca, copiamos a URL/dataURL da foto.
+     ---------------------------------------------------------------- */
+  function bibFotoByName(nome){
+    const bib=(window.state&&state.biblioteca)||[]; if(!nome) return '';
+    const k=norm(nome);
+    const hit=bib.find(b=>norm(b.nome)===k);
+    if(!hit||!hit.foto) return '';
+    return typeof hit.foto==='string' ? hit.foto : (hit.foto.url||hit.foto.data||'');
+  }
+  function backfillItemFotosFromBib(){
+    const its=(window.state&&state.itens)||[];
+    let changed=0;
+    its.forEach(it=>{
+      const hasFoto=it.foto && (typeof it.foto==='string'?it.foto:(it.foto.data||it.foto.url));
+      if(hasFoto) return;
+      const url=bibFotoByName(it.desc);
+      if(url){ it.foto={name:(it.desc||'item')+'.jpg', url:url, data:url}; changed++; }
+    });
+    if(changed){
+      try{ window.save&&save(); }catch(_){}
+      try{ window.renderReqs&&renderReqs(); }catch(_){}
+      try{ window.renderPedidos&&renderPedidos(); }catch(_){}
+      try{ window.renderItens&&renderItens(); }catch(_){}
+    }
+  }
+  window.backfillItemFotosFromBib=backfillItemFotosFromBib;
+  setTimeout(backfillItemFotosFromBib, 1500);
+  if(window.bibUpsert && !window.bibUpsert.__fix4){
+    const origUp=window.bibUpsert;
+    window.bibUpsert=function(entry){
+      const r=origUp.apply(this,arguments);
+      setTimeout(backfillItemFotosFromBib, 150);
+      return r;
+    };
+    window.bibUpsert.__fix4=true;
+  }
+
+  /* -----------------------------------------------------------------
+     FIX D · "Itens Cadastrados" UNIFICADO sem código
+     Antes o painel juntava state.inventario + state.itens exibindo o
+     mesmo item em duplicidade. Agora usa APENAS state.biblioteca (o
+     dicionário deduplicado por nome). Itens são identificados pelo nome.
+     ---------------------------------------------------------------- */
+  function ensureBibSeq(){
+    const bib=(window.state&&state.biblioteca)||[];
+    const sorted=bib.slice().sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));
+    sorted.forEach((b,i)=>{ b.seq=i+1; });
+  }
+  function renderICUnificado(){
+    if(!window.state) return;
+    ensureBibSeq();
+    const q=norm(($('ic-q')&&$('ic-q').value)||'');
+    const bib=(state.biblioteca||[]).slice().sort((a,b)=>(a.seq||0)-(b.seq||0));
+    const rows=bib.filter(b=>{
+      if(!q) return true;
+      return [b.nome,b.det,b.cat,b.origem].map(norm).some(v=>v.indexOf(q)>=0);
+    });
+    const cnt=$('ic-count'); if(cnt) cnt.textContent='· '+rows.length+' de '+bib.length+' (deduplicado)';
+    const body=$('ic-body'); if(!body) return;
+    body.innerHTML = rows.length ? rows.map(b=>{
+      const foto=b.foto?(typeof b.foto==='string'?b.foto:(b.foto.url||b.foto.data||'')):'';
+      const usos=Number(b.usos||1);
+      return '<tr>'
+        
+        + '<td>'+(foto?'<img class="thumb" src="'+esc(foto)+'" style="width:44px;height:44px;object-fit:cover;border-radius:6px;cursor:zoom-in" onclick="window.open(this.src,\'_blank\')"/>':'—')+'</td>'
+        + '<td><b>'+esc(b.nome)+'</b></td>'
+        + '<td style="color:var(--fg-mut);font-size:12px">'+esc([b.cat,b.det].filter(Boolean).join(' · ')||'-')+'</td>'
+        + '<td style="text-align:center">'+usos+'</td>'
+        + '<td style="color:var(--fg-mut);font-size:12px">'+esc(b.origem||'-')+'</td>'
+        + '</tr>';
+    }).join('') : '<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--fg-mut)">Nenhum item cadastrado ainda</td></tr>';
+    const fabC=$('modesk-fab-count'); if(fabC) fabC.textContent=bib.length;
+    // O filtro por origem ("ic-src") não faz mais sentido no modo unificado — oculta.
+    const srcSel=$('ic-src');
+    if(srcSel && !srcSel.__hidden){ srcSel.style.display='none'; srcSel.__hidden=true; }
+  }
+  window.renderItensCadastrados = renderICUnificado;
+  window.openItensCadastrados = function(){ try{ if(window.go) go('biblioteca'); }catch(_){}; setTimeout(renderICUnificado,60); };
+  setInterval(()=>{ try{ if(document.querySelector('.pane[data-pane="biblioteca"].active')) renderICUnificado(); }catch(_){} }, 2500);
+  setTimeout(renderICUnificado, 1200);
+
+  /* -----------------------------------------------------------------
+     FIX E · Sincronização entre usuários da BIBLIOTECA DE ITENS
+     A sync do Firestore só cobria itens/reqs/pedidos/laudos/manut/
+     eventos/inventário. Agora inclui state.biblioteca (upload e
+     download), com merge por normKey(nome) preservando usos, foto,
+     detalhes e origens combinados.
+     ---------------------------------------------------------------- */
+  function bibSanitize(arr){
+    if(!Array.isArray(arr)) return [];
+    return arr.map(b=>{
+      const c=Object.assign({},b);
+      if(c.foto && typeof c.foto==='object'){
+        c.foto = c.foto.url || (typeof c.foto.data==='string' && !c.foto.data.startsWith('data:') ? c.foto.data : '');
+      } else if(typeof c.foto==='string' && c.foto.startsWith('data:')){
+        c.foto=''; // remove base64 grande para não estourar 1MB do doc
+      }
+      return c;
+    });
+  }
+  function mergeBib(local, cloud){
+    const map=new Map();
+    const put=(b)=>{
+      if(!b||!b.nome) return;
+      const k=norm(b.nome);
+      const prev=map.get(k);
+      if(!prev){ map.set(k, Object.assign({}, b)); return; }
+      const merged=Object.assign({}, prev, b);
+      merged.usos = Math.max(prev.usos||0, b.usos||0);
+      merged.foto = prev.foto || b.foto || '';
+      merged.det  = (prev.det && prev.det.length>=(b.det||'').length) ? prev.det : (b.det||prev.det||'');
+      merged.cat  = (prev.cat && prev.cat!=='Outros') ? prev.cat : (b.cat||prev.cat||'Outros');
+      merged.createdAt = Math.min(prev.createdAt||Date.now(), b.createdAt||Date.now());
+      merged.updatedAt = Math.max(prev.updatedAt||0, b.updatedAt||0);
+      const o1=String(prev.origem||'').split(' · ').filter(Boolean);
+      const o2=String(b.origem||'').split(' · ').filter(Boolean);
+      merged.origem=[...new Set([...o1,...o2])].join(' · ');
+      map.set(k, merged);
+    };
+    (local||[]).forEach(put);
+    (cloud||[]).forEach(put);
+    return [...map.values()];
+  }
+
+  if(typeof window.applyCloudPlanilhas==='function' && !window.applyCloudPlanilhas.__fix4){
+    const orig=window.applyCloudPlanilhas;
+    window.applyCloudPlanilhas=function(data){
+      const r=orig.apply(this,arguments);
+      try{
+        if(data && Array.isArray(data.biblioteca)){
+          state.biblioteca = mergeBib(state.biblioteca||[], data.biblioteca);
+          ensureBibSeq();
+          try{ window.save&&save(); }catch(_){}
+          try{ renderICUnificado(); }catch(_){}
+          try{ backfillItemFotosFromBib(); }catch(_){}
+        }
+      }catch(e){ console.warn('[FIX4] merge biblioteca',e); }
+      return r;
+    };
+    window.applyCloudPlanilhas.__fix4=true;
+  }
+
+  if(typeof window.scheduleCloudStateSync==='function' && !window.scheduleCloudStateSync.__fix4){
+    const orig=window.scheduleCloudStateSync;
+    let t=null;
+    function pushBib(){
+      if(!window.db) return;
+      clearTimeout(t);
+      t=setTimeout(()=>{
+        try{
+          const payload={ biblioteca: bibSanitize(state.biblioteca||[]), updatedAt:new Date() };
+          window.db.collection('modesk_omega_sync').doc('planilhas').set(payload,{merge:true})
+            .catch(err=>console.warn('[FIX4] push biblioteca',err));
+        }catch(e){ console.warn('[FIX4] push biblioteca',e); }
+      }, 800);
+    }
+    window.scheduleCloudStateSync=function(){
+      const r=orig.apply(this,arguments);
+      pushBib();
+      return r;
+    };
+    window.scheduleCloudStateSync.__fix4=true;
+  }
+
+  console.log('[MODESK] FIX4 aplicado: EST02 dedup+link · foto biblioteca · itens cadastrados unificados (sem código) · sync biblioteca.');
+})();
+</script>
+<!-- =============== FIM MODESK FIX4 =============== -->
 
 </body>
 </html>
