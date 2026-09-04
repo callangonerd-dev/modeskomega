@@ -328,6 +328,11 @@ main{padding-top:26px}
 .railmenu .mi .gi{width:22px;height:16px;flex:0 0 22px;display:grid;gap:2px;opacity:.85}
 .railmenu .mi .gi span{background:currentColor;border-radius:2px}
 .railmenu .msep{height:1px;margin:5px 6px;background:var(--line)}
+
+.inapp{position:fixed;inset:0;z-index:9999;background:#0e1117;display:flex;flex-direction:column}
+.inapp-bar{display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(255,255,255,.06);border-bottom:1px solid rgba(255,255,255,.12);flex-wrap:wrap}
+.inapp-frame{flex:1;width:100%;border:0;background:#fff}
+.inapp-note{padding:6px 12px;font-size:11.5px}
 </style>
 <style>
 /* ===================== MODESK v15 — JARVIS FX · LUPA · MULTITELAS · RAIL INFERIOR ===================== */
@@ -591,6 +596,7 @@ body.dock-top main{padding-top:14px}
 </div>
 <div id="toast"></div>
 <div id="modal-root"></div>
+<div id="inapp-root"></div>
 
 <script>
 /* ================= ESTADO ================= */
@@ -609,9 +615,13 @@ const DEF={
   ],
   pastas:[
     {id:u(),nome:'Pedidos de Compra',caminho:'C:\\MODESK\\Pedidos',desc:'PDFs e planilhas dos pedidos'},
-    {id:u(),nome:'SEND',caminho:'C:\\MODESK\\SEND',desc:'Comprovantes e retornos de e-mail'}
+    {id:u(),nome:'SEND',caminho:'C:\\MODESK\\SEND',desc:'Comprovantes e retornos de e-mail'},
+    {id:u(),nome:'MODESK MASTER',caminho:'D:\\MODESK MASTER',desc:'Pasta principal do MODESK no disco D'},
+    {id:u(),nome:'Imagem PCs',caminho:'D:\\MODESK MASTER\\Imagem PCs',desc:'Imagens e backups das estações'},
+    {id:u(),nome:'Usuário master',caminho:'C:\\Users\\master',desc:'Pasta do usuário master no PC'}
   ],
   links:[
+    {id:u(),nome:'MXM CEWeb — Dashboard',url:'https://cewebmanager.mxm.senac.br/principal/dashboard',icone:'📊',desc:'Painel CEWeb Manager MXM Senac'},
     {id:u(),nome:'MXM',url:'https://www.mxm.com.br',icone:'🏢',desc:'ERP MXM — pedidos, compras e financeiro'},
     {id:u(),nome:'Websuporte Senac',url:'https://www.senac.br',icone:'🎓',desc:'Portal de suporte técnico Senac'},
     {id:u(),nome:'SEND',url:'https://www.senacrs.com.br',icone:'✉️',desc:'Plataforma SEND — envios e comprovantes'},
@@ -627,7 +637,14 @@ const DEF={
 let state=load(), tab='dashboard';
 
 function u(){return Math.random().toString(36).slice(2,10)}
-function load(){try{const v=localStorage.getItem(LS);if(v)return Object.assign(structuredClone(DEF),JSON.parse(v))}catch(e){}return structuredClone(DEF)}
+function load(){let st=structuredClone(DEF);
+  try{const v=localStorage.getItem(LS);if(v)st=Object.assign(structuredClone(DEF),JSON.parse(v))}catch(e){}
+  return migrar(st)}
+function migrar(st){
+  st.pastas=st.pastas||[]; st.links=st.links||[];
+  DEF.pastas.forEach(d=>{if(!st.pastas.some(x=>(x.caminho||'').toLowerCase()===d.caminho.toLowerCase()))st.pastas.push({...d,id:u()})});
+  DEF.links.forEach(d=>{if(!st.links.some(x=>(x.url||'')===d.url))st.links.push({...d,id:u()})});
+  return st}
 function save(silent){try{localStorage.setItem(LS,JSON.stringify(state))}catch(e){toast('Armazenamento cheio')}
   bc.postMessage({t:'sync',s:state}); pushCloud(); if(!silent)render()}
 const bc=new BroadcastChannel('modesk-pessoal');
@@ -712,7 +729,7 @@ const MENU=[
   {nome:'Painel',icone:'dashboard',itens:[{k:'dashboard',n:'Dashboard',i:'dashboard'},{k:'agenda',n:'Agenda & Avisos',i:'bell'},{k:'atividades',n:'Atividades & Lembretes',i:'pulse'},{k:'busca',n:'Busca Geral',i:'database'}]},
   {nome:'Serviços',icone:'folder',itens:[{k:'servicos',n:'Pastas de Serviços',i:'folder'},{k:'itens',n:'Cadastro de Itens',i:'boxes'}]},
   {nome:'Operacional',icone:'gear',itens:[{k:'pedidos',n:'Pedidos de Compra',i:'cart'},{k:'send',n:'Acompanhamento SEND',i:'mail'},{k:'eventos',n:'Eventos',i:'calendar'}]},
-  {nome:'Máquina & Acessos',icone:'monitor',itens:[{k:'remoto',n:'Conexões Remotas',i:'plug'},{k:'monitor',n:'Monitoramento do PC',i:'pulse'},{k:'pastasfs',n:'Pastas Internas',i:'database'},{k:'explorer',n:'Explorador de Arquivos',i:'folder'}]},
+  {nome:'Máquina & Acessos',icone:'monitor',itens:[{k:'remoto',n:'Conexões Remotas',i:'plug'},{k:'pastasfs',n:'Pastas Internas',i:'database'},{k:'explorer',n:'Explorador de Arquivos',i:'folder'}]},
   {nome:'Atalhos',icone:'link',itens:[{k:'links',n:'Sistemas & Sites',i:'link'}]},
   {nome:'Sistema',icone:'shield',itens:[{k:'config',n:'Configurações',i:'gear'},{k:'entrega',n:'Entrega & Pendências',i:'package'}]}
 ];
@@ -768,10 +785,10 @@ const fmt=d=>d?new Date(d+'T00:00:00').toLocaleDateString('pt-BR'):'—';
 function render(){
   document.querySelectorAll('.navbtn[data-k]').forEach(b=>b.classList.toggle('active',b.dataset.k===tab));
   const map={dashboard:vDash,agenda:vAgenda,servicos:vServicos,itens:vItens,pedidos:vPedidos,send:vSend,eventos:vEventos,
-    remoto:vRemoto,monitor:vMonitor,pastasfs:vPastas,links:vLinks,config:vConfig,entrega:vEntrega,
+    remoto:vRemoto,pastasfs:vPastas,links:vLinks,config:vConfig,entrega:vEntrega,
     atividades:vAtividades,explorer:vExplorer,busca:vBusca,interface:vInterface};
   const titulos={dashboard:'Dashboard',agenda:'Agenda & Avisos',servicos:'Pastas de Serviços',itens:'Cadastro de Itens',pedidos:'Pedidos de Compra',
-    send:'Acompanhamento SEND',eventos:'Eventos',remoto:'Conexões Remotas',monitor:'Monitoramento do PC',pastasfs:'Pastas Internas',
+    send:'Acompanhamento SEND',eventos:'Eventos',remoto:'Conexões Remotas',pastasfs:'Pastas Internas',
     links:'Sistemas & Sites',config:'Configurações',entrega:'Entrega & Pendências',
     atividades:'Atividades & Lembretes',explorer:'Explorador de Arquivos',busca:'Busca Geral',interface:'Central de Interface'};
   ($('tb-title')||{}).textContent=titulos[tab]||'';
@@ -1079,8 +1096,8 @@ function vPastas(){
 }
 function addPastaFS(){const n=$('pf-n').value.trim();if(!n)return toast('Informe o nome');
   state.pastas.push({id:u(),nome:n,caminho:$('pf-c').value,desc:$('pf-d').value});save();toast('Pasta adicionada')}
-function abrirCaminho(c){try{window.open('file:///'+c.replace(/\\/g,'/'),'_blank')}catch(e){}
-  navigator.clipboard&&navigator.clipboard.writeText(c);toast('Caminho copiado — cole no Explorer se o navegador bloquear')}
+function abrirCaminho(c){navigator.clipboard&&navigator.clipboard.writeText(c);
+  toast('Abrindo no Explorador interno — caminho copiado: '+c);go('explorer')}
 async function abrirLocal(){
   if(!window.showDirectoryPicker)return toast('Recurso disponível no Chrome/Edge desktop');
   try{const dir=await window.showDirectoryPicker();const arr=[];
@@ -1091,6 +1108,7 @@ async function abrirLocal(){
 
 /* ---- Links / Sistemas (v12.2 — logos oficiais) ---- */
 const SYS_CATALOGO=[
+  {nome:'MXM CEWeb — Dashboard',url:'https://cewebmanager.mxm.senac.br/principal/dashboard',desc:'Painel CEWeb Manager MXM Senac'},
   {nome:'MXM',url:'https://www.mxm.com.br',desc:'ERP MXM — pedidos e compras'},
   {nome:'Websuporte Senac',url:'https://www.senac.br',desc:'Portal de suporte técnico'},
   {nome:'SEND',url:'https://www.senacrs.com.br',desc:'Envios e comprovantes'},
@@ -1135,7 +1153,7 @@ function vLinks(){
     </div></div>`).join('')||'<div class="card dim">Nenhum sistema cadastrado.</div>'}
   </div>`);
 }
-function abrirSys(id){const l=state.links.find(x=>x.id===id);if(!l)return;if(!l.url)return toast('Informe a URL em Editar');window.open(l.url,'_blank')}
+function abrirSys(id){const l=state.links.find(x=>x.id===id);if(!l)return;if(!l.url)return toast('Informe a URL em Editar');abrirInterno(l.url,l.nome)}
 function addSys(nome){const c=SYS_CATALOGO.find(x=>x.nome===nome);if(!c)return;
   state.links.push({id:u(),nome:c.nome,url:c.url,desc:c.desc,logo:''});save();toast(c.nome+' adicionado')}
 function addLink(){const n=$('lk-n').value.trim();if(!n)return toast('Informe o nome');
@@ -1205,7 +1223,6 @@ function vEntrega(){
     <ul class="dim">
      <li><b>URLs reais</b> de MXM, Websuporte Senac e SEND (campo Editar em Atalhos).</li>
      <li><b>IDs/hosts reais</b> de AnyDesk e VNC das máquinas.</li>
-     <li><b>Agente local</b> de monitoramento (CPU/RAM/disco) — o navegador não acessa hardware.</li>
      <li><b>Credenciais Firebase</b> para o tempo real entre dispositivos (hoje: local + abas).</li>
      <li><b>Busca de conteúdo em PDF/DOCX/XLSX</b> (hoje só arquivos de texto).</li>
      <li><b>OCR de imagens</b> para reconhecimento automático de pedidos (requer Tesseract.js).</li>
@@ -1217,6 +1234,29 @@ function vEntrega(){
 
 /* ---- utilidades ---- */
 function del(col,id){if(!confirm('Excluir este registro?'))return;state[col]=state[col].filter(x=>x.id!==id);save()}
+
+/* ---- NAVEGADOR INTERNO (tudo abre dentro do próprio site) ---- */
+function abrirInterno(url,titulo){
+  if(!url)return toast('Sem link cadastrado');
+  const host=(()=>{try{return new URL(url).hostname}catch(e){return url}})();
+  const t=titulo||host;
+  document.getElementById('inapp-root').innerHTML=`
+   <div class="inapp">
+     <div class="inapp-bar">
+       <button class="btn sm" onclick="fecharInterno()">← Voltar ao MODESK</button>
+       <b style="font-size:13px">${esc(t)}</b>
+       <span class="tag mono">${esc(host)}</span>
+       <button class="btn sm" onclick="document.getElementById('inapp-frame').src=document.getElementById('inapp-frame').src">⟳ Recarregar</button>
+       <button class="btn sm" onclick="navigator.clipboard.writeText(${JSON.stringify(url)});toast('Link copiado')">⧉ Copiar link</button>
+     </div>
+     <iframe id="inapp-frame" src="${esc(url)}" class="inapp-frame" referrerpolicy="no-referrer"></iframe>
+     <div class="inapp-note dim">Se a página ficar em branco, o próprio site bloqueia a exibição interna — use “Copiar link”.</div>
+   </div>`;
+  document.body.style.overflow='hidden';
+}
+function fecharInterno(){document.getElementById('inapp-root').innerHTML='';document.body.style.overflow=''}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')fecharInterno()});
+
 function modal(html){$('modal-root').innerHTML=`<div class="modal" onclick="if(event.target===this)closeModal()"><div class="inner">${html}
   <div style="margin-top:18px"><button class="btn" onclick="closeModal()">Fechar</button></div></div></div>`}
 function closeModal(){$('modal-root').innerHTML=''}
@@ -1314,6 +1354,21 @@ function verAtiv(id){const a=state.atividades.find(x=>x.id===id);if(!a)return;co
     <p>${esc(a.desc||'')}</p><h4 style="margin-top:12px">Arquivo</h4><div style="margin-top:8px">${an}</div>`);}
 function pedirNotificacao(){if(!('Notification'in window))return toast('Navegador sem suporte');
   Notification.requestPermission().then(p=>toast(p==='granted'?'Notificações ativadas':'Notificações negadas'))}
+
+function ativarNotificacoes(){if(!('Notification'in window))return;
+  if(Notification.permission==='default'){Notification.requestPermission().then(perm=>{if(perm==='granted')notificarPedidosHoje(true)})}
+  else if(Notification.permission==='granted')notificarPedidosHoje();}
+let pedidosAvisados={};
+function notificarPedidosHoje(forcar){
+  if(!('Notification'in window)||Notification.permission!=='granted')return;
+  (state.pedidos||[]).forEach(p=>{
+    if(!p.prazo||p.status==='Concluído')return;
+    const d=dias(p.prazo); if(d>0) return;
+    const chave=p.id+'|'+p.prazo; if(pedidosAvisados[chave]&&!forcar)return; pedidosAvisados[chave]=1;
+    try{new Notification('MODESK: Pedido '+(d<0?'está atrasado!':'vence hoje!'),
+      {body:'#'+(p.numero||'—')+' '+(p.forn||'')+' — prazo '+fmt(p.prazo)});}catch(e){}
+  });
+}
 
 /* ---------- MONITOR DE DEADLINE (pisca em vermelho) ---------- */
 let deadlineAtivas=[],avisadas={};
@@ -1429,11 +1484,10 @@ async function expAbrir(ix){
   else if(f.type.startsWith('audio'))inner=`<audio src="${url}" controls style="width:100%"></audio>`;
   else if(['txt','csv','log','json','md','xml','ini','js','html','css'].includes(ext)){
     const txt=await f.text();inner=`<pre class="mono viewer" style="overflow:auto;padding:12px;white-space:pre-wrap">${esc(txt.slice(0,120000))}</pre>`;}
-  else inner='<div class="dim">Pré-visualização interna não disponível para este tipo. Use “Abrir externamente”.</div>';
+  else inner='<div class="dim">Pré-visualização interna não disponível para este tipo. Use “Baixar cópia”.</div>';
   modal(`<h2>${esc(it.nome)}</h2><div class="row" style="margin:8px 0">
     <span class="tag mono">${bytes(f.size)}</span><span class="tag mono">${esc(f.type||ext)}</span>
     <span class="tag mono">${new Date(f.lastModified).toLocaleString('pt-BR')}</span>
-    <a class="btn sm" href="${url}" target="_blank" rel="noopener">↗ Abrir externamente</a>
     <a class="btn sm" href="${url}" download="${esc(it.nome)}">⬇ Baixar cópia</a></div>${inner}`);
 }
 function expIr(i){EXP.path=EXP.path.slice(0,i+1);EXP.dir=EXP.path[EXP.path.length-1];EXP.filtro='';expLer()}
@@ -1530,6 +1584,8 @@ function winClose(){if(confirm('Sair do MODESK?'))logout()}
 (function initV10(){
   setInterval(checarDeadlines,20000);
   setTimeout(checarDeadlines,800);
+  setTimeout(ativarNotificacoes,1500);
+  setInterval(notificarPedidosHoje,600000);
   setInterval(()=>{if(tab==='atividades')render()},60000);
   window.addEventListener('online',atualizarStatusbar);
   window.addEventListener('offline',atualizarStatusbar);
@@ -1650,14 +1706,14 @@ function winClose(){if(confirm('Sair do MODESK?'))logout()}
     dashboard: 'Dashboard', agenda: 'Agenda & Avisos', atividades: 'Atividades & Lembretes',
     busca: 'Busca Geral', servicos: 'Pastas de Serviços', itens: 'Cadastro de Itens',
     pedidos: 'Pedidos de Compra', send: 'Acompanhamento SEND', eventos: 'Eventos',
-    remoto: 'Conexões Remotas', monitor: 'Monitoramento do PC', pastasfs: 'Pastas Internas',
+    remoto: 'Conexões Remotas', pastasfs: 'Pastas Internas',
     explorer: 'Explorador de Arquivos', links: 'Sistemas & Sites', config: 'Configurações',
     entrega: 'Entrega & Pendências', interface: 'Central de Interface'
   };
   const VIEW = () => ({
     dashboard: window.vDash, agenda: window.vAgenda, servicos: window.vServicos, itens: window.vItens,
     pedidos: window.vPedidos, send: window.vSend, eventos: window.vEventos, remoto: window.vRemoto,
-    monitor: window.vMonitor, pastasfs: window.vPastas, links: window.vLinks, config: window.vConfig,
+    pastasfs: window.vPastas, links: window.vLinks, config: window.vConfig,
     entrega: window.vEntrega, atividades: window.vAtividades, explorer: window.vExplorer, busca: window.vBusca,
     interface: window.vInterface
   });
