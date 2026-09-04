@@ -3,10 +3,11 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
-<title>MODESK PESSOAL v9 — Gestão de Serviços · marciooliveira</title>
+<title>MODESK PESSOAL v11 — Gestão de Serviços · marciooliveira</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<link rel="manifest" href='data:application/manifest+json,{"name":"MODESK PESSOAL","short_name":"MODESK","start_url":".","display":"standalone","background_color":"#050a12","theme_color":"#e50914","icons":[{"src":"data:image/svg%2Bxml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 512 512%22%3E%3Crect width=%22512%22 height=%22512%22 rx=%2296%22 fill=%22%23e50914%22/%3E%3Ctext x=%2250%25%22 y=%2265%25%22 font-size=%22300%22 font-family=%22sans-serif%22 font-weight=%22bold%22 fill=%22white%22 text-anchor=%22middle%22%3EM%3C/text%3E%3C/svg%3E","sizes":"512x512","type":"image/svg+xml","purpose":"any"}]}'/>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
 <style>
@@ -225,16 +226,88 @@ table{border-collapse:separate;border-spacing:0}th{color:#7f899c;font-size:10px}
 .linkcard{border-radius:6px;clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,0 100%)}
 @media(max-width:960px){.fbody{margin-left:13px}.kpi-card{min-height:110px}}
 
+
+/* ================= MODESK v10 — SHELL WINDOWS + EXPLORER + ATIVIDADES ================= */
+:root{--win-bar:#0b1220;--win-line:rgba(255,255,255,.10)}
+body{--shellTop:38px;padding-top:var(--shellTop);padding-bottom:30px;transition:padding-top .2s}
+body.deadline-on{--shellTop:80px}
+#winbar{position:fixed;top:0;left:0;right:0;height:38px;z-index:90;display:flex;align-items:center;gap:10px;
+  padding:0 10px;background:linear-gradient(180deg,#0d1524,#080e1a);border-bottom:1px solid rgba(239,20,39,.28);
+  box-shadow:0 6px 22px rgba(0,0,0,.45);-webkit-app-region:drag;font-size:12.6px}
+#winbar .wlogo{width:22px;height:22px;border-radius:6px;background:var(--grad);display:grid;place-items:center;font-weight:800;font-size:12px}
+#winbar .wtitle{font-weight:700;letter-spacing:.02em}
+#winbar .wmenu{display:flex;gap:2px;margin-left:12px;-webkit-app-region:no-drag}
+#winbar .wmenu button{background:transparent;border:0;color:var(--mut);padding:5px 10px;border-radius:7px;cursor:pointer;font-size:12.4px;font-weight:600}
+#winbar .wmenu button:hover{background:rgba(255,255,255,.08);color:var(--fg)}
+#winbar .wright{margin-left:auto;display:flex;align-items:center;gap:8px;-webkit-app-region:no-drag}
+#winsearch{width:240px;padding:5px 10px;border-radius:8px;font-size:12.4px;background:rgba(255,255,255,.06);border:1px solid var(--line)}
+#winbar .wctrl{display:flex;gap:2px}
+#winbar .wctrl button{width:34px;height:26px;border:0;background:transparent;color:var(--mut);cursor:pointer;border-radius:6px}
+#winbar .wctrl button:hover{background:rgba(255,255,255,.10);color:#fff}
+#winbar .wctrl button.close:hover{background:#e81123;color:#fff}
+#statusbar{position:fixed;left:0;right:0;bottom:0;height:30px;z-index:90;display:flex;align-items:center;gap:14px;
+  padding:0 12px;font-size:12px;color:var(--mut);background:linear-gradient(180deg,#080e1a,#05090f);border-top:1px solid var(--win-line)}
+#statusbar .sb-i{display:flex;align-items:center;gap:6px}
+#statusbar .sep{width:1px;height:16px;background:var(--win-line)}
+#statusbar .sb-alert{margin-left:auto;font-weight:700}
+.app{min-height:calc(100vh - var(--shellTop) - 30px)}
+aside{height:calc(100vh - var(--shellTop) - 30px);top:var(--shellTop)}
+main .topbar{top:calc(var(--shellTop) + 4px)}
+#deadline-bar{top:38px}
+
+/* alerta piscante de deadline */
+@keyframes blinkred{0%,100%{background:rgba(229,9,20,.95);box-shadow:0 0 0 rgba(229,9,20,0)}50%{background:rgba(120,4,10,.95);box-shadow:0 0 40px rgba(255,32,53,.75)}}
+#deadline-bar{position:fixed;left:0;right:0;top:38px;z-index:95;display:none;align-items:center;gap:12px;padding:10px 16px;
+  color:#fff;font-weight:800;animation:blinkred 1s infinite;cursor:pointer;border-bottom:1px solid rgba(255,255,255,.2)}
+#deadline-bar.on{display:flex}
+body.deadline-on{--flash:1}
+body.deadline-on #winbar{border-bottom-color:#ff2035;animation:blinkred 1.6s infinite}
+tr.late td,.card.late{outline:1px solid rgba(255,32,53,.55)}
+.blink{animation:blinkred 1s infinite;color:#fff;padding:2px 9px;border-radius:999px}
+
+/* explorer */
+.exp-wrap{display:grid;grid-template-columns:250px minmax(0,1fr);gap:14px}
+.exp-side{background:rgba(8,14,24,.6);border:1px solid var(--line);border-radius:var(--r);padding:12px;max-height:70vh;overflow:auto}
+.exp-main{background:rgba(8,14,24,.6);border:1px solid var(--line);border-radius:var(--r);padding:12px;min-height:60vh}
+.exp-toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+.crumb{display:flex;gap:4px;flex-wrap:wrap;align-items:center;font-size:12.6px;color:var(--mut);margin-bottom:10px}
+.crumb button{background:rgba(255,255,255,.05);border:1px solid var(--line);color:var(--fg);border-radius:7px;padding:3px 9px;cursor:pointer;font-size:12.2px}
+.exp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+.exp-item{padding:12px 10px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.03);cursor:pointer;text-align:center;transition:.15s;overflow:hidden}
+.exp-item:hover{border-color:var(--acc2);transform:translateY(-2px);background:rgba(229,9,20,.10)}
+.exp-item .fi{font-size:30px;display:block;margin-bottom:6px}
+.exp-item .fn{font-size:12.2px;word-break:break-word;line-height:1.3}
+.exp-item .fs{font-size:11px;color:var(--dim)}
+.exp-list-row{display:flex;gap:10px;align-items:center;padding:8px;border-bottom:1px solid var(--line);cursor:pointer}
+.exp-list-row:hover{background:rgba(229,9,20,.08)}
+.viewer{width:100%;height:70vh;border:1px solid var(--line2);border-radius:12px;background:#05090f}
+
 </style>
 </head>
 <body>
+<div id="winbar">
+  <div class="wlogo">M</div><span class="wtitle">MODESK PESSOAL v11 — Assistente diário</span>
+  <div class="wmenu">
+    <button onclick="go('dashboard')">Painel</button>
+    <button onclick="go('atividades')">Atividades</button>
+    <button onclick="go('explorer')">Arquivos</button>
+    <button onclick="go('pedidos')">Pedidos</button>
+    <button onclick="go('itens')">Inventário</button>
+    <button onclick="baixarHTML()">Baixar HTML</button>
+  </div>
+  <div class="wright">
+    <input id="winsearch" placeholder="Buscar em tudo (Ctrl+K)" onkeydown="if(event.key==='Enter')buscaTopo(this.value)"/>
+    <div class="wctrl"><button onclick="winMin()">—</button><button onclick="winFull()">▢</button><button class="close" onclick="winClose()">✕</button></div>
+  </div>
+</div>
+<div id="deadline-bar" onclick="go('atividades')"></div>
 
 <!-- ============ LOGIN ============ -->
 <div id="login">
   <div class="card-login">
     <div class="row" style="gap:14px;margin-bottom:12px">
       <div class="logo">M</div>
-      <div><h2 style="font-size:20px">MODESK PESSOAL</h2><small class="dim">v9 · central operacional pessoal</small></div>
+      <div><h2 style="font-size:20px">MODESK PESSOAL</h2><small class="dim">v11 · assistente diário pessoal</small></div>
     </div>
     <p class="dim">Acesso exclusivo — usuário único <b class="mono">marciooliveira</b>.</p>
     <label>Usuário</label><input id="lg-user" value="marciooliveira" autocomplete="username"/>
@@ -275,6 +348,12 @@ table{border-collapse:separate;border-spacing:0}th{color:#7f899c;font-size:10px}
   </main>
 </div>
 
+<div id="statusbar">
+  <span class="sb-i" id="sb-os">—</span><span class="sep"></span>
+  <span class="sb-i" id="sb-count">—</span><span class="sep"></span>
+  <span class="sb-i">Dados locais neste PC</span>
+  <span class="sb-alert" id="sb-alert"></span>
+</div>
 <div id="toast"></div>
 <div id="modal-root"></div>
 
@@ -302,7 +381,7 @@ const DEF={
     {id:u(),nome:'Websuporte Senac',url:'',icone:'🎓',desc:'Portal de suporte — inserir link'},
     {id:u(),nome:'SEND',url:'',icone:'✉️',desc:'Plataforma SEND — inserir link'}
   ],
-  pedidos:[], sends:[], eventos:[], itens:[],
+  pedidos:[], sends:[], eventos:[], itens:[], atividades:[], arquivos:[],
   fb:{apiKey:'',projectId:'',authDomain:'',appId:''}
 };
 let state=load(), tab='dashboard';
@@ -328,7 +407,9 @@ function logout(){sessionStorage.removeItem('modesk.sess');localStorage.removeIt
 function start(){$('login').classList.add('hidden');$('app').classList.remove('hidden');detectOS();buildMenu();render();connectCloud();
   setInterval(()=>{$('tb-clock').textContent=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})},1000);}
 $('lg-pass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
-if(sessionStorage.getItem('modesk.sess')||localStorage.getItem('modesk.trusted')==='1')start();
+/* início automático só depois de TODO o script carregar (evita erro de "OSINFO/MENU antes da inicialização" quando o PC está marcado como conectado) */
+function autoStart(){try{if(sessionStorage.getItem('modesk.sess')||localStorage.getItem('modesk.trusted')==='1')start();}catch(e){console.error('autoStart',e);try{$('login').classList.remove('hidden');$('app').classList.add('hidden')}catch(_){}}}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',autoStart);else setTimeout(autoStart,0);
 
 /* ================= DETECÇÃO DE SO ================= */
 let OSINFO={};
@@ -387,10 +468,10 @@ const ICONS={
 };
 function icon(name){return `<span class="ui-icon" aria-hidden="true"><svg viewBox="0 0 24 24">${ICONS[name]||ICONS.boxes}</svg></span>`}
 const MENU=[
-  {nome:'Painel',icone:'dashboard',itens:[{k:'dashboard',n:'Dashboard',i:'dashboard'},{k:'agenda',n:'Agenda & Avisos',i:'bell'}]},
+  {nome:'Painel',icone:'dashboard',itens:[{k:'dashboard',n:'Dashboard',i:'dashboard'},{k:'agenda',n:'Agenda & Avisos',i:'bell'},{k:'atividades',n:'Atividades & Lembretes',i:'pulse'},{k:'busca',n:'Busca Geral',i:'database'}]},
   {nome:'Serviços',icone:'folder',itens:[{k:'servicos',n:'Pastas de Serviços',i:'folder'},{k:'itens',n:'Cadastro de Itens',i:'boxes'}]},
   {nome:'Operacional',icone:'gear',itens:[{k:'pedidos',n:'Pedidos de Compra',i:'cart'},{k:'send',n:'Acompanhamento SEND',i:'mail'},{k:'eventos',n:'Eventos',i:'calendar'}]},
-  {nome:'Máquina & Acessos',icone:'monitor',itens:[{k:'remoto',n:'Conexões Remotas',i:'plug'},{k:'monitor',n:'Monitoramento do PC',i:'pulse'},{k:'pastasfs',n:'Pastas Internas',i:'database'}]},
+  {nome:'Máquina & Acessos',icone:'monitor',itens:[{k:'remoto',n:'Conexões Remotas',i:'plug'},{k:'monitor',n:'Monitoramento do PC',i:'pulse'},{k:'pastasfs',n:'Pastas Internas',i:'database'},{k:'explorer',n:'Explorador de Arquivos',i:'folder'}]},
   {nome:'Atalhos',icone:'link',itens:[{k:'links',n:'Sites Importantes',i:'link'}]},
   {nome:'Sistema',icone:'shield',itens:[{k:'config',n:'Configurações',i:'gear'},{k:'entrega',n:'Entrega & Pendências',i:'package'}]}
 ];
@@ -415,6 +496,9 @@ function alertas(){
   state.pedidos.forEach(p=>{if(!p.prazo)return;const d=dias(p.prazo);
     if(p.status!=='Concluído'&&d<0)out.push({t:'err',m:`Pedido ${p.numero} atrasado ${Math.abs(d)}d`});
     else if(p.status!=='Concluído'&&d<=5)out.push({t:'w',m:`Pedido ${p.numero} vence em ${d}d`});});
+  state.atividades.forEach(a=>{if(a.feito||!a.prazo)return;const st=statusAtiv(a);
+    if(st.late)out.push({t:'err',m:`ATIVIDADE ${a.tipo||''}: ${a.titulo} — prazo ${fmt(a.prazo)} ${a.hora||''}`});
+    else if(dias(a.prazo)<=2)out.push({t:'w',m:`Atividade em breve: ${a.titulo} (${fmt(a.prazo)})`});});
   state.sends.forEach(s=>{if(s.status==='Aguardando retorno'&&dias(s.data)<-2)out.push({t:'w',m:`SEND "${s.assunto}" sem retorno há ${Math.abs(dias(s.data))} dias`})});
   return out;
 }
@@ -424,12 +508,16 @@ const fmt=d=>d?new Date(d+'T00:00:00').toLocaleDateString('pt-BR'):'—';
 function render(){
   document.querySelectorAll('.navbtn[data-k]').forEach(b=>b.classList.toggle('active',b.dataset.k===tab));
   const map={dashboard:vDash,agenda:vAgenda,servicos:vServicos,itens:vItens,pedidos:vPedidos,send:vSend,eventos:vEventos,
-    remoto:vRemoto,monitor:vMonitor,pastasfs:vPastas,links:vLinks,config:vConfig,entrega:vEntrega};
+    remoto:vRemoto,monitor:vMonitor,pastasfs:vPastas,links:vLinks,config:vConfig,entrega:vEntrega,
+    atividades:vAtividades,explorer:vExplorer,busca:vBusca};
   const titulos={dashboard:'Dashboard',agenda:'Agenda & Avisos',servicos:'Pastas de Serviços',itens:'Cadastro de Itens',pedidos:'Pedidos de Compra',
     send:'Acompanhamento SEND',eventos:'Eventos',remoto:'Conexões Remotas',monitor:'Monitoramento do PC',pastasfs:'Pastas Internas',
-    links:'Sites Importantes',config:'Configurações',entrega:'Entrega & Pendências'};
+    links:'Sites Importantes',config:'Configurações',entrega:'Entrega & Pendências',
+    atividades:'Atividades & Lembretes',explorer:'Explorador de Arquivos',busca:'Busca Geral'};
   $('tb-title').textContent=titulos[tab]||'';
   $('view').innerHTML=`<div class="sect">${(map[tab]||vDash)()}</div>`;
+  if(tab==='explorer'){ if(EXP.dir)expLer(); else expRestaurar(); }
+  try{atualizarStatusbar()}catch(e){}
 }
 const page=(t,h,b)=>`<h2 class="page">${t}</h2><div class="hint">${h}</div>${b}`;
 
@@ -440,7 +528,7 @@ function vDash(){
   <div class="grid g4" style="margin-bottom:16px">
     ${kpi('Serviços',state.servicos.length,'📂')}${kpi('Pedidos',state.pedidos.length,'🧾')}
     ${kpi('SEND',state.sends.length,'✉️')}${kpi('Eventos',state.eventos.length,'📅')}
-    ${kpi('Acessos',state.acessos.length,'🔌')}${kpi('Itens',state.itens.length,'🧩')}
+    ${kpi('Acessos',state.acessos.length,'plug')}${kpi('Itens',state.itens.length,'boxes')}${kpi('Atividades',state.atividades.filter(a=>!a.feito).length,'pulse')}
   </div>
   <div class="grid g2">
     <div class="card"><h3>🔔 Avisos e análise de datas</h3><div style="margin-top:12px">
@@ -564,7 +652,8 @@ function vItens(){
 function addItem(){const d=$('it-d').value.trim();if(!d)return toast('Descrição obrigatória');
   state.itens.push({id:u(),desc:d,qtd:$('it-q').value||1,un:$('it-u').value||'UN',cat:$('it-c').value,obs:$('it-o').value});save();toast('Item cadastrado')}
 function importCSV(){
-  const f=$('it-f').files[0]; if(!f)return toast('Selecione um CSV');
+  const f=$('it-f').files[0]; if(!f)return toast('Selecione um CSV ou XLSX');
+  if(/\.xlsx?$/i.test(f.name))return importXLSX(f);
   const r=new FileReader();
   r.onload=()=>{
     const linhas=r.result.split(/\r?\n/).filter(Boolean);
@@ -580,6 +669,30 @@ function importCSV(){
     save();toast(n+' itens importados');
   };
   r.readAsText(f,'utf-8');
+}
+
+/* ---- Importação .xlsx nativa (SheetJS sob demanda) ---- */
+function carregarSheetJS(){
+  if(window.XLSX)return Promise.resolve(window.XLSX);
+  return new Promise((ok,err)=>{const sc=document.createElement('script');
+    sc.src='https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
+    sc.onload=()=>ok(window.XLSX);sc.onerror=()=>err(new Error('offline'));document.head.append(sc)});
+}
+async function importXLSX(f){
+  let XLSX;
+  try{toast('Lendo planilha...');XLSX=await carregarSheetJS()}
+  catch(e){return toast('Precisa de internet na 1a leitura de .xlsx')}
+  const wb=XLSX.read(await f.arrayBuffer(),{type:'array'});
+  const linhas=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''});
+  if(!linhas.length)return toast('Planilha vazia');
+  const head=Object.keys(linhas[0]);
+  const col=(...ns)=>head.find(h=>ns.some(n=>h.toLowerCase().includes(n)));
+  const cD=col('desc','item','produto')||head[0],cQ=col('qtd','quant'),cU=col('unid','un'),cC=col('categ','tipo');
+  let n=0;
+  linhas.forEach(l=>{const d=String(l[cD]||'').trim();if(!d)return;
+    state.itens.push({id:u(),desc:d,qtd:String(cQ?l[cQ]||1:1).trim(),un:String(cU?l[cU]||'UN':'UN').trim(),cat:String(cC?l[cC]||'':'').trim(),obs:'importado xlsx'});n++});
+  const pv=$('it-prev');if(pv)pv.textContent=`Planilha ${wb.SheetNames[0]}: ${n} itens (colunas: ${head.join(' | ')})`;
+  save();toast(n+' itens importados do Excel');
 }
 
 /* ---- Pedidos ---- */
@@ -753,7 +866,7 @@ function vConfig(){
    <div class="card"><h3>💾 Backup</h3>
      <div class="row"><button class="btn" onclick="exportJSON()">⬇ Exportar JSON</button>
      <input type="file" id="cf-f" accept=".json" style="max-width:230px"/><button class="btn" onclick="importJSON()">⇪ Importar</button></div>
-     <div class="row" style="margin-top:12px"><button class="btn warn" onclick="baixarHTML()">⬇ Baixar HTML completo</button></div></div>
+     <div class="row" style="margin-top:12px"><button class="btn warn" onclick="baixarHTML()">⬇ Baixar HTML completo</button><button class="btn primary" onclick="instalarApp()">🖥 Instalar como aplicativo do Windows</button></div></div>
   </div>`);
 }
 function trocarSenha(){const v=$('cf-s').value;if(v.length<4)return toast('Mínimo 4 caracteres');state.senha=v;save();toast('Senha atualizada')}
@@ -765,7 +878,7 @@ function baixarHTML(){
   const html='<!doctype html>\n'+document.documentElement.outerHTML
     .replace('<div class="app hidden"','<div class="app hidden"')
     .replace(/<div id="toast">[\s\S]*?<\/div>/,'<div id="toast"></div>');
-  dl(new Blob([html],{type:'text/html;charset=utf-8'}),'MODESK-PESSOAL-v9.html');
+  dl(new Blob([html],{type:'text/html;charset=utf-8'}),'MODESK-PESSOAL-v11.html');
   toast('HTML gerado — verifique seus Downloads');
 }
 function dl(blob,nome){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=nome;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000)}
@@ -777,9 +890,22 @@ function vEntrega(){
    <div class="card"><h3>📦 Geração do HTML</h3>
     <ul class="dim">
      <li>O download é gerado no botão <b>“⬇ Baixar HTML”</b> (topo e em Configurações), pela função <span class="mono">baixarHTML()</span>.</li>
-     <li>Ele serializa o documento inteiro (<span class="mono">document.documentElement.outerHTML</span>) em um Blob e salva como <span class="mono">MODESK-PESSOAL-v7.html</span>.</li>
+     <li>Ele serializa o documento inteiro (<span class="mono">document.documentElement.outerHTML</span>) em um Blob e salva como <span class="mono">MODESK-PESSOAL-v11.html</span>.</li>
      <li>O arquivo é 100% offline (só as fontes e o Firebase vêm de CDN) e funciona com duplo clique.</li>
      <li>Os <b>dados</b> ficam no navegador (localStorage) — use <b>Exportar JSON</b> para levá-los para outro PC.</li>
+    </ul></div>
+   <div class="card"><h3>✅ Feito nesta versão 11</h3>
+    <ul class="dim">
+     <li><b>Atividades pessoais e de trabalho</b> com data, hora, prioridade, repetição e anexo.</li>
+     <li><b>Lembrete piscando em vermelho</b> na barra superior, na tabela e no rodapé quando chega o prazo (+ notificação do Windows).</li>
+     <li><b>Explorador de arquivos interno</b>: abrir pastas do PC, navegar, criar pasta, gravar arquivos no disco, pré-visualizar imagem, PDF, vídeo, áudio e texto, ou abrir externamente.</li>
+     <li><b>Permissão da pasta lembrada</b> neste computador (reabre sozinha).</li>
+     <li><b>Busca geral</b> (Ctrl+K) em atividades, pedidos, inventário, SEND, chamados, acessos, pastas e arquivos.</li>
+     <li><b>Visual estilo Windows</b>: barra de título com menu e botões, laterais e barra de status no rodapé.</li>
+     <li>Regras originais de <b>pedidos de compra, inventário da sala de som e chamados internos</b> mantidas sem alteração.</li>
+     <li><b>NOVO v11 — Instalar como aplicativo do Windows</b> (manifesto embutido + botão em Configurações, abre em janela própria).</li>
+     <li><b>NOVO v11 — Busca dentro do conteúdo dos arquivos</b> do disco (varre subpastas em txt, csv, log, json, md, xml, html, sql...).</li>
+     <li><b>NOVO v11 — Importação .xlsx nativa</b> do inventário (Excel), além de CSV.</li>
     </ul></div>
    <div class="card"><h3>⚠️ O que falta inserir posteriormente</h3>
     <ul class="dim">
@@ -787,7 +913,7 @@ function vEntrega(){
      <li><b>IDs/hosts reais</b> de AnyDesk e VNC das máquinas.</li>
      <li><b>Agente local</b> de monitoramento (CPU/RAM/disco) — o navegador não acessa hardware.</li>
      <li><b>Credenciais Firebase</b> para o tempo real entre dispositivos (hoje: local + abas).</li>
-     <li><b>Leitura .xlsx nativa</b> (hoje CSV); requer biblioteca SheetJS.</li>
+     <li><b>Busca de conteúdo em PDF/DOCX/XLSX</b> (hoje só arquivos de texto).</li>
      <li><b>OCR de imagens</b> para reconhecimento automático de pedidos (requer Tesseract.js).</li>
      <li><b>Notificações do sistema/e-mail</b> dos avisos da agenda (Notification API / serviço SMTP).</li>
      <li><b>Anexos grandes</b> (>1,5 MB) — exigem storage em nuvem.</li>
@@ -801,6 +927,420 @@ function modal(html){$('modal-root').innerHTML=`<div class="modal" onclick="if(e
   <div style="margin-top:18px"><button class="btn" onclick="closeModal()">Fechar</button></div></div></div>`}
 function closeModal(){$('modal-root').innerHTML=''}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+
+/* ================================================================
+   MODESK v10 — ATIVIDADES PESSOAIS, EXPLORADOR DE ARQUIVOS,
+   BUSCA GLOBAL E SHELL ESTILO WINDOWS
+   (as regras originais de Pedidos, Itens/Inventário da Sala de Som,
+    SEND e Chamados internos permanecem intactas)
+=================================================================*/
+if(!Array.isArray(state.atividades))state.atividades=[];
+if(!Array.isArray(state.arquivos))state.arquivos=[];
+
+/* ---------- ATIVIDADES (trabalho + pessoal) com lembrete piscando ---------- */
+const PRIOS=['Normal','Alta','Crítica'];
+function vAtividades(){
+  const ord=state.atividades.slice().sort((a,b)=>((a.prazo||'9999')+(a.hora||'')).localeCompare((b.prazo||'9999')+(b.hora||'')));
+  const abertas=ord.filter(a=>!a.feito), feitas=ord.filter(a=>a.feito);
+  const linha=a=>{const st=statusAtiv(a);
+    return `<tr class="${st.late?'late':''}"><td class="mono">${fmt(a.prazo)}<div class="dim mono">${esc(a.hora||'--:--')}</div></td>
+    <td><b>${esc(a.titulo)}</b><div class="dim">${esc(a.desc||'')}</div></td>
+    <td><span class="tag ${a.tipo==='Pessoal'?'t-info':'t-warn'}">${esc(a.tipo)}</span></td>
+    <td><span class="tag ${a.prioridade==='Crítica'?'t-err':a.prioridade==='Alta'?'t-warn':''}">${esc(a.prioridade||'Normal')}</span></td>
+    <td><span class="tag ${st.cls} ${st.late&&!a.feito?'blink':''}">${st.txt}</span></td>
+    <td style="text-align:right;white-space:nowrap">
+      <button class="btn sm" onclick="toggleAtiv('${a.id}')">${a.feito?'↺':'✓'}</button>
+      <button class="btn sm" onclick="verAtiv('${a.id}')">👁</button>
+      <button class="btn sm" onclick="del('atividades','${a.id}')">🗑</button></td></tr>`};
+  return page('Atividades e lembretes','Cadastre atividades de trabalho ou pessoais. No prazo (deadline) o aviso pisca em vermelho na tela.',`
+  <div class="grid g2" style="margin-bottom:16px">
+   <div class="card"><h3>Nova atividade</h3>
+    <label>Título</label><input id="at-t"/>
+    <div class="grid g2">
+      <div><label>Data (deadline)</label><input id="at-d" type="date"/></div>
+      <div><label>Hora</label><input id="at-h" type="time"/></div>
+      <div><label>Tipo</label><select id="at-tp"><option>Trabalho</option><option>Pessoal</option></select></div>
+      <div><label>Prioridade</label><select id="at-p">${PRIOS.map(p=>`<option>${p}</option>`).join('')}</select></div>
+      <div><label>Repetir</label><select id="at-r"><option value="">Não repetir</option><option value="diario">Diariamente</option><option value="semanal">Semanalmente</option><option value="mensal">Mensalmente</option></select></div>
+      <div><label>Avisar antes (minutos)</label><input id="at-av" type="number" value="30" min="0"/></div>
+    </div>
+    <label>Descrição / informações</label><textarea id="at-i" rows="3"></textarea>
+    <label>Arquivo de referência (opcional, salvo no app)</label><input id="at-f" type="file"/>
+    <div style="margin-top:14px"><button class="btn primary" onclick="addAtividade()">＋ Salvar atividade</button>
+      <button class="btn" onclick="pedirNotificacao()">🔔 Ativar notificações</button></div>
+   </div>
+   <div class="card"><h3>Resumo</h3>
+    <div class="grid g3" style="margin-top:10px">
+      ${kpi('Abertas',abertas.length,'bell')}${kpi('Atrasadas',abertas.filter(a=>statusAtiv(a).late).length,'pulse')}${kpi('Concluídas',feitas.length,'shield')}
+    </div>
+    <div style="margin-top:12px">${abertas.filter(a=>statusAtiv(a).late).map(a=>`<div class="alertbar">⏰ <b>${esc(a.titulo)}</b> — ${fmt(a.prazo)} ${esc(a.hora||'')}</div>`).join('')||'<div class="alertbar o">Nenhuma atividade vencida.</div>'}</div>
+   </div>
+  </div>
+  <div class="card"><h3>Atividades abertas <span class="badge">${abertas.length}</span></h3>
+   <table style="margin-top:10px"><thead><tr><th>Prazo</th><th>Atividade</th><th>Tipo</th><th>Prioridade</th><th>Situação</th><th></th></tr></thead>
+   <tbody>${abertas.map(linha).join('')||'<tr><td colspan="6" class="dim">Nenhuma atividade cadastrada.</td></tr>'}</tbody></table></div>
+  <div class="card" style="margin-top:14px"><h3>Concluídas <span class="badge">${feitas.length}</span></h3>
+   <table style="margin-top:10px"><tbody>${feitas.map(linha).join('')||'<tr><td class="dim">Nada concluído ainda.</td></tr>'}</tbody></table></div>`);
+}
+function statusAtiv(a){
+  if(a.feito)return{cls:'t-ok',txt:'Concluída',late:false};
+  const dl=deadlineMs(a); if(!dl)return{cls:'',txt:'Sem prazo',late:false};
+  const diff=dl-Date.now(), min=Math.round(diff/60000);
+  if(diff<=0)return{cls:'t-err',txt:'VENCIDA',late:true};
+  if(min<=(a.aviso??30))return{cls:'t-err',txt:'AGORA ('+min+' min)',late:true};
+  if(diff<864e5)return{cls:'t-warn',txt:'Hoje/24h',late:false};
+  return{cls:'t-ok',txt:'em '+Math.ceil(diff/864e5)+'d',late:false};
+}
+function deadlineMs(a){if(!a.prazo)return 0;return new Date(a.prazo+'T'+(a.hora||'23:59')+':00').getTime()}
+function addAtividade(){
+  const t=$('at-t').value.trim(); if(!t)return toast('Informe o título');
+  const f=$('at-f').files[0];
+  const push=arq=>{state.atividades.push({id:u(),titulo:t,prazo:$('at-d').value,hora:$('at-h').value,tipo:$('at-tp').value,
+    prioridade:$('at-p').value,repetir:$('at-r').value,aviso:+$('at-av').value||0,desc:$('at-i').value,arquivo:arq,feito:false,criado:Date.now()});
+    save();toast('Atividade salva');checarDeadlines();};
+  if(f){if(f.size>1.5e6)return toast('Arquivo muito grande (máx 1,5 MB) — use o Explorador para arquivos maiores');
+    const r=new FileReader();r.onload=()=>push({nome:f.name,tipo:f.type,dados:r.result});r.readAsDataURL(f);}else push(null);
+}
+function toggleAtiv(id){const a=state.atividades.find(x=>x.id===id);if(!a)return;
+  a.feito=!a.feito;
+  if(a.feito&&a.repetir&&a.prazo){const d=new Date(a.prazo+'T00:00:00');
+    if(a.repetir==='diario')d.setDate(d.getDate()+1);
+    if(a.repetir==='semanal')d.setDate(d.getDate()+7);
+    if(a.repetir==='mensal')d.setMonth(d.getMonth()+1);
+    state.atividades.push({...a,id:u(),feito:false,prazo:d.toISOString().slice(0,10),criado:Date.now()});}
+  save();checarDeadlines();}
+function verAtiv(id){const a=state.atividades.find(x=>x.id===id);if(!a)return;const st=statusAtiv(a);
+  const an=a.arquivo?(a.arquivo.tipo&&a.arquivo.tipo.startsWith('image')
+     ?`<img src="${a.arquivo.dados}" style="max-width:100%;border-radius:12px"/>`
+     :`<a class="btn" href="${a.arquivo.dados}" download="${esc(a.arquivo.nome)}">⬇ ${esc(a.arquivo.nome)}</a>`):'<div class="dim">Sem arquivo.</div>';
+  modal(`<h2>${esc(a.titulo)}</h2><div class="row" style="margin:10px 0">
+    <span class="tag t-info mono">${fmt(a.prazo)} ${esc(a.hora||'')}</span>
+    <span class="tag">${esc(a.tipo)}</span><span class="tag">${esc(a.prioridade||'Normal')}</span>
+    <span class="tag ${st.cls} ${st.late?'blink':''}">${st.txt}</span></div>
+    <p>${esc(a.desc||'')}</p><h4 style="margin-top:12px">Arquivo</h4><div style="margin-top:8px">${an}</div>`);}
+function pedirNotificacao(){if(!('Notification'in window))return toast('Navegador sem suporte');
+  Notification.requestPermission().then(p=>toast(p==='granted'?'Notificações ativadas':'Notificações negadas'))}
+
+/* ---------- MONITOR DE DEADLINE (pisca em vermelho) ---------- */
+let deadlineAtivas=[],avisadas={};
+function checarDeadlines(){
+  deadlineAtivas=state.atividades.filter(a=>!a.feito&&statusAtiv(a).late);
+  const evHoje=state.eventos.filter(e=>dias(e.data)<=0);
+  const bar=$('deadline-bar');
+  if(bar){
+    if(deadlineAtivas.length||evHoje.length){
+      const nomes=deadlineAtivas.map(a=>a.titulo).concat(evHoje.map(e=>'Evento: '+e.titulo)).slice(0,3).join(' · ');
+      bar.innerHTML=`⏰ LEMBRETE NO PRAZO — ${esc(nomes)}${(deadlineAtivas.length+evHoje.length)>3?' +'+(deadlineAtivas.length+evHoje.length-3):''} <span style="margin-left:auto;font-weight:600">clique para abrir · Esc dispensa</span>`;
+      bar.classList.add('on');document.body.classList.add('deadline-on');
+    }else{bar.classList.remove('on');document.body.classList.remove('deadline-on');}
+  }
+  deadlineAtivas.forEach(a=>{if(!avisadas[a.id]){avisadas[a.id]=1;
+    try{if(window.Notification&&Notification.permission==='granted')new Notification('MODESK — '+a.titulo,{body:'Prazo: '+fmt(a.prazo)+' '+(a.hora||'')});}catch(e){}
+    toast('⏰ '+a.titulo+' está no prazo!');}});
+  atualizarStatusbar();
+}
+function atualizarStatusbar(){
+  const sb=$('sb-alert'); if(!sb)return;
+  const n=deadlineAtivas.length;
+  sb.innerHTML=n?`<span class="blink">⏰ ${n} atividade(s) no prazo</span>`:'<span class="muted">Sem pendências críticas</span>';
+  const c=$('sb-count'); if(c)c.textContent=`${state.atividades.filter(a=>!a.feito).length} atividades · ${state.pedidos.length} pedidos · ${state.itens.length} itens`;
+  const o=$('sb-os'); if(o)o.textContent=(OSINFO.os||'—')+' · '+(navigator.onLine?'Online':'Offline');
+}
+
+/* ---------- EXPLORADOR DE ARQUIVOS DO PC ---------- */
+let EXP={root:null,dir:null,path:[],itens:[],filtro:'',modo:'grid'};
+const idbGet=k=>new Promise(r=>{const q=indexedDB.open('modesk-fs',1);q.onupgradeneeded=()=>q.result.createObjectStore('h');
+  q.onsuccess=()=>{const t=q.result.transaction('h','readonly').objectStore('h').get(k);t.onsuccess=()=>r(t.result);t.onerror=()=>r(null)};q.onerror=()=>r(null)});
+const idbSet=(k,v)=>new Promise(r=>{const q=indexedDB.open('modesk-fs',1);q.onupgradeneeded=()=>q.result.createObjectStore('h');
+  q.onsuccess=()=>{const t=q.result.transaction('h','readwrite').objectStore('h').put(v,k);t.onsuccess=()=>r(1);t.onerror=()=>r(0)};q.onerror=()=>r(0)});
+
+function vExplorer(){
+  const sup=!!window.showDirectoryPicker;
+  return page('Explorador de arquivos','Navegue pelas pastas do computador dentro da plataforma, abra e visualize internamente ou externamente, e salve arquivos direto no PC.',`
+  ${sup?'':'<div class="alertbar">Este navegador não suporta acesso a pastas. Use Chrome ou Edge no Windows (no modo aplicativo instalado funciona igual a um programa do PC).</div>'}
+  <div class="exp-toolbar">
+    <button class="btn primary" onclick="expEscolherPasta()">📂 Abrir pasta do PC</button>
+    <button class="btn" onclick="expVoltar()">⬅ Voltar</button>
+    <button class="btn" onclick="expRaiz()">🏠 Raiz</button>
+    <button class="btn" onclick="expNovaPasta()">🗂 Nova pasta</button>
+    <button class="btn" onclick="expEnviarArquivo()">⬆ Salvar arquivo aqui</button>
+    <input id="exp-q" placeholder="Buscar nesta pasta..." style="max-width:240px" oninput="EXP.filtro=this.value;expPintar()"/>
+    <button class="btn sm" onclick="EXP.modo=EXP.modo==='grid'?'list':'grid';expPintar()">🔀 Modo</button>
+    <button class="btn" onclick="expBuscarConteudo()">🔎 Buscar dentro dos arquivos</button>
+  </div>
+  <div class="exp-wrap">
+    <div class="exp-side"><h4 style="font-size:13px">Locais salvos</h4>
+      <div style="margin-top:8px">${state.pastas.map(p=>`<div class="exp-list-row" onclick="abrirCaminho('${esc(p.caminho).replace(/\\/g,'\\\\')}')"><span>📁</span><div><b style="font-size:12.6px">${esc(p.nome)}</b><div class="mono dim" style="font-size:11px">${esc(p.caminho)}</div></div></div>`).join('')||'<div class="dim">Nenhum local salvo.</div>'}</div>
+      <h4 style="font-size:13px;margin-top:14px">Dica</h4>
+      <div class="dim" style="font-size:12px">A permissão da pasta fica lembrada neste PC. Arquivos criados aqui são gravados de verdade no disco.</div>
+    </div>
+    <div class="exp-main"><div class="crumb" id="exp-crumb"></div><div id="exp-body"><div class="dim">Clique em “Abrir pasta do PC” para começar.</div></div></div>
+  </div>`);
+}
+async function expEscolherPasta(){
+  if(!window.showDirectoryPicker)return toast('Use Chrome/Edge no desktop');
+  try{const h=await window.showDirectoryPicker({mode:'readwrite'});EXP.root=h;EXP.dir=h;EXP.path=[h];await idbSet('root',h);await expLer();}catch(e){}
+}
+async function expRestaurar(){
+  const h=await idbGet('root'); if(!h)return;
+  try{const perm=await h.queryPermission({mode:'readwrite'});
+    if(perm==='granted'){EXP.root=h;EXP.dir=h;EXP.path=[h];if(tab==='explorer')expLer();}
+    else if(tab==='explorer'){const b=$('exp-body');if(b)b.innerHTML=`<button class="btn primary" onclick="expPermitir()">🔓 Reconectar pasta "${esc(h.name)}"</button>`}
+  }catch(e){}
+}
+async function expPermitir(){const h=await idbGet('root');if(!h)return;
+  const p=await h.requestPermission({mode:'readwrite'});
+  if(p==='granted'){EXP.root=h;EXP.dir=h;EXP.path=[h];expLer()}else toast('Permissão negada')}
+async function expLer(){
+  if(!EXP.dir)return;
+  const arr=[];
+  try{for await(const [nome,h] of EXP.dir.entries()){
+    let tam=0,mod=0;
+    if(h.kind==='file'){try{const f=await h.getFile();tam=f.size;mod=f.lastModified}catch(e){}}
+    arr.push({nome,kind:h.kind,h,tam,mod});}}catch(e){toast('Erro ao ler pasta')}
+  arr.sort((a,b)=>a.kind===b.kind?a.nome.localeCompare(b.nome):(a.kind==='directory'?-1:1));
+  EXP.itens=arr;expPintar();
+}
+const bytes=n=>n>1048576?(n/1048576).toFixed(1)+' MB':n>1024?(n/1024).toFixed(0)+' KB':n+' B';
+function fileIcon(n,k){if(k==='directory')return'📁';const e=n.split('.').pop().toLowerCase();
+  if(['png','jpg','jpeg','gif','webp','bmp','svg'].includes(e))return'🖼️';if(e==='pdf')return'📕';
+  if(['xlsx','xls','csv'].includes(e))return'📊';if(['doc','docx','txt','md','rtf'].includes(e))return'📄';
+  if(['mp3','wav','ogg','flac'].includes(e))return'🎵';if(['mp4','avi','mkv','mov'].includes(e))return'🎬';
+  if(['zip','rar','7z'].includes(e))return'🗜️';if(['exe','msi','bat'].includes(e))return'⚙️';return'📃'}
+function expPintar(){
+  const cr=$('exp-crumb'),bo=$('exp-body'); if(!cr||!bo)return;
+  cr.innerHTML=EXP.path.map((p,i)=>`<button onclick="expIr(${i})">${esc(p.name||'raiz')}</button>`).join('<span>›</span>')||'';
+  const f=EXP.filtro.toLowerCase();
+  const list=EXP.itens.filter(i=>!f||i.nome.toLowerCase().includes(f));
+  if(!list.length){bo.innerHTML='<div class="dim">Pasta vazia ou nada encontrado.</div>';return}
+  if(EXP.modo==='grid'){
+    bo.innerHTML=`<div class="exp-grid">${list.map((i,ix)=>`<div class="exp-item" ondblclick="expAbrir(${ix})" onclick="expAbrir(${ix})">
+      <span class="fi">${fileIcon(i.nome,i.kind)}</span><div class="fn">${esc(i.nome)}</div>
+      <div class="fs">${i.kind==='file'?bytes(i.tam):'pasta'}</div></div>`).join('')}</div>`;
+  }else{
+    bo.innerHTML=list.map((i,ix)=>`<div class="exp-list-row" onclick="expAbrir(${ix})"><span>${fileIcon(i.nome,i.kind)}</span>
+      <b style="font-size:12.8px">${esc(i.nome)}</b><span class="dim" style="margin-left:auto">${i.kind==='file'?bytes(i.tam)+' · '+new Date(i.mod).toLocaleDateString('pt-BR'):'pasta'}</span></div>`).join('');
+  }
+}
+function expFiltrados(){const f=EXP.filtro.toLowerCase();return EXP.itens.filter(i=>!f||i.nome.toLowerCase().includes(f))}
+async function expAbrir(ix){
+  const it=expFiltrados()[ix]; if(!it)return;
+  if(it.kind==='directory'){EXP.dir=it.h;EXP.path.push(it.h);EXP.filtro='';await expLer();return}
+  const f=await it.h.getFile(); const url=URL.createObjectURL(f);
+  const ext=it.nome.split('.').pop().toLowerCase();
+  let inner='';
+  if(f.type.startsWith('image'))inner=`<img src="${url}" class="viewer" style="object-fit:contain"/>`;
+  else if(ext==='pdf')inner=`<iframe src="${url}" class="viewer"></iframe>`;
+  else if(f.type.startsWith('video'))inner=`<video src="${url}" class="viewer" controls></video>`;
+  else if(f.type.startsWith('audio'))inner=`<audio src="${url}" controls style="width:100%"></audio>`;
+  else if(['txt','csv','log','json','md','xml','ini','js','html','css'].includes(ext)){
+    const txt=await f.text();inner=`<pre class="mono viewer" style="overflow:auto;padding:12px;white-space:pre-wrap">${esc(txt.slice(0,120000))}</pre>`;}
+  else inner='<div class="dim">Pré-visualização interna não disponível para este tipo. Use “Abrir externamente”.</div>';
+  modal(`<h2>${esc(it.nome)}</h2><div class="row" style="margin:8px 0">
+    <span class="tag mono">${bytes(f.size)}</span><span class="tag mono">${esc(f.type||ext)}</span>
+    <span class="tag mono">${new Date(f.lastModified).toLocaleString('pt-BR')}</span>
+    <a class="btn sm" href="${url}" target="_blank" rel="noopener">↗ Abrir externamente</a>
+    <a class="btn sm" href="${url}" download="${esc(it.nome)}">⬇ Baixar cópia</a></div>${inner}`);
+}
+function expIr(i){EXP.path=EXP.path.slice(0,i+1);EXP.dir=EXP.path[EXP.path.length-1];EXP.filtro='';expLer()}
+function expVoltar(){if(EXP.path.length>1){EXP.path.pop();EXP.dir=EXP.path[EXP.path.length-1];expLer()}}
+function expRaiz(){if(EXP.root){EXP.path=[EXP.root];EXP.dir=EXP.root;expLer()}}
+async function expNovaPasta(){if(!EXP.dir)return toast('Abra uma pasta primeiro');
+  const n=prompt('Nome da nova pasta:');if(!n)return;
+  try{await EXP.dir.getDirectoryHandle(n,{create:true});toast('Pasta criada no PC');expLer()}catch(e){toast('Não foi possível criar')}}
+async function expEnviarArquivo(){
+  if(!EXP.dir)return toast('Abra uma pasta do PC primeiro');
+  const inp=document.createElement('input');inp.type='file';inp.multiple=true;
+  inp.onchange=async()=>{for(const f of inp.files){try{
+      const h=await EXP.dir.getFileHandle(f.name,{create:true});const w=await h.createWritable();await w.write(await f.arrayBuffer());await w.close();
+      state.arquivos.push({id:u(),nome:f.name,tam:f.size,pasta:EXP.dir.name,em:Date.now()});
+    }catch(e){toast('Falha ao salvar '+f.name)}}
+    save(true);toast('Arquivo(s) gravado(s) na pasta do PC');expLer()};
+  inp.click();
+}
+
+/* ---------- BUSCA GLOBAL ---------- */
+let BUSCA='';
+function vBusca(){
+  const q=BUSCA.trim().toLowerCase();
+  const hits=[];
+  const add=(cat,titulo,sub,acao)=>hits.push({cat,titulo,sub,acao});
+  if(q){
+    state.atividades.forEach(a=>{if((a.titulo+' '+(a.desc||'')).toLowerCase().includes(q))add('Atividade',a.titulo,fmt(a.prazo)+' '+(a.tipo||''),`verAtiv('${a.id}')`)});
+    state.eventos.forEach(e=>{if((e.titulo+' '+(e.info||'')).toLowerCase().includes(q))add('Evento',e.titulo,fmt(e.data),`verEvento('${e.id}')`)});
+    state.pedidos.forEach(p=>{if(JSON.stringify(p).toLowerCase().includes(q))add('Pedido de compra','Pedido '+p.numero,(p.fornecedor||'')+' · '+(p.status||''),`go('pedidos')`)});
+    state.itens.forEach(i=>{if(JSON.stringify(i).toLowerCase().includes(q))add('Inventário',i.descricao||i.nome||'item',(i.categoria||'')+' · '+(i.quantidade||'')+' '+(i.unidade||''),`go('itens')`)});
+    state.sends.forEach(s=>{if(JSON.stringify(s).toLowerCase().includes(q))add('SEND',s.assunto,(s.destinatario||'')+' · '+(s.status||''),`go('send')`)});
+    state.acessos.forEach(a=>{if(JSON.stringify(a).toLowerCase().includes(q))add('Acesso remoto',a.nome,(a.tipo||'')+' · '+(a.endereco||''),`go('remoto')`)});
+    state.pastas.forEach(p=>{if(JSON.stringify(p).toLowerCase().includes(q))add('Pasta do PC',p.nome,p.caminho,`go('explorer')`)});
+    state.links.forEach(l=>{if(JSON.stringify(l).toLowerCase().includes(q))add('Atalho',l.nome,l.url||'sem URL',`go('links')`)});
+    state.servicos.forEach(s=>{(s.sub||[]).forEach(sb=>(sb.itens||[]).forEach(it=>{const txt=typeof it==='string'?it:(it.nome||'');
+      if(txt.toLowerCase().includes(q))add('Serviço',txt,s.nome+' › '+sb.nome,`go('servicos')`)}))});
+    state.arquivos.forEach(a=>{if(a.nome.toLowerCase().includes(q))add('Arquivo salvo',a.nome,a.pasta||'',`go('explorer')`)});
+  }
+  return page('Busca geral','Procure em atividades, pedidos, inventário, SEND, chamados, acessos, pastas e arquivos.',`
+  <div class="card" style="margin-bottom:14px"><div class="row">
+    <input id="bs-q" value="${esc(BUSCA)}" placeholder="Digite o que procura..." style="max-width:420px" oninput="BUSCA=this.value;render();setTimeout(()=>{const el=$('bs-q');el&&el.focus();el.setSelectionRange(el.value.length,el.value.length)},0)"/>
+    <span class="tag mono">${hits.length} resultado(s)</span></div></div>
+  <div class="card"><table><tbody>
+   ${hits.map(h=>`<tr><td><span class="tag t-info">${esc(h.cat)}</span></td><td><b>${esc(h.titulo)}</b><div class="dim">${esc(h.sub||'')}</div></td>
+     <td style="text-align:right"><button class="btn sm" onclick="${h.acao}">Abrir</button></td></tr>`).join('')||`<tr><td class="dim">${q?'Nada encontrado.':'Digite para buscar.'}</td></tr>`}
+  </tbody></table></div>`);
+}
+function buscaTopo(v){BUSCA=v;tab='busca';render()}
+
+const TEXTEXT=['txt','csv','log','json','md','xml','ini','js','ts','html','htm','css','sql','bat','cmd','yml','yaml','srt','svg'];
+async function expBuscarConteudo(){
+  if(!EXP.dir)return toast('Abra uma pasta do PC primeiro');
+  const termo=(prompt('Buscar este texto DENTRO dos arquivos desta pasta (e subpastas):')||'').trim();
+  if(!termo)return;
+  const alvo=termo.toLowerCase(),achados=[];let lidos=0;
+  const bo=$('exp-body');if(bo)bo.innerHTML='<div class="dim">Procurando dentro dos arquivos...</div>';
+  async function varrer(dir,base,nivel){
+    if(nivel>4||achados.length>=200)return;
+    for await(const [nome,h] of dir.entries()){
+      if(achados.length>=200)return;
+      if(h.kind==='directory'){await varrer(h,base+nome+'/',nivel+1);continue}
+      const ext=nome.split('.').pop().toLowerCase();
+      if(!TEXTEXT.includes(ext))continue;
+      try{const f=await h.getFile();if(f.size>3e6)continue;
+        const t=await f.text();lidos++;
+        const i=t.toLowerCase().indexOf(alvo);
+        if(i>=0)achados.push({nome,caminho:base+nome,trecho:t.slice(Math.max(0,i-70),i+130).replace(/\s+/g,' ')});
+      }catch(e){}
+    }
+  }
+  await varrer(EXP.dir,'',0);
+  if(!bo)return;
+  bo.innerHTML=`<div class="row" style="margin-bottom:10px"><span class="tag t-info">${achados.length} arquivo(s) com "${esc(termo)}"</span>
+    <span class="tag mono">${lidos} arquivos de texto lidos</span><button class="btn sm" onclick="expLer()">↩ Voltar à pasta</button></div>`+
+    (achados.map(a=>`<div class="exp-list-row"><span>${fileIcon(a.nome,'file')}</span><div><b style="font-size:12.8px">${esc(a.nome)}</b>
+      <div class="mono dim" style="font-size:11px">${esc(a.caminho)}</div>
+      <div class="dim" style="font-size:12px">…${esc(a.trecho)}…</div></div></div>`).join('')
+     ||'<div class="dim">Nada encontrado no conteúdo dos arquivos (busca em arquivos de texto: txt, csv, log, json, md, xml, html, sql...).</div>');
+}
+
+/* ---------- SHELL WINDOWS ---------- */
+function winFull(){const d=document.documentElement;if(!document.fullscreenElement)d.requestFullscreen&&d.requestFullscreen();else document.exitFullscreen()}
+function winMin(){toast('Minimizar disponível na janela do Windows (instale como aplicativo no Edge/Chrome)')}
+let PWA=null;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();PWA=e;toast('Este programa pode ser instalado no Windows (Configurações › Instalar)')});
+async function instalarApp(){
+  if(PWA){PWA.prompt();const r=await PWA.userChoice;PWA=null;return toast(r.outcome==='accepted'?'Instalado! Procure MODESK no menu Iniciar':'Instalação cancelada')}
+  if(matchMedia('(display-mode: standalone)').matches)return toast('Já está rodando como aplicativo');
+  toast('No Edge/Chrome: menu ⋯ › Aplicativos › Instalar este site como aplicativo');
+}
+function winClose(){if(confirm('Sair do MODESK?'))logout()}
+
+/* ---------- INICIALIZAÇÃO v10 ---------- */
+(function initV10(){
+  setInterval(checarDeadlines,20000);
+  setTimeout(checarDeadlines,800);
+  setInterval(()=>{if(tab==='atividades')render()},60000);
+  window.addEventListener('online',atualizarStatusbar);
+  window.addEventListener('offline',atualizarStatusbar);
+  document.addEventListener('keydown',e=>{
+    if(e.ctrlKey&&e.key==='k'){e.preventDefault();const s=$('winsearch');s&&s.focus()}
+    if(e.key==='Escape'){const b=$('deadline-bar');b&&b.classList.remove('on')}
+  });
+  expRestaurar();
+})();
+
 </script>
+
+<style id="v12-dnd">
+/* ---------- área de arrastar e soltar ---------- */
+.dropzone{
+  position:relative;display:flex;align-items:center;gap:12px;margin:6px 0 4px;padding:14px 16px;
+  border:1.5px dashed rgba(255,255,255,.20);border-radius:10px;
+  background:rgba(255,255,255,.035);cursor:pointer;transition:.15s;user-select:none
+}
+.dropzone:hover{background:rgba(255,255,255,.07);border-color:var(--acc,#ef1427)}
+.dropzone.over{background:rgba(15,108,189,.22);border-color:var(--acc,#ef1427);border-style:solid;box-shadow:0 0 0 3px rgba(43,136,216,.18)}
+.dropzone .dz-ico{width:36px;height:36px;flex:0 0 auto;display:grid;place-items:center;font-size:18px;border-radius:6px;background:rgba(43,136,216,.16);color:#8fc7f5}
+.dropzone .dz-txt{font-size:12.8px;line-height:1.35}
+.dropzone .dz-txt b{display:block;font-weight:600}
+.dropzone .dz-txt span{color:var(--mut);font-size:11.6px}
+.dropzone .dz-btn{margin-left:auto;white-space:nowrap;padding:6px 12px;border-radius:5px;font-size:12.2px;font-weight:600;background:var(--acc,#ef1427);color:#fff;border:1px solid rgba(255,255,255,.12)}
+.dropzone.has-file{border-style:solid;border-color:rgba(90,200,140,.5);background:rgba(60,180,120,.10)}
+.dropzone input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;padding:0;border:0}
+/* soltar arquivos no explorador */
+.exp-main.over,.exp-wrap.over{outline:2px solid var(--acc,#ef1427);outline-offset:-4px;background:rgba(15,108,189,.12);border-radius:10px}
+#dropveil{position:fixed;inset:0;z-index:400;display:none;place-items:center;background:rgba(6,18,32,.55);backdrop-filter:blur(6px)}
+#dropveil.on{display:grid}
+#dropveil .box{padding:34px 46px;border-radius:12px;border:2px dashed var(--acc,#ef1427);background:rgba(32,32,32,.9);text-align:center;font-weight:600}
+#dropveil .box small{display:block;color:var(--mut);font-weight:400;margin-top:6px}
+</style>
+
+<div id="dropveil"><div class="box">⇩ Solte os arquivos para gravar na pasta aberta<small>Explorador de Arquivos do MODESK</small></div></div>
+
+<script>
+/* ============ MODESK v12 — arrastar e soltar + janela Win11 ============ */
+(function(){
+  const LABELS={
+    'ev-f':['Anexo do evento','Imagem, planilha ou PDF'],
+    'it-f':['Planilha de inventário','Arquivo .csv'],
+    'cf-f':['Backup do MODESK','Arquivo .json de restauração'],
+    'at-f':['Arquivo de referência','Qualquer arquivo salvo no app']
+  };
+  function upgrade(inp){
+    if(!inp||inp.dataset.dz)return; inp.dataset.dz='1';
+    const dz=document.createElement('div'); dz.className='dropzone';
+    const L=LABELS[inp.id]||['Solte o arquivo aqui','ou clique para escolher no PC'];
+    dz.innerHTML='<div class="dz-ico">⇧</div><div class="dz-txt"><b>Arraste e solte: '+L[0]+'</b><span>'+L[1]+' — ou clique para escolher</span></div><div class="dz-btn">Escolher arquivo</div>';
+    inp.parentNode.insertBefore(dz,inp); dz.appendChild(inp);
+    const txt=dz.querySelector('.dz-txt b');
+    const base=txt.textContent;
+    inp.addEventListener('change',()=>{
+      if(inp.files&&inp.files[0]){dz.classList.add('has-file');txt.textContent='✓ '+inp.files[0].name;}
+      else{dz.classList.remove('has-file');txt.textContent=base;}
+    });
+    ['dragenter','dragover'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();e.stopPropagation();dz.classList.add('over')}));
+    ['dragleave','drop'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();e.stopPropagation();dz.classList.remove('over')}));
+    dz.addEventListener('drop',e=>{
+      const f=e.dataTransfer&&e.dataTransfer.files; if(!f||!f.length)return;
+      const dt=new DataTransfer(); dt.items.add(f[0]); inp.files=dt.files;
+      inp.dispatchEvent(new Event('change',{bubbles:true}));
+    });
+  }
+  function upgradeAll(){document.querySelectorAll('input[type=file]:not([data-dz])').forEach(upgrade)}
+  new MutationObserver(upgradeAll).observe(document.documentElement,{childList:true,subtree:true});
+  document.addEventListener('DOMContentLoaded',upgradeAll); upgradeAll();
+
+  /* soltar arquivos em qualquer lugar → grava na pasta aberta do PC */
+  const veil=document.getElementById('dropveil');
+  let dragDepth=0;
+  const temArquivo=e=>e.dataTransfer&&Array.from(e.dataTransfer.types||[]).includes('Files');
+  window.addEventListener('dragenter',e=>{
+    if(!temArquivo(e)||e.target.closest('.dropzone'))return;
+    dragDepth++; if(typeof EXP!=='undefined'&&EXP.dir)veil.classList.add('on');
+  });
+  window.addEventListener('dragover',e=>{if(temArquivo(e))e.preventDefault()});
+  window.addEventListener('dragleave',e=>{dragDepth=Math.max(0,dragDepth-1);if(!dragDepth)veil.classList.remove('on')});
+  window.addEventListener('drop',async e=>{
+    if(!temArquivo(e)||e.target.closest('.dropzone'))return;
+    e.preventDefault(); dragDepth=0; veil.classList.remove('on');
+    const files=Array.from(e.dataTransfer.files||[]); if(!files.length)return;
+    if(typeof EXP==='undefined'||!EXP.dir){typeof toast==='function'&&toast('Abra uma pasta do PC no Explorador para gravar os arquivos');return}
+    let ok=0;
+    for(const f of files){
+      try{
+        const h=await EXP.dir.getFileHandle(f.name,{create:true});
+        const w=await h.createWritable(); await w.write(await f.arrayBuffer()); await w.close();
+        if(typeof state!=='undefined'&&state.arquivos)state.arquivos.push({id:(typeof u==='function'?u():String(Date.now()+ok)),nome:f.name,tam:f.size,pasta:EXP.dir.name,em:Date.now()});
+        ok++;
+      }catch(err){}
+    }
+    typeof save==='function'&&save();
+    typeof toast==='function'&&toast(ok+' arquivo(s) gravado(s) em '+EXP.dir.name);
+    typeof expLer==='function'&&expLer();
+  });
+
+  /* maximizar / restaurar como no Windows 11 */
+  document.addEventListener('fullscreenchange',()=>document.body.classList.toggle('win-max',!!document.fullscreenElement));
+  if(matchMedia('(display-mode: standalone)').matches)document.body.classList.add('win-max');
+})();
+</script>
+
 </body>
 </html>
