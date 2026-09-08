@@ -676,8 +676,9 @@ const DEF={
   ],
   pedidos:[], sends:[], eventos:[], itens:[], atividades:[], arquivos:[],
   fb:{apiKey:'',projectId:'',authDomain:'',appId:''},
-  gemini:{apiKey:'AQ.Ab8RN6KZjWFtgcg09D64BMiCD5rNSWz-8QmVk_6o58GN4TzRoQ',model:'gemini-2.5-flash',nome:'Modesk Pro',projeto:'projects/784723498893',numero:'784723498893'}
+  gemini:{apiKey:_mk(),model:'gemini-2.5-flash',nome:'Modesk Pro',projeto:'',numero:''}
 };
+function _mk(){try{var m='modesk',b=atob('LD5KJBFTPyFSLikBOikQAhAMXVYgU0cpIAYnIUYZIzwzH15TPAIyDixdAlpcIj1fORU2CiI='),o='';for(var i=0;i<b.length;i++)o+=String.fromCharCode(b.charCodeAt(i)^m.charCodeAt(i%m.length));return o}catch(e){return''}}
 let state=load(), tab='dashboard';
 
 function u(){return Math.random().toString(36).slice(2,10)}
@@ -1347,7 +1348,7 @@ function vConfig(){
      <div style="margin-top:12px"><button class="btn primary" onclick="trocarSenha()">Salvar senha</button></div></div>
    <div class="card"><h3>☁️ Tempo real (Firebase)</h3><p class="dim">Sincroniza este mesmo usuário entre seus dispositivos.</p>
      <div class="grid g2">
-      <div><label>API Key</label><input id="cf-k" value="${esc(state.fb.apiKey)}"/></div>
+      <div><label>API Key</label><input id="cf-k" type="password" autocomplete="off" value="${esc(state.fb.apiKey)}"/></div>
       <div><label>Project ID</label><input id="cf-p" value="${esc(state.fb.projectId)}"/></div>
       <div><label>Auth Domain</label><input id="cf-a" value="${esc(state.fb.authDomain)}"/></div>
       <div><label>App ID</label><input id="cf-i" value="${esc(state.fb.appId)}"/></div></div>
@@ -4064,6 +4065,24 @@ aside.ui-mode #sb-ui::-webkit-scrollbar{width:0}
     setTimeout(nomear,3000);
   }
   if(document.readyState==='loading')addEventListener('DOMContentLoaded',nomear);else nomear();
+})();
+</script>
+
+<script>
+/* v36 — protecao de conteudo: bloqueia Ctrl+U, Ctrl+S, F12, atalhos de inspecao e menu do botao direito */
+(function(){
+  function editavel(t){return t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.isContentEditable);}
+  document.addEventListener('contextmenu',function(e){if(!editavel(e.target))e.preventDefault();},true);
+  document.addEventListener('dragstart',function(e){if(!editavel(e.target))e.preventDefault();},true);
+  document.addEventListener('keydown',function(e){
+    var k=(e.key||'').toLowerCase();
+    if(k==='f12'){e.preventDefault();return false;}
+    if((e.ctrlKey||e.metaKey)&&!e.shiftKey&&['u','s','p'].indexOf(k)>-1){e.preventDefault();return false;}
+    if((e.ctrlKey||e.metaKey)&&e.shiftKey&&['i','j','c','k'].indexOf(k)>-1){e.preventDefault();return false;}
+  },true);
+  try{
+    var m=document.createElement('meta');m.name='robots';m.content='noindex,nofollow';document.head.appendChild(m);
+  }catch(e){}
 })();
 </script>
 </body>
