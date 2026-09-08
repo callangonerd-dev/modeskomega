@@ -3785,8 +3785,7 @@ body.jvpip-off #jvx{display:none!important}
     if(!pop){aviso('O navegador bloqueou a janela. Libere pop-ups deste site.');return}
     try{
       pop.document.open();
-      pop.document.write('<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>J.A.R.V.I.S. — MODESK</title></head><body>
-</body></html>');
+      pop.document.write('<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>J.A.R.V.I.S. \u2014 MODESK</title></head><body></body></html>');
       pop.document.close();
       estilos(pop.document);
       volta=document.createComment('jvx');
