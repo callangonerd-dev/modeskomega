@@ -2884,12 +2884,8 @@ Tipos validos: add_atividade, add_evento {titulo,data,hora,local,info}, add_pedi
 add_send {assunto,data,status,obs}, add_item {desc,qtd,un,cat,obs}, ir_para {tela}.
 Nunca invente acoes que o usuario nao pediu. Sem pedido de acao, nao envie bloco json.
 
-Voce tem busca no Google e leitura de links ativas: quando a pergunta pedir informacao atual
-(noticias, precos, cotacoes, resultados, paginas da web), pesquise e cite as fontes.
-Voce tambem le imagens, PDFs, audios e videos anexados pelo usuario.
-
 === ESTADO ATUAL DO SISTEMA (contexto opcional, use so se for relevante) ===
-${jvResumo().slice(0,3500)}`;
+${jvResumo()}`;
 }
 const JV_MODELOS=['gemini-2.5-flash','gemini-flash-latest','gemini-2.0-flash','gemini-2.5-flash-lite','gemini-flash-lite-latest'];
 function jvModeloValido(m){
@@ -2899,20 +2895,13 @@ function jvModeloValido(m){
   if(!/^(gemini|gemma)[\w.\-]*$/.test(m))return JV_MODELOS[0];
   return m;
 }
-let JV_SEM_TOOLS=false;
-function jvBody(model,contents){
-  const b={systemInstruction:{parts:[{text:jvSystem()}]},contents,
-    generationConfig:{temperature:.7,maxOutputTokens:8192,topP:.95}};
-  // pensamento desligado no 2.5 = resposta MUITO mais rapida
-  if(/2\.5|flash-latest/.test(model))b.generationConfig.thinkingConfig={thinkingBudget:0};
-  if(!JV_SEM_TOOLS)b.tools=[{google_search:{}},{url_context:{}}];
-  return b;
-}
 async function jvChamada(model,contents,key,viaQuery){
   const base='https://generativelanguage.googleapis.com/v1beta/models/'+model+':generateContent';
   const url=viaQuery?(base+'?key='+encodeURIComponent(key)):base;
   const hd={'Content-Type':'application/json'}; if(!viaQuery)hd['x-goog-api-key']=key;
-  const r=await fetch(url,{method:'POST',headers:hd,body:JSON.stringify(jvBody(model,contents))});
+  const r=await fetch(url,{method:'POST',headers:hd,
+    body:JSON.stringify({systemInstruction:{parts:[{text:jvSystem()}]},contents,
+      generationConfig:{temperature:.6,maxOutputTokens:4096}})});
   let j={}; try{j=await r.json()}catch(e){}
   if(!r.ok&&!viaQuery&&(r.status===400||r.status===401||r.status===403))return jvChamada(model,contents,key,true);
   if(!r.ok){
@@ -2948,56 +2937,6 @@ async function jvListarModelos(key){
   if(!r.ok)throw new Error((j.error&&j.error.message)||('HTTP '+r.status));
   return (j.models||[]).filter(m=>(m.supportedGenerationMethods||[]).includes('generateContent'))
     .map(m=>String(m.name||'').replace('models/',''));
-}
-async function jvStreamChamada(model,contents,key,onDelta){
-  const url='https://generativelanguage.googleapis.com/v1beta/models/'+model
-    +':streamGenerateContent?alt=sse&key='+encodeURIComponent(key);
-  const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify(jvBody(model,contents))});
-  if(!r.ok||!r.body){
-    let j={};try{j=await r.json()}catch(e){}
-    const msg=(j.error&&j.error.message)||('HTTP '+r.status);
-    const err=new Error(msg);err.status=r.status;throw err;
-  }
-  const rd=r.body.getReader(),dec=new TextDecoder();
-  let buf='',txt='';const fontes=[];
-  for(;;){
-    const {value,done}=await rd.read(); if(done)break;
-    buf+=dec.decode(value,{stream:true});
-    let i;
-    while((i=buf.indexOf('\n'))>=0){
-      const line=buf.slice(0,i).trim(); buf=buf.slice(i+1);
-      if(!line.startsWith('data:'))continue;
-      const d=line.slice(5).trim(); if(!d||d==='[DONE]')continue;
-      let j;try{j=JSON.parse(d)}catch(e){continue}
-      const cand=(j.candidates||[])[0]||{};
-      ((cand.content&&cand.content.parts)||[]).forEach(pt=>{
-        if(pt.text){txt+=pt.text;try{onDelta&&onDelta(txt)}catch(_){}}
-      });
-      const gm=cand.groundingMetadata;
-      if(gm&&gm.groundingChunks)gm.groundingChunks.forEach(c=>{
-        const w=c.web;if(w&&w.uri&&!fontes.some(f=>f.uri===w.uri))fontes.push({uri:w.uri,titulo:w.title||w.uri});
-      });
-    }
-  }
-  if(!txt.trim())throw new Error('Sem resposta do modelo.');
-  return {texto:txt.trim(),fontes};
-}
-async function jvGeminiStream(contents,onDelta){
-  const c=jvCfg();const key=(c.apiKey||'').trim();
-  if(!key)throw new Error('Cole a sua chave do Google AI Studio para ativar o JARVIS.');
-  const model=jvModeloValido(c.model);
-  try{ return await jvStreamChamada(model,contents,key,onDelta) }
-  catch(e){
-    if(e.status===401||e.status===403)throw e;
-    if(!JV_SEM_TOOLS&&(e.status===400||e.status===404)){
-      JV_SEM_TOOLS=true;
-      try{ return await jvStreamChamada(model,contents,key,onDelta) }catch(_){}
-    }
-    const txt=await jvGemini(contents);
-    try{onDelta&&onDelta(txt)}catch(_){}
-    return {texto:txt,fontes:[]};
-  }
 }
 async function jvGemini(contents){
   const c=jvCfg();
@@ -3259,7 +3198,11 @@ function vJarvis(){
 (function(){
   const LS='jvx_v25';
   const S={threads:[],atual:null,files:[],pensando:false,snap:''};
-  const $x=id=>document.getElementById(id);
+  /* v42: busca sempre DENTRO da janela do JARVIS (funciona tambem quando ela esta
+     em janela separada do computador / PiP, onde document.getElementById falha) */
+  const $x=id=>{ if(win){ const el=win.querySelector('#'+id); if(el) return el; } return document.getElementById(id); };
+  const jwin=()=>(win&&win.ownerDocument&&win.ownerDocument.defaultView)||window;
+  const pr=(m,d)=>{ try{ return jwin().prompt(m,d) }catch(_){ return window.prompt(m,d) } };
   const esc2=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const uid=()=>Math.random().toString(36).slice(2,10);
   function aviso(m){try{toast(m)}catch(_){console.log(m)}}
@@ -3287,7 +3230,7 @@ function vJarvis(){
   const HTML=`
   <div class="jx-head">
     <div class="jx-logo">◉</div>
-    <div class="jx-title"><b>J.A.R.V.I.S.</b><small>MODESK CORE · IA</small></div>
+    <div class="jx-title"><b>J.A.R.V.I.S.</b><small>MODESK CORE · IA v42</small></div>
     <div class="jx-sp"></div>
     <button class="jx-b" data-a="side" title="Mostrar/ocultar assuntos">☰</button>
     <button class="jx-b" data-a="w" title="Largura total">↔</button>
@@ -3318,8 +3261,6 @@ function vJarvis(){
             <button class="jx-ic" data-a="xls" title="Gerar planilha (CSV/Excel)">📊</button>
             <button class="jx-ic" data-a="doc" title="Gerar documento para download">📄</button>
             <button class="jx-ic" data-a="mic" title="Ditar por voz">🎤</button>
-            <button class="jx-ic" data-a="falar" title="Ler a ultima resposta em voz alta">🔊</button>
-            <button class="jx-ic" data-a="parar" title="Parar a leitura / geracao">⏹</button>
             <button class="jx-ic" data-a="site" title="Perguntar sobre o conteúdo do site">🌐</button>
             <button class="jx-ic" data-a="share" title="Importar conversa compartilhada do Gemini">🔗</button>
             <button class="jx-ic" data-a="limpar" title="Limpar este assunto">🧹</button>
@@ -3406,34 +3347,15 @@ function vJarvis(){
       <button data-r="${t.id}" title="Renomear">✎</button><button data-x="${t.id}" title="Excluir">🗑</button></div>`).join('');
     box.querySelectorAll('.jx-th').forEach(el=>{
       el.onclick=e=>{
-        if(e.target.dataset.r){const n=prompt('Nome do assunto:',th().nome);const t=S.threads.find(t=>t.id===e.target.dataset.r);if(n&&t){t.nome=n;salvarX();pintarThreads()}return}
+        if(e.target.dataset.r){const n=pr('Nome do assunto:',th().nome);const t=S.threads.find(t=>t.id===e.target.dataset.r);if(n&&t){t.nome=n;salvarX();pintarThreads()}return}
         if(e.target.dataset.x){S.threads=S.threads.filter(t=>t.id!==e.target.dataset.x);if(!S.threads.length)novoAssunto(true);S.atual=S.threads[0].id;salvarX();pintarThreads();pintar();return}
         S.atual=el.dataset.id;salvarX();pintarThreads();pintar();
       };
     });
   }
   function fmt(t){
-    let h=esc2(t)
-      .replace(/```[a-z]*\n?([\s\S]*?)```/g,(m,c)=>`<pre class="jx-code">${c.replace(/\n$/,'')}</pre>`)
-      .replace(/^###\s?(.+)$/gm,'<h4>$1</h4>')
-      .replace(/^##\s?(.+)$/gm,'<h3>$1</h3>')
-      .replace(/^#\s?(.+)$/gm,'<h3>$1</h3>')
-      .replace(/\[([^\]]+)\]\((https?:[^)\s]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>')
-      .replace(/\*\*(.+?)\*\*/g,'<b>$1</b>')
-      .replace(/(^|[\s(])\*([^*\n]+)\*(?=[\s).,!?]|$)/g,'$1<i>$2</i>')
-      .replace(/`([^`]+)`/g,'<code>$1</code>')
-      .replace(/^\s*[-•]\s+(.+)$/gm,'<li>$1</li>')
-      .replace(/^\s*(\d+)\.\s+(.+)$/gm,'<li>$2</li>');
-    h=h.replace(/(<li>[\s\S]*?<\/li>)(?!\s*<li>)/g,m=>'<ul>'+m+'</ul>');
-    return h.split(/\n{2,}/).map(b=>/^\s*<(pre|ul|h3|h4)/.test(b)?b:'<p>'+b.replace(/\n/g,'<br>')+'</p>').join('');
-  }
-  function pintarStream(i){
-    const box=$x('jx-log');if(!box)return;
-    const el=box.querySelectorAll('.m')[i];
-    const m=th().msgs[i];if(!el||!m)return;
-    const perto=box.scrollHeight-box.scrollTop-box.clientHeight<160;
-    el.innerHTML=fmt(m.text||'')+'<span class="jx-cur"></span>';
-    if(perto)box.scrollTop=box.scrollHeight;
+    return esc2(t).replace(/```[a-z]*\n([\s\S]*?)```/g,(m,c)=>`<pre style="white-space:pre-wrap;background:rgba(255,60,60,.08);border:1px solid rgba(255,60,60,.25);padding:8px;border-radius:8px">${c}</pre>`)
+      .replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/`([^`]+)`/g,'<code>$1</code>');
   }
   function pintar(){
     const box=$x('jx-log');if(!box)return;
@@ -3449,19 +3371,11 @@ function vJarvis(){
             ${csv?`<button data-dl="csv" data-i="${i}">⬇ Baixar planilha .csv</button><button data-dl="xls" data-i="${i}">⬇ Baixar Excel .xls</button>`:''}
           </div>`:'';
         const imgs=(m.imgs||[]).map(u=>`<img src="${u}"/>`).join('');
-        const cp=m.role==='model'&&!m.streaming?`<div class="dl"><button data-cp="${i}">⧉ Copiar</button><button data-tts="${i}">🔊 Ouvir</button></div>`:'';
-        return `<div class="m ${m.role==='user'?'me':'ai'}">${fmt(m.text||'')}${m.streaming?'<span class="jx-cur"></span>':''}${imgs}${dl}${cp}</div>`;
+        return `<div class="m ${m.role==='user'?'me':'ai'}">${fmt(m.text||'')}${imgs}${dl}</div>`;
       }).join('')
       +(S.pensando?'<div class="m sys">JARVIS processando…</div>':'');
     try{box.scrollTo({top:box.scrollHeight,behavior:'smooth'})}catch(e){box.scrollTop=box.scrollHeight}
     box.querySelectorAll('[data-dl]').forEach(b=>b.onclick=()=>baixarDe(b.dataset.dl,+b.dataset.i));
-    box.querySelectorAll('[data-cp]').forEach(b=>b.onclick=()=>{
-      const m=th().msgs[+b.dataset.cp];if(!m)return;
-      try{navigator.clipboard.writeText(m.text||'');aviso('Copiado')}catch(_){aviso('Nao consegui copiar')}
-    });
-    box.querySelectorAll('[data-tts]').forEach(b=>b.onclick=()=>{
-      const m=th().msgs[+b.dataset.tts];if(m)falar(m.text||'');
-    });
     $x('jx-st').textContent=S.files.length?S.files.length+' anexo(s)':'';
   }
   function pintarFiles(){
@@ -3519,7 +3433,7 @@ function vJarvis(){
 
   function contents(){
     const t=th();
-    const arr=t.msgs.filter(m=>m.role&&m.text&&!m.streaming).slice(-14).map(m=>({role:m.role==='user'?'user':'model',parts:[{text:m.text}]}));
+    const arr=t.msgs.filter(m=>m.role&&m.text).slice(-24).map(m=>({role:m.role==='user'?'user':'model',parts:[{text:m.text}]}));
     const ult=arr[arr.length-1];
     if(ult&&ult.role==='user'){
       S.files.forEach(f=>{
@@ -3583,7 +3497,7 @@ function vJarvis(){
     if(!forcar){if(chavePedida)return true;chavePedida=true}
     const c=(typeof jvCfg==='function')?jvCfg():(window.state&&(state.gemini=state.gemini||{}))||{};
     if(c.apiKey&&!forcar)return true;
-    const k=prompt('Cole a chave do Google AI Studio (aistudio.google.com/apikey):',c.apiKey||'');
+    const k=pr('Cole a chave do Google AI Studio (aistudio.google.com/apikey):',c.apiKey||'');
     if(k===null)return !!c.apiKey;
     c.apiKey=k.trim();
     try{save(true)}catch(_){}
@@ -3594,7 +3508,7 @@ function vJarvis(){
   /* ---------- conversa compartilhada do Gemini (herdado da versao antiga) ---------- */
   async function importarShare(){
     const c=(typeof jvCfg==='function')?jvCfg():{};
-    const u=(prompt('Link da conversa compartilhada do Gemini:',c.share||'')||'').trim();
+    const u=(pr('Link da conversa compartilhada do Gemini:',c.share||'')||'').trim();
     if(!u)return;
     if(!/^https?:\/\//i.test(u)){aviso('Cole um link válido (https://...)');return}
     c.share=u;try{save(true)}catch(_){}
@@ -3635,19 +3549,10 @@ function vJarvis(){
         const url=await gerarVideo(msg);
         t.msgs.push({role:'model',tipo:'video',url,text:'Vídeo gerado a partir de: '+msg});
       }else{
-        const ctx=contents();
-        const idx=t.msgs.push({role:'model',text:'',streaming:true})-1;
-        S.pensando=false;pintar();
-        let ult=0;
-        const r0=await jvGeminiStream(ctx,txt=>{
-          t.msgs[idx].text=txt;
-          const now=Date.now(); if(now-ult>70){ult=now;pintarStream(idx)}
-        });
-        let limpo=r0.texto,feitas=[];
-        try{const r=jvAcoes(r0.texto);limpo=r.limpo;feitas=r.feitas}catch(_){}
-        if(r0.fontes&&r0.fontes.length)
-          limpo+='\n\n**Fontes:**\n'+r0.fontes.slice(0,6).map(f=>'- ['+f.titulo+']('+f.uri+')').join('\n');
-        t.msgs[idx]={role:'model',text:limpo+(feitas.length?'\n\n✅ '+feitas.join('\n✅ '):'')};
+        const resp=await jvGemini(contents());
+        let limpo=resp,feitas=[];
+        try{const r=jvAcoes(resp);limpo=r.limpo;feitas=r.feitas}catch(_){}
+        t.msgs.push({role:'model',text:limpo+(feitas.length?'\n\n✅ '+feitas.join('\n✅ '):'')});
         if(feitas.length){try{render()}catch(_){}}
       }
       S.files=[];pintarFiles();
@@ -3657,12 +3562,6 @@ function vJarvis(){
       S.pensando=false;pintar();salvarX();
     }
   }
-
-  function falar(txt){
-    try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(String(txt).slice(0,4000));
-      u.lang='pt-BR';u.rate=1.05;speechSynthesis.speak(u)}catch(_){aviso('Voz nao suportada')}
-  }
-  window.jvxFalar=falar;
 
   /* ---------- voz ---------- */
   let rec=null;
@@ -3693,16 +3592,14 @@ function vJarvis(){
       const b=e.target.closest('[data-a]');if(!b)return;
       const a=b.dataset.a,ta=$x('jx-in');
       if(a==='file')$x('jx-file').click();
-      else if(a==='img'){if(!ta.value.trim())ta.value='';const p=ta.value.trim()||prompt('Descreva a imagem que devo criar:');if(p){ta.value=p;enviar(undefined,'img')}}
-      else if(a==='vid'){const p=ta.value.trim()||prompt('Descreva o vídeo que devo criar:');if(p){ta.value=p;enviar(undefined,'vid')}}
-      else if(a==='xls'){const p=ta.value.trim()||prompt('Qual planilha devo gerar? (ex.: atividades atrasadas por prioridade)');
+      else if(a==='img'){if(!ta.value.trim())ta.value='';const p=ta.value.trim()||pr('Descreva a imagem que devo criar:');if(p){ta.value=p;enviar(undefined,'img')}}
+      else if(a==='vid'){const p=ta.value.trim()||pr('Descreva o vídeo que devo criar:');if(p){ta.value=p;enviar(undefined,'vid')}}
+      else if(a==='xls'){const p=ta.value.trim()||pr('Qual planilha devo gerar? (ex.: atividades atrasadas por prioridade)');
         if(p)enviar('Gere uma planilha sobre: '+p+'. Responda com uma breve explicação e a tabela completa dentro de um bloco ```csv usando ponto e vírgula como separador, com cabeçalho.');}
-      else if(a==='doc'){const p=ta.value.trim()||prompt('Qual documento devo escrever?');
+      else if(a==='doc'){const p=ta.value.trim()||pr('Qual documento devo escrever?');
         if(p)enviar('Escreva o documento completo e formatado sobre: '+p);}
       else if(a==='mic')ditar(b);
-      else if(a==='falar'){const ms=th().msgs.filter(m=>m.role==='model'&&m.text);ms.length?falar(ms[ms.length-1].text):aviso('Nada para ler ainda')}
-      else if(a==='parar'){try{speechSynthesis.cancel()}catch(_){}}
-      else if(a==='site'){const p=ta.value.trim()||prompt('O que quer saber sobre o sistema/site?');
+      else if(a==='site'){const p=ta.value.trim()||pr('O que quer saber sobre o sistema/site?');
         if(p)enviar('Com base nos dados reais do MODESK (telas, atividades, pedidos, eventos, SEND, itens, links, arquivos), responda: '+p);}
       else if(a==='share'){importarShare()}
       else if(a==='limpar'){const t=th();t.msgs=[];S.files=[];pintarFiles();pintar();salvarX()}
@@ -3717,9 +3614,14 @@ function vJarvis(){
     log.addEventListener('dragover',e=>{e.preventDefault();log.classList.add('drag')});
     log.addEventListener('dragleave',()=>log.classList.remove('drag'));
     log.addEventListener('drop',e=>{e.preventDefault();log.classList.remove('drag');anexar([...(e.dataTransfer.files||[])])});
-    document.addEventListener('paste',e=>{
+    const onPaste=e=>{
       if(!win.classList.contains('on'))return;
       const f=[...(e.clipboardData&&e.clipboardData.files||[])];if(f.length){anexar(f);aviso('Anexo colado no JARVIS')}
+    };
+    document.addEventListener('paste',onPaste);
+    win.addEventListener('paste',onPaste); /* v42: colar dentro da janela externa */
+    win.addEventListener('keydown',e=>{   /* v42: Esc/Enter funcionam fora do site */
+      if(e.key==='Escape'&&!win.classList.contains('solto'))fechar();
     });
     addEventListener('resize',()=>{if(win.classList.contains('max'))aplicar({l:0,t:0,w:innerWidth,h:innerHeight})});
   }
@@ -4016,6 +3918,7 @@ body.jvpip-off #jvx{display:none!important}
       pop.document.body.appendChild(w);
       w.classList.add('on','solto');
       barraExterna(pop,w);
+      setTimeout(function(){try{w.querySelector('#jx-in').focus()}catch(_){}},120);
       aplicarTema();
       pop.addEventListener('pagehide',function(){try{devolver(w)}catch(_){}pop=null});
       pop.addEventListener('beforeunload',function(){try{devolver(w)}catch(_){}pop=null});
@@ -4059,6 +3962,7 @@ body.jvpip-off #jvx{display:none!important}
       w.parentNode.insertBefore(volta,w);
       pip.document.body.appendChild(w);
       w.classList.add('on','solto');aplicarTema();
+      setTimeout(function(){try{w.querySelector('#jx-in').focus()}catch(_){}},120);
       pip.addEventListener('pagehide',function(){devolver(w);pip=null});
       aviso('JARVIS em janela flutuante');
     }catch(e){abrirPopup()}
@@ -4307,73 +4211,5 @@ aside.ui-mode #sb-ui::-webkit-scrollbar{width:0}
   }catch(e){}
 })();
 </script>
-<style>
-/* ===================== v42 · JARVIS — layout estilo Gemini (paleta MODESK) ===================== */
-#jvx{--jvbg:#0a0f16;--jvsurf:#111820;--jvline:rgba(127,224,255,.16);--jvtx:#e6f2fa;--jvdim:#8aa6ba;--jvacc:#7fe0ff;
-  border-radius:18px;overflow:hidden;box-shadow:0 30px 90px rgba(0,0,0,.65),0 0 0 1px var(--jvline);
-  background:var(--jvbg);font-family:system-ui,'Segoe UI',Roboto,sans-serif;color:var(--jvtx)}
-#jvx .jx-head{height:46px;background:linear-gradient(180deg,#121b25,#0c131b);border-bottom:1px solid var(--jvline)}
-#jvx .jx-title b{letter-spacing:.14em;font-size:12.5px}
-#jvx .jx-title small{color:var(--jvdim)}
-#jvx .jx-b{border:0;background:transparent;color:var(--jvdim);border-radius:8px}
-#jvx .jx-b:hover{background:rgba(127,224,255,.12);color:#fff}
-#jvx .jx-side{background:#0c121a;border-right:1px solid var(--jvline);padding:10px 8px;width:212px}
-#jvx .jx-new{width:100%;border:1px solid var(--jvline);background:rgba(127,224,255,.10);color:var(--jvtx);
-  border-radius:999px;padding:9px 12px;font-size:12.5px;cursor:pointer;margin-bottom:10px}
-#jvx .jx-new:hover{background:rgba(127,224,255,.2)}
-#jvx .jx-th{border-radius:999px;padding:7px 10px;font-size:12px;color:var(--jvdim);border:0;background:transparent}
-#jvx .jx-th:hover{background:rgba(255,255,255,.05);color:var(--jvtx)}
-#jvx .jx-th.sel{background:rgba(127,224,255,.16);color:#fff}
-#jvx .jx-main{background:var(--jvbg)}
-#jvx .jx-log{padding:22px clamp(12px,6%,80px);gap:22px;scroll-behavior:smooth}
-#jvx .m{white-space:normal;max-width:none;font-size:14.5px;line-height:1.68;border:0;background:none;padding:0;border-radius:0}
-#jvx .m.me{align-self:flex-end;max-width:78%;background:rgba(127,224,255,.13);border:1px solid var(--jvline);
-  border-radius:20px 20px 6px 20px;padding:11px 16px}
-#jvx .m.ai{align-self:stretch;background:none;border:0;padding:0 0 0 30px;position:relative}
-#jvx .m.ai::before{content:'◉';position:absolute;left:0;top:1px;color:var(--jvacc);font-size:14px;
-  filter:drop-shadow(0 0 6px rgba(127,224,255,.7))}
-#jvx .m p{margin:0 0 10px}
-#jvx .m p:last-child{margin-bottom:0}
-#jvx .m h3{font-size:15.5px;margin:14px 0 6px;color:#fff}
-#jvx .m h4{font-size:14px;margin:12px 0 5px;color:#fff}
-#jvx .m ul{margin:6px 0 10px;padding-left:20px}
-#jvx .m li{margin:3px 0}
-#jvx .m a{color:var(--jvacc);text-decoration:none;border-bottom:1px solid rgba(127,224,255,.35)}
-#jvx .m .jx-code{white-space:pre-wrap;background:#0c1219;border:1px solid var(--jvline);border-radius:12px;
-  padding:12px 14px;font-size:12.5px;overflow:auto;margin:8px 0;color:#cfeeff}
-#jvx .jx-cur{display:inline-block;width:8px;height:15px;margin-left:3px;vertical-align:-2px;border-radius:2px;
-  background:var(--jvacc);animation:jxBlink 1s steps(2) infinite}
-@keyframes jxBlink{50%{opacity:0}}
-#jvx .m.sys{color:var(--jvdim);font-size:12px}
-#jvx .dl{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;opacity:.55;transition:opacity .15s}
-#jvx .m:hover .dl{opacity:1}
-#jvx .dl button{border:1px solid var(--jvline);background:transparent;color:var(--jvdim);border-radius:999px;
-  padding:4px 11px;font-size:11.5px;cursor:pointer}
-#jvx .dl button:hover{color:#fff;background:rgba(127,224,255,.14)}
-#jvx .jx-empty{color:var(--jvdim);text-align:center;margin:auto}
-#jvx .jx-empty .core{font-size:42px;color:var(--jvacc);filter:drop-shadow(0 0 18px rgba(127,224,255,.6))}
-#jvx .jx-chips{padding:0 clamp(12px,6%,80px) 6px;display:flex;gap:8px;flex-wrap:wrap}
-#jvx .jx-chips button{border:1px solid var(--jvline);background:rgba(255,255,255,.03);color:var(--jvdim);
-  border-radius:999px;padding:6px 13px;font-size:12px;cursor:pointer}
-#jvx .jx-chips button:hover{color:#fff;background:rgba(127,224,255,.14)}
-#jvx .jx-foot{padding:10px clamp(12px,6%,80px) 16px;background:none;border:0}
-#jvx .jx-comp{background:var(--jvsurf);border:1px solid var(--jvline);border-radius:26px;padding:10px 12px 8px;
-  box-shadow:0 10px 30px rgba(0,0,0,.35)}
-#jvx .jx-comp:focus-within{border-color:rgba(127,224,255,.45);box-shadow:0 0 0 3px rgba(127,224,255,.10)}
-#jvx #jx-in{background:transparent;border:0;outline:0;color:var(--jvtx);font-size:14.5px;width:100%;resize:none;
-  padding:6px 8px;font-family:inherit}
-#jvx .jx-row{gap:2px;align-items:center;margin-top:4px}
-#jvx .jx-ic{border:0;background:transparent;color:var(--jvdim);border-radius:50%;width:32px;height:32px;
-  font-size:14px;cursor:pointer}
-#jvx .jx-ic:hover{background:rgba(127,224,255,.14);color:#fff}
-#jvx .jx-ic.on{color:#ff8f8f;background:rgba(255,80,80,.14)}
-#jvx .jx-send{width:36px;height:36px;border-radius:50%;border:0;cursor:pointer;color:#04222f;
-  background:linear-gradient(180deg,#bff0ff,#56c8ff);box-shadow:0 0 16px rgba(86,200,255,.45)}
-#jvx .jx-send:hover{filter:brightness(1.08)}
-#jvx .jx-st{color:var(--jvdim);font-size:11.5px;margin-right:6px}
-#jvx .jx-files{padding:0 clamp(12px,6%,80px)}
-@media(max-width:720px){#jvx .jx-log,#jvx .jx-foot,#jvx .jx-chips{padding-left:12px;padding-right:12px}}
-</style>
-
 </body>
 </html>
