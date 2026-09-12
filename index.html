@@ -3,6 +3,12 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="MODESK"/>
+<meta name="theme-color" content="#03060c"/>
+<link rel="manifest" href="/manifest.webmanifest"/>
 <title>MODESK PESSOAL — JARVIS v20</title>
 <link rel="icon" type="image/png" sizes="64x64" href="data:image/png;base64,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"/>
 <link rel="apple-touch-icon" sizes="180x180" href="data:image/png;base64,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"/>
@@ -910,11 +916,7 @@ const LS='modesk.pessoal.v7';
 const GESTOR='marciooliveira';
 const DEF={
   senha:'marcio2026',
-  servicos:[
-    {id:u(),nome:'Suporte Técnico',icone:'🛠️',sub:[{id:u(),nome:'Chamados internos',itens:[]},{id:u(),nome:'Manutenções',itens:[]}]},
-    {id:u(),nome:'Compras',icone:'🧾',sub:[{id:u(),nome:'Pedidos abertos',itens:[]}]},
-    {id:u(),nome:'Documentos',icone:'📁',sub:[{id:u(),nome:'Laudos',itens:[]},{id:u(),nome:'Planilhas',itens:[]}]}
-  ],
+  servicos:[],
   acessos:[
     {id:u(),nome:'PC Sala de Som',tipo:'AnyDesk',endereco:'000 000 000',so:'Windows',obs:'estação principal'},
     {id:u(),nome:'Servidor Local',tipo:'VNC',endereco:'192.168.0.10',so:'Linux',obs:''}
@@ -11889,5 +11891,298 @@ input:focus,select:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0
   window.baixarHTML=function(){var clone=document.documentElement.cloneNode(true);var toast=clone.querySelector('#toast');if(toast)toast.innerHTML='';var html='<!doctype html>\n'+clone.outerHTML;dl(new Blob([html],{type:'text/html;charset=utf-8'}),'MODESK_PESSOAL_JARVIS_v20.html');if(typeof window.toast==='function')window.toast('HTML v20 gerado — verifique seus Downloads')};
 })();
 </script>
+<!-- ===== v21 · Central de Arquivos funcional + Jarvis mobile + tela cheia ===== -->
+<style id="mdk-v21-css">
+:root{--sa-t:env(safe-area-inset-top,0px);--sa-b:env(safe-area-inset-bottom,0px)}
+html,body{min-height:100dvh}
+body{padding-bottom:var(--sa-b)}
+
+/* ---------- Central de Arquivos ---------- */
+.fs21{display:flex;flex-direction:column;gap:10px}
+.fs21-bar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:9px;border:1px solid var(--line);
+  border-radius:12px;background:rgba(16,21,31,.64)}
+.fs21-bar .btn{padding:6px 10px;font-size:12px}
+.fs21-bar input{padding:6px 9px;font-size:12px;min-width:120px;flex:1 1 160px;max-width:260px}
+.fs21-grid{display:grid;grid-template-columns:220px minmax(0,1fr);gap:10px;align-items:start}
+.fs21-side,.fs21-main{border:1px solid var(--line);border-radius:12px;padding:10px;
+  background:linear-gradient(135deg,rgba(255,255,255,.055),rgba(255,255,255,.018))}
+.fs21-main{display:flex;flex-direction:column;min-height:320px;max-height:72vh;overflow:auto}
+.fs21-side{max-height:72vh;overflow:auto}
+.fs21-side h4{margin:0 0 6px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;opacity:.7}
+.fs21-side+.fs21-side{margin-top:10px}
+.fs21-sec{margin-top:14px}
+.fs21-row{display:flex;align-items:center;gap:7px;padding:6px 7px;border-radius:8px;cursor:pointer;font-size:12.4px}
+.fs21-row:hover{background:rgba(239,20,39,.09)}
+.fs21-row b{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.fs21-row .btn.sm{margin-left:auto;padding:2px 7px;font-size:11px}
+.fs21-empty{padding:18px;text-align:center;font-size:12.5px;opacity:.65}
+.fs21-new{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.fs21-bar select{flex:0 0 auto;width:auto;padding:6px 9px;font-size:12px}
+.fs21-new{flex-wrap:nowrap;align-items:center}
+.fs21-new input{flex:1 1 100px;min-width:0;padding:6px 9px;font-size:12px}
+.fs21-new .btn{flex:0 0 auto}
+.fs21-serv details{border:1px solid var(--line);border-radius:10px;padding:7px 10px;margin-bottom:7px;background:rgba(8,14,24,.5)}
+.fs21-serv summary{cursor:pointer;list-style:none;font-size:12.6px;font-weight:700;display:flex;align-items:center;gap:7px}
+.fs21-serv summary::-webkit-details-marker{display:none}
+@media(max-width:900px){
+  .fs21-grid{grid-template-columns:1fr}
+  .fs21-side,.fs21-main{max-height:none}
+  .fs21-main{max-height:60vh}
+  .fs21-bar{position:sticky;top:0;z-index:5}
+  .fs21-bar .btn{flex:0 0 auto}
+  .exp-grid{grid-template-columns:repeat(auto-fill,minmax(92px,1fr))}
+  .exp-list-row .exp-row-acts,.exp-list-row:hover .exp-row-acts{opacity:1}
+  .exp-list-row{padding:9px 7px;font-size:13px}
+}
+
+/* ---------- Jarvis no celular ---------- */
+@media(max-width:860px){
+  #jv-orb,#jn-orb{width:52px;height:52px;right:14px;bottom:calc(76px + var(--sa-b));touch-action:none}
+  #jvx{left:0!important;top:0!important;right:0!important;bottom:0!important;
+    width:100vw!important;height:100dvh!important;max-width:none!important;max-height:none!important;
+    min-width:0!important;margin:0!important;box-sizing:border-box!important;
+    transform:none!important;border-radius:0!important;padding-top:var(--sa-t)}
+  #jvx textarea{min-height:52px}
+  #jvx .rz{display:none!important}
+  main{padding-bottom:110px}
+}
+#jv-orb,#jn-orb{touch-action:none}
+</style>
+<input id="mdk21-dir" type="file" webkitdirectory directory multiple style="display:none"/>
+<script id="mdk-v21-js">
+(function(){
+  'use strict';
+  var T=function(m){try{window.toast&&window.toast(m)}catch(e){}};
+  var E=function(s){try{return window.esc?esc(s):String(s==null?'':s)}catch(e){return ''}};
+
+  /* 1 ---------- remove as pastas de servico padrao (Compras, Suporte Tecnico, Documentos) */
+  function limparPadrao(){
+    try{
+      if(!window.state||!Array.isArray(state.servicos))return;
+      var fora=['compras','suporte tecnico','suporte técnico','documentos'];
+      var novos=state.servicos.filter(function(s){
+        return fora.indexOf(String(s.nome||'').trim().toLowerCase())<0;
+      });
+      if(novos.length!==state.servicos.length){state.servicos=novos;try{save(true)}catch(e){}}
+    }catch(e){}
+  }
+  limparPadrao();
+
+  /* 2 ---------- modo celular: pasta lida por seletor de diretorio ---------- */
+  var MOB={nome:'',files:[],path:[]};
+  var ehCelular=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)||
+    (window.matchMedia&&matchMedia('(pointer:coarse)').matches&&innerWidth<900);
+  var temFSA=!!window.showDirectoryPicker&&!ehCelular;
+
+  function mobLer(){
+    var pref=MOB.path.length?MOB.path.join('/')+'/':'';
+    var dirs={},arqs=[];
+    MOB.files.forEach(function(x){
+      if(x.rel.indexOf(pref)!==0)return;
+      var resto=x.rel.slice(pref.length),p=resto.split('/');
+      if(p.length===1){arqs.push({kind:'file',nome:p[0],tam:x.f.size,mod:x.f.lastModified,mobFile:x.f})}
+      else if(p[0])dirs[p[0]]=(dirs[p[0]]||0)+1;
+    });
+    EXP.itens=Object.keys(dirs).map(function(d){return {kind:'directory',nome:d,mobDir:true}}).concat(arqs);
+    EXP.path=[{name:MOB.nome}].concat(MOB.path.map(function(p){return {name:p}}));
+    EXP.dir={name:MOB.path.length?MOB.path[MOB.path.length-1]:MOB.nome};
+    EXP.mob=true;
+    try{expPintar()}catch(e){}
+  }
+
+  var inp=document.getElementById('mdk21-dir');
+  if(inp)inp.addEventListener('change',function(){
+    var fl=Array.prototype.slice.call(inp.files||[]);
+    if(!fl.length)return;
+    var raiz=(fl[0].webkitRelativePath||fl[0].name).split('/')[0]||'Pasta';
+    MOB.nome=raiz;MOB.path=[];
+    MOB.files=fl.map(function(f){
+      var rel=(f.webkitRelativePath||f.name).split('/').slice(1).join('/')||f.name;
+      return {rel:rel,f:f};
+    });
+    try{
+      if(window.state&&Array.isArray(state.pastas)&&!state.pastas.some(function(p){return p.nome===raiz})){
+        state.pastas.push({id:u(),nome:raiz,caminho:raiz,desc:'pasta lida no celular'});
+        try{save(true)}catch(e){}
+      }
+    }catch(e){}
+    EXP.filtro='';
+    if(typeof go==='function'&&window.tab!=='arquivos')go('arquivos'); else {try{render()}catch(e){}}
+    setTimeout(mobLer,60);
+    T('Pasta carregada: '+raiz+' ('+MOB.files.length+' arquivos)');
+    inp.value='';
+  });
+
+  /* 3 ---------- conectar pasta: PC (handles persistentes) ou celular (fallback) ---------- */
+  var fsPC=window.fsAdicionarPasta;
+  window.fsAdicionarPasta=function(){
+    if(temFSA){
+      try{ var r=fsPC.apply(null,arguments); if(r&&r.catch)r.catch(function(){ if(inp)inp.click() }); return r }
+      catch(e){ if(inp)inp.click(); return }
+    }
+    if(inp)inp.click(); else T('Este navegador nao permite abrir pastas');
+  };
+  window.fsCarregarPastaCelular=function(){ if(inp)inp.click() };
+
+  /* navegacao compativel com os dois modos */
+  var oAbrir=window.expAbrir,oVoltar=window.expVoltar,oIr=window.expIr,oRaiz=window.expRaiz,oLer=window.expLer;
+  window.expAbrir=function(ix){
+    if(!EXP.mob)return oAbrir.apply(null,arguments);
+    var it=(window.expFiltrados?expFiltrados():EXP.itens)[ix]; if(!it)return;
+    if(it.kind==='directory'){MOB.path.push(it.nome);EXP.filtro='';var q=document.getElementById('exp-q');if(q)q.value='';return mobLer()}
+    try{var url=URL.createObjectURL(it.mobFile);window.open(url,'_blank');setTimeout(function(){URL.revokeObjectURL(url)},30000)}
+    catch(e){T('Nao foi possivel abrir este arquivo')}
+  };
+  window.expVoltar=function(){ if(!EXP.mob)return oVoltar.apply(null,arguments); if(MOB.path.length){MOB.path.pop();mobLer()} };
+  window.expIr=function(i){ if(!EXP.mob)return oIr.apply(null,arguments); MOB.path=MOB.path.slice(0,i); mobLer() };
+  window.expRaiz=function(){ if(!EXP.mob)return oRaiz.apply(null,arguments); MOB.path=[]; mobLer() };
+  window.expLer=function(){ if(!EXP.mob)return oLer.apply(null,arguments); mobLer() };
+  window.fsAbrirRaizMob=function(){ if(MOB.files.length){MOB.path=[];mobLer()} else if(inp)inp.click() };
+
+  /* reconecta sozinho as pastas ja autorizadas, assim que o app abre */
+  function autoConectar(){ try{ temFSA&&window.fsAutoConectar&&fsAutoConectar(false) }catch(e){} }
+  if(document.readyState==='complete')setTimeout(autoConectar,800);
+  else window.addEventListener('load',function(){setTimeout(autoConectar,800)});
+
+  /* 4 ---------- tela da Central de Arquivos (layout limpo e responsivo) ---------- */
+  window.vArquivos=function(){
+    var roots=(window.EXP&&EXP.roots)||[];
+    var locais=temFSA
+      ? (roots.map(function(r){
+          return '<div class="fs21-row" onclick="fsAbrirRaiz(\''+E(r.nome)+'\')" title="'+E(r.nome)+'">'+
+            '<span>'+(r.livre?'📂':'🔒')+'</span><b>'+E(r.nome)+'</b>'+
+            '<button class="btn sm" onclick="event.stopPropagation();fsRemoverRaiz(\''+E(r.nome)+'\')">✕</button></div>';
+        }).join('')||'<div class="dim" style="font-size:12px">Nenhuma pasta conectada ainda.</div>')
+      : (MOB.files.length
+          ? '<div class="fs21-row" onclick="fsAbrirRaizMob()"><span>📂</span><b>'+E(MOB.nome)+'</b>'+
+            '<span class="dim" style="margin-left:auto;font-size:11px">'+MOB.files.length+' arq.</span></div>'
+          : '<div class="dim" style="font-size:12px">Toque em “Abrir pasta” para carregar uma pasta do celular.</div>');
+
+    var salvos=((window.state&&state.pastas)||[]).map(function(p){
+      return '<div class="fs21-row" title="'+E(p.caminho||p.nome)+'"><span>📁</span><b>'+E(p.nome)+'</b>'+
+        '<button class="btn sm" onclick="del(\'pastas\',\''+p.id+'\')">🗑</button></div>';
+    }).join('')||'<div class="dim" style="font-size:12px">Nenhum caminho salvo.</div>';
+
+    var servicos=((window.state&&state.servicos)||[]).map(function(s){
+      var subs=(s.sub||[]).map(function(sb){
+        return '<li><b>📂 '+E(sb.nome)+'</b> <span class="badge">'+((sb.itens||[]).length)+'</span>'+
+          '<ul class="tree">'+((sb.itens||[]).map(function(i){return '<li>📄 '+E(i)+'</li>'}).join('')||'<li class="dim">vazio</li>')+'</ul>'+
+          '<div class="fs21-new"><input placeholder="novo item" id="i-'+sb.id+'"/>'+
+          '<button class="btn sm" onclick="addItemSub(\''+s.id+'\',\''+sb.id+'\')">＋</button></div></li>';
+      }).join('');
+      return '<details><summary>'+E(s.icone||'📁')+' '+E(s.nome)+
+        '<span class="badge">'+((s.sub||[]).length)+'</span>'+
+        '<button class="btn sm" style="margin-left:auto" onclick="event.preventDefault();del(\'servicos\',\''+s.id+'\')">🗑</button></summary>'+
+        '<ul class="tree">'+subs+'</ul>'+
+        '<div class="fs21-new"><input placeholder="nova subpasta" id="s-'+s.id+'"/>'+
+        '<button class="btn sm" onclick="addSub(\''+s.id+'\')">＋ Subpasta</button></div></details>';
+    }).join('')||'<div class="dim" style="font-size:12px">Nenhuma pasta criada. Use o campo abaixo para criar a primeira.</div>';
+
+    var acoesPC=temFSA
+      ? '<button class="btn" onclick="fsLiberarTudo()">🔓 Reconectar</button>'+
+        '<button class="btn" onclick="expNovaPasta()">🗂 Nova pasta</button>'+
+        '<button class="btn" onclick="expEnviarArquivo()">⬆ Salvar aqui</button>'
+      : '';
+
+    var html=
+    '<div class="fs21">'+
+      '<div class="fs21-bar">'+
+        '<button class="btn primary" onclick="fsAdicionarPasta()">＋ '+(temFSA?'Conectar pasta':'Abrir pasta')+'</button>'+
+        '<button class="btn" onclick="expVoltar()">⬅</button>'+
+        '<button class="btn" onclick="expRaiz()">🏠</button>'+
+        '<button class="btn" onclick="expLer()">🔄</button>'+
+        acoesPC+
+        '<input id="exp-q" placeholder="Buscar nesta pasta..." oninput="EXP.filtro=this.value;MDK.deb(\'exp-q\',expPintar,400)"/>'+
+        '<span class="exp-seg"><button class="btn sm" id="exp-m-list" onclick="expModo(\'list\')">☰</button>'+
+        '<button class="btn sm" id="exp-m-grid" onclick="expModo(\'grid\')">▦</button></span>'+
+        '<select id="exp-ord" onchange="expOrdenar(this.value)">'+
+          '<option value="nome">Nome</option><option value="data">Data</option>'+
+          '<option value="tam">Tamanho</option><option value="tipo">Tipo</option></select>'+
+      '</div>'+
+      '<div class="fs21-grid">'+
+        '<aside class="fs21-side">'+
+          '<h4>Pastas do dispositivo</h4>'+locais+
+          '<div class="fs21-sec"><h4>Caminhos salvos</h4>'+salvos+'</div>'+
+          '<div class="fs21-sec"><h4>Pastas de serviço</h4>'+
+            '<div class="fs21-serv">'+servicos+'</div>'+
+            '<div class="fs21-new"><input id="nf" placeholder="Nova pasta"/><input id="nfi" value="📁" style="flex:0 0 62px;text-align:center"/>'+
+            '<button class="btn primary sm" onclick="addPasta()">＋</button></div>'+
+          '</div>'+
+        '</aside>'+
+        '<section class="fs21-main">'+
+          '<div class="crumb" id="exp-crumb"></div>'+
+          '<div class="exp-chips" id="exp-chips"></div>'+
+          '<div id="exp-body"><div class="fs21-empty">'+(temFSA?'Conecte uma pasta do computador para começar.':'Abra uma pasta do celular para ver os arquivos aqui.')+'</div></div>'+
+          '<div class="exp-foot" id="exp-foot"></div>'+
+        '</section>'+
+      '</div>'+
+    '</div>';
+
+    return page('Central de Arquivos',
+      'Pastas do computador e do celular, pastas de serviço e arquivos em uma única tela — conecte, navegue e organize.',html);
+  };
+
+  /* pinta assim que a tela monta, nos dois modos */
+  var oPintar=window.expPintar;
+  window.expPintar=function(){
+    try{oPintar&&oPintar()}catch(e){}
+    var b=document.getElementById('exp-body');
+    if(b&&EXP.mob&&!(EXP.itens||[]).length&&!MOB.files.length)
+      b.innerHTML='<div class="fs21-empty">Abra uma pasta do celular para ver os arquivos aqui.</div>';
+  };
+  var _go=window.go;
+  if(typeof _go==='function')window.go=function(k){
+    var r=_go.apply(this,arguments);
+    if(k==='arquivos')setTimeout(function(){ try{ EXP.mob?mobLer():(EXP.dir?expLer():expPintar()) }catch(e){} },80);
+    return r;
+  };
+
+  /* 5 ---------- Jarvis: arrastar com o dedo + janela cheia no celular ---------- */
+  function orb(){return document.getElementById('jv-orb')||document.getElementById('jn-orb')}
+  function ligarToque(){
+    var o=orb(); if(!o||o.dataset.v21)return; o.dataset.v21='1';
+    var st=null,moveu=false;
+    o.addEventListener('pointerdown',function(e){
+      if(e.pointerType==='mouse'&&e.button!==0)return;
+      var r=o.getBoundingClientRect();
+      st={dx:e.clientX-r.left,dy:e.clientY-r.top};moveu=false;
+      try{o.setPointerCapture(e.pointerId)}catch(err){}
+    });
+    o.addEventListener('pointermove',function(e){
+      if(!st)return;
+      var x=e.clientX-st.dx,y=e.clientY-st.dy,w=o.offsetWidth,h=o.offsetHeight;
+      if(Math.abs(e.movementX||1)+Math.abs(e.movementY||1)>0)moveu=true;
+      x=Math.max(6,Math.min(innerWidth-w-6,x));y=Math.max(6,Math.min(innerHeight-h-6,y));
+      o.classList.add('mdk-solto','mdk-dragging');
+      o.style.setProperty('--mdk-x',x+'px');o.style.setProperty('--mdk-y',y+'px');
+      e.preventDefault();
+    },{passive:false});
+    function up(e){
+      if(!st)return; st=null; o.classList.remove('mdk-dragging');
+      if(moveu){var k=function(ev){ev.stopPropagation();ev.preventDefault();o.removeEventListener('click',k,true)};
+        o.addEventListener('click',k,true);setTimeout(function(){o.removeEventListener('click',k,true)},260)}
+    }
+    o.addEventListener('pointerup',up);o.addEventListener('pointercancel',up);
+  }
+  setInterval(ligarToque,1500); setTimeout(ligarToque,600);
+
+  /* 6 ---------- tela cheia no celular ---------- */
+  function telaCheia(){
+    if(innerWidth>860)return;
+    var d=document.documentElement;
+    if(document.fullscreenElement)return;
+    try{(d.requestFullscreen&&d.requestFullscreen({navigationUI:'hide'}))||(d.webkitRequestFullscreen&&d.webkitRequestFullscreen())}catch(e){}
+  }
+  ['click','touchend'].forEach(function(ev){
+    document.addEventListener(ev,function once(){ telaCheia(); document.removeEventListener(ev,once) },{passive:true});
+  });
+  window.mdkTelaCheia=telaCheia;
+  function altura(){document.documentElement.style.setProperty('--vh',innerHeight*0.01+'px')}
+  addEventListener('resize',altura);addEventListener('orientationchange',function(){setTimeout(altura,250)});altura();
+
+  try{console.log('[MODESK v21] Central de Arquivos corrigida · Jarvis mobile · tela cheia')}catch(e){}
+})();
+</script>
+
 </body>
 </html>
