@@ -289,6 +289,21 @@ main{padding-top:26px}
 .side-actions{display:flex;flex-direction:column;gap:6px;margin-top:14px;width:100%}
 .side-actions .btn{width:100%;min-width:0;justify-content:flex-start;gap:8px;padding:8px 10px;font-size:12px;line-height:1.15;white-space:normal;text-align:left;overflow-wrap:anywhere}
 .side-actions .btn b{font-weight:700}
+.side-actions .btn.icon-only{width:42px;min-width:42px;height:38px;align-self:center;justify-content:center;padding:0}
+.side-actions .btn.icon-only svg{width:19px!important;height:19px!important}
+.site-intro{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:16px;padding:16px;border:1px solid var(--line2);border-radius:12px;background:linear-gradient(135deg,rgba(86,217,255,.08),rgba(239,20,39,.07))}
+.site-intro p{margin:5px 0 0;color:var(--mut);font-size:13px}
+.site-map{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:14px}
+.site-group{padding:15px;border:1px solid var(--line);border-radius:12px;background:rgba(8,14,24,.7)}
+.site-group h3{display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:15px}
+.site-link{width:100%;display:grid;grid-template-columns:38px minmax(0,1fr) auto;align-items:center;gap:10px;padding:10px;margin-top:7px;text-align:left;color:var(--fg);border:1px solid var(--line);border-radius:9px;background:rgba(255,255,255,.025);cursor:pointer;transition:.18s}
+.site-link:hover{transform:translateY(-2px);border-color:var(--tech-cyan);background:rgba(86,217,255,.08)}
+.site-link .site-ico{width:36px;height:36px;display:grid;place-items:center;border-radius:8px;background:rgba(86,217,255,.1);color:var(--tech-cyan)}
+.site-link .site-ico .ui-icon{width:19px;height:19px}
+.site-link b{display:block;font-size:12.5px}.site-link small{display:block;margin-top:3px;color:var(--mut);line-height:1.35}.site-link .arr{color:var(--acc3);font-size:17px}
+.site-help{margin-top:16px;padding:15px;border:1px solid rgba(245,181,10,.35);border-radius:12px;background:rgba(245,181,10,.06)}
+.site-help h3{margin-bottom:8px}.site-help ol{margin:0;padding-left:20px;color:var(--mut);font-size:13px;line-height:1.65}
+@media(max-width:620px){.site-intro{align-items:flex-start;flex-direction:column}.site-map{grid-template-columns:1fr}}
 @media(min-width:1500px){.side-actions{flex-direction:row;flex-wrap:wrap}.side-actions .btn{flex:1 1 46%;justify-content:center;text-align:center}}
 .sysgrid{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
 .syscard{position:relative;display:flex;flex-direction:column;gap:12px;padding:18px;border-radius:16px;cursor:pointer;
@@ -380,9 +395,17 @@ main{padding-top:26px}
 .mp-th{cursor:pointer;user-select:none}
 .mp-chip{background:rgba(56,189,248,.08);border:1px solid rgba(148,163,184,.3);color:inherit;border-radius:999px;padding:7px 14px;font-size:13px;cursor:pointer}
 .mp-chip.on{background:#38bdf8;color:#0f172a;border-color:#38bdf8;font-weight:700}
+
+/* ===== AGENDA INTERATIVA INTEGRADA ===== */
+.agenda-shell{display:grid;grid-template-columns:minmax(520px,1.35fr) minmax(300px,.65fr);gap:16px;align-items:start}
+.agenda-cal{overflow:hidden}.agenda-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}.agenda-nav{display:flex;align-items:center;gap:7px}.agenda-month{font-size:18px;font-weight:800;text-transform:capitalize;min-width:190px;text-align:center}.agenda-week,.agenda-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}.agenda-week span{text-align:center;color:var(--dim);font:700 10px/1.2 'JetBrains Mono',monospace;text-transform:uppercase;padding:7px 0}.agenda-day{position:relative;min-height:82px;padding:8px;border:1px solid var(--line);border-radius:7px;background:rgba(255,255,255,.018);color:var(--fg);cursor:pointer;text-align:left;transition:.18s;overflow:hidden}.agenda-day:hover{border-color:var(--tech-cyan);background:rgba(86,217,255,.07);transform:translateY(-2px)}.agenda-day.out{opacity:.32}.agenda-day.today{box-shadow:inset 0 0 0 1px var(--tech-cyan)}.agenda-day.selected{border-color:var(--acc2);background:rgba(239,20,39,.12);box-shadow:0 0 20px rgba(239,20,39,.12)}.agenda-day .dn{display:block;font:700 12px/1 'JetBrains Mono',monospace}.agenda-dots{position:absolute;left:8px;right:8px;bottom:8px;display:flex;gap:4px;align-items:center;flex-wrap:wrap}.agenda-dot{width:6px;height:6px;border-radius:50%;background:var(--tech-cyan);box-shadow:0 0 7px currentColor}.agenda-dot.atividade{background:#ffc857}.agenda-dot.lembrete{background:var(--acc3)}.agenda-more{font-size:9px;color:var(--mut)}
+.agenda-side{display:flex;flex-direction:column;gap:16px}.agenda-list{display:flex;flex-direction:column;gap:8px;margin-top:10px}.agenda-item{display:grid;grid-template-columns:4px minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 9px;border:1px solid var(--line);border-radius:7px;background:rgba(255,255,255,.025)}.agenda-item .bar{height:100%;min-height:38px;border-radius:4px;background:var(--tech-cyan)}.agenda-item.atividade .bar{background:#ffc857}.agenda-item.lembrete .bar{background:var(--acc3)}.agenda-item.feito{opacity:.48}.agenda-item.feito b{text-decoration:line-through}.agenda-item b{display:block;font-size:12.5px}.agenda-item small{display:block;color:var(--mut);margin-top:3px}.agenda-legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px;color:var(--mut);font-size:11px}.agenda-legend i{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px}.agenda-quick{display:grid;grid-template-columns:minmax(130px,1.4fr) 110px 130px 105px auto;gap:8px;align-items:end}.agenda-empty{padding:18px;text-align:center;color:var(--dim);border:1px dashed var(--line);border-radius:7px}
+@media(max-width:1050px){.agenda-shell{grid-template-columns:1fr}.agenda-quick{grid-template-columns:1fr 1fr}.agenda-quick .wide{grid-column:1/-1}}
+@media(max-width:620px){.agenda-day{min-height:55px;padding:6px}.agenda-month{font-size:15px;min-width:0}.agenda-week,.agenda-days{gap:3px}.agenda-quick{grid-template-columns:1fr}.agenda-quick .wide{grid-column:auto}.agenda-item{grid-template-columns:4px minmax(0,1fr)}}
+
 </style>
 <style>
-/* ===================== MODESK v15 — JARVIS FX · LUPA · MULTITELAS · RAIL INFERIOR ===================== */
+/* ===================== MODESK v15 — JARVIS FX · MULTITELAS · RAIL INFERIOR ===================== */
 :root{
   --jv:#5ba9ff; --jv2:#8fd0ff; --jv-soft:rgba(91,169,255,.35);
   --win-h:38px;
@@ -433,25 +456,6 @@ body.jfx-off #jfx{display:none}
 #rail #r-deck{border-color:var(--acc2);color:var(--acc3);background:rgba(239,20,39,.08);box-shadow:0 0 18px rgba(239,20,39,.15)}
 #rail #r-deck:hover{background:rgba(239,20,39,.16);box-shadow:0 0 0 4px rgba(239,20,39,.18),0 0 26px rgba(239,20,39,.25)}
 #rail #r-deck.on{background:var(--grad);border-color:transparent;color:#fff;box-shadow:0 0 28px rgba(239,20,39,.35)}
-
-/* ---------- LUPA / BUSCA GLOBAL ---------- */
-#lupa{position:fixed;inset:0;z-index:150;display:none;padding:9vh 16px;background:rgba(3,6,12,.72);backdrop-filter:blur(8px)}
-#lupa.open{display:block;animation:fade .2s}
-#lupa .box{width:min(720px,100%);margin:0 auto;background:rgba(8,14,24,.94);border:1px solid rgba(91,169,255,.3);
-  border-radius:16px;box-shadow:0 40px 110px rgba(0,0,0,.7),0 0 0 1px rgba(255,32,53,.08);overflow:hidden}
-#lupa .head{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line)}
-#lupa .head span{font-size:18px;filter:drop-shadow(0 0 6px var(--jv))}
-#lupa input{border:0;background:transparent;font-size:16px;padding:4px 0;box-shadow:none}
-#lupa input:focus{box-shadow:none;border:0}
-#lupa .res{max-height:56vh;overflow:auto;padding:8px}
-#lupa .r{display:flex;gap:12px;align-items:center;padding:11px 12px;border-radius:11px;cursor:pointer;border:1px solid transparent}
-#lupa .r:hover,#lupa .r.sel{background:rgba(91,169,255,.12);border-color:rgba(91,169,255,.3)}
-#lupa .r .k{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--jv2);
-  border:1px solid rgba(91,169,255,.3);border-radius:999px;padding:2px 8px;flex:0 0 auto}
-#lupa .r .tx{min-width:0}
-#lupa .r b{display:block;font-size:13.6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#lupa .r small{color:var(--dim);font-size:11.6px}
-#lupa .foot{padding:9px 16px;border-top:1px solid var(--line);color:var(--dim);font-size:11.5px;display:flex;gap:14px;flex-wrap:wrap}
 
 /* ---------- MENU DOCK ---------- */
 body.dock-right .app{grid-template-columns:minmax(0,1fr) 252px}
@@ -839,7 +843,7 @@ main>section,.view,.screen,[data-view]{animation:viewIn .42s var(--ease-glide) b
 </head>
 <body>
 <!-- #winbar removido (v12.3) — navegação já existe na barra lateral -->
-<div id="deadline-bar" onclick="go('atividades')"></div>
+<div id="deadline-bar" onclick="go('agenda')"></div>
 
 <!-- ============ LOGIN ============ -->
 <div id="login">
@@ -871,9 +875,9 @@ main>section,.view,.screen,[data-view]{animation:viewIn .42s var(--ease-glide) b
     </div>
     <div id="menu"></div>
     <div class="side-actions">
-      <button class="btn sm" id="btn-mt" onclick="toggleMultitelas()" title="Ativar/desativar o modo multitelas">
-        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="8" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/><rect x="13" y="13" width="8" height="8" rx="1.5"/></svg>
-        Multitelas: <b id="btn-mt-st">desligado</b></button>
+      <button class="btn sm icon-only" id="btn-mt" onclick="toggleMultitelas()" title="Ativar ou desativar multitelas" aria-label="Ativar ou desativar multitelas">
+        <svg viewBox="0 0 24 24" style="stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="8" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/><rect x="13" y="13" width="8" height="8" rx="1.5"/></svg>
+        <b id="btn-mt-st" class="hidden">desligado</b></button>
       <button class="btn sm" onclick="exportJSON()">⬇ Backup</button>
       <button class="btn sm primary" onclick="baixarHTML()">⬇ Baixar HTML</button>
     </div>
@@ -934,6 +938,7 @@ const DEF={
     {id:u(),nome:'Microsoft 365',url:'https://www.office.com',icone:'📄',desc:'Word, Excel e Teams online'}
   ],
   pedidos:[], sends:[], eventos:[], itens:[], atividades:[], arquivos:[],
+  compras:{lista:[],internas:[],reqs:[],pedidos:[],docs:{},tipos:['COMP01','COMP01 PT','Compra direta','Contrato']},
   fb:{apiKey:'',projectId:'',authDomain:'',appId:''}
 };
 let state=load(), tab='dashboard';
@@ -1029,13 +1034,13 @@ const ICONS={
 };
 function icon(name){return `<span class="ui-icon" aria-hidden="true"><svg viewBox="0 0 24 24">${ICONS[name]||ICONS.boxes}</svg></span>`}
 const MENU=[
-  {nome:'Painel',icone:'dashboard',itens:[{k:'dashboard',n:'Dashboard',i:'dashboard'},{k:'agenda',n:'Agenda & Avisos',i:'bell'},{k:'atividades',n:'Atividades & Lembretes',i:'pulse'},{k:'busca',n:'Busca Geral',i:'database'},{k:'jarvis',n:'JARVIS (IA)',i:'pulse'}]},
+  {nome:'Painel',icone:'dashboard',itens:[{k:'dashboard',n:'Dashboard',i:'dashboard'},{k:'agenda',n:'Agenda & Avisos',i:'calendar'},{k:'jarvis',n:'JARVIS (IA)',i:'pulse'}]},
   {nome:'Arquivos',icone:'folder',itens:[{k:'arquivos',n:'Central de Arquivos',i:'folder'},{k:'itens',n:'Cadastro de Itens',i:'boxes'}]},
-  {nome:'Operacional',icone:'gear',itens:[{k:'pedidos',n:'Pedidos de Compra',i:'cart'},{k:'send',n:'Acompanhamento SEND',i:'mail'},{k:'eventos',n:'Eventos',i:'calendar'}]},
+  {nome:'Operacional',icone:'gear',itens:[{k:'pedidos',n:'Compras',i:'cart'},{k:'send',n:'Acompanhamento SEND',i:'mail'}]},
   {nome:'Máquina & Acessos',icone:'monitor',itens:[{k:'mapa',n:'Acessos & Mapeamento',i:'monitor'}]},
   {nome:'Manual & Utilitários',icone:'shield',itens:[{k:'manual',n:'Manual Operacional (Slides)',i:'monitor'}]},
   {nome:'Atalhos',icone:'link',itens:[{k:'links',n:'Sistemas & Sites',i:'link'}]},
-  {nome:'Sistema',icone:'shield',itens:[{k:'interface',n:'Central de Interface',i:'monitor'},{k:'config',n:'Configurações',i:'gear'},{k:'entrega',n:'Entrega & Pendências',i:'package'}]}
+  {nome:'Sistema',icone:'shield',itens:[{k:'interface',n:'Central de Interface',i:'monitor'},{k:'config',n:'Configurações',i:'gear'},{k:'entrega',n:'Mapa do Site & Tutorial',i:'package'}]}
 ];
 function buildMenu(){
   $('menu').innerHTML=MENU.map((f,ix)=>`
@@ -1270,7 +1275,7 @@ function vManual(){
 document.addEventListener('keydown',e=>{ if(typeof tab!=='undefined'&&tab==='manual'&&!/input|textarea|select/i.test((e.target.tagName||''))){
   if(e.key==='ArrowRight')mnIr(MN.i+1); if(e.key==='ArrowLeft')mnIr(MN.i-1);}});
 
-const ALIAS_TELA={remoto:'mapa',explorer:'arquivos',pastasfs:'arquivos',servicos:'arquivos'};
+const ALIAS_TELA={remoto:'mapa',explorer:'arquivos',pastasfs:'arquivos',servicos:'arquivos',eventos:'agenda',atividades:'agenda'};
 function go(k){tab=ALIAS_TELA[k]||k;render();window.scrollTo({top:0,behavior:'smooth'})}
 
 /* ================= ALERTAS DE DATAS ================= */
@@ -1297,11 +1302,11 @@ function render(){
   document.querySelectorAll('.navbtn[data-k]').forEach(b=>b.classList.toggle('active',b.dataset.k===tab));
   const map={dashboard:vDash,agenda:vAgenda,arquivos:vArquivos,itens:vItens,pedidos:vPedidos,send:vSend,eventos:vEventos,
     remoto:vRemoto,links:vLinks,config:vConfig,entrega:vEntrega,
-    atividades:vAtividades,busca:vBusca,interface:vInterface,jarvis:vJarvis,mapa:vMapa,manual:vManual};
+    atividades:vAtividades,interface:vInterface,jarvis:vJarvis,mapa:vMapa,manual:vManual};
   const titulos={dashboard:'Dashboard',agenda:'Agenda & Avisos',arquivos:'Central de Arquivos',itens:'Cadastro de Itens',pedidos:'Pedidos de Compra',
     send:'Acompanhamento SEND',eventos:'Eventos',remoto:'Conexões Remotas',
-    links:'Sistemas & Sites',config:'Configurações',entrega:'Entrega & Pendências',
-    atividades:'Atividades & Lembretes',busca:'Busca Geral',interface:'Central de Interface',jarvis:'JARVIS — Assistente do Sistema',mapa:'Acessos & Mapeamento da Unidade',manual:'Manual Operacional & Guia de Transição — TI SENAC Aldeota'};
+    links:'Sistemas & Sites',config:'Configurações',entrega:'Mapa do Site & Tutorial',
+    atividades:'Atividades & Lembretes',interface:'Central de Interface',jarvis:'JARVIS — Assistente do Sistema',mapa:'Acessos & Mapeamento da Unidade',manual:'Manual Operacional & Guia de Transição — TI SENAC Aldeota'};
   ($('tb-title')||{}).textContent=titulos[tab]||'';
   $('view').innerHTML=`<div class="sect">${(map[tab]||vDash)()}</div>`;
   if(tab==='arquivos'){ if(EXP.dir)expLer(); else fsAutoConectar(); }
@@ -1443,18 +1448,52 @@ function vDash(){
 const kpi=(n,v,i)=>`<div class="card kpi-card"><div class="kpi-head"><span>${n}</span><span class="kpi-icon">${icon(i)}</span></div><div class="kpi">${v}</div></div>`;
 
 /* ---- Agenda ---- */
+let agendaCursor=new Date(), agendaSelecionada=new Date().toISOString().slice(0,10);
+function agendaISO(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function agendaItens(){
+  const itens=[];
+  (state.eventos||[]).forEach(e=>{if(e.data)itens.push({id:e.id,data:e.data,hora:e.hora||'',titulo:e.titulo,tipo:'evento',sub:e.local||e.info||'',feito:false})});
+  (state.atividades||[]).forEach(a=>{if(a.prazo)itens.push({id:a.id,data:a.prazo,hora:a.hora||'',titulo:a.titulo,tipo:(a.tipo==='Pessoal'?'lembrete':'atividade'),sub:a.desc||a.prioridade||'',feito:!!a.feito})});
+  return itens.sort((a,b)=>(a.data+a.hora).localeCompare(b.data+b.hora));
+}
+function agendaMudar(delta){agendaCursor=new Date(agendaCursor.getFullYear(),agendaCursor.getMonth()+delta,1);render()}
+function agendaHoje(){agendaCursor=new Date();agendaSelecionada=agendaISO(new Date());render()}
+function agendaEscolher(data){agendaSelecionada=data;const d=new Date(data+'T12:00:00');agendaCursor=new Date(d.getFullYear(),d.getMonth(),1);render()}
+function agendaAbrir(x){x.tipo==='evento'?verEvento(x.id):verAtiv(x.id)}
+function addAgendaItem(){
+  const titulo=$('ag-t').value.trim(),data=$('ag-d').value,tipo=$('ag-tp').value,hora=$('ag-h').value;
+  if(!titulo||!data)return toast('Informe o título e a data');
+  if(tipo==='Evento')state.eventos.push({id:u(),titulo,data,hora,local:'',info:'Criado pela agenda integrada',anexo:null});
+  else state.atividades.push({id:u(),titulo,prazo:data,hora,tipo:tipo==='Lembrete'?'Pessoal':'Trabalho',prioridade:tipo==='Lembrete'?'Alta':'Normal',repetir:'',aviso:30,desc:tipo==='Lembrete'?'Lembrete criado pela agenda integrada':'',arquivo:null,feito:false,criado:Date.now()});
+  agendaSelecionada=data;const d=new Date(data+'T12:00:00');agendaCursor=new Date(d.getFullYear(),d.getMonth(),1);save();toast(tipo+' salvo na agenda');
+}
 function vAgenda(){
-  const evs=state.eventos.slice().sort((a,b)=>(a.data+a.hora).localeCompare(b.data+b.hora));
-  const a=alertas();
-  return page('Agenda integrada','Eventos, pedidos e SEND unificados com avisos automáticos por data.',`
-  <div class="card" style="margin-bottom:16px"><h3>Avisos ativos <span class="badge">${a.length}</span></h3>
-    <div style="margin-top:10px">${a.length?a.map(x=>`<div class="alertbar ${x.t==='w'?'w':''}">${esc(x.m)}</div>`).join(''):'<div class="alertbar o">Agenda limpa.</div>'}</div></div>
-  <div class="card"><h3>Linha do tempo</h3><table style="margin-top:10px"><thead><tr><th>Data</th><th>Hora</th><th>Evento</th><th>Local</th><th>Status</th><th></th></tr></thead><tbody>
-  ${evs.map(e=>{const d=dias(e.data);const cls=d<0?'t-err':d<=3?'t-warn':'t-ok';
-    return `<tr><td class="mono">${fmt(e.data)}</td><td class="mono">${esc(e.hora||'--:--')}</td><td><b>${esc(e.titulo)}</b><div class="dim">${esc(e.info||'')}</div></td>
-    <td>${esc(e.local||'—')}</td><td><span class="tag ${cls}">${d<0?'Vencido':d===0?'Hoje':'em '+d+'d'}</span></td>
-    <td><button class="btn sm" onclick="verEvento('${e.id}')">Visualizar</button></td></tr>`}).join('')||'<tr><td colspan="6" class="dim">Sem eventos.</td></tr>'}
-  </tbody></table></div>`);
+  const itens=agendaItens(), a=alertas(), hoje=agendaISO(new Date());
+  const ano=agendaCursor.getFullYear(),mes=agendaCursor.getMonth();
+  const primeiro=new Date(ano,mes,1), inicio=new Date(ano,mes,1-primeiro.getDay());
+  const tituloMes=new Intl.DateTimeFormat('pt-BR',{month:'long',year:'numeric'}).format(primeiro);
+  let diasHtml='';
+  for(let i=0;i<42;i++){
+    const d=new Date(inicio);d.setDate(inicio.getDate()+i);const iso=agendaISO(d), noMes=d.getMonth()===mes, diaItens=itens.filter(x=>x.data===iso);
+    const dots=diaItens.slice(0,4).map(x=>`<i class="agenda-dot ${x.tipo}" title="${esc(x.titulo)}"></i>`).join('');
+    diasHtml+=`<button class="agenda-day ${noMes?'':'out'} ${iso===hoje?'today':''} ${iso===agendaSelecionada?'selected':''}" onclick="agendaEscolher('${iso}')" aria-label="${fmt(iso)}, ${diaItens.length} item(ns)"><span class="dn">${d.getDate()}</span><span class="agenda-dots">${dots}${diaItens.length>4?`<em class="agenda-more">+${diaItens.length-4}</em>`:''}</span></button>`;
+  }
+  const escolhidos=itens.filter(x=>x.data===agendaSelecionada);
+  const proximos=itens.filter(x=>x.data>=hoje&&!x.feito).slice(0,8);
+  const itemHtml=x=>`<div class="agenda-item ${x.tipo} ${x.feito?'feito':''}"><i class="bar"></i><div><b>${esc(x.titulo)}</b><small>${esc(x.hora||'Dia inteiro')} · ${x.tipo==='evento'?'Evento':x.tipo==='lembrete'?'Lembrete pessoal':'Atividade'}${x.sub?' · '+esc(x.sub):''}</small></div><button class="btn sm" onclick='agendaAbrir(${JSON.stringify(x)})'>Ver</button></div>`;
+  return page('Agenda integrada','Calendário, eventos, atividades e lembretes reunidos em uma única visão.',`
+  <div class="card" style="margin-bottom:16px"><h3>Adicionar à agenda</h3><div class="agenda-quick" style="margin-top:10px">
+    <div class="wide"><label>Título</label><input id="ag-t" placeholder="O que precisa ser feito?"/></div><div><label>Tipo</label><select id="ag-tp"><option>Evento</option><option>Atividade</option><option>Lembrete</option></select></div><div><label>Data</label><input id="ag-d" type="date" value="${agendaSelecionada}"/></div><div><label>Hora</label><input id="ag-h" type="time"/></div><button class="btn primary" onclick="addAgendaItem()">＋ Adicionar</button>
+  </div></div>
+  <div class="agenda-shell">
+    <div class="card agenda-cal"><div class="agenda-toolbar"><button class="btn sm" onclick="agendaHoje()">Hoje</button><div class="agenda-nav"><button class="btn sm" onclick="agendaMudar(-1)" title="Mês anterior">‹</button><strong class="agenda-month">${tituloMes}</strong><button class="btn sm" onclick="agendaMudar(1)" title="Próximo mês">›</button></div></div>
+      <div class="agenda-week"><span>Dom</span><span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span></div><div class="agenda-days">${diasHtml}</div>
+      <div class="agenda-legend"><span><i style="background:var(--tech-cyan)"></i>Eventos</span><span><i style="background:#ffc857"></i>Atividades</span><span><i style="background:var(--acc3)"></i>Lembretes</span></div>
+    </div>
+    <div class="agenda-side"><div class="card"><h3>${fmt(agendaSelecionada)} <span class="badge">${escolhidos.length}</span></h3><div class="agenda-list">${escolhidos.length?escolhidos.map(itemHtml).join(''):'<div class="agenda-empty">Nada marcado para esta data.</div>'}</div></div>
+      <div class="card"><h3>Próximos compromissos</h3><div class="agenda-list">${proximos.length?proximos.map(itemHtml).join(''):'<div class="agenda-empty">Sua agenda está livre.</div>'}</div></div></div>
+  </div>
+  <div class="card" style="margin-top:16px"><h3>Avisos e lembretes ativos <span class="badge">${a.length}</span></h3><div style="margin-top:10px">${a.length?a.map(x=>`<div class="alertbar ${x.t==='w'?'w':''}">${esc(x.m)}</div>`).join(''):'<div class="alertbar o">Tudo em dia.</div>'}</div></div>`);
 }
 
 /* ---- Eventos (CRUD + anexos) ---- */
@@ -2028,41 +2067,39 @@ function baixarHTML(){
 }
 function dl(blob,nome){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=nome;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000)}
 
-/* ---- Entrega & pendências ---- */
+/* ---- Mapa do site & tutorial ---- */
 function vEntrega(){
-  return page('Entrega & Pendências','Onde o HTML é gerado e o que ainda precisa ser inserido depois.',`
-  <div class="grid g2">
-   <div class="card"><h3>📦 Geração do HTML</h3>
-    <ul class="dim">
-     <li>O download é gerado no botão <b>“⬇ Baixar HTML”</b> (topo e em Configurações), pela função <span class="mono">baixarHTML()</span>.</li>
-     <li>Ele serializa o documento inteiro (<span class="mono">document.documentElement.outerHTML</span>) em um Blob e salva como <span class="mono">MODESK-PESSOAL-v11.html</span>.</li>
-     <li>O arquivo é 100% offline (só as fontes e o Firebase vêm de CDN) e funciona com duplo clique.</li>
-     <li>Os <b>dados</b> ficam no navegador (localStorage) — use <b>Exportar JSON</b> para levá-los para outro PC.</li>
-    </ul></div>
-   <div class="card"><h3>✅ Feito nesta versão 11</h3>
-    <ul class="dim">
-     <li><b>Atividades pessoais e de trabalho</b> com data, hora, prioridade, repetição e anexo.</li>
-     <li><b>Lembrete piscando em vermelho</b> na barra superior, na tabela e no rodapé quando chega o prazo (+ notificação do Windows).</li>
-     <li><b>Explorador de arquivos interno</b>: abrir pastas do PC, navegar, criar pasta, gravar arquivos no disco, pré-visualizar imagem, PDF, vídeo, áudio e texto, ou abrir externamente.</li>
-     <li><b>Permissão da pasta lembrada</b> neste computador (reabre sozinha).</li>
-     <li><b>Busca geral</b> (Ctrl+K) em atividades, pedidos, inventário, SEND, chamados, acessos, pastas e arquivos.</li>
-     <li><b>Visual estilo Windows</b>: barra de título com menu e botões, laterais e barra de status no rodapé.</li>
-     <li>Regras originais de <b>pedidos de compra, inventário da sala de som e chamados internos</b> mantidas sem alteração.</li>
-     <li><b>NOVO v11 — Instalar como aplicativo do Windows</b> (manifesto embutido + botão em Configurações, abre em janela própria).</li>
-     <li><b>NOVO v11 — Busca dentro do conteúdo dos arquivos</b> do disco (varre subpastas em txt, csv, log, json, md, xml, html, sql...).</li>
-     <li><b>NOVO v11 — Importação .xlsx nativa</b> do inventário (Excel), além de CSV.</li>
-    </ul></div>
-   <div class="card"><h3>⚠️ O que falta inserir posteriormente</h3>
-    <ul class="dim">
-     <li><b>URLs reais</b> de MXM, Websuporte Senac e SEND (campo Editar em Atalhos).</li>
-     <li><b>IDs/hosts reais</b> de AnyDesk e VNC das máquinas.</li>
-     <li><b>Credenciais Firebase</b> para o tempo real entre dispositivos (hoje: local + abas).</li>
-     <li><b>Busca de conteúdo em PDF/DOCX/XLSX</b> (hoje só arquivos de texto).</li>
-     <li><b>OCR de imagens</b> para reconhecimento automático de pedidos (requer Tesseract.js).</li>
-     <li><b>Notificações do sistema/e-mail</b> dos avisos da agenda (Notification API / serviço SMTP).</li>
-     <li><b>Anexos grandes</b> (>1,5 MB) — exigem storage em nuvem.</li>
-    </ul></div>
-  </div>`);
+  const grupos=[
+    {n:'Painel',i:'dashboard',itens:[
+      ['dashboard','Dashboard','Resumo geral, indicadores, alertas e acessos rápidos.','dashboard'],
+      ['agenda','Agenda & Avisos','Cadastre compromissos e acompanhe prazos e lembretes.','calendar'],
+      ['jarvis','JARVIS (IA)','Converse com o assistente e peça ações dentro do sistema.','pulse']]},
+    {n:'Arquivos',i:'folder',itens:[
+      ['arquivos','Central de Arquivos','Abra uma pasta do computador, organize e visualize documentos.','folder'],
+      ['itens','Cadastro de Itens','Cadastre, pesquise, filtre e atualize os itens controlados.','boxes']]},
+    {n:'Operacional',i:'gear',itens:[
+      ['pedidos','Compras','Crie requisições e acompanhe pedidos, prazos e recebimentos.','cart'],
+      ['send','Acompanhamento SEND','Registre envios, retornos e pendências de atendimento.','mail']]},
+    {n:'Máquina & Acessos',i:'monitor',itens:[
+      ['mapa','Acessos & Mapeamento','Consulte máquinas, ambientes, acessos e informações da unidade.','monitor']]},
+    {n:'Manual & Utilitários',i:'shield',itens:[
+      ['manual','Manual Operacional','Veja o guia em slides com rotinas e transição da operação.','monitor'],
+      ['links','Sistemas & Sites','Abra e edite os atalhos dos sistemas usados no dia a dia.','link']]},
+    {n:'Sistema',i:'shield',itens:[
+      ['interface','Central de Interface','Acesse todas as áreas por cartões em uma única tela.','monitor'],
+      ['config','Configurações','Ajuste senha, sincronização, backup e instalação do aplicativo.','gear']]}
+  ];
+  const mapa=grupos.map(g=>`<section class="site-group"><h3>${icon(g.i)}${g.n}</h3>${g.itens.map(x=>`<button class="site-link" onclick="go('${x[0]}')"><span class="site-ico">${icon(x[3])}</span><span><b>${x[1]}</b><small>${x[2]}</small></span><span class="arr">›</span></button>`).join('')}</section>`).join('');
+  return page('Mapa do Site & Tutorial','Conheça cada área e clique em qualquer função para abri-la.',`
+    <div class="site-intro"><div><b>Comece por aqui</b><p>Este mapa explica para que serve cada área do MODESK e funciona como atalho.</p></div><button class="btn primary" onclick="go('dashboard')">Abrir Dashboard</button></div>
+    <div class="site-map">${mapa}</div>
+    <div class="site-help"><h3>Como usar a interface</h3><ol>
+      <li>Use o menu lateral para abrir uma área ou clique diretamente nos itens deste mapa.</li>
+      <li>O ícone de quatro telas no menu lateral ativa e desativa o modo multitelas.</li>
+      <li>No modo multitelas, arraste uma janela até encontrar a posição desejada e clique no alfinete da própria janela para travá-la.</li>
+      <li>Na barra inferior, escolha a posição do menu e clique no alfinete para mantê-la. Clique novamente para liberar.</li>
+      <li>Use Backup para salvar os dados e Baixar HTML para gerar uma cópia completa do sistema.</li>
+    </ol></div>`);
 }
 
 /* ---- utilidades ---- */
@@ -2097,7 +2134,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
 
 /* ================================================================
    MODESK v10 — ATIVIDADES PESSOAIS, EXPLORADOR DE ARQUIVOS,
-   BUSCA GLOBAL E SHELL ESTILO WINDOWS
+   SHELL ESTILO WINDOWS
    (as regras originais de Pedidos, Itens/Inventário da Sala de Som,
     SEND e Chamados internos permanecem intactas)
 =================================================================*/
@@ -2427,36 +2464,6 @@ async function expEnviarArquivo(){
   inp.click();
 }
 
-/* ---------- BUSCA GLOBAL ---------- */
-let BUSCA='';
-function vBusca(){
-  const q=BUSCA.trim().toLowerCase();
-  const hits=[];
-  const add=(cat,titulo,sub,acao)=>hits.push({cat,titulo,sub,acao});
-  if(q){
-    state.atividades.forEach(a=>{if((a.titulo+' '+(a.desc||'')).toLowerCase().includes(q))add('Atividade',a.titulo,fmt(a.prazo)+' '+(a.tipo||''),`verAtiv('${a.id}')`)});
-    state.eventos.forEach(e=>{if((e.titulo+' '+(e.info||'')).toLowerCase().includes(q))add('Evento',e.titulo,fmt(e.data),`verEvento('${e.id}')`)});
-    state.pedidos.forEach(p=>{if(JSON.stringify(p).toLowerCase().includes(q))add('Pedido de compra','Pedido '+p.numero,(p.fornecedor||'')+' · '+(p.status||''),`go('pedidos')`)});
-    state.itens.forEach(i=>{if(JSON.stringify(i).toLowerCase().includes(q))add('Inventário',i.descricao||i.nome||'item',(i.categoria||'')+' · '+(i.quantidade||'')+' '+(i.unidade||''),`go('itens')`)});
-    state.sends.forEach(s=>{if(JSON.stringify(s).toLowerCase().includes(q))add('SEND',s.assunto,(s.destinatario||'')+' · '+(s.status||''),`go('send')`)});
-    state.acessos.forEach(a=>{if(JSON.stringify(a).toLowerCase().includes(q))add('Acesso remoto',a.nome,(a.tipo||'')+' · '+(a.endereco||''),`go('remoto')`)});
-    state.pastas.forEach(p=>{if(JSON.stringify(p).toLowerCase().includes(q))add('Pasta do PC',p.nome,p.caminho,`go('arquivos')`)});
-    state.links.forEach(l=>{if(JSON.stringify(l).toLowerCase().includes(q))add('Atalho',l.nome,l.url||'sem URL',`go('links')`)});
-    state.servicos.forEach(s=>{(s.sub||[]).forEach(sb=>(sb.itens||[]).forEach(it=>{const txt=typeof it==='string'?it:(it.nome||'');
-      if(txt.toLowerCase().includes(q))add('Serviço',txt,s.nome+' › '+sb.nome,`go('arquivos')`)}))});
-    state.arquivos.forEach(a=>{if(a.nome.toLowerCase().includes(q))add('Arquivo salvo',a.nome,a.pasta||'',`go('arquivos')`)});
-  }
-  return page('Busca geral','Procure em atividades, pedidos, inventário, SEND, chamados, acessos, pastas e arquivos.',`
-  <div class="card" style="margin-bottom:14px"><div class="row">
-    <input id="bs-q" value="${esc(BUSCA)}" placeholder="Digite o que procura..." style="max-width:420px" oninput="BUSCA=this.value;MDK.deb('bs-q',()=>{render();setTimeout(()=>{const el=$('bs-q');el&&el.focus();el.setSelectionRange(el.value.length,el.value.length)},0)},500)"/>
-    <span class="tag mono">${hits.length} resultado(s)</span></div></div>
-  <div class="card"><table><tbody>
-   ${hits.map(h=>`<tr><td><span class="tag t-info">${esc(h.cat)}</span></td><td><b>${esc(h.titulo)}</b><div class="dim">${esc(h.sub||'')}</div></td>
-     <td style="text-align:right"><button class="btn sm" onclick="${h.acao}">Abrir</button></td></tr>`).join('')||`<tr><td class="dim">${q?'Nada encontrado.':'Digite para buscar.'}</td></tr>`}
-  </tbody></table></div>`);
-}
-function buscaTopo(v){BUSCA=v;tab='busca';render()}
-
 const TEXTEXT=['txt','csv','log','json','md','xml','ini','js','ts','html','htm','css','sql','bat','cmd','yml','yaml','srt','svg'];
 async function expBuscarConteudo(){
   if(!EXP.dir)return toast('Abra uma pasta do PC primeiro');
@@ -2506,11 +2513,10 @@ function winClose(){if(confirm('Sair do MODESK?'))logout()}
   setTimeout(checarDeadlines,800);
   setTimeout(ativarNotificacoes,1500);
   setInterval(notificarPedidosHoje,600000);
-  setInterval(()=>{if(tab==='atividades')render()},60000);
+  setInterval(()=>{if(tab==='agenda')render()},60000);
   window.addEventListener('online',atualizarStatusbar);
   window.addEventListener('offline',atualizarStatusbar);
   document.addEventListener('keydown',e=>{
-    if(e.ctrlKey&&e.key==='k'){e.preventDefault();go('busca')}
     if(e.key==='Escape'){const b=$('deadline-bar');b&&b.classList.remove('on')}
   });
   fsAutoConectar();
@@ -2613,9 +2619,8 @@ function winClose(){if(confirm('Sair do MODESK?'))logout()}
 </script>
 
 <script>
-/* ===================== MODESK v15 — JARVIS FX · LUPA · MULTITELAS · RAIL INFERIOR =====================
+/* ===================== MODESK v15 — JARVIS FX · MULTITELAS · RAIL INFERIOR =====================
    Camada adicional: não altera as regras do sistema, apenas a apresentação/navegação.
-   - Lupa de busca global (clique na lupa ou Ctrl+K / F3)
    - Efeitos estilo JARVIS (scanner, retícula, HUD, boot)
    - Multitelas arrastáveis/redimensionáveis com layouts (estilo Filmora)
    - Menu acomodável: esquerda / direita / topo / oculto
@@ -2623,18 +2628,18 @@ function winClose(){if(confirm('Sair do MODESK?'))logout()}
 (function () {
   const KEY = 'modesk.v15.ui';
   const TITLES = {
-    dashboard: 'Dashboard', agenda: 'Agenda & Avisos', atividades: 'Atividades & Lembretes',
-    busca: 'Busca Geral', arquivos: 'Central de Arquivos', itens: 'Cadastro de Itens',
+    dashboard: 'Dashboard', agenda: 'Agenda & Avisos', atividades: 'Agenda & Avisos',
+    arquivos: 'Central de Arquivos', itens: 'Cadastro de Itens',
     pedidos: 'Pedidos de Compra', send: 'Acompanhamento SEND', eventos: 'Eventos',
     remoto: 'Conexões Remotas', links: 'Sistemas & Sites', config: 'Configurações',
-    entrega: 'Entrega & Pendências', interface: 'Central de Interface',
+    entrega: 'Mapa do Site & Tutorial', interface: 'Central de Interface',
     jarvis: 'JARVIS — Assistente do Sistema'
   };
   const VIEW = () => ({
     dashboard: window.vDash, agenda: window.vAgenda, arquivos: window.vArquivos, itens: window.vItens,
     pedidos: window.vPedidos, send: window.vSend, eventos: window.vEventos, remoto: window.vRemoto,
     links: window.vLinks, config: window.vConfig,
-    entrega: window.vEntrega, atividades: window.vAtividades, busca: window.vBusca,
+    entrega: window.vEntrega, atividades: window.vAtividades,
     interface: window.vInterface, jarvis: window.vJarvis
   });
 
@@ -3167,9 +3172,6 @@ function winClose(){if(confirm('Sair do MODESK?'))logout()}
 
       'r-dock': () => ({ groups: [{ h: 'Posição do menu', items: DOCKS.map(d => ({
         l: DOCK_LBL[d], on: ui.dock === d, fn: () => { ui.dock = d; saveUI(); applyDock(); window.toast && toast(DOCK_LBL[d]) } })) }] }),
-      'r-deck': () => ({ groups: [{ h: 'Multitelas', items: [
-        { l: 'Ativar multitelas', on: !!ui.deck, fn: () => toggleDeck(true) },
-        { l: 'Tela única', on: !ui.deck, fn: () => toggleDeck(false) } ] }] }),
       'r-fx': () => ({ groups: [{ h: 'Efeitos', items: [
         { l: 'Efeitos ligados', on: !!ui.fx, fn: () => { ui.fx = true; saveUI(); document.body.classList.remove('jfx-off') } },
         { l: 'Efeitos desligados', on: !ui.fx, fn: () => { ui.fx = false; saveUI(); document.body.classList.add('jfx-off') } } ] }] })
@@ -3191,63 +3193,16 @@ function winClose(){if(confirm('Sair do MODESK?'))logout()}
       };
       const open = () => { clearTimeout(t); document.querySelectorAll('.railmenu.open').forEach(m => m !== box && m.classList.remove('open')); build(); box.classList.add('open') };
       const close = () => { clearTimeout(t); t = setTimeout(() => box.classList.remove('open'), 220) };
-      wrap.addEventListener('pointerenter', open);
-      wrap.addEventListener('pointerleave', close);
-      box.addEventListener('pointerenter', () => clearTimeout(t));
-      box.addEventListener('pointerleave', close);
+      btn.onclick = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        if (box.classList.contains('open')) { clearTimeout(t); box.classList.remove('open') }
+        else open();
+      };
+      box.addEventListener('click', event => event.stopPropagation());
     });
     addEventListener('pointerdown', e => { if (!e.target.closest('#rail')) document.querySelectorAll('.railmenu.open').forEach(m => m.classList.remove('open')) });
   }
-
-  /* ---------------- LUPA (busca global) ---------------- */
-  function dataset() {
-    const s = window.state || {}, out = [];
-    const add = (tipo, titulo, sub, k, id) => out.push({ tipo, titulo, sub: sub || '', k, id });
-    Object.keys(TITLES).forEach(k => add('tela', TITLES[k], 'abrir tela', k));
-    (s.itens || []).forEach(i => add('item', i.desc || i.descricao || '(sem descrição)', [i.categoria, i.qtd && ('qtd ' + i.qtd + ' ' + (i.un || ''))].filter(Boolean).join(' · '), 'itens'));
-    (s.pedidos || []).forEach(p => add('pedido', `#${p.numero || '—'} ${p.fornecedor || ''}`, [p.status, p.prazo && ('prazo ' + p.prazo)].filter(Boolean).join(' · '), 'pedidos'));
-    (s.eventos || []).forEach(e => add('evento', e.titulo, [e.data, e.hora, e.local].filter(Boolean).join(' · '), 'eventos'));
-    (s.atividades || []).forEach(a => add('atividade', a.titulo, [a.tipo, a.prazo].filter(Boolean).join(' · '), 'atividades'));
-    (s.sends || []).forEach(x => add('send', x.assunto || '(sem assunto)', [x.status, x.data].filter(Boolean).join(' · '), 'send'));
-    (s.servicos || []).forEach(p => {
-      add('pasta', p.nome, 'pasta de serviço', 'arquivos');
-      (p.sub || []).forEach(sb => { add('subpasta', sb.nome, p.nome, 'arquivos'); (sb.itens || []).forEach(it => add('arquivo', String(it), p.nome + ' / ' + sb.nome, 'arquivos')) });
-    });
-    (s.links || []).forEach(l => add('link', l.nome || l.titulo || l.url, l.url || '', 'links'));
-    (s.remotos || s.remoto || []).forEach(r => add('remoto', r.nome || r.host, r.host || '', 'remoto'));
-    return out;
-  }
-  const norm = (v) => String(v || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-  let sel = 0, hits = [];
-  function search(q) {
-    const t = norm(q).split(/\s+/).filter(Boolean);
-    const base = dataset();
-    hits = (!t.length ? base.filter(r => r.tipo === 'tela') : base.filter(r => {
-      const hay = norm(r.tipo + ' ' + r.titulo + ' ' + r.sub);
-      return t.every(w => hay.includes(w));
-    })).slice(0, 60);
-    sel = 0; paint();
-  }
-  function paint() {
-    const box = document.getElementById('lupa-res');
-    box.innerHTML = hits.length ? hits.map((r, i) => `<div class="r ${i === sel ? 'sel' : ''}" data-i="${i}">
-      <span class="k">${r.tipo}</span><span class="tx"><b>${esc(r.titulo)}</b><small>${esc(r.sub)}</small></span></div>`).join('')
-      : `<div class="r"><span class="tx"><b>Nada encontrado</b><small>tente outro termo</small></span></div>`;
-    box.querySelectorAll('.r[data-i]').forEach(d => d.onclick = () => { sel = +d.dataset.i; pick() });
-    box.querySelector('.r.sel')?.scrollIntoView({ block: 'nearest' });
-  }
-  function pick() {
-    const r = hits[sel]; if (!r) return;
-    closeLupa();
-    if (ui.deck) { openWin(r.k); focus(document.querySelector(`.win[data-k="${r.k}"]`)) }
-    else window.go && go(r.k);
-    if (r.tipo !== 'tela') window.toast && toast(r.tipo.toUpperCase() + ': ' + r.titulo);
-  }
-  function openLupa() {
-    document.getElementById('lupa').classList.add('open');
-    const i = document.getElementById('lupa-q'); i.value = ''; i.focus(); search('');
-  }
-  function closeLupa() { document.getElementById('lupa').classList.remove('open') }
 
   /* ---------------- MONTAGEM ---------------- */
   function mount() {
@@ -3255,49 +3210,24 @@ function winClose(){if(confirm('Sair do MODESK?'))logout()}
     if (!document.getElementById('deck')) document.body.append(el('<div id="deck"></div>'));
     if (!document.getElementById('taskbar')) document.body.append(el('<div id="taskbar"></div>'));
     if (!document.getElementById('rail')) {
-      const ICON_LUPA = '<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>';
       const ICON_MULT = '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.5"/></svg>';
       const ICON_LAYOUT = '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="8" rx="1.5"/><rect x="3" y="14" width="8" height="7" rx="1.5"/><rect x="13" y="14" width="8" height="7" rx="1.5"/></svg>';
       const ICON_DOCK = '<svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>';
       const ICON_FX = '<svg viewBox="0 0 24 24"><path d="M12 2l2.4 7.2h7.6l-6 4.8 2.4 7.2-6-4.8-6 4.8 2.4-7.2-6-4.8h7.6z"/></svg>';
       const rail = el(`<div id="rail">
-        <button id="r-lupa" title="Buscar (Ctrl+K)">${ICON_LUPA}</button><span class="sep"></span>
-        <span class="rwrap"><button id="r-deck" title="Multitelas ligado/desligado">${ICON_MULT}</button></span>
         <span class="rwrap"><button id="r-layout" title="Layout das telas">${ICON_LAYOUT}</button></span>
         <span class="rwrap"><button id="r-dock" title="Posição do menu">${ICON_DOCK}</button></span>
         <span class="rwrap"><button id="r-fx" title="Efeitos JARVIS">${ICON_FX}</button></span></div>`);
       document.body.append(rail);
-      rail.querySelector('#r-lupa').onclick = openLupa;
-      rail.querySelector('#r-deck').onclick = () => toggleDeck();
       rail.querySelector('#r-layout').onclick = cycleLayout;
       rail.querySelector('#r-dock').onclick = cycleDock;
       rail.querySelector('#r-fx').onclick = () => { ui.fx = !ui.fx; saveUI(); document.body.classList.toggle('jfx-off', !ui.fx) };
       railMenus(rail);
     }
-    if (!document.getElementById('lupa')) {
-      const l = el(`<div id="lupa"><div class="box">
-        <div class="head"><span>🔍</span><input id="lupa-q" placeholder="Buscar item, pedido, evento, pasta, tela…" autocomplete="off"/></div>
-        <div class="res" id="lupa-res"></div>
-        <div class="foot"><span>↑↓ navegar</span><span>Enter abrir</span><span>Esc fechar</span><span>Ctrl+K a qualquer momento</span></div>
-      </div></div>`);
-      document.body.append(l);
-      l.addEventListener('click', e => { if (e.target === l) closeLupa() });
-      l.querySelector('#lupa-q').addEventListener('input', e => search(e.target.value));
-    }
     applyDock();
-    document.getElementById('r-deck').classList.toggle('on', !!ui.deck);
     if (ui.deck) { ui.deck = false; toggleDeck(true) }
   }
 
-  addEventListener('keydown', e => {
-    const open = document.getElementById('lupa')?.classList.contains('open');
-    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k' || e.key === 'F3') { e.preventDefault(); open ? closeLupa() : openLupa(); return }
-    if (!open) return;
-    if (e.key === 'Escape') closeLupa();
-    else if (e.key === 'ArrowDown') { sel = Math.min(hits.length - 1, sel + 1); paint(); e.preventDefault() }
-    else if (e.key === 'ArrowUp') { sel = Math.max(0, sel - 1); paint(); e.preventDefault() }
-    else if (e.key === 'Enter') pick();
-  });
   addEventListener('resize', () => { if (ui.deck && ui.layout && ui.layout !== 'free') arrange(ui.layout) });
 
   function hook() {
@@ -3316,7 +3246,7 @@ function winClose(){if(confirm('Sair do MODESK?'))logout()}
     };
     window.go = function (k) { if (ui.deck) { openWin(k); return } return G.apply(this, arguments) };
     if (S) window.start = function () { const r = S.apply(this, arguments); setTimeout(mount, 0); return r };
-    window.MODESK13 = { openWin, arrange, toggleDeck, cycleDock, openLupa, refresh };
+    window.MODESK13 = { openWin, arrange, toggleDeck, cycleDock, refresh };
     window.toggleMultitelas = function () { toggleDeck(); window.toast && toast(ui.deck ? 'Multitelas ativado' : 'Multitelas desativado') };
   }
 
@@ -5361,7 +5291,6 @@ if(document.readyState==='loading')addEventListener('DOMContentLoaded',boot);els
     dashboard:'Visão geral dos indicadores e do andamento do dia.',
     agenda:'Agenda, avisos e compromissos do período.',
     atividades:'Atividades, lembretes e prazos em acompanhamento.',
-    busca:'Busca geral em todos os registros do sistema.',
     jarvis:'Assistente de IA conectado aos seus dados.',
     arquivos:'Central de arquivos e pastas de serviço.',
     itens:'Cadastro e consulta de itens.',
@@ -5372,7 +5301,7 @@ if(document.readyState==='loading')addEventListener('DOMContentLoaded',boot);els
     mapa:'Mapeamento dos computadores da unidade.',
     links:'Sistemas e sites de uso frequente.',
     config:'Configurações gerais do MODESK.',
-    entrega:'Entrega, pendências e geração do HTML.'
+    entrega:'Mapa completo do sistema e tutorial de uso.'
   };
   function ls(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}}
   function save(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
@@ -8301,7 +8230,7 @@ h1.page,#view h1{font-size:clamp(22px,2.6vw,34px)!important;margin:0 0 4px!impor
     try{var p=JSON.parse(localStorage.getItem(LS)||'null');if(p&&typeof p.x==='number')aplicar(p.x,p.y)}catch(e){}
     var ox=0,oy=0,sx=0,sy=0,mov=false,ativo=false;
     r.addEventListener('pointerdown',function(e){
-      if(e.button!==0)return; ativo=true;mov=false;
+      if(e.button!==0 || !e.target.closest('.grip'))return; ativo=true;mov=false;
       var b=r.getBoundingClientRect();ox=b.left;oy=b.top;sx=e.clientX;sy=e.clientY;
       try{r.setPointerCapture(e.pointerId)}catch(_){}
     });
@@ -9591,72 +9520,736 @@ html[data-jv90="1"] #jv-orb{background:radial-gradient(circle at 34% 28%,#fff,va
 #lupa.open{display:block!important}
 #lupa .box{pointer-events:auto}
 </style>
-<script>
-/* ============ v5 · CORRECAO: menu rail clicavel + janela de busca por cima ============ */
+
+
+<style id="mdk-compras-v4">
+#cp-abas{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+#cp-abas .cp-aba{padding:9px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);color:inherit;cursor:pointer;font-size:12.8px;font-weight:600}
+#cp-abas .cp-aba.on{border-color:var(--acc,#ef1427);background:rgba(239,20,39,.16)}
+.cp-pane{display:none}.cp-pane.on{display:block}
+.cp-flow{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px;font-size:12px}
+.cp-flow b{opacity:.9}
+.cp-chip{padding:5px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04)}
+.cp-sel{width:auto!important;margin-right:6px}
+.cp-doc{font-size:11.5px}
+</style>
+<script id="mdk-compras-v4-js">
+/* ===================== MODESK v4 · MODULO DE COMPRAS =====================
+   Fluxo: Lista previa -> Requisicao interna (EST01/EST04) -> Requisicao de
+   compra (EST02) -> Pedido(s) de compra (vinculados ou diretos COMP01/COMP01 PT).
+   + link para o documento interno mapeado pelo numero no titulo do arquivo
+   + deadline de entrega com alerta igual a agenda
+   + acoes do JARVIS (cadastro por voz/texto)
+========================================================================= */
 (function(){
-  'use strict';
-  function menuDe(btn){ return btn.parentElement && btn.parentElement.querySelector('.railmenu') }
-  function fechaTodos(){ document.querySelectorAll('.railmenu.open').forEach(function(m){ m.classList.remove('open') }) }
-  function abreLupa(){
-    var l=document.getElementById('lupa');
-    if(!l){ if(window.go) window.go('busca'); return }
-    l.classList.add('open');
-    var i=document.getElementById('lupa-q');
-    if(i){ try{ i.focus() }catch(e){} i.dispatchEvent(new Event('input',{bubbles:true})) }
-  }
-  function fechaLupa(){ var l=document.getElementById('lupa'); if(l) l.classList.remove('open') }
-  window.MDKabrirBusca=abreLupa; window.MDKfecharBusca=fechaLupa;
+  var CP={aba:'lista'};
+  window.CP=CP;
+  var TIPOS_INT=['EST01','EST04'];
 
-  /* acha o botao do rail mesmo quando o clique cai na borda/moldura */
-  function botaoPorPonto(x,y){
-    var r=document.getElementById('rail'); if(!r) return null;
-    var achado=null, melhor=1e9;
-    r.querySelectorAll('button').forEach(function(b){
-      var q=b.getBoundingClientRect();
-      var dx=Math.max(q.left-x,0,x-q.right), dy=Math.max(q.top-y,0,y-q.bottom);
-      var d=dx*dx+dy*dy;
-      if(d<=196&&d<melhor){ melhor=d; achado=b }
+  function C(){
+    var s=window.state; if(!s)return {lista:[],internas:[],reqs:[],pedidos:[],docs:{},tipos:[]};
+    if(!s.compras)s.compras={};
+    var c=s.compras;
+    c.lista=c.lista||[]; c.internas=c.internas||[]; c.reqs=c.reqs||[]; c.pedidos=c.pedidos||[];
+    c.docs=c.docs||{}; c.tipos=(c.tipos&&c.tipos.length)?c.tipos:['COMP01','COMP01 PT','Compra direta','Contrato'];
+    return c;
+  }
+  window.comprasDados=C;
+  function sv(msg){try{save(true)}catch(e){}; if(msg)toast(msg); try{render()}catch(e){}}
+  function hoje(){return new Date().toISOString().slice(0,10)}
+  function v(id,d){var e=$(id);return e?String(e.value||'').trim():(d||'')}
+
+  /* ---------- documento interno mapeado pelo numero ---------- */
+  function docsRaizes(){try{return (window.EXP&&EXP.roots)?EXP.roots:[]}catch(e){return []}}
+  async function cpProcurar(num,limite){
+    var achados=[],alvo=String(num||'').replace(/\s+/g,'').toLowerCase();
+    if(!alvo)return achados;
+    async function varrer(dir,base,nivel){
+      if(nivel>5||achados.length>=(limite||5))return;
+      try{
+        for await(const par of dir.entries()){
+          var nome=par[0],h=par[1];
+          if(achados.length>=(limite||5))return;
+          if(h.kind==='directory'){await varrer(h,base+nome+'/',nivel+1);continue}
+          if(nome.replace(/\s+/g,'').toLowerCase().indexOf(alvo)>=0)achados.push({nome:nome,caminho:base+nome,h:h});
+        }
+      }catch(e){}
+    }
+    for(const r of docsRaizes()){ await varrer(r.h,(r.nome||'raiz')+'/',0) }
+    return achados;
+  }
+  window.cpMapearDoc=async function(num){
+    if(!window.showDirectoryPicker)return toast('Mapeamento de documentos: use o Chrome/Edge no PC');
+    toast('Procurando documento '+num+' nas pastas internas...');
+    var a=await cpProcurar(num,5);
+    if(!a.length)return toast('Nenhum arquivo com o numero '+num+' nas pastas autorizadas');
+    C().docs[num]={nome:a[0].nome,caminho:a[0].caminho,em:Date.now(),qtd:a.length};
+    sv('Documento vinculado: '+a[0].nome);
+  };
+  window.cpAbrirDoc=async function(num){
+    var a=await cpProcurar(num,1);
+    if(!a.length)return toast('Arquivo nao encontrado agora — reconecte as pastas em Central de Arquivos');
+    var f=await a[0].h.getFile(),url=URL.createObjectURL(f),ext=a[0].nome.split('.').pop().toLowerCase(),inner='';
+    if((f.type||'').indexOf('image')===0)inner='<img src="'+url+'" class="viewer" style="object-fit:contain"/>';
+    else if(ext==='pdf')inner='<iframe src="'+url+'" class="viewer"></iframe>';
+    else inner='<div class="dim">Sem previa interna para este tipo. Use baixar copia.</div>';
+    modal('<h2>'+esc(a[0].nome)+'</h2><div class="row" style="margin:8px 0"><span class="tag mono">'+esc(a[0].caminho)+'</span>'+
+      '<a class="btn sm" href="'+url+'" download="'+esc(a[0].nome)+'">baixar copia</a></div>'+inner);
+  };
+  window.cpRemapearTodos=async function(){
+    var c=C(),nums=[];
+    c.internas.forEach(function(i){if(i.num)nums.push(i.num)});
+    c.reqs.forEach(function(r){if(r.num)nums.push(r.num)});
+    c.pedidos.forEach(function(p){if(p.num)nums.push(p.num)});
+    var n=0;
+    for(const num of nums){var a=await cpProcurar(num,3);if(a.length){c.docs[num]={nome:a[0].nome,caminho:a[0].caminho,em:Date.now(),qtd:a.length};n++}}
+    sv(n+' documento(s) vinculado(s)');
+  };
+  function docBtn(num){
+    if(!num)return '<span class="dim">—</span>';
+    var d=C().docs[num];
+    if(d)return '<button class="btn sm cp-doc" title="'+esc(d.caminho)+'" onclick="cpAbrirDoc(\''+esc(num)+'\')">abrir documento</button>';
+    return '<button class="btn sm cp-doc" onclick="cpMapearDoc(\''+esc(num)+'\')">mapear</button>';
+  }
+
+  /* ---------- 1. LISTA PREVIA ---------- */
+  window.cpAddLista=function(){
+    var d=v('cp-l-d'); if(!d)return toast('Informe o item');
+    C().lista.push({id:u(),desc:d,qtd:v('cp-l-q','1')||'1',un:v('cp-l-u','UN')||'UN',cat:v('cp-l-c'),obs:v('cp-l-o'),status:'pendente',em:Date.now()});
+    sv('Item adicionado a lista previa');
+  };
+  window.cpColarLista=function(){
+    var t=($('cp-l-bulk')||{}).value||'';
+    var linhas=t.split(/\r?\n/).map(function(x){return x.trim()}).filter(Boolean),n=0;
+    linhas.forEach(function(l){
+      var p=l.split(/[;\t|]|\s-\s/),desc=(p[0]||'').trim();if(!desc)return;
+      var q=(p[1]||'').trim()||'1',un=(p[2]||'').trim()||'UN';
+      C().lista.push({id:u(),desc:desc,qtd:q,un:un,cat:(p[3]||'').trim(),obs:'lista colada',status:'pendente',em:Date.now()});n++;
     });
-    return achado;
+    if(!n)return toast('Nada reconhecido');
+    sv(n+' itens cadastrados na lista previa');
+  };
+  window.cpDelLista=function(id){var c=C();c.lista=c.lista.filter(function(x){return x.id!==id});sv('Item removido')};
+  window.cpCriarInterna=function(){
+    var num=v('cp-i-n'); if(!num)return toast('Informe o numero da requisicao interna');
+    var sel=[].slice.call(document.querySelectorAll('.cp-sel-lista:checked')).map(function(x){return x.value});
+    if(!sel.length)return toast('Selecione os itens da lista previa');
+    var c=C();
+    c.internas.push({id:u(),num:num,cat:v('cp-i-c','EST01')||'EST01',data:v('cp-i-d')||hoje(),setor:v('cp-i-s'),obs:v('cp-i-o'),itens:sel,status:'aberta',em:Date.now()});
+    c.lista.forEach(function(i){if(sel.indexOf(i.id)>=0){i.status='requisitado';i.req=num}});
+    sv('Requisicao interna '+num+' criada com '+sel.length+' item(ns)');
+  };
+
+  /* ---------- 2. REQUISICAO DE COMPRA (EST02) ---------- */
+  window.cpCriarReq=function(){
+    var num=v('cp-r-n'); if(!num)return toast('Informe o numero EST02');
+    var sel=[].slice.call(document.querySelectorAll('.cp-sel-int:checked')).map(function(x){return x.value});
+    if(!sel.length)return toast('Selecione as requisicoes internas');
+    var c=C();
+    c.reqs.push({id:u(),num:num,cat:'EST02',data:v('cp-r-d')||hoje(),internas:sel,obs:v('cp-r-o'),status:'aberta',em:Date.now()});
+    c.internas.forEach(function(i){if(sel.indexOf(i.id)>=0){i.status='em requisicao';i.est02=num}});
+    sv('Requisicao de compra '+num+' criada');
+  };
+  window.cpDelInt=function(id){var c=C();c.internas=c.internas.filter(function(x){return x.id!==id});sv('Requisicao interna removida')};
+  window.cpDelReq=function(id){var c=C();c.reqs=c.reqs.filter(function(x){return x.id!==id});sv('Requisicao de compra removida')};
+
+  /* ---------- 3. PEDIDO DE COMPRA ---------- */
+  window.cpAddPedidoC=function(){
+    var num=v('cp-p-n'); if(!num)return toast('Informe o numero do pedido');
+    var c=C();
+    c.pedidos.push({id:u(),num:num,tipo:v('cp-p-t','EST02')||'EST02',reqId:v('cp-p-r'),forn:v('cp-p-f'),
+      valor:v('cp-p-v'),deadline:v('cp-p-dl'),status:'Pendente entrega',obs:v('cp-p-o'),em:Date.now()});
+    var r=c.reqs.find(function(x){return x.id===v('cp-p-r')}); if(r)r.status='com pedido';
+    sv('Pedido de compra '+num+' cadastrado');
+  };
+  window.cpNovoTipo=function(){
+    var t=prompt('Nova categoria de pedido (ex.: COMP02, Ata, Contrato XYZ):');
+    if(!t)return; var c=C(); if(c.tipos.indexOf(t)<0)c.tipos.push(t); sv('Categoria adicionada');
+  };
+  window.cpReceber=function(id){
+    var p=C().pedidos.find(function(x){return x.id===id}); if(!p)return;
+    p.status=p.status==='Recebido'?'Pendente entrega':'Recebido';
+    p.recebidoEm=p.status==='Recebido'?hoje():'';
+    sv(p.status==='Recebido'?'Pedido '+p.num+' marcado como recebido':'Pedido reaberto');
+  };
+  window.cpDeadline=function(id){
+    var p=C().pedidos.find(function(x){return x.id===id}); if(!p)return;
+    var d=prompt('Deadline de entrega (AAAA-MM-DD):',p.deadline||hoje()); if(d===null)return;
+    p.deadline=d.trim(); sv('Deadline atualizado');
+  };
+  window.cpDelPedidoC=function(id){var c=C();c.pedidos=c.pedidos.filter(function(x){return x.id!==id});sv('Pedido removido')};
+
+  /* ---------- ALERTAS DE ENTREGA (igual agenda) ---------- */
+  window.comprasAlertas=function(){
+    var out=[];
+    C().pedidos.forEach(function(p){
+      if(!p.deadline||p.status==='Recebido')return;
+      var d=dias(p.deadline);
+      if(d<0)out.push({t:'err',m:'ENTREGA ATRASADA '+Math.abs(d)+'d — pedido '+p.num+' ('+(p.forn||'sem fornecedor')+') — cobrar'});
+      else if(d===0)out.push({t:'err',m:'ENTREGA HOJE — pedido '+p.num+' ('+(p.forn||'')+')'});
+      else if(d<=5)out.push({t:'w',m:'Entrega em '+d+'d — pedido '+p.num+' ('+(p.forn||'')+')'});
+    });
+    return out;
+  };
+  var _alertas=window.alertas;
+  window.alertas=function(){
+    var base=[]; try{base=_alertas()||[]}catch(e){}
+    return base.concat(window.comprasAlertas());
+  };
+  var avisadosCp={};
+  function notificarCompras(){
+    if(!('Notification'in window)||Notification.permission!=='granted')return;
+    C().pedidos.forEach(function(p){
+      if(!p.deadline||p.status==='Recebido')return;
+      var d=dias(p.deadline); if(d>0)return;
+      var k=p.id+'|'+p.deadline; if(avisadosCp[k])return; avisadosCp[k]=1;
+      try{new Notification('MODESK Compras: pedido '+p.num+(d<0?' ATRASADO':' vence hoje'),
+        {body:(p.forn||'')+' — deadline '+fmt(p.deadline)})}catch(e){}
+    });
+  }
+  setInterval(notificarCompras,300000); setTimeout(notificarCompras,4000);
+
+  /* ---------- VIEW ---------- */
+  window.cpAba=function(k){
+    CP.aba=k;
+    document.querySelectorAll('#cp-abas .cp-aba').forEach(function(b){b.classList.toggle('on',b.dataset.k===k)});
+    document.querySelectorAll('.cp-pane').forEach(function(x){x.classList.toggle('on',x.dataset.k===k)});
+  };
+  function tagStatus(s){return '<span class="tag '+(s==='Recebido'?'t-ok':'t-warn')+'">'+esc(s)+'</span>'}
+
+  function paneLista(){
+    var c=C();
+    return '<div class="card" style="margin-bottom:16px"><h3>Lista previa (livre)</h3>'+
+    '<p class="dim">Cadastre manualmente, cole uma lista inteira ou peca ao JARVIS: "cadastre na lista previa de compras: 10 cabos HDMI, 2 monitores".</p>'+
+    '<div class="grid g3"><div><label>Item</label><input id="cp-l-d"/></div><div><label>Qtd</label><input id="cp-l-q" value="1"/></div>'+
+    '<div><label>Unidade</label><input id="cp-l-u" value="UN"/></div><div><label>Categoria</label><input id="cp-l-c" placeholder="TI, som, papelaria..."/></div>'+
+    '<div style="grid-column:span 2"><label>Observacao</label><input id="cp-l-o"/></div></div>'+
+    '<div class="row" style="margin-top:12px"><button class="btn primary" onclick="cpAddLista()">+ Adicionar item</button></div>'+
+    '<div style="margin-top:14px"><label>Colar lista (1 item por linha — item ; qtd ; unidade ; categoria)</label>'+
+    '<textarea id="cp-l-bulk" rows="4" placeholder="Cabo HDMI 2m ; 10 ; UN ; TI"></textarea>'+
+    '<div class="row" style="margin-top:10px"><button class="btn" onclick="cpColarLista()">Cadastrar lista colada</button></div></div></div>'+
+    '<div class="card" style="margin-bottom:16px"><h3>Gerar requisicao interna (EST01 / EST04)</h3>'+
+    '<div class="grid g3"><div><label>Numero</label><input id="cp-i-n" placeholder="EST01-000123"/></div>'+
+    '<div><label>Categoria</label><select id="cp-i-c">'+TIPOS_INT.map(function(t){return '<option>'+t+'</option>'}).join('')+'</select></div>'+
+    '<div><label>Data</label><input id="cp-i-d" type="date" value="'+hoje()+'"/></div>'+
+    '<div><label>Setor / solicitante</label><input id="cp-i-s"/></div>'+
+    '<div style="grid-column:span 2"><label>Observacao</label><input id="cp-i-o"/></div></div>'+
+    '<div class="row" style="margin-top:12px"><button class="btn primary" onclick="cpCriarInterna()">Criar requisicao com os itens marcados</button></div></div>'+
+    '<div class="card"><table><thead><tr><th></th><th>Item</th><th>Qtd</th><th>Categoria</th><th>Situacao</th><th>Requisicao</th><th></th></tr></thead><tbody>'+
+    (c.lista.map(function(i){return '<tr><td><input type="checkbox" class="cp-sel cp-sel-lista" value="'+i.id+'" '+(i.status==='requisitado'?'disabled':'')+'/></td>'+
+      '<td><b>'+esc(i.desc)+'</b><div class="dim">'+esc(i.obs||'')+'</div></td><td class="mono">'+esc(i.qtd)+' '+esc(i.un||'')+'</td>'+
+      '<td>'+esc(i.cat||'—')+'</td><td><span class="tag '+(i.status==='requisitado'?'t-ok':'t-info')+'">'+esc(i.status)+'</span></td>'+
+      '<td class="mono dim">'+esc(i.req||'—')+'</td><td><button class="btn sm" onclick="cpDelLista(\''+i.id+'\')">apagar</button></td></tr>'}).join('')
+      ||'<tr><td colspan="7" class="dim">Lista previa vazia.</td></tr>')+'</tbody></table></div>';
   }
 
-  function acionar(btn,e){
-    var box=menuDe(btn);
-    if(box){
-      var aberto=box.classList.contains('open');
-      fechaTodos();
-      if(!aberto){
-        try{ btn.parentElement.dispatchEvent(new PointerEvent('pointerenter',{bubbles:false})) }catch(err){}
-        box.classList.add('open');
-      }
-    }
-    if(btn.id==='r-lupa'){ setTimeout(abreLupa,0); return }
-    /* se o clique nao caiu no proprio botao, dispara a acao dele */
-    if(e && e.target!==btn && !(e.target.closest&&e.target.closest('#rail button')===btn) && typeof btn.onclick==='function'){
-      try{ btn.onclick(e) }catch(err){}
-    }
+  function paneInternas(){
+    var c=C();
+    return '<div class="card" style="margin-bottom:16px"><h3>Gerar requisicao de compra (EST02)</h3>'+
+    '<p class="dim">Marque uma ou mais requisicoes internas e informe o numero de controle EST02.</p>'+
+    '<div class="grid g3"><div><label>Numero EST02</label><input id="cp-r-n" placeholder="EST02-000456"/></div>'+
+    '<div><label>Data</label><input id="cp-r-d" type="date" value="'+hoje()+'"/></div>'+
+    '<div><label>Observacao</label><input id="cp-r-o"/></div></div>'+
+    '<div class="row" style="margin-top:12px"><button class="btn primary" onclick="cpCriarReq()">Criar EST02 com as internas marcadas</button>'+
+    '<button class="btn" onclick="cpRemapearTodos()">Revincular documentos internos</button></div></div>'+
+    '<div class="card"><table><thead><tr><th></th><th>Numero</th><th>Cat.</th><th>Data</th><th>Itens</th><th>Situacao</th><th>EST02</th><th>Documento</th><th></th></tr></thead><tbody>'+
+    (c.internas.map(function(i){return '<tr><td><input type="checkbox" class="cp-sel cp-sel-int" value="'+i.id+'" '+(i.est02?'disabled':'')+'/></td>'+
+      '<td class="mono"><b>'+esc(i.num)+'</b></td><td><span class="tag t-info">'+esc(i.cat)+'</span></td><td class="mono">'+fmt(i.data)+'</td>'+
+      '<td class="mono">'+(i.itens||[]).length+'</td><td>'+esc(i.status||'')+'</td><td class="mono dim">'+esc(i.est02||'—')+'</td>'+
+      '<td>'+docBtn(i.num)+'</td><td><button class="btn sm" onclick="cpDelInt(\''+i.id+'\')">apagar</button></td></tr>'}).join('')
+      ||'<tr><td colspan="9" class="dim">Nenhuma requisicao interna.</td></tr>')+'</tbody></table></div>';
   }
 
-  document.addEventListener('click', function(e){
-    var t=e.target; if(!t||!t.closest) return;
-    if(t.closest('#rail')){
-      if(t.closest('.mdk-grip')) return;
-      var btn=t.closest('#rail button')||botaoPorPonto(e.clientX,e.clientY);
-      if(btn){ acionar(btn,e); return }
-      return;
+  function paneReqs(){
+    var c=C();
+    return '<div class="card"><h3>Requisicoes de compra (EST02)</h3><table><thead><tr><th>Numero</th><th>Data</th><th>Internas</th><th>Pedidos</th><th>Situacao</th><th>Documento</th><th></th></tr></thead><tbody>'+
+    (c.reqs.map(function(r){
+      var ins=(r.internas||[]).map(function(id){var x=c.internas.find(function(y){return y.id===id});return x?x.num+' ('+x.cat+')':'?'}).join(', ');
+      var peds=c.pedidos.filter(function(p){return p.reqId===r.id});
+      return '<tr><td class="mono"><b>'+esc(r.num)+'</b></td><td class="mono">'+fmt(r.data)+'</td><td class="dim">'+esc(ins||'—')+'</td>'+
+      '<td>'+(peds.length?peds.map(function(p){return '<span class="cp-chip mono">'+esc(p.num)+'</span>'}).join(' '):'<span class="dim">nenhum</span>')+'</td>'+
+      '<td><span class="tag '+(peds.length?'t-ok':'t-warn')+'">'+(peds.length?'com pedido':'aguardando pedido')+'</span></td>'+
+      '<td>'+docBtn(r.num)+'</td><td><button class="btn sm" onclick="cpDelReq(\''+r.id+'\')">apagar</button></td></tr>'}).join('')
+      ||'<tr><td colspan="7" class="dim">Nenhuma requisicao de compra.</td></tr>')+'</tbody></table>'+
+    '<p class="dim" style="margin-top:10px">Uma EST02 pode ter varios pedidos, um para cada fornecedor.</p></div>';
+  }
+
+  function panePedidos(){
+    var c=C(),tipos=['EST02'].concat(c.tipos);
+    return '<div class="card" style="margin-bottom:16px"><h3>Novo pedido de compra</h3>'+
+    '<div class="grid g3"><div><label>Numero do pedido</label><input id="cp-p-n" placeholder="PC-00789"/></div>'+
+    '<div><label>Categoria / origem</label><select id="cp-p-t">'+tipos.map(function(t){return '<option>'+esc(t)+'</option>'}).join('')+'</select></div>'+
+    '<div><label>Requisicao EST02 (se houver)</label><select id="cp-p-r"><option value="">— compra direta / contrato —</option>'+
+      c.reqs.map(function(r){return '<option value="'+r.id+'">'+esc(r.num)+'</option>'}).join('')+'</select></div>'+
+    '<div><label>Fornecedor</label><input id="cp-p-f"/></div>'+
+    '<div><label>Valor (R$)</label><input id="cp-p-v" type="number" step="0.01"/></div>'+
+    '<div><label>Deadline de entrega</label><input id="cp-p-dl" type="date"/></div>'+
+    '<div style="grid-column:span 2"><label>Observacao</label><input id="cp-p-o"/></div></div>'+
+    '<div class="row" style="margin-top:12px"><button class="btn primary" onclick="cpAddPedidoC()">+ Cadastrar pedido</button>'+
+    '<button class="btn" onclick="cpNovoTipo()">+ Nova categoria</button></div></div>'+
+    '<div class="card"><table><thead><tr><th>Pedido</th><th>Origem</th><th>EST02</th><th>Fornecedor</th><th>Valor</th><th>Deadline</th><th>Status</th><th>Documento</th><th></th></tr></thead><tbody>'+
+    (c.pedidos.map(function(p){
+      var r=c.reqs.find(function(x){return x.id===p.reqId});
+      var d=p.deadline?dias(p.deadline):null,alerta='';
+      if(d!==null&&p.status!=='Recebido')alerta=' <span class="tag '+(d<0?'t-err blink':d<=5?'t-warn':'t-ok')+'">'+(d<0?'atrasado '+Math.abs(d)+'d':d+'d')+'</span>';
+      return '<tr><td class="mono"><b>'+esc(p.num)+'</b></td><td><span class="tag t-info">'+esc(p.tipo)+'</span></td>'+
+      '<td class="mono dim">'+esc(r?r.num:'—')+'</td><td>'+esc(p.forn||'—')+'</td><td class="mono">R$ '+Number(p.valor||0).toFixed(2)+'</td>'+
+      '<td class="mono">'+(p.deadline?fmt(p.deadline):'—')+alerta+'</td><td>'+tagStatus(p.status||'Pendente entrega')+
+      (p.recebidoEm?'<div class="dim mono">em '+fmt(p.recebidoEm)+'</div>':'')+'</td>'+
+      '<td>'+docBtn(p.num)+'</td>'+
+      '<td><button class="btn sm" onclick="cpReceber(\''+p.id+'\')">'+(p.status==='Recebido'?'reabrir':'recebido')+'</button>'+
+      '<button class="btn sm" onclick="cpDeadline(\''+p.id+'\')">prazo</button>'+
+      '<button class="btn sm" onclick="cpDelPedidoC(\''+p.id+'\')">apagar</button></td></tr>'}).join('')
+      ||'<tr><td colspan="9" class="dim">Nenhum pedido de compra.</td></tr>')+'</tbody></table></div>';
+  }
+
+  function paneLegado(){
+    var s=window.state;
+    return '<div class="card"><h3>Pedidos simples (registro antigo)</h3><p class="dim">Mantido para nao perder os pedidos ja cadastrados no formato anterior.</p>'+
+    '<table><thead><tr><th>No</th><th>Fornecedor</th><th>Valor</th><th>Prazo</th><th>Status</th><th></th></tr></thead><tbody>'+
+    ((s.pedidos||[]).map(function(p){return '<tr><td class="mono">'+esc(p.numero)+'</td><td>'+esc(p.forn||'')+'</td>'+
+      '<td class="mono">R$ '+Number(p.valor||0).toFixed(2)+'</td><td class="mono">'+fmt(p.prazo)+'</td><td>'+esc(p.status||'')+'</td>'+
+      '<td><button class="btn sm" onclick="del(\'pedidos\',\''+p.id+'\')">apagar</button></td></tr>'}).join('')
+      ||'<tr><td colspan="6" class="dim">Nenhum registro antigo.</td></tr>')+'</tbody></table></div>';
+  }
+
+  window.vPedidos=function(){
+    var c=C(),ab=CP.aba;
+    var abas=[['lista','1 · Lista previa ('+c.lista.filter(function(i){return i.status!=='requisitado'}).length+')'],
+      ['internas','2 · Requisicoes internas ('+c.internas.length+')'],
+      ['reqs','3 · Requisicoes de compra ('+c.reqs.length+')'],
+      ['pedidos','4 · Pedidos de compra ('+c.pedidos.length+')'],
+      ['legado','Pedidos simples']];
+    var al=window.comprasAlertas();
+    var aviso=al.length?'<div class="card" style="margin-bottom:14px"><h3>Cobrancas de entrega</h3>'+
+      al.map(function(a){return '<div class="row" style="gap:8px;margin:6px 0"><span class="tag '+(a.t==='err'?'t-err blink':'t-warn')+'">'+(a.t==='err'?'urgente':'atencao')+'</span><span>'+esc(a.m)+'</span></div>'}).join('')+'</div>':'';
+    return page('Compras — Requisicoes e Pedidos',
+      'Fluxo completo: lista previa livre, requisicao interna EST01/EST04, requisicao de compra EST02, pedidos de compra vinculados ou diretos (COMP01, COMP01 PT e outros), com link para o documento interno e deadline de entrega com alerta.',
+      '<div class="cp-flow"><span class="cp-chip">Lista previa</span><b>&rsaquo;</b><span class="cp-chip">EST01 / EST04</span><b>&rsaquo;</b>'+
+      '<span class="cp-chip">EST02</span><b>&rsaquo;</b><span class="cp-chip">Pedido(s) de compra</span><b>&rsaquo;</b><span class="cp-chip">Entrega</span></div>'+
+      aviso+
+      '<div id="cp-abas">'+abas.map(function(a){return '<button class="cp-aba '+(a[0]===ab?'on':'')+'" data-k="'+a[0]+'" onclick="cpAba(\''+a[0]+'\')">'+a[1]+'</button>'}).join('')+'</div>'+
+      '<div class="cp-pane '+(ab==='lista'?'on':'')+'" data-k="lista">'+paneLista()+'</div>'+
+      '<div class="cp-pane '+(ab==='internas'?'on':'')+'" data-k="internas">'+paneInternas()+'</div>'+
+      '<div class="cp-pane '+(ab==='reqs'?'on':'')+'" data-k="reqs">'+paneReqs()+'</div>'+
+      '<div class="cp-pane '+(ab==='pedidos'?'on':'')+'" data-k="pedidos">'+panePedidos()+'</div>'+
+      '<div class="cp-pane '+(ab==='legado'?'on':'')+'" data-k="legado">'+paneLegado()+'</div>');
+  };
+  window.vCompras=window.vPedidos;
+  try{ALIAS_TELA.compras='pedidos';ALIAS_TELA.requisicoes='pedidos';ALIAS_TELA.lista='pedidos'}catch(e){}
+
+  /* ---------- JARVIS ---------- */
+  window.comprasResumo=function(){
+    var c=C(),L=function(a,f){return a.slice(0,25).map(f).join('\n')||'nenhum'};
+    return 'COMPRAS · LISTA PREVIA ('+c.lista.length+'):\n'+L(c.lista,function(i){return '- '+i.desc+' '+i.qtd+' '+(i.un||'')+' ['+i.status+']'})+
+    '\nREQUISICOES INTERNAS ('+c.internas.length+'):\n'+L(c.internas,function(i){return '- '+i.num+' '+i.cat+' itens:'+(i.itens||[]).length+' EST02:'+(i.est02||'-')})+
+    '\nREQUISICOES DE COMPRA EST02 ('+c.reqs.length+'):\n'+L(c.reqs,function(r){return '- '+r.num+' internas:'+(r.internas||[]).length})+
+    '\nPEDIDOS DE COMPRA ('+c.pedidos.length+'):\n'+L(c.pedidos,function(p){return '- '+p.num+' ('+p.tipo+') '+(p.forn||'')+' deadline '+(p.deadline||'-')+' '+(p.status||'')});
+  };
+  var _sys=window.jvSystem;
+  window.jvSystem=function(){
+    var base=''; try{base=_sys()}catch(e){}
+    return base+'\n\n=== MODULO DE COMPRAS ===\n'+
+    'Fluxo: lista previa (livre) -> requisicao interna EST01/EST04 -> requisicao de compra EST02 -> pedido(s) de compra.\n'+
+    'Uma EST02 pode ter varios pedidos (fornecedores diferentes). Existem tambem pedidos diretos/contrato: COMP01, COMP01 PT e outras categorias.\n'+
+    'Acoes extras que voce pode usar no bloco json:\n'+
+    'add_lista_compra {desc,qtd,un,cat,obs} (pode repetir para varios itens),\n'+
+    'add_req_interna {numero,categoria:"EST01|EST04",data,setor,obs,itens:["descricao1","descricao2"]} (os itens sao casados por descricao com a lista previa, e criados se nao existirem),\n'+
+    'add_req_compra {numero,data,internas:["EST01-000123"],obs},\n'+
+    'add_pedido_compra {numero,categoria:"EST02|COMP01|COMP01 PT|...",req:"EST02-000456",fornecedor,valor,deadline:"AAAA-MM-DD",obs}.\n'+
+    'Use ir_para {"tela":"pedidos"} para abrir a tela de Compras.\n\n'+window.comprasResumo();
+  };
+  var _ac=window.jvAcoes;
+  window.jvAcoes=function(txt){
+    var m=txt.match(/```json([\s\S]*?)```/i),extra=[];
+    if(m){
+      var obj={}; try{obj=JSON.parse(m[1].trim())}catch(e){obj={}}
+      var c=C();
+      (obj.acoes||[]).forEach(function(a){
+        try{
+          if(a.tipo==='add_lista_compra'){
+            c.lista.push({id:u(),desc:a.desc||'item',qtd:a.qtd||'1',un:a.un||'UN',cat:a.cat||'',obs:a.obs||'via JARVIS',status:'pendente',em:Date.now()});
+            extra.push('Lista previa: '+(a.desc||''));
+          }else if(a.tipo==='add_req_interna'){
+            var ids=[];
+            (a.itens||[]).forEach(function(d){
+              var ex=c.lista.find(function(x){return (x.desc||'').toLowerCase()===String(d).toLowerCase()});
+              if(!ex){ex={id:u(),desc:String(d),qtd:'1',un:'UN',cat:'',obs:'via JARVIS',status:'pendente',em:Date.now()};c.lista.push(ex)}
+              ex.status='requisitado';ex.req=a.numero||'';ids.push(ex.id);
+            });
+            c.internas.push({id:u(),num:a.numero||'-',cat:a.categoria||'EST01',data:a.data||hoje(),setor:a.setor||'',obs:a.obs||'',itens:ids,status:'aberta',em:Date.now()});
+            extra.push('Requisicao interna: '+(a.numero||''));
+          }else if(a.tipo==='add_req_compra'){
+            var ints=[];
+            (a.internas||[]).forEach(function(n){var x=c.internas.find(function(y){return (y.num||'')===String(n)});if(x){ints.push(x.id);x.est02=a.numero||'';x.status='em requisicao'}});
+            c.reqs.push({id:u(),num:a.numero||'-',cat:'EST02',data:a.data||hoje(),internas:ints,obs:a.obs||'',status:'aberta',em:Date.now()});
+            extra.push('Requisicao de compra: '+(a.numero||''));
+          }else if(a.tipo==='add_pedido_compra'){
+            var r=c.reqs.find(function(x){return (x.num||'')===String(a.req||'')});
+            c.pedidos.push({id:u(),num:a.numero||'-',tipo:a.tipo_pedido||a.categoria||a.tipo_compra||(r?'EST02':'COMP01'),reqId:r?r.id:'',
+              forn:a.fornecedor||'',valor:a.valor||'',deadline:a.deadline||'',status:'Pendente entrega',obs:a.obs||'',em:Date.now()});
+            extra.push('Pedido de compra: '+(a.numero||''));
+          }
+        }catch(e){}
+      });
+      if(extra.length){try{save(true)}catch(e){}}
     }
-    fechaTodos();
-    var l=document.getElementById('lupa');
-    if(l&&l.classList.contains('open')&&t.id==='lupa') fechaLupa();
-  }, true);
+    var base={limpo:txt,feitas:[]};
+    try{base=_ac(txt)}catch(e){}
+    return {limpo:base.limpo,feitas:(base.feitas||[]).concat(extra)};
+  };
 
-  document.addEventListener('keydown', function(e){
-    var l=document.getElementById('lupa');
-    if(e.key==='Escape'&&l&&l.classList.contains('open')){ fechaLupa(); return }
-    if(e.key==='F3'||((e.ctrlKey||e.metaKey)&&(e.key==='k'||e.key==='K'))){ e.preventDefault(); abreLupa() }
-  }, true);
+  console.log('[MODESK v4] modulo de compras carregado');
+})();
+</script>
 
-  console.log('[MODESK v5] rail clicavel + lupa acima dos paineis');
+<style id="mdk-v5-css">
+.v5-drop{border:2px dashed rgba(255,255,255,.25);border-radius:12px;padding:18px;text-align:center;cursor:pointer;font-size:12.5px;transition:.15s}
+.v5-drop.on{border-color:var(--acc,#ef1427);background:rgba(239,20,39,.10)}
+.v5-drop img{max-height:150px;border-radius:10px;margin-top:10px;display:block;margin-left:auto;margin-right:auto}
+.v5-thumb{width:54px;height:54px;object-fit:cover;border-radius:8px;cursor:zoom-in;border:1px solid rgba(255,255,255,.15)}
+.v5-nofoto{width:54px;height:54px;border-radius:8px;display:flex;align-items:center;justify-content:center;border:1px dashed rgba(255,255,255,.2);font-size:16px;opacity:.5}
+.v5-docrow{display:flex;gap:10px;align-items:center;padding:7px 9px;border-radius:9px;border:1px solid rgba(255,255,255,.10);margin-bottom:6px;cursor:pointer;font-size:12.3px}
+.v5-docrow:hover{border-color:var(--acc,#ef1427);background:rgba(239,20,39,.08)}
+</style>
+<script id="mdk-v5-js">
+/* ============ MODESK v5 ============================================
+   1) Pasta fixa dos PDFs de pedidos/requisicoes (mapeamento + vinculo)
+   2) Cadastro dos itens da sala de som (foto, ficha patrimonial, edicao)
+      + botao "esta acabando" que joga o item na lista previa de compras
+==================================================================== */
+(function(){
+  /* ---------------- utilidades locais ---------------- */
+  function S(){return window.state}
+  function C(){var s=S();if(!s.compras)s.compras={};var c=s.compras;
+    c.lista=c.lista||[];c.internas=c.internas||[];c.reqs=c.reqs||[];c.pedidos=c.pedidos||[];c.docs=c.docs||{};
+    c.tipos=(c.tipos&&c.tipos.length)?c.tipos:['COMP01','COMP01 PT','Compra direta','Contrato'];return c}
+  function hoje(){return new Date().toISOString().slice(0,10)}
+  function val(id,d){var e=$(id);return e?String(e.value||'').trim():(d||'')}
+
+  /* =========== 1. PASTA DOS DOCUMENTOS DE COMPRA =========== */
+  var CPD={h:null,arquivos:[],lendo:false,em:0};
+  window.CPD=CPD;
+
+  function idbDoc(k,v){ /* wrapper sobre o idb ja existente */
+    return (v===undefined)?idbGet(k):idbSet(k,v);
+  }
+
+  async function cpdIndexar(silencioso){
+    if(!CPD.h)return [];
+    CPD.lendo=true; var out=[];
+    async function varrer(dir,base,nivel){
+      if(nivel>6||out.length>4000)return;
+      try{ for await(const par of dir.entries()){
+        var nome=par[0],h=par[1];
+        if(h.kind==='directory'){await varrer(h,base+nome+'/',nivel+1);continue}
+        out.push({nome:nome,caminho:base+nome,h:h});
+      } }catch(e){}
+    }
+    await varrer(CPD.h,'',0);
+    CPD.arquivos=out; CPD.lendo=false; CPD.em=Date.now();
+    if(!silencioso)toast(out.length+' arquivo(s) lidos na pasta de documentos');
+    return out;
+  }
+  window.cpdIndexar=cpdIndexar;
+
+  window.cpdConectarPasta=async function(){
+    if(!window.showDirectoryPicker)return toast('Use o Chrome ou o Edge no computador');
+    try{
+      var h=await window.showDirectoryPicker({mode:'read'});
+      CPD.h=h; await idbDoc('compras-docs',h);
+      var c=C(); c.pastaDocs={nome:h.name,em:Date.now()};
+      try{ if(window.EXP&&!EXP.roots.some(function(r){return r.nome===h.name}))EXP.roots.push({h:h,nome:h.name,livre:true}) }catch(e){}
+      await cpdIndexar(true);
+      try{save(true)}catch(e){}
+      toast('Pasta de documentos conectada: '+h.name+' ('+CPD.arquivos.length+' arquivos)');
+      try{render()}catch(e){}
+    }catch(e){}
+  };
+
+  window.cpdReconectar=async function(pedir){
+    try{ var h=await idbDoc('compras-docs'); if(!h)return;
+      var p=await h.queryPermission({mode:'read'});
+      if(p!=='granted'&&pedir)p=await h.requestPermission({mode:'read'});
+      if(p!=='granted'){ if(pedir)toast('Permissao negada para a pasta de documentos'); return }
+      CPD.h=h; await cpdIndexar(true);
+      if(pedir){toast('Pasta reconectada: '+CPD.arquivos.length+' arquivos');try{render()}catch(e){}}
+    }catch(e){}
+  };
+  window.cpdAtualizar=async function(){ if(!CPD.h)return window.cpdConectarPasta(); await cpdIndexar(); try{render()}catch(e){} };
+
+  function normal(x){return String(x||'').replace(/[\s_\-.]/g,'').toLowerCase()}
+  window.cpdBuscar=function(num,limite){
+    var alvo=normal(num); if(!alvo)return [];
+    return CPD.arquivos.filter(function(a){return normal(a.nome).indexOf(alvo)>=0}).slice(0,limite||20);
+  };
+
+  /* vincula automaticamente pelo numero, ou abre a lista para escolher */
+  window.cpdVincular=async function(num){
+    if(!CPD.h){ toast('Conecte primeiro a pasta dos documentos'); return window.cpdConectarPasta() }
+    if(!CPD.arquivos.length)await cpdIndexar(true);
+    var a=window.cpdBuscar(num,20);
+    if(a.length===1){ C().docs[num]={nome:a[0].nome,caminho:a[0].caminho,em:Date.now(),qtd:1,pasta:CPD.h.name};
+      try{save(true)}catch(e){} toast('Documento vinculado: '+a[0].nome); return render() }
+    window.cpdEscolher(num,a.length?a:CPD.arquivos.slice(0,400));
+  };
+
+  window.cpdEscolher=function(num,lista){
+    var html='<h2>Vincular documento ao numero '+esc(num)+'</h2>'+
+      '<p class="dim">Clique no arquivo da pasta que corresponde a este pedido/requisicao.</p>'+
+      '<input id="cpd-busca" placeholder="filtrar pelo nome do arquivo" oninput="cpdFiltrarModal(\''+esc(num)+'\')" style="margin-bottom:10px"/>'+
+      '<div id="cpd-lista" style="max-height:380px;overflow:auto">'+linhasDoc(num,lista)+'</div>';
+    modal(html);
+    window.__cpdBase=lista;
+  };
+  function linhasDoc(num,lista){
+    if(!lista.length)return '<div class="dim">Nenhum arquivo encontrado na pasta.</div>';
+    return lista.map(function(a){
+      return '<div class="v5-docrow" onclick="cpdConfirmar(\''+esc(num)+'\',\''+esc(a.caminho).replace(/'/g,"\\'")+'\')">'+
+        '<span>'+(/\.pdf$/i.test(a.nome)?'PDF':'DOC')+'</span><div style="min-width:0"><b>'+esc(a.nome)+'</b>'+
+        '<div class="mono dim" style="font-size:10.8px">'+esc(a.caminho)+'</div></div></div>';
+    }).join('');
+  }
+  window.cpdFiltrarModal=function(num){
+    var q=normal(($('cpd-busca')||{}).value||'');
+    var base=window.__cpdBase||CPD.arquivos;
+    var f=q?base.filter(function(a){return normal(a.nome).indexOf(q)>=0}).slice(0,400):base.slice(0,400);
+    var el=$('cpd-lista'); if(el)el.innerHTML=linhasDoc(num,f);
+  };
+  window.cpdConfirmar=function(num,caminho){
+    var a=CPD.arquivos.find(function(x){return x.caminho===caminho}); if(!a)return toast('Arquivo nao encontrado');
+    C().docs[num]={nome:a.nome,caminho:a.caminho,em:Date.now(),qtd:1,pasta:CPD.h?CPD.h.name:''};
+    try{save(true)}catch(e){} closeModal(); toast('Documento vinculado: '+a.nome); render();
+  };
+
+  /* abre o PDF vinculado dentro do proprio sistema */
+  var abrirAntigo=window.cpAbrirDoc;
+  window.cpAbrirDoc=async function(num){
+    var d=C().docs[num],alvo=null;
+    if(!CPD.h)await window.cpdReconectar(true);
+    if(CPD.h){
+      if(!CPD.arquivos.length)await cpdIndexar(true);
+      if(d&&d.caminho)alvo=CPD.arquivos.find(function(x){return x.caminho===d.caminho});
+      if(!alvo){var b=window.cpdBuscar(num,1);if(b.length)alvo=b[0]}
+    }
+    if(!alvo)return abrirAntigo?abrirAntigo(num):toast('Arquivo nao encontrado — atualize a pasta de documentos');
+    var f=await alvo.h.getFile(),url=URL.createObjectURL(f),ext=(alvo.nome.split('.').pop()||'').toLowerCase(),inner='';
+    if((f.type||'').indexOf('image')===0)inner='<img src="'+url+'" class="viewer" style="object-fit:contain"/>';
+    else if(ext==='pdf')inner='<iframe src="'+url+'" class="viewer" style="width:100%;height:70vh;border:0;border-radius:10px"></iframe>';
+    else inner='<div class="dim">Sem previa interna para este tipo. Use baixar copia.</div>';
+    modal('<h2>'+esc(alvo.nome)+'</h2><div class="row" style="margin:8px 0"><span class="tag mono">'+esc(alvo.caminho)+'</span>'+
+      '<a class="btn sm" href="'+url+'" download="'+esc(alvo.nome)+'">baixar copia</a></div>'+inner);
+  };
+  var mapearAntigo=window.cpMapearDoc;
+  window.cpMapearDoc=function(num){ if(CPD.h||C().pastaDocs)return window.cpdVincular(num); return mapearAntigo?mapearAntigo(num):window.cpdConectarPasta() };
+
+  /* revincula tudo de uma vez usando a pasta fixa */
+  window.cpdRevincularTudo=async function(){
+    if(!CPD.h)return window.cpdConectarPasta();
+    if(!CPD.arquivos.length)await cpdIndexar(true);
+    var c=C(),nums=[],n=0;
+    c.internas.forEach(function(i){if(i.num)nums.push(i.num)});
+    c.reqs.forEach(function(r){if(r.num)nums.push(r.num)});
+    c.pedidos.forEach(function(p){if(p.num)nums.push(p.num)});
+    nums.forEach(function(num){var a=window.cpdBuscar(num,1);if(a.length){c.docs[num]={nome:a[0].nome,caminho:a[0].caminho,em:Date.now(),qtd:1,pasta:CPD.h.name};n++}});
+    try{save(true)}catch(e){} toast(n+' documento(s) vinculado(s) automaticamente'); render();
+  };
+
+  /* cartao da pasta, exibido no topo da tela de Pedidos de Compra */
+  function cardPasta(){
+    var c=C(),p=c.pastaDocs,sup=!!window.showDirectoryPicker;
+    var pdfs=CPD.arquivos.filter(function(a){return /\.pdf$/i.test(a.nome)}).length;
+    return '<div class="card" style="margin-bottom:16px"><div class="row" style="justify-content:space-between;align-items:center">'+
+      '<h3>Pasta dos documentos (PDFs de pedidos e requisicoes)</h3>'+
+      '<span class="tag '+(CPD.h?'t-ok':'t-warn')+'">'+(CPD.h?'conectada':(p?'precisa liberar':'nao configurada'))+'</span></div>'+
+      '<p class="dim">Escolha uma unica vez a pasta do PC onde ficam os PDFs. O sistema le os nomes dos arquivos e vincula cada pedido/requisicao pelo numero — e abre o PDF aqui dentro.</p>'+
+      (p?'<div class="row" style="margin:8px 0"><span class="tag mono">'+esc(p.nome)+'</span>'+
+         '<span class="tag mono">'+CPD.arquivos.length+' arquivos · '+pdfs+' PDFs</span></div>':'')+
+      '<div class="row" style="margin-top:10px">'+
+      '<button class="btn primary" onclick="cpdConectarPasta()">'+(p?'Trocar pasta':'Escolher pasta do PC')+'</button>'+
+      '<button class="btn" onclick="cpdReconectar(true)">Liberar acesso</button>'+
+      '<button class="btn" onclick="cpdAtualizar()">Atualizar lista de arquivos</button>'+
+      '<button class="btn" onclick="cpdRevincularTudo()">Vincular todos pelo numero</button></div>'+
+      (sup?'':'<p class="dim" style="margin-top:8px;color:var(--acc3)">Este navegador nao permite ler pastas. Abra no Chrome ou Edge do computador.</p>')+
+      '</div>';
+  }
+
+  var vPedAntigo=window.vPedidos;
+  window.vPedidos=function(){
+    var html=vPedAntigo?vPedAntigo():'';
+    var i=html.indexOf('<div id="cp-abas"');
+    if(i<0)return cardPasta()+html;
+    return html.slice(0,i)+cardPasta()+html.slice(i);
+  };
+
+  /* =========== 2. ITENS DA SALA DE SOM =========== */
+  var IT={edit:null,foto:''};
+  window.ITSOM=IT;
+
+  function itens(){var s=S();s.itens=s.itens||[];return s.itens}
+
+  function comprimir(file){
+    return new Promise(function(ok){
+      var r=new FileReader();
+      r.onload=function(){
+        var img=new Image();
+        img.onload=function(){
+          var m=900,w=img.width,h=img.height;
+          if(w>m||h>m){var k=Math.min(m/w,m/h);w=Math.round(w*k);h=Math.round(h*k)}
+          var cv=document.createElement('canvas');cv.width=w;cv.height=h;
+          cv.getContext('2d').drawImage(img,0,0,w,h);
+          ok(cv.toDataURL('image/jpeg',0.72));
+        };
+        img.onerror=function(){ok('')};
+        img.src=r.result;
+      };
+      r.onerror=function(){ok('')};
+      r.readAsDataURL(file);
+    });
+  }
+
+  window.itsFoto=async function(file){
+    if(!file||!/^image\//.test(file.type||''))return toast('Arquivo nao e uma imagem');
+    var d=await comprimir(file); if(!d)return toast('Nao consegui ler a imagem');
+    IT.foto=d; pintarFoto(); toast('Foto anexada');
+  };
+  function pintarFoto(){
+    var z=$('its-drop'); if(!z)return;
+    z.innerHTML=IT.foto
+      ? '<b>Foto anexada</b><div class="dim">clique, arraste outra ou cole (Ctrl+V) para trocar</div><img src="'+IT.foto+'"/>'
+      : '<b>Arraste a foto aqui</b><div class="dim">ou clique para escolher · ou cole com Ctrl+V</div>';
+  }
+  window.itsLimparFoto=function(){IT.foto='';pintarFoto();};
+
+  function ligarDrop(){
+    var z=$('its-drop'); if(!z)return;
+    pintarFoto();
+    z.onclick=function(){var i=document.createElement('input');i.type='file';i.accept='image/*';
+      i.onchange=function(){if(i.files[0])window.itsFoto(i.files[0])};i.click()};
+    z.ondragover=function(e){e.preventDefault();z.classList.add('on')};
+    z.ondragleave=function(){z.classList.remove('on')};
+    z.ondrop=function(e){e.preventDefault();z.classList.remove('on');
+      var f=e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0]; if(f)window.itsFoto(f)};
+  }
+  /* colar com Ctrl+V em qualquer lugar da tela de itens */
+  document.addEventListener('paste',function(e){
+    if(window.tab!=='itens'&&(typeof tab==='undefined'||tab!=='itens'))return;
+    var it=(e.clipboardData||{}).items||[];
+    for(var i=0;i<it.length;i++){ if(it[i].type&&it[i].type.indexOf('image')===0){
+      var f=it[i].getAsFile(); if(f){e.preventDefault();window.itsFoto(f)} return } }
+  });
+
+  window.itsSalvar=function(){
+    var nome=val('its-nome'); if(!nome)return toast('Informe o nome do item');
+    var reg={
+      nome:nome, desc:val('its-desc'), qtd:val('its-qtd','1')||'1', un:val('its-un','UN')||'UN',
+      local:val('its-local','Sala de som')||'Sala de som', cat:val('its-cat'),
+      patr:val('its-patr','Nao')==='Sim', patrNum:val('its-patrn'), min:val('its-min'),
+      obs:val('its-obs'), foto:IT.foto||''
+    };
+    var lista=itens();
+    if(IT.edit){
+      var x=lista.find(function(y){return y.id===IT.edit});
+      if(x){ Object.keys(reg).forEach(function(k){ if(k!=='foto'||reg.foto)x[k]=reg[k] }); x.desc=reg.desc; }
+      IT.edit=null; IT.foto=''; try{save()}catch(e){} return toast('Item atualizado');
+    }
+    reg.id=u(); reg.em=Date.now();
+    lista.push(reg); IT.foto='';
+    try{save()}catch(e){} toast('Item cadastrado');
+  };
+  window.itsEditar=function(id){
+    var x=itens().find(function(y){return y.id===id}); if(!x)return;
+    IT.edit=id; IT.foto=x.foto||''; render();
+    setTimeout(function(){ window.scrollTo({top:0,behavior:'smooth'}) },60);
+  };
+  window.itsCancelar=function(){IT.edit=null;IT.foto='';render()};
+  window.itsExcluir=function(id){
+    if(!confirm('Excluir este item do inventario?'))return;
+    var s=S(); s.itens=itens().filter(function(y){return y.id!==id});
+    if(IT.edit===id){IT.edit=null;IT.foto=''}
+    try{save()}catch(e){} toast('Item excluido');
+  };
+  window.itsVerFoto=function(id){
+    var x=itens().find(function(y){return y.id===id}); if(!x||!x.foto)return;
+    modal('<h2>'+esc(x.nome||x.desc||'Item')+'</h2><img src="'+x.foto+'" style="max-width:100%;border-radius:12px"/>');
+  };
+  /* botao "esta acabando" -> lista previa de compras */
+  window.itsAcabando=function(id){
+    var x=itens().find(function(y){return y.id===id}); if(!x)return;
+    var q=prompt('Quantidade a pedir de "'+(x.nome||x.desc)+'":', x.min||x.qtd||'1');
+    if(q===null)return; q=String(q).trim()||'1';
+    var c=C();
+    c.lista.push({id:u(),desc:(x.nome||'')+(x.desc?' — '+x.desc:''),qtd:q,un:x.un||'UN',
+      cat:x.cat||'Sala de som',obs:'reposicao do inventario'+(x.patrNum?' · patrimonio '+x.patrNum:''),
+      status:'pendente',em:Date.now(),itemId:x.id});
+    x.pedidoEm=hoje();
+    try{save(true)}catch(e){}
+    toast(q+' × '+(x.nome||x.desc)+' foi para a lista previa de compras');
+    try{render()}catch(e){}
+  };
+  window.itsIrCompras=function(){ try{ if(window.CP)CP.aba='lista' }catch(e){} go('pedidos') };
+
+  window.vItens=function(){
+    var lista=itens(), ed=IT.edit?lista.find(function(y){return y.id===IT.edit}):null;
+    var f=ed||{};
+    var corpo=
+    '<div class="grid g2">'+
+     '<div class="card"><h3>'+(ed?'Editar item':'Novo item da sala de som')+'</h3>'+
+      '<div class="grid g2">'+
+      '<div style="grid-column:span 2"><label>Nome do item</label><input id="its-nome" value="'+esc(f.nome||'')+'" placeholder="Ex.: Microfone sem fio Shure"/></div>'+
+      '<div style="grid-column:span 2"><label>Descricao</label><textarea id="its-desc" rows="2" placeholder="modelo, cor, detalhes, estado">'+esc(f.desc||'')+'</textarea></div>'+
+      '<div><label>Quantidade</label><input id="its-qtd" type="number" value="'+esc(f.qtd||'1')+'"/></div>'+
+      '<div><label>Unidade</label><input id="its-un" value="'+esc(f.un||'UN')+'"/></div>'+
+      '<div><label>Tem ficha patrimonial?</label><select id="its-patr"><option'+(f.patr?' selected':'')+'>Sim</option><option'+(f.patr?'':' selected')+'>Nao</option></select></div>'+
+      '<div><label>Numero do patrimonio</label><input id="its-patrn" value="'+esc(f.patrNum||'')+'" placeholder="se houver"/></div>'+
+      '<div><label>Local</label><input id="its-local" value="'+esc(f.local||'Sala de som')+'"/></div>'+
+      '<div><label>Categoria</label><input id="its-cat" value="'+esc(f.cat||'')+'" placeholder="Audio, cabos, TI..."/></div>'+
+      '<div><label>Estoque minimo</label><input id="its-min" value="'+esc(f.min||'')+'" placeholder="avisar abaixo de"/></div>'+
+      '<div><label>Observacao</label><input id="its-obs" value="'+esc(f.obs||'')+'"/></div>'+
+      '</div>'+
+      '<div style="margin-top:12px"><label>Foto do item</label><div id="its-drop" class="v5-drop"></div>'+
+      '<div class="row" style="margin-top:8px"><button class="btn sm" onclick="itsLimparFoto()">remover foto</button></div></div>'+
+      '<div class="row" style="margin-top:14px"><button class="btn primary" onclick="itsSalvar()">'+(ed?'Salvar alteracoes':'+ Cadastrar item')+'</button>'+
+      (ed?'<button class="btn" onclick="itsCancelar()">cancelar edicao</button>':'')+
+      '<button class="btn" onclick="itsIrCompras()">ver lista previa de compras</button></div>'+
+     '</div>'+
+     '<div class="card"><h3>Importar planilha (CSV / XLSX)</h3>'+
+      '<p class="dim">Reconhece automaticamente as colunas: descricao, quantidade, unidade, categoria.</p>'+
+      '<input type="file" id="it-f" accept=".csv,text/csv,.xlsx,.xls"/>'+
+      '<div style="margin-top:12px"><button class="btn warn" onclick="importCSV()">⇪ Importar e reconhecer</button></div>'+
+      '<div id="it-prev" class="dim" style="margin-top:10px"></div>'+
+      '<h3 style="margin-top:18px">Como funciona</h3>'+
+      '<ul class="dim" style="margin:8px 0 0 16px;line-height:1.7;font-size:12.3px">'+
+      '<li>Foto: arraste o arquivo, clique na area ou cole com <b>Ctrl+V</b>.</li>'+
+      '<li>Clique em <b>editar</b> na tabela para alterar qualquer item.</li>'+
+      '<li>Em <b>acabando</b>, informe a quantidade e o item entra sozinho na lista previa de compras.</li></ul>'+
+     '</div>'+
+    '</div>'+
+    '<div class="card" style="margin-top:16px"><h3>Inventario <span class="badge">'+lista.length+'</span></h3>'+
+     '<table style="margin-top:10px"><thead><tr><th>Foto</th><th>Item</th><th>Qtd</th><th>Patrimonio</th><th>Local</th><th>Categoria</th><th>Acoes</th></tr></thead><tbody>'+
+     (lista.map(function(i){
+       var nome=i.nome||i.desc||'—';
+       var baixo=(i.min&&Number(i.qtd)<=Number(i.min));
+       return '<tr>'+
+        '<td>'+(i.foto?'<img src="'+i.foto+'" class="v5-thumb" onclick="itsVerFoto(\''+i.id+'\')"/>':'<div class="v5-nofoto">sem<br>foto</div>')+'</td>'+
+        '<td><b>'+esc(nome)+'</b>'+(i.nome&&i.desc?'<div class="dim">'+esc(i.desc)+'</div>':'')+
+          (i.obs?'<div class="dim" style="font-size:11px">'+esc(i.obs)+'</div>':'')+
+          (i.pedidoEm?'<div class="dim mono" style="font-size:11px">reposicao pedida em '+fmt(i.pedidoEm)+'</div>':'')+'</td>'+
+        '<td class="mono">'+esc(i.qtd||'')+' '+esc(i.un||'')+(baixo?' <span class="tag t-warn">baixo</span>':'')+'</td>'+
+        '<td>'+(i.patr?'<span class="tag t-ok">sim</span> <span class="mono dim">'+esc(i.patrNum||'')+'</span>':'<span class="tag t-info">nao</span>')+'</td>'+
+        '<td>'+esc(i.local||'—')+'</td><td>'+esc(i.cat||'—')+'</td>'+
+        '<td><button class="btn sm" onclick="itsAcabando(\''+i.id+'\')">acabando</button>'+
+        '<button class="btn sm" onclick="itsEditar(\''+i.id+'\')">editar</button>'+
+        '<button class="btn sm" onclick="itsExcluir(\''+i.id+'\')">excluir</button></td></tr>';
+     }).join('')||'<tr><td colspan="7" class="dim">Nenhum item cadastrado.</td></tr>')+
+     '</tbody></table></div>';
+    setTimeout(ligarDrop,0);
+    return page('Itens da sala de som','Nome, descricao, quantidade, ficha patrimonial e foto (arraste ou Ctrl+V). Editavel, com botao de reposicao direto para a lista previa de compras.',corpo);
+  };
+
+  /* reconecta a pasta de documentos ao abrir o sistema */
+  setTimeout(function(){ try{window.cpdReconectar(false)}catch(e){} },2500);
+  console.log('[MODESK v5] pasta de documentos + inventario da sala de som ativos');
 })();
 </script>
 
