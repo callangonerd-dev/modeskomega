@@ -8249,6 +8249,7 @@ console.log('[MODESK v80] brilho por cor · telas sem rolagem · menu arrastáve
 
   /* ---- 1) abre o proprio site numa aba nova, em modo JARVIS ---- */
   function abrirAba(){
+    if(window.__jv84){ try{ return window.jvAbrirFora() }catch(_){} }
     if(ehAba()){ try{ window.jvAbrir&&window.jvAbrir() }catch(_){} return }
     if(aba && !aba.closed){ try{ aba.focus() }catch(_){} return }
     /* v83: janela propria do JARVIS — sem abas, sem barra de endereco, sem menus */
@@ -8313,7 +8314,7 @@ console.log('[MODESK v80] brilho por cor · telas sem rolagem · menu arrastáve
     },200);
     setTimeout(function(){clearInterval(t)},15000);
   }
-  if(ehAba()){ if(document.readyState==='loading')addEventListener('DOMContentLoaded',modoAba); else modoAba(); }
+  if(!window.__jv84 && ehAba()){ if(document.readyState==='loading')addEventListener('DOMContentLoaded',modoAba); else modoAba(); }
 
   /* ---- 4) conexao viva entre a aba e o site: conversas sincronizadas ---- */
   try{
@@ -13739,6 +13740,136 @@ aside .side-actions .railmenu.open{transform:translateY(0)!important}
   if(document.body)new MutationObserver(agendar).observe(document.body,{childList:true});
   setInterval(function(){fxRotulo();criarRail()},2000);
   console.log('[MODESK v13.1] menu rail restaurado + botao de efeitos ao lado de Sair');
+})();
+</script>
+
+<script id="mdk-v84-jarvis-fora-do-site">
+/* ============ v84 · CORRECAO: JARVIS FORA DO SITE ============
+   Problemas corrigidos:
+   1) A janela externa abria na tela de login (ou totalmente preta), porque a
+      sessao nao acompanha a nova janela e o CSS do modo-aba esconde o login.
+   2) Se o navegador bloqueava o pop-up, nada acontecia.
+   3) Se o painel do JARVIS demorava a ser criado, a janela ficava preta para sempre.
+   Este bloco roda depois de todos os outros e substitui a rotina anterior. */
+(function(){
+  'use strict';
+  window.__jv84=1;
+  var MARCA='jarvis-aba';
+  var BASE=location.href.split('#')[0];
+  var janela=null;
+
+  function ehAba(){ return (location.hash||'').indexOf(MARCA)>=0 }
+  function aviso(m){ try{ toast(m) }catch(_){ console.log('[JARVIS]',m) } }
+
+  /* ---------- 1) abrir fora do site, com planos B e C ---------- */
+  function abrirFora(){
+    if(ehAba()){ try{ window.jvAbrir&&window.jvAbrir() }catch(_){} return }
+    if(janela && !janela.closed){ try{ janela.focus() }catch(_){} return }
+    var url=BASE+'#'+MARCA;
+    var w=Math.min(1220,Math.round((screen.availWidth||1280)*0.82));
+    var h=Math.min(860,Math.round((screen.availHeight||800)*0.88));
+    var l=Math.max(0,Math.round(((screen.availWidth||1280)-w)/2));
+    var t=Math.max(0,Math.round(((screen.availHeight||800)-h)/2));
+    var feat='popup=yes,width='+w+',height='+h+',left='+l+',top='+t+
+      ',menubar=no,toolbar=no,location=no,status=no,resizable=yes,scrollbars=yes';
+    try{ janela=window.open(url,'jarvisAba',feat) }catch(_){ janela=null }
+    if(!janela||janela.closed){ try{ janela=window.open(url,'_blank') }catch(_){ janela=null } } /* plano B: aba normal */
+    if(!janela||janela.closed){                                                                  /* plano C: aqui dentro */
+      aviso('O navegador bloqueou a janela. Libere pop-ups deste site — o JARVIS abriu aqui dentro.');
+      try{ window.jvAbrir&&window.jvAbrir() }catch(_){}
+      return;
+    }
+    /* a janela nova precisa da sessao liberada mesmo em file:// */
+    try{ janela.addEventListener('load',function(){ try{ janela.sessionStorage.setItem('modesk.sess','1') }catch(_){} }) }catch(_){}
+    try{ janela.focus() }catch(_){}
+    aviso('JARVIS aberto fora do site');
+  }
+  window.jvAbrirFora=window.jvPopup=window.jvPiP=window.jvAbrirAbaJarvis=abrirFora;
+  window.jvFecharPopup=window.jvVoltarParaSite=function(){ try{ janela&&janela.close() }catch(_){} janela=null };
+
+  /* os botoes antigos passam a usar esta rotina */
+  addEventListener('click',function(e){
+    var alvo=e.target&&e.target.closest?e.target.closest('#jn-pip,[data-a="pip"],[data-a="solto"],[data-a="fora"]'):null;
+    if(!alvo)return;
+    e.preventDefault(); e.stopPropagation();
+    if(e.stopImmediatePropagation)e.stopImmediatePropagation();
+    if(ehAba()){ try{ opener&&opener.focus() }catch(_){} try{ window.close() }catch(_){} return }
+    abrirFora();
+  },true);
+  addEventListener('keydown',function(e){
+    var k=(e.key||'').toLowerCase();
+    if((e.ctrlKey||e.metaKey)&&e.shiftKey&&k==='j'){
+      e.preventDefault(); e.stopPropagation();
+      if(e.stopImmediatePropagation)e.stopImmediatePropagation();
+      abrirFora();
+    }
+  },true);
+
+  /* ---------- 2) modo janela externa ---------- */
+  if(!ehAba())return;
+
+  /* libera a sessao ANTES do autoStart, senao a janela para no login escondido */
+  try{ sessionStorage.setItem('modesk.sess','1') }catch(_){}
+
+  function entrar(){
+    try{
+      var lg=document.getElementById('login'), ap=document.getElementById('app');
+      if(lg&&!lg.classList.contains('hidden')){
+        if(typeof window.start==='function') window.start();
+        else { lg.classList.add('hidden'); ap&&ap.classList.remove('hidden') }
+      }
+    }catch(_){}
+  }
+
+  function modoAba(){
+    document.documentElement.classList.add('jv-aba');
+    var st=document.createElement('style');
+    st.textContent=
+      'html.jv-aba,html.jv-aba body{margin:0;height:100%;background:#050b14;overflow:hidden}'
+      +'html.jv-aba body>*:not(#jn-win):not(#jvx):not(script):not(style):not(.toast):not(#toast):not(#toasts):not(#jv84-aguarde){display:none!important}'
+      +'html.jv-aba #jn-win{display:flex!important;position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;max-width:none!important;max-height:none!important;border-radius:0!important;transform:none!important;z-index:99999!important;opacity:1!important;visibility:visible!important}'
+      +'html.jv-aba #jn-win #jn-min{display:none!important}'
+      +'#jv84-aguarde{position:fixed;inset:0;display:grid;place-items:center;z-index:99998;color:#bfe6ff;'
+      +'font:600 14px Inter,system-ui,sans-serif;text-align:center;padding:24px;line-height:1.7}'
+      +'#jv84-aguarde button{margin-top:14px;padding:10px 18px;border-radius:999px;border:1px solid rgba(120,210,255,.35);'
+      +'background:rgba(20,45,70,.6);color:#eaf9ff;cursor:pointer;font-weight:700}';
+    document.head.appendChild(st);
+    document.title='J.A.R.V.I.S. — MODESK';
+
+    var espera=document.createElement('div');
+    espera.id='jv84-aguarde';
+    espera.innerHTML='<div><div>Carregando o J.A.R.V.I.S…</div></div>';
+    document.body.appendChild(espera);
+
+    entrar();
+
+    var tentativas=0;
+    var t=setInterval(function(){
+      tentativas++;
+      entrar();
+      try{ window.jvSync?window.jvSync.construir():0 }catch(_){}
+      var w=document.getElementById('jn-win');
+      if(w){
+        clearInterval(t);
+        try{ window.jvSync?window.jvSync.abrir():(window.jvAbrir&&window.jvAbrir()) }catch(_){}
+        w.classList.add('open');
+        var b=document.getElementById('jn-pip'); if(b)b.textContent='← voltar ao site';
+        var c=document.getElementById('jn-close');
+        if(c)c.onclick=function(){ try{opener&&opener.focus()}catch(_){} try{window.close()}catch(_){} };
+        espera.remove();
+        setTimeout(function(){ try{document.getElementById('jn-in').focus()}catch(_){} },250);
+        return;
+      }
+      if(tentativas>60){ /* ~18s: mostra saida em vez de tela preta */
+        clearInterval(t);
+        espera.innerHTML='<div><div>Nao consegui carregar o painel do JARVIS nesta janela.</div>'
+          +'<button onclick="location.hash=\'\';location.reload()">Abrir o MODESK completo aqui</button></div>';
+      }
+    },300);
+  }
+  if(document.readyState==='loading')addEventListener('DOMContentLoaded',modoAba); else modoAba();
+
+  console.log('[MODESK v84] JARVIS fora do site corrigido (sessao, pop-up bloqueado e tela preta)');
 })();
 </script>
 
