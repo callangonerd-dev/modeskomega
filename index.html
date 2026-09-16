@@ -994,7 +994,8 @@ tbody tr,.jx-empty{animation:none!important}
     <div class="side-actions">
       <button class="btn sm" onclick="exportJSON()">⬇ Backup</button>
     </div>
-    <button class="navbtn" style="margin-top:10px" onclick="logout()"><span class="ic">⏻</span>Sair</button>
+    <button class="navbtn" id="btn-fx" style="margin-top:10px" onclick="fxToggle()"><span class="ic">✦</span><span id="btn-fx-lbl">Efeitos: ligados</span></button>
+    <button class="navbtn" onclick="logout()"><span class="ic">⏻</span>Sair</button>
   </aside>
 
   <main>
@@ -13682,6 +13683,62 @@ aside .side-actions .railmenu.open{transform:translateY(0)!important}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',montar);
   montar(); setInterval(montar,900);
   console.log('[MODESK v13] Groq e ElevenLabs movidos para dentro do estudio do JARVIS');
+})();
+</script>
+
+<style id="mdk-fxbtn-css">
+/* botão Efeitos no estado desligado */
+.navbtn.fx-off{opacity:.6;border-style:dashed}
+.navbtn.fx-off .ic{filter:grayscale(1)}
+</style>
+<script id="mdk-fxbtn-rail-js">
+/* ===== v13.1 · MENU RAIL de volta + botão LIGAR/DESLIGAR EFEITOS ===== */
+(function(){
+  'use strict';
+  var KEY='modesk.v15.ui';
+  function fxLigado(){try{return JSON.parse(localStorage.getItem(KEY)||'{}').fx!==false}catch(e){return true}}
+  function fxRotulo(){
+    var on=fxLigado(),l=document.getElementById('btn-fx-lbl'),b=document.getElementById('btn-fx');
+    var txt='Efeitos: '+(on?'ligados':'desligados');
+    if(l&&l.textContent!==txt)l.textContent=txt;
+    if(b&&b.classList.contains('fx-off')!==!on)b.classList.toggle('fx-off',!on);
+  }
+  window.fxToggle=function(){
+    var s={};try{s=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){}
+    s.fx=!fxLigado();
+    try{localStorage.setItem(KEY,JSON.stringify(s))}catch(e){}
+    document.body.classList.toggle('jfx-off',!s.fx);
+    fxRotulo();
+    if(window.toast)toast('Efeitos visuais '+(s.fx?'ligados':'desligados'));
+  };
+
+  /* o #rail sumiu do arquivo — aqui ele volta a ser criado com os atalhos */
+  function ico(n){return (typeof icon==='function')?icon(n):'<span class="ui-icon"></span>'}
+  function botao(t,cont,fn){
+    var w=document.createElement('div');w.className='rwrap';
+    var b=document.createElement('button');b.title=t;b.setAttribute('aria-label',t);
+    b.innerHTML=cont+'<span class="lbl" style="display:none">'+t+'</span>';
+    b.addEventListener('click',fn);
+    w.appendChild(b);return w;
+  }
+  function criarRail(){
+    if(document.getElementById('rail'))return;
+    var app=document.getElementById('app');
+    if(!app||app.classList.contains('hidden'))return;
+    var r=document.createElement('div');r.id='rail';
+    r.appendChild(botao('Central de Interface',ico('boxes'),function(){if(window.ihubAbrir)ihubAbrir();else if(window.go)go('interface')}));
+    r.appendChild(botao('JARVIS','<span class="ui-icon" aria-hidden="true" style="display:grid;place-items:center;font-size:15px">◉</span>',function(){if(window.jvAbrir)jvAbrir()}));
+    r.appendChild(botao('Baixar HTML','<span class="ui-icon" aria-hidden="true" style="display:grid;place-items:center;font-size:14px">⬇</span>',function(){if(window.baixarHTML)baixarHTML();else if(window.exportJSON)exportJSON()}));
+    document.body.appendChild(r);
+    /* os módulos existentes (v9 / compacto) encaixam o rail na barra lateral sozinhos */
+  }
+  function boot(){fxRotulo();criarRail();}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+  var agendado=false;
+  function agendar(){if(agendado)return;agendado=true;setTimeout(function(){agendado=false;fxRotulo();criarRail()},300)}
+  if(document.body)new MutationObserver(agendar).observe(document.body,{childList:true});
+  setInterval(function(){fxRotulo();criarRail()},2000);
+  console.log('[MODESK v13.1] menu rail restaurado + botao de efeitos ao lado de Sair');
 })();
 </script>
 
