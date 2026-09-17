@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="MODESK"/>
 <meta name="theme-color" content="#03060c"/>
 <link rel="manifest" href="/manifest.webmanifest"/>
-<title>MODESK PESSOAL — Central Compacto (v18)</title>
+<title>MODESK PESSOAL — Central Compacto (v19)</title>
 <script id="mdk-v10-boot">
 /* ===== MODESK v10 · GOVERNADOR DE DESEMPENHO (carrega antes de tudo) =====
    O arquivo acumulou dezenas de rotinas repetitivas (setInterval de 600-1200ms
@@ -14509,5 +14509,122 @@ aside>#btn-fx{margin-top:6px!important}
 })();
 </script>
 
+<script id="mdk-v88-jarvis-continuidade">
+/* ============ v88 · JARVIS IGUAL E CONTINUO DENTRO E FORA DO SITE ============
+   Problema: a janela de fora (pop-up ou arquivo no computador) nao compartilha o
+   armazenamento do navegador quando o endereco e diferente (site x file://).
+   Resultado: aparencia diferente (tema/nucleo) e conversa que nao continua.
+   Solucao: ponte direta entre as duas janelas por mensagem (postMessage), que
+   funciona mesmo com enderecos diferentes. Tema, nucleo, ajustes e conversas
+   passam a ser os mesmos nos dois lados, em tempo real. */
+(function(){
+  'use strict';
+  if(window.__jv88)return; window.__jv88=1;
+
+  var JLS='modesk.jarvis.conversas.v85';
+  var PREFS=['modesk_jarvis_skin_v74','modesk_jarvis_layout_v73','modesk_jarvis_anim_v75','modesk_jarvis_edit_v75','jvx_v25'];
+  var MARCA='jarvis-aba';
+  function ehAba(){ return (location.hash||'').indexOf(MARCA)>=0 }
+  function ler(k){ try{ return localStorage.getItem(k) }catch(_){ return null } }
+  function gravar(k,v){ try{ v==null?localStorage.removeItem(k):localStorage.setItem(k,v) }catch(_){} }
+
+  /* ---------- aparencia ---------- */
+  function lerPrefs(){ var o={}; PREFS.forEach(function(k){ o[k]=ler(k) }); return o }
+  function aplicarPrefs(p){
+    if(!p)return false;
+    var mudou=false;
+    PREFS.forEach(function(k){ if(p[k]!==undefined && p[k]!==ler(k)){ gravar(k,p[k]); mudou=true } });
+    if(!mudou)return false;
+    try{ if(window.jvSkin){ window.jvSkin.aplicarTema(window.jvSkin.tema(),false); window.jvSkin.aplicarCore(window.jvSkin.core(),false) } }catch(_){}
+    try{ if(window.jvSync){ window.jvSync.pintar&&window.jvSync.pintar(); window.jvSync.pintarSide&&window.jvSync.pintarSide() } }catch(_){}
+    return true;
+  }
+
+  /* ---------- conversas ---------- */
+  function fim(t){ var m=(t&&t.msgs)||[]; var u=m[m.length-1]; return u?(u.em||0):((t&&t.em)||0) }
+  function mesclar(remoto){
+    if(!remoto||!remoto.threads)return false;
+    var local=null; try{ local=JSON.parse(ler(JLS)||'null') }catch(_){}
+    if(!local||!local.threads)local={threads:[],cfg:{},atual:remoto.atual,em:0};
+    var porId={}, mudou=false;
+    local.threads.forEach(function(t){ if(t&&t.id)porId[t.id]=t });
+    remoto.threads.forEach(function(rt){
+      if(!rt||!rt.id)return;
+      var lt=porId[rt.id];
+      if(!lt){ local.threads.push(rt); porId[rt.id]=rt; mudou=true; return }
+      var a=(rt.msgs||[]).length, b=(lt.msgs||[]).length;
+      if(a>b || (a===b && fim(rt)>fim(lt))){ lt.msgs=rt.msgs||[]; if(rt.nome)lt.nome=rt.nome; if(rt.em)lt.em=rt.em; mudou=true }
+    });
+    if(remoto.cfg){ try{ local.cfg=Object.assign(local.cfg||{},remoto.cfg) }catch(_){} }
+    if(remoto.atual && porId[remoto.atual] && remoto.atual!==local.atual && (remoto.em||0)>(local.em||0)){ local.atual=remoto.atual; mudou=true }
+    if(!mudou)return false;
+    local.em=Date.now();
+    gravar(JLS,JSON.stringify(local));
+    try{ window.jvSync && window.jvSync.carregar && window.jvSync.carregar() }catch(_){}
+    try{ window.jvJuntarConversas && window.jvJuntarConversas() }catch(_){}
+    try{ if(window.jvSync){ window.jvSync.pintarSide&&window.jvSync.pintarSide(); window.jvSync.pintar&&window.jvSync.pintar() } }catch(_){}
+    return true;
+  }
+  function conversasAtuais(){
+    var D=null; try{ D=window.jvSync&&window.jvSync.estado }catch(_){}
+    if(D&&D.threads)return {threads:(D.threads||[]).slice(-40),cfg:D.cfg,atual:D.atual,em:Date.now()};
+    try{ return JSON.parse(ler(JLS)||'null') }catch(_){ return null }
+  }
+
+  /* ---------- ponte entre janelas ---------- */
+  var pares=[];
+  function registrar(w){ if(w && pares.indexOf(w)<0)pares.push(w) }
+  function enviar(w,msg){ try{ w && !w.closed && w.postMessage(msg,'*') }catch(_){} }
+  function difundir(msg){
+    pares=pares.filter(function(w){ try{ return w && !w.closed }catch(_){ return false } });
+    pares.forEach(function(w){ enviar(w,msg) });
+    try{ if(ehAba() && window.opener && !window.opener.closed) enviar(window.opener,msg) }catch(_){}
+  }
+  function pacote(){ return {jv88:1, t:'estado', prefs:lerPrefs(), conversas:conversasAtuais()} }
+
+  addEventListener('message',function(e){
+    var d=e&&e.data; if(!d||d.jv88!==1)return;
+    if(e.source)registrar(e.source);
+    if(d.t==='ola'){ enviar(e.source,pacote()); return }
+    if(d.t!=='estado')return;
+    aplicarPrefs(d.prefs);
+    mesclar(d.conversas);
+  },false);
+
+  /* a janela de fora se apresenta ate receber resposta */
+  if(ehAba()){
+    var tentativas=0;
+    var apresentar=setInterval(function(){
+      tentativas++;
+      try{ window.opener && !window.opener.closed && enviar(window.opener,{jv88:1,t:'ola'}) }catch(_){}
+      if(tentativas>40)clearInterval(apresentar);
+    },500);
+    addEventListener('message',function(e){ if(e&&e.data&&e.data.jv88===1&&e.data.t==='estado')clearInterval(apresentar) },false);
+  }
+
+  /* qualquer janela nova aberta por esta vira um par */
+  var _open=window.open;
+  window.open=function(){
+    var w=_open.apply(window,arguments);
+    if(w){ registrar(w); setTimeout(function(){ enviar(w,pacote()) },900); setTimeout(function(){ enviar(w,pacote()) },2500) }
+    return w;
+  };
+
+  /* envia o que mudou (aparencia e conversa) a cada 1s */
+  var ultimo='';
+  setInterval(function(){
+    var p=pacote();
+    var assinatura=JSON.stringify(p.prefs)+'|'+JSON.stringify(p.conversas&&p.conversas.threads?p.conversas.threads.map(function(t){return t.id+':'+((t.msgs||[]).length)+':'+fim(t)}):[])+'|'+(p.conversas&&p.conversas.atual||'');
+    if(assinatura===ultimo)return;
+    ultimo=assinatura;
+    difundir(p);
+  },1000);
+
+  addEventListener('focus',function(){ difundir(pacote()) });
+  window.jv88Sincronizar=function(){ difundir(pacote()) };
+  console.log('[MODESK v88] JARVIS com mesma aparencia e mesma conversa dentro e fora do site');
+})();
+</script>
 </body>
+
 </html>
