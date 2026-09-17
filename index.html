@@ -977,6 +977,113 @@ aside{display:flex;flex-direction:column}
 </style>
 
 
+<!-- MODESK v62 — blocos padronizados em todas as páginas -->
+<style id="mdk-v62-blocos-padrao-global">
+:root{
+  --mdk-block-cut:13px;
+  --mdk-block-bg:linear-gradient(145deg,rgba(10,18,30,.94),rgba(5,9,18,.96));
+  --mdk-block-bg-soft:linear-gradient(145deg,rgba(12,22,36,.90),rgba(6,10,20,.94));
+  --mdk-block-line:rgba(86,200,255,.16);
+  --mdk-block-line-strong:rgba(86,200,255,.38);
+  --mdk-block-shadow:0 14px 38px rgba(0,0,0,.30),inset 0 1px 0 rgba(255,255,255,.028);
+  --mdk-block-shadow-hover:0 22px 52px rgba(0,0,0,.42),0 0 30px rgba(86,200,255,.09),inset 0 1px 0 rgba(255,255,255,.035);
+  --mdk-block-cyan:var(--tech-cyan,#56d9ff);
+  --mdk-block-red:var(--acc2,#ff2035);
+}
+
+/* Base única para todos os blocos visuais renderizados nas páginas. */
+#view :is(.card,.syscard,.pastas-card,.pastacard,.linkcard,.site-group,.site-intro,.site-help,.exp-side,.exp-main,.mn-card,.mn-slide,.lb-wrap,.jc-card,.dash-card,.kpi-card,.v20-glass,.v20-kpi,.cpv-card,.cfg-ia),
+.modal .inner{
+position: relative !important;
+    overflow: hidden;
+    isolation: isolate;
+    border-radius: 7px !important;
+    background: var(--mdk-block-bg) !important;
+    clip-path: polygon(0 0, calc(100% - var(--mdk-block-cut)) 0, 100% var(--mdk-block-cut), 100% 100%, 0 100%) !important;
+    transition: transform .28s cubic-bezier(.2, .8, .2, 1), border-color .28s ease, box-shadow .28s ease, background .28s ease !important;
+    animation: mdkBlockPadraoIn .46s cubic-bezier(.2, .75, .25, 1) both !important;
+}
+
+#view :is(.card,.syscard,.pastas-card,.pastacard,.linkcard,.site-group,.site-intro,.site-help,.exp-side,.exp-main,.mn-card,.mn-slide,.lb-wrap,.jc-card,.dash-card,.kpi-card,.v20-glass,.v20-kpi,.cpv-card,.cfg-ia)::before,
+.modal .inner::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:0;
+  pointer-events:none;
+  background:linear-gradient(118deg,rgba(86,200,255,.052),transparent 31%,rgba(255,32,53,.038));
+  opacity:.9;
+}
+
+#view :is(.card,.syscard,.pastas-card,.pastacard,.linkcard,.site-group,.site-intro,.site-help,.exp-side,.exp-main,.mn-card,.mn-slide,.lb-wrap,.jc-card,.dash-card,.kpi-card,.v20-glass,.v20-kpi,.cpv-card,.cfg-ia)::after,
+.modal .inner::after{
+  content:"";
+  position:absolute;
+  z-index:3;
+  left:0;
+  top:0;
+  width:44px;
+  height:1px;
+  pointer-events:none;
+  background:var(--mdk-block-cyan);
+  box-shadow:0 0 10px rgba(86,200,255,.76),0 0 22px rgba(86,200,255,.28);
+  opacity:.72;
+  transition:width .35s ease,opacity .35s ease;
+}
+
+#view :is(.card,.syscard,.pastas-card,.pastacard,.linkcard,.site-group,.site-intro,.site-help,.exp-side,.exp-main,.mn-card,.mn-slide,.lb-wrap,.jc-card,.dash-card,.kpi-card,.v20-glass,.v20-kpi,.cpv-card,.cfg-ia)>*,
+.modal .inner>*{position:relative;z-index:1}
+
+#view :is(.card,.syscard,.pastas-card,.pastacard,.linkcard,.site-group,.site-intro,.site-help,.exp-side,.exp-main,.mn-card,.mn-slide,.lb-wrap,.jc-card,.dash-card,.kpi-card,.v20-glass,.v20-kpi,.cpv-card,.cfg-ia):hover{
+  transform:translateY(-4px)!important;
+  border-color:var(--mdk-block-line-strong)!important;
+  box-shadow:var(--mdk-block-shadow-hover)!important;
+}
+#view :is(.card,.syscard,.pastas-card,.pastacard,.linkcard,.site-group,.site-intro,.site-help,.exp-side,.exp-main,.mn-card,.mn-slide,.lb-wrap,.jc-card,.dash-card,.kpi-card,.v20-glass,.v20-kpi,.cpv-card,.cfg-ia):hover::after,
+.modal .inner:hover::after{width:112px;opacity:.96}
+
+/* Cards de resumo e filtros seguem a mesma altura, espaçamento e entrada. */
+#view .grid.g4>.card{min-height:68px;padding:15px 16px!important;display:flex;flex-direction:column;justify-content:center;gap:4px}
+#view .grid.g3>.card,#view .grid.g2>.card{min-height:72px}
+#view :is(input,select,textarea){border-radius:8px!important;background:rgba(3,8,15,.78)!important;border-color:rgba(86,200,255,.13)!important}
+#view :is(input,select,textarea):focus{border-color:var(--mdk-block-cyan)!important;box-shadow:0 0 0 3px rgba(86,200,255,.11),0 8px 24px rgba(0,0,0,.20)!important}
+#view label{color:#8795a8!important;font-size:10.5px!important;letter-spacing:.09em!important}
+
+/* Entrada em cascata ao abrir qualquer página. */
+#view .sect>:nth-child(2){animation-delay:.035s!important}
+#view .sect>:nth-child(3){animation-delay:.07s!important}
+#view .sect>:nth-child(4){animation-delay:.105s!important}
+#view .sect>:nth-child(5){animation-delay:.14s!important}
+#view .sect>:nth-child(n+6){animation-delay:.175s!important}
+#view .grid>*:nth-child(2){animation-delay:.035s!important}
+#view .grid>*:nth-child(3){animation-delay:.07s!important}
+#view .grid>*:nth-child(4){animation-delay:.105s!important}
+#view .grid>*:nth-child(n+5){animation-delay:.14s!important}
+
+@keyframes mdkBlockPadraoIn{
+  from{opacity:0;transform:translateY(12px) scale(.992);filter:blur(3px)}
+  to{opacity:1;transform:none;filter:none}
+}
+
+/* Blocos especiais que precisam permanecer planos internamente. */
+#view .jv-futuristic .card .card,
+#view .lb-wrap .card{
+  clip-path:none!important;
+}
+#view .jv-futuristic .card .card::after,
+#view .lb-wrap .card::after{display:none!important}
+
+@media(max-width:620px){
+  :root{--mdk-block-cut:10px}
+  #view :is(.card,.syscard,.pastas-card,.pastacard,.linkcard,.site-group,.site-intro,.site-help,.exp-side,.exp-main,.mn-card,.mn-slide,.lb-wrap,.jc-card,.dash-card,.kpi-card,.v20-glass,.v20-kpi,.cpv-card,.cfg-ia):hover{transform:translateY(-2px)!important}
+  #view .grid.g4>.card{min-height:62px}
+}
+@media(prefers-reduced-motion:reduce){
+  #view :is(.card,.syscard,.pastas-card,.pastacard,.linkcard,.site-group,.site-intro,.site-help,.exp-side,.exp-main,.mn-card,.mn-slide,.lb-wrap,.jc-card,.dash-card,.kpi-card,.v20-glass,.v20-kpi,.cpv-card,.cfg-ia),
+  .modal .inner{animation:none!important;transition:none!important}
+}
+</style>
+
 </head>
 <body>
 <!-- #winbar removido (v12.3) — navegação já existe na barra lateral -->
@@ -12735,7 +12842,7 @@ aside .side-actions .railmenu.open{transform:translateY(0)!important}
 .lb-tab td{padding:7px 8px;border-bottom:1px solid rgba(255,255,255,.06);color:#dbe6ee;vertical-align:top}
 .lb-itens{max-height:52vh;overflow:auto;border:1px solid rgba(113,220,250,.14);border-radius:8px}
 .lb-itens input,.lb-itens select{width:100%;padding:6px 8px;border:1px solid rgba(113,220,250,.16);border-radius:5px;background:rgba(255,255,255,.03);color:#e7f2f8;font-size:12px}
-.lb-fotos-item{display:grid;grid-template-columns:1fr 1fr;gap:6px;min-width:210px}.lb-foto-upload{position:relative;min-height:64px;border:1px dashed rgba(113,220,250,.3);border-radius:6px;background:rgba(255,255,255,.025);display:grid;place-items:center;text-align:center;overflow:hidden;cursor:pointer}.lb-foto-upload:hover{border-color:#71dcfa;background:rgba(113,220,250,.08)}.lb-foto-upload:focus{outline:none}.lb-foto-upload.alvo{border-color:#71dcfa;border-style:solid;box-shadow:0 0 0 2px rgba(113,220,250,.35)}.lb-foto-upload input{position:absolute;inset:0;opacity:0;cursor:pointer}.lb-foto-upload img{width:100%;height:64px;object-fit:cover}.lb-foto-upload span{padding:7px 4px;color:#9fb1bf;font-size:10px;line-height:1.25}.lb-foto-upload b{display:block;color:#d7f2ff;font-size:9px;text-transform:uppercase;letter-spacing:.04em}
+.lb-fotos-item{display:grid;grid-template-columns:1fr 1fr;gap:6px;min-width:210px}.lb-foto-upload{position:relative;min-height:64px;border:1px dashed rgba(113,220,250,.3);border-radius:6px;background:rgba(255,255,255,.025);display:grid;place-items:center;text-align:center;overflow:hidden;cursor:pointer}.lb-foto-upload:hover{border-color:#71dcfa;background:rgba(113,220,250,.08)}.lb-foto-upload input{position:absolute;inset:0;opacity:0;cursor:pointer}.lb-foto-upload img{width:100%;height:64px;object-fit:cover}.lb-foto-upload span{padding:7px 4px;color:#9fb1bf;font-size:10px;line-height:1.25}.lb-foto-upload b{display:block;color:#d7f2ff;font-size:9px;text-transform:uppercase;letter-spacing:.04em}
 .lb-tag{display:inline-block;padding:3px 9px;border-radius:999px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border:1px solid currentColor}
 .lb-tag.emitido{color:#4ce7b2}.lb-tag.rascunho{color:#ffc46b}
 .lb-vazio{padding:20px;text-align:center;color:#7d8fa0;font-size:12.5px}
@@ -12817,9 +12924,7 @@ aside .side-actions .railmenu.open{transform:translateY(0)!important}
   function linhaVazia(){ return {equipamento:'',patrimonio:'',serie:'',defeito:DEFEITOS[0],solucao:SOLUCOES[0],fotoFicha:'',fotoEquipamento:''}; }
 
   function fotoCampo(i,tipo,rotulo,foto){
-    var alvo=(LB.alvo&&LB.alvo.i===i&&LB.alvo.tipo===tipo)?' alvo':'';
-    var dica=foto?'trocar foto ou Ctrl+V':'enviar foto ou Ctrl+V';
-    return '<label class="lb-foto-upload'+alvo+'" tabindex="0" data-i="'+i+'" data-tipo="'+tipo+'" title="Clique para escolher, arraste ou cole com Ctrl+V" onclick="lbAlvo('+i+',\''+tipo+'\')" onfocus="lbAlvo('+i+',\''+tipo+'\')" ondragover="event.preventDefault();this.classList.add(\'alvo\')" ondragleave="this.classList.remove(\'alvo\')" ondrop="lbSoltar(event,'+i+',\''+tipo+'\')">'+(foto?'<img src="'+foto+'" alt="'+esc(rotulo)+'"><span><b>'+rotulo+'</b>'+dica+'</span>':'<span><b>'+rotulo+'</b>'+dica+'</span>')+'<input type="file" accept="image/*" onchange="lbFoto('+i+',\''+tipo+'\',this.files[0])"></label>';
+    return '<label class="lb-foto-upload" title="Enviar '+rotulo.toLowerCase()+'">'+(foto?'<img src="'+foto+'" alt="'+esc(rotulo)+'"><span><b>'+rotulo+'</b>trocar foto</span>':'<span><b>'+rotulo+'</b>enviar foto</span>')+'<input type="file" accept="image/*" capture="environment" onchange="lbFoto('+i+',\''+tipo+'\',this.files[0])"></label>';
   }
   function comprimirFoto(file){return new Promise(function(ok){var r=new FileReader();r.onload=function(){var img=new Image();img.onload=function(){var m=1200,w=img.width,h=img.height,k=Math.min(1,m/Math.max(w,h));w=Math.round(w*k);h=Math.round(h*k);var c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);ok(c.toDataURL('image/jpeg',.78))};img.onerror=function(){ok('')};img.src=r.result};r.onerror=function(){ok('')};r.readAsDataURL(file)})}
 
@@ -12929,22 +13034,7 @@ aside .side-actions .railmenu.open{transform:translateY(0)!important}
   }
 
   window.lbItem=function(i,k,v){ var I=itensAtuais(); if(I[i])I[i][k]=v; };
-  window.lbFoto=async function(i,tipo,file){if(!file||!/^image\//.test(file.type||'')){aviso('Selecione uma imagem válida');return}var foto=await comprimirFoto(file);if(!foto){aviso('Não foi possível ler a imagem');return}var I=itensAtuais();if(I[i])I[i][tipo]=foto;LB.alvo={i:i,tipo:tipo};var tb=document.getElementById('lb-itens-tb');if(tb)tb.innerHTML=linhasItens();aviso('Foto anexada para a página 2')};
-  window.lbAlvo=function(i,tipo){ LB.alvo={i:i,tipo:tipo}; var ls=document.querySelectorAll('#lb-itens-tb .lb-foto-upload'); for(var k=0;k<ls.length;k++){ ls[k].classList.toggle('alvo', +ls[k].getAttribute('data-i')===i && ls[k].getAttribute('data-tipo')===tipo); } };
-  window.lbSoltar=function(ev,i,tipo){ ev.preventDefault(); ev.currentTarget.classList.remove('alvo'); var f=ev.dataTransfer&&ev.dataTransfer.files&&ev.dataTransfer.files[0]; if(f)window.lbFoto(i,tipo,f); };
-  if(!window.__lbPasteOn){
-    window.__lbPasteOn=true;
-    document.addEventListener('paste',function(ev){
-      var tb=document.getElementById('lb-itens-tb'); if(!tb)return;
-      var itemsCb=(ev.clipboardData&&ev.clipboardData.items)||[]; var file=null;
-      for(var k=0;k<itemsCb.length;k++){ if(itemsCb[k].kind==='file'&&/^image\//.test(itemsCb[k].type)){ file=itemsCb[k].getAsFile(); break; } }
-      if(!file)return;
-      var a=LB.alvo;
-      if(!a){ var first=tb.querySelector('.lb-foto-upload'); if(!first){aviso('Abra um laudo para colar a foto');return} a={i:+first.getAttribute('data-i'),tipo:first.getAttribute('data-tipo')}; LB.alvo=a; }
-      ev.preventDefault();
-      window.lbFoto(a.i,a.tipo,file);
-    });
-  }
+  window.lbFoto=async function(i,tipo,file){if(!file||!/^image\//.test(file.type||'')){aviso('Selecione uma imagem válida');return}var foto=await comprimirFoto(file);if(!foto){aviso('Não foi possível ler a imagem');return}var I=itensAtuais();if(I[i])I[i][tipo]=foto;var tb=document.getElementById('lb-itens-tb');if(tb)tb.innerHTML=linhasItens();aviso('Foto anexada para a página 2')};
   window.lbAddItem=function(){ itensAtuais().push(linhaVazia()); var tb=document.getElementById('lb-itens-tb'); if(tb)tb.innerHTML=linhasItens(); };
   window.lbDelItem=function(i){ var I=itensAtuais(); I.splice(i,1); if(!I.length)I.push(linhaVazia()); var tb=document.getElementById('lb-itens-tb'); if(tb)tb.innerHTML=linhasItens(); };
   window.lbBuscar=function(v){ LB.q=v||''; var tb=document.getElementById('lb-tb'); if(tb)tb.innerHTML=linhas(); };
