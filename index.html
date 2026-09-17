@@ -4277,9 +4277,41 @@ aside.ui-mode #sb-ui::-webkit-scrollbar{width:0}
 /* ---------- estado ---------- */
 const VOZES=['Kore'];
 const D={threads:[],atual:null,cfg:{model:'openai/gpt-oss-20b',ferramentas:true,falar:false}};
-function carregar(){try{const j=JSON.parse(localStorage.getItem(LS)||'{}');if(j.threads)D.threads=j.threads;if(j.cfg)Object.assign(D.cfg,j.cfg);D.atual=j.atual||null}catch(e){}
+/* v85: as conversas tem chave propria (antes dividiam a chave dos dados do
+   MODESK e uma janela apagava a outra) e sao sincronizadas entre a janela do
+   site e a janela aberta fora do site. */
+const JLS='modesk.jarvis.conversas.v85';
+let jbc=null; try{jbc=new BroadcastChannel('modesk-jarvis')}catch(e){}
+let jvStamp=0, jvAplicando=false;
+function jvPayload(){return {threads:D.threads.slice(-40),cfg:D.cfg,atual:D.atual,em:jvStamp}}
+function carregar(){
+  let j={};
+  try{j=JSON.parse(localStorage.getItem(JLS)||'{}')||{}}catch(e){j={}}
+  if(!j.threads){ /* migra do formato antigo, se existir */
+    try{const v=JSON.parse(localStorage.getItem(LS)||'{}');if(v&&v.threads)j=v}catch(e){}
+  }
+  if(j.threads)D.threads=j.threads;
+  if(j.cfg)Object.assign(D.cfg,j.cfg);
+  D.atual=j.atual||D.atual||null;
+  jvStamp=j.em||0;
   D.cfg.model=iaCfg().groqModel||'openai/gpt-oss-20b';}
-function gravar(){try{localStorage.setItem(LS,JSON.stringify({threads:D.threads.slice(-40),cfg:D.cfg,atual:D.atual}))}catch(e){}}
+function gravar(){
+  jvStamp=Date.now();
+  const p=jvPayload();
+  try{localStorage.setItem(JLS,JSON.stringify(p))}catch(e){}
+  if(!jvAplicando){try{jbc&&jbc.postMessage({t:'jv',p:p})}catch(e){}}
+}
+function jvAplicar(p){
+  if(!p||!p.threads||(p.em||0)<=jvStamp)return;
+  jvAplicando=true;
+  D.threads=p.threads; if(p.cfg)Object.assign(D.cfg,p.cfg); D.atual=p.atual||D.atual;
+  jvStamp=p.em||Date.now();
+  try{pintarSide()}catch(e){}
+  try{pintar()}catch(e){}
+  jvAplicando=false;
+}
+try{ if(jbc)jbc.onmessage=e=>{const d=e&&e.data; if(d&&d.t==='jv')jvAplicar(d.p)} }catch(e){}
+addEventListener('storage',e=>{ if(e&&e.key===JLS){try{jvAplicar(JSON.parse(e.newValue||'{}'))}catch(x){}} });
 function uid(){return Math.random().toString(36).slice(2,10)}
 function th(){let t=D.threads.find(x=>x.id===D.atual);if(!t){t={id:uid(),nome:'Nova conversa',msgs:[],em:Date.now()};D.threads.push(t);D.atual=t.id}return t}
 function chave(){ try{return String(iaCfg().groqKey||'').trim()}catch(e){return ''} }
@@ -4302,6 +4334,9 @@ Quando o usuario pedir algo do sistema, USE AS FERRAMENTAS em vez de apenas desc
 criar registros (atividade, evento, pedido, SEND, item, link, pasta, acesso remoto, arquivo),
 editar e excluir registros, marcar atividades como concluidas, buscar em todos os dados,
 abrir qualquer tela do MODESK e abrir paginas da internet (links cadastrados ou URLs).
+Para agendamentos com lista de itens/equipamentos use agendar_item (campo itens separado por ;).
+Para anexar documentos em cadastros use anexar_documento; se o usuario nao enviou o arquivo no chat nem passou um link,
+chame anexar_documento com escolher_arquivo=true para abrir o seletor de arquivos do computador.
 Datas sempre no formato AAAA-MM-DD e horas HH:MM. Se faltar um dado essencial, pergunte antes de criar.
 Depois de executar, confirme em uma frase curta o que foi feito.
 CONTEXTO ATUAL DO SISTEMA:
@@ -4333,9 +4368,32 @@ const FUNCS=[
   parameters:{type:'object',properties:{alvo:{type:'string'},feito:{type:'boolean'}},required:['alvo']}},
  {name:'excluir_registro',description:'Exclui um registro do MODESK.',
   parameters:{type:'object',properties:{secao:{type:'string'},alvo:{type:'string'}},required:['secao','alvo']}},
+ {name:'agendar_item',description:'Cria um agendamento na Agenda do MODESK, podendo incluir a lista de itens/equipamentos do agendamento.',
+  parameters:{type:'object',properties:{
+    titulo:{type:'string'},data:{type:'string',description:'AAAA-MM-DD'},hora:{type:'string',description:'HH:MM'},
+    local:{type:'string'},responsavel:{type:'string'},
+    itens:{type:'string',description:'itens/equipamentos do agendamento separados por ; (ponto e virgula)'},
+    obs:{type:'string'}},required:['titulo']}},
+ {name:'anexar_documento',description:'Anexa um documento a um cadastro existente do MODESK (pedido, item, evento, atividade, arquivo, send). Usa o arquivo enviado no chat, um link, ou abre o seletor de arquivos do computador quando escolher_arquivo=true.',
+  parameters:{type:'object',properties:{
+    secao:{type:'string',description:'pedidos|itens|eventos|atividades|arquivos|sends'},
+    alvo:{type:'string',description:'id ou parte do titulo/numero/descricao do cadastro'},
+    campo:{type:'string',description:'tipo do documento, ex.: nota, contrato, laudo, ficha'},
+    nome:{type:'string'},url:{type:'string'},
+    escolher_arquivo:{type:'boolean'}},required:['secao','alvo']}},
  {name:'abrir_link',description:'Abre uma pagina da internet em nova aba. Aceite uma URL completa ou o nome de um link ja cadastrado no MODESK.',
   parameters:{type:'object',properties:{url:{type:'string'},nome:{type:'string'}},required:[]}}
 ];
+function jvEscolherArquivo(){
+  return new Promise(res=>{
+    const i=document.createElement('input');i.type='file';i.style.display='none';
+    i.onchange=()=>{res(i.files&&i.files[0]||null);i.remove()};
+    document.body.appendChild(i);i.click();
+  });
+}
+function jvLerB64(f){
+  return new Promise(res=>{const r=new FileReader();r.onload=()=>res(String(r.result||''));r.onerror=()=>res('');r.readAsDataURL(f)});
+}
 async function exec(nome,args){
   args=args||{};
   try{
@@ -4403,6 +4461,39 @@ async function exec(nome,args){
       const fora=S[col].splice(i,1)[0];
       try{save(true);render()}catch(e){}
       return {ok:true,excluido:fora};
+    }
+    if(nome==='agendar_item'){
+      if(!Array.isArray(S.eventos))S.eventos=[];
+      const itens=String(args.itens||'').split(/[;\n]+/).map(x=>x.trim()).filter(Boolean);
+      const reg={id:(typeof u==='function'?u():uid()),titulo:args.titulo,data:args.data||'',hora:args.hora||'',
+        local:args.local||'',responsavel:args.responsavel||'',itens:itens,
+        info:[args.obs||'',itens.length?('Itens: '+itens.join(' · ')):''].filter(Boolean).join(' — ')};
+      S.eventos.push(reg);
+      try{if(typeof save==='function')save(true);if(typeof render==='function')render()}catch(e){}
+      return {ok:true,agendado:reg};
+    }
+    if(nome==='anexar_documento'){
+      const col=String(args.secao||'').toLowerCase();
+      if(!Array.isArray(S[col]))return{ok:false,erro:'secao invalida'};
+      const i=achar(col,args.alvo); if(i<0)return{ok:false,erro:'cadastro nao encontrado'};
+      const reg=S[col][i]; reg.docs=reg.docs||{};
+      const campo=String(args.campo||'documento').toLowerCase();
+      const chat=(window.__jvAnexos||[]).slice(-1)[0];
+      if(args.url){
+        reg.docs[campo]={nome:args.nome||args.url,link:args.url,em:Date.now()};
+      }else if(chat&&!args.escolher_arquivo){
+        reg.docs[campo]={nome:chat.nome||args.nome||'documento',tipo:chat.mime||'',em:Date.now(),
+          dados:chat.b64?('data:'+(chat.mime||'application/octet-stream')+';base64,'+chat.b64):'',
+          texto:chat.texto||''};
+      }else{
+        const f=await jvEscolherArquivo();
+        if(!f)return{ok:false,erro:'nenhum arquivo escolhido'};
+        const grande=f.size>1200000;
+        reg.docs[campo]={nome:f.name,tipo:f.type||'',tam:f.size,em:Date.now(),
+          dados:grande?'':await jvLerB64(f),aviso:grande?'arquivo grande: guardei apenas a referencia':''};
+      }
+      try{if(typeof save==='function')save(true);if(typeof render==='function')render()}catch(e){}
+      return {ok:true,secao:col,cadastro:reg.id,campo:campo,documento:reg.docs[campo].nome};
     }
     if(nome==='abrir_link'){
       let url=String(args.url||'').trim();
@@ -4474,6 +4565,7 @@ async function enviar(texto){
   if(!texto&&!anexos.length)return;
   t.msgs.push({role:'user',text:texto,anexos:anexos.slice(),em:Date.now()});
   if(t.nome==='Nova conversa'&&texto)t.nome=texto.slice(0,32);
+  try{window.__jvAnexos=(th().msgs.filter(m=>m.role==='user').slice(-1)[0]||{}).anexos||[]}catch(e){}
   anexos=[];pintarChips();
   const alvo={role:'model',text:'',pensando:'',imgs:[],fontes:[],em:Date.now()};
   t.msgs.push(alvo);pintar();gravar();
