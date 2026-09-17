@@ -14157,5 +14157,84 @@ aside .side-actions .railmenu.open{transform:translateY(0)!important}
 })();
 </script>
 
+<script id="mdk-v87-jarvis-conversa-unica">
+/* ============ v87 · JARVIS UNICO: A MESMA CONVERSA DENTRO E FORA DO SITE ============
+   Antes: cada janela guardava a conversa na memoria e so lia o armazenamento ao abrir,
+   e o aviso de mudanca (storage/BroadcastChannel) nao chega em arquivos abertos
+   direto do computador (file://). Resultado: conversas separadas.
+   Agora: as duas janelas conferem o armazenamento a cada 0,7s, juntam as mensagens
+   (nada se perde) e acompanham a mesma conversa aberta. */
+(function(){
+  'use strict';
+  var JLS='modesk.jarvis.conversas.v85';
+  var visto=null, minhaEscrita=0;
+
+  /* saber quando esta propria janela gravou */
+  try{
+    var si=Storage.prototype.setItem;
+    Storage.prototype.setItem=function(k,v){
+      if(k===JLS){ visto=v; minhaEscrita=Date.now() }
+      return si.apply(this,arguments);
+    };
+  }catch(_){}
+
+  function S(){ return (window.jvSync && window.jvSync.estado) ? window.jvSync : null }
+  function fim(t){ var m=(t&&t.msgs)||[]; var u=m[m.length-1]; return u?(u.em||0):((t&&t.em)||0) }
+  function ocupado(D){
+    try{
+      var t=(D.threads||[]).filter(function(x){return x.id===D.atual})[0]; if(!t)return false;
+      var m=t.msgs||[], u=m[m.length-1];
+      return !!(u && u.role==='model' && !u.fim);
+    }catch(_){ return false }
+  }
+  function desenhar(s){ try{s.pintarSide()}catch(_){}; try{s.pintar()}catch(_){} }
+  function regravar(D){
+    try{
+      var p={threads:(D.threads||[]).slice(-40),cfg:D.cfg,atual:D.atual,em:Date.now()};
+      localStorage.setItem(JLS,JSON.stringify(p));
+    }catch(_){}
+  }
+
+  function juntar(){
+    var s=S(); if(!s)return;
+    var D=s.estado; if(!D)return;
+    var raw=null; try{ raw=localStorage.getItem(JLS) }catch(_){ return }
+    if(!raw)return;
+    if(visto===null){ visto=raw }
+    if(raw===visto && !D.__jvForcar)return;
+    if(ocupado(D))return;                 /* esperando a resposta: junta depois */
+    visto=raw;
+    var r=null; try{ r=JSON.parse(raw) }catch(_){ return }
+    if(!r||!r.threads)return;
+
+    var mudou=false, porId={};
+    (D.threads||[]).forEach(function(t){ porId[t.id]=t });
+    r.threads.forEach(function(rt){
+      if(!rt||!rt.id)return;
+      var lt=porId[rt.id];
+      if(!lt){ D.threads.push(rt); porId[rt.id]=rt; mudou=true; return }
+      var a=(rt.msgs||[]).length, b=(lt.msgs||[]).length;
+      if(a>b || (a===b && fim(rt)>fim(lt))){
+        lt.msgs=rt.msgs||[]; if(rt.nome)lt.nome=rt.nome; if(rt.em)lt.em=rt.em; mudou=true;
+      }
+    });
+    if(r.cfg)try{Object.assign(D.cfg,r.cfg)}catch(_){}
+    if(r.atual && porId[r.atual] && r.atual!==D.atual && (r.em||0)>minhaEscrita){ D.atual=r.atual; mudou=true }
+
+    if(mudou){ desenhar(s); regravar(D) }
+  }
+
+  function agora(){ try{ juntar() }catch(_){} }
+  setInterval(agora,700);
+  addEventListener('storage',function(e){ if(!e.key||e.key===JLS)setTimeout(agora,60) });
+  addEventListener('focus',agora);
+  addEventListener('visibilitychange',agora);
+  try{ var bc=new BroadcastChannel('modesk-jarvis'); bc.onmessage=function(){ setTimeout(agora,60) } }catch(_){}
+  document.addEventListener('click',function(){ setTimeout(agora,120) },true);
+  window.jvJuntarConversas=agora;
+  console.log('[MODESK v87] JARVIS com a mesma conversa dentro e fora do site');
+})();
+</script>
+
 </body>
 </html>
