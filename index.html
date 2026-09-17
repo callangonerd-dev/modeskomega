@@ -998,7 +998,7 @@ position: relative !important;
     overflow: hidden;
     isolation: isolate;
     border-radius: 7px !important;
-    background: var(--mdk-block-bg) !important;
+    
     clip-path: polygon(0 0, calc(100% - var(--mdk-block-cut)) 0, 100% var(--mdk-block-cut), 100% 100%, 0 100%) !important;
     transition: transform .28s cubic-bezier(.2, .8, .2, 1), border-color .28s ease, box-shadow .28s ease, background .28s ease !important;
     animation: mdkBlockPadraoIn .46s cubic-bezier(.2, .75, .25, 1) both !important;
@@ -8168,7 +8168,7 @@ h1.page,#view h1{font-size:clamp(22px,2.6vw,34px)!important;margin:0 0 4px!impor
 #view table th,#view table td{padding:7px 9px;font-size:12.4px}
 
 /* ---- 4. Configurações: cards alinhados e campos sem estourar ---- */
-#view .card{display:flex;flex-direction:column;min-width:0}
+#view .card{display:flex;flex-direction:column;min-width:0;    background: var(--mdk-block-bg) !important;}
 #view .card input,#view .card select,#view .card textarea{width:100%;max-width:100%;box-sizing:border-box}
 #view .card .row{flex-wrap:wrap;gap:8px}
 .cfg-sub{margin:14px 0 8px;font-size:10.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;
