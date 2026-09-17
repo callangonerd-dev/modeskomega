@@ -2898,13 +2898,13 @@ function iaErro(status,msg){
 async function iaRaw(system,mensagens,opc){
   opc=opc||{};
   const c=iaCfg();
-  const hist=(mensagens||[]).filter(m=>m&&m.content).slice(-4);
+  const hist=(mensagens||[]).filter(m=>m&&m.content).slice(-14);
   const msgs=[{role:'system',content:String(system||'').slice(0,12000)}].concat(hist);
   const usarStream=!!opc.onChunk&&!opc.tools;
   if(!String(c.groqKey||'').trim())throw iaErro(401,'');
   const url='https://api.groq.com/openai/v1/chat/completions';
   const headers={'Content-Type':'application/json','Authorization':'Bearer '+String(c.groqKey).trim()};
-  const body={model:c.groqModel||'openai/gpt-oss-20b',messages:msgs,temperature:.6,max_tokens:2048,stream:usarStream};
+  const body={model:c.groqModel||'openai/gpt-oss-20b',messages:msgs,temperature:.6,max_tokens:4096,stream:usarStream};
   if(opc.tools){body.tools=opc.tools;body.tool_choice='auto'}
   let r;
   try{ r=await fetch(url,{method:'POST',headers,body:JSON.stringify(body)}) }
@@ -2931,7 +2931,10 @@ async function iaRaw(system,mensagens,opc){
   let j={}; try{j=await r.json()}catch(e){}
   const m=(((j.choices||[])[0]||{}).message)||{};
   const tc=(m.tool_calls||[]).map(t=>{ let a={}; try{a=JSON.parse((t.function||{}).arguments||'{}')}catch(e){} return {name:(t.function||{}).name,args:a} });
-  return {text:String(m.content||'').trim(),tools:tc};
+  /* alguns modelos devolvem o texto em 'reasoning' quando 'content' vem vazio */
+  let saida=String(m.content||'').trim();
+  if(!saida&&!tc.length)saida=String(m.reasoning||m.reasoning_content||'').trim();
+  return {text:saida,tools:tc};
 }
 async function iaChat(system,mensagens,onChunk){
   const r=await iaRaw(system,mensagens,{onChunk});
@@ -4323,6 +4326,16 @@ function dadosSite(){
   try{if(typeof jvResumo==='function')return jvResumo()}catch(e){}
   try{return JSON.stringify(window.state||{}).slice(0,20000)}catch(e){return '(sem dados)'}
 }
+function jvAgora(){
+  try{
+    const d=new Date();
+    const dias=['domingo','segunda-feira','terca-feira','quarta-feira','quinta-feira','sexta-feira','sabado'];
+    const z=n=>String(n).padStart(2,'0');
+    const amanha=new Date(d.getTime()+86400000);
+    return dias[d.getDay()]+', '+d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate())+' '+z(d.getHours())+':'+z(d.getMinutes())
+      +' (amanha = '+amanha.getFullYear()+'-'+z(amanha.getMonth()+1)+'-'+z(amanha.getDate())+')';
+  }catch(e){return new Date().toISOString().slice(0,16).replace('T',' ')}
+}
 function sistema(){
   const gestor=(typeof GESTOR!=='undefined'?GESTOR:'usuario');
   return `Voce e o J.A.R.V.I.S., assistente pessoal completo de ${gestor}, integrado ao sistema MODESK.
@@ -4337,7 +4350,12 @@ abrir qualquer tela do MODESK e abrir paginas da internet (links cadastrados ou 
 Para agendamentos com lista de itens/equipamentos use agendar_item (campo itens separado por ;).
 Para anexar documentos em cadastros use anexar_documento; se o usuario nao enviou o arquivo no chat nem passou um link,
 chame anexar_documento com escolher_arquivo=true para abrir o seletor de arquivos do computador.
-Datas sempre no formato AAAA-MM-DD e horas HH:MM. Se faltar um dado essencial, pergunte antes de criar.
+Datas sempre no formato AAAA-MM-DD e horas HH:MM.
+DATA E HORA DE AGORA: ${jvAgora()}.
+Converta voce mesmo expressoes como "hoje", "amanha", "depois de amanha", "segunda", "meio dia" (12:00),
+"meia noite" (00:00) usando a data acima. Nao pergunte a data quando for possivel calcular.
+Se o usuario pedir um lembrete/alerta, preencha o campo lembrete com a hora (HH:MM) no agendar_item.
+Execute o pedido com as ferramentas mesmo que faltem dados opcionais (local, responsavel, observacao).
 Depois de executar, confirme em uma frase curta o que foi feito.
 CONTEXTO ATUAL DO SISTEMA:
 ${dadosSite()}`;
@@ -4373,6 +4391,7 @@ const FUNCS=[
     titulo:{type:'string'},data:{type:'string',description:'AAAA-MM-DD'},hora:{type:'string',description:'HH:MM'},
     local:{type:'string'},responsavel:{type:'string'},
     itens:{type:'string',description:'itens/equipamentos do agendamento separados por ; (ponto e virgula)'},
+    lembrete:{type:'string',description:'hora do lembrete/alerta no formato HH:MM'},
     obs:{type:'string'}},required:['titulo']}},
  {name:'anexar_documento',description:'Anexa um documento a um cadastro existente do MODESK (pedido, item, evento, atividade, arquivo, send). Usa o arquivo enviado no chat, um link, ou abre o seletor de arquivos do computador quando escolher_arquivo=true.',
   parameters:{type:'object',properties:{
@@ -4465,9 +4484,10 @@ async function exec(nome,args){
     if(nome==='agendar_item'){
       if(!Array.isArray(S.eventos))S.eventos=[];
       const itens=String(args.itens||'').split(/[;\n]+/).map(x=>x.trim()).filter(Boolean);
+      const lembrete=String(args.lembrete||'').trim();
       const reg={id:(typeof u==='function'?u():uid()),titulo:args.titulo,data:args.data||'',hora:args.hora||'',
-        local:args.local||'',responsavel:args.responsavel||'',itens:itens,
-        info:[args.obs||'',itens.length?('Itens: '+itens.join(' · ')):''].filter(Boolean).join(' — ')};
+        local:args.local||'',responsavel:args.responsavel||'',itens:itens,lembrete:lembrete,alerta:lembrete,
+        info:[args.obs||'',lembrete?('Lembrete '+lembrete):'',itens.length?('Itens: '+itens.join(' · ')):''].filter(Boolean).join(' — ')};
       S.eventos.push(reg);
       try{if(typeof save==='function')save(true);if(typeof render==='function')render()}catch(e){}
       return {ok:true,agendado:reg};
@@ -4542,13 +4562,12 @@ async function stream(model,body,onChunk){
 /* ---------- conversa ---------- */
 let anexos=[];
 function ferramentas(){
-  const t=[];
-  if(D.cfg.ferramentas)t.push({function_declarations:FUNCS});
-  return t.length?t:undefined;
+  /* v86: as acoes no sistema ficam sempre disponiveis, mesmo sem marcar a caixa */
+  return [{function_declarations:FUNCS}];
 }
 function historico(){
   const t=th();const out=[];
-  t.msgs.filter(m=>m.role==='user'||m.role==='model').slice(-6).forEach(m=>{
+  t.msgs.filter(m=>m.role==='user'||m.role==='model').slice(-14).forEach(m=>{
     const parts=[];
     if(m.text)parts.push({text:m.text});
     (m.anexos||[]).forEach(a=>{
@@ -4571,6 +4590,7 @@ async function enviar(texto){
   t.msgs.push(alvo);pintar();gravar();
   const body={systemInstruction:{parts:[{text:sistema()}]},contents:historico(),
     tools:ferramentas(),generationConfig:{temperature:.7,maxOutputTokens:8192}};
+  const jvFeitas=[];
   try{
     for(let volta=0;volta<4;volta++){
       const chamadas=[];
@@ -4595,12 +4615,23 @@ async function enviar(texto){
         let r;
         try{ r=await exec(c.name,c.args) }catch(er){ r={ok:false,erro:String(er.message||er)} }
         alvo.text+='\n· '+c.name+' executado\n';
+        jvFeitas.push(c.name.replace(/_/g,' '));
         respostas.push({functionResponse:{name:c.name,response:{result:r}}});
       }
       body.contents.push({role:'user',parts:respostas});
       pintar(true);
     }
-    if(!alvo.text&&!alvo.imgs.length)alvo.text='(sem resposta do modelo)';
+    if(!alvo.text&&!alvo.imgs.length){
+      /* v86: se o modelo executou acoes mas nao escreveu nada, pedimos o resumo sem ferramentas */
+      try{
+        const fecho=await iaChat(sistema(),iaDeContents(body.contents).concat([{role:'user',content:'Confirme em uma frase curta, em portugues, o que foi feito agora.'}]));
+        if(fecho)alvo.text=fecho;
+      }catch(e){}
+    }
+    if(!alvo.text&&!alvo.imgs.length){
+      alvo.text=jvFeitas.length?('Pronto: '+jvFeitas.join(', ')+'.')
+        :'Nao consegui uma resposta do modelo agora. Tente reenviar ou troque o modelo em AJUSTES.';
+    }
     if(D.cfg.falar&&alvo.text)falar(alvo.text.slice(0,900));
   }catch(e){alvo.text=(alvo.text||'')+'\n⚠ '+e.message}
   alvo.fim=true;pintar();gravar();
@@ -14090,6 +14121,39 @@ aside .side-actions .railmenu.open{transform:translateY(0)!important}
   if(document.readyState==='loading')addEventListener('DOMContentLoaded',modoAba); else modoAba();
 
   console.log('[MODESK v84] JARVIS fora do site corrigido (sessao, pop-up bloqueado e tela preta)');
+})();
+</script>
+
+<script>
+/* ============ v86 · DADOS DO MODESK SINCRONIZADOS ENTRE O SITE E A JANELA DE FORA ============ */
+(function(){
+  'use strict';
+  var LSD='modesk.pessoal.v7', canal=null, meuSalvar=0;
+  try{canal=new BroadcastChannel('modesk-dados')}catch(e){}
+  function recarregar(){
+    try{
+      var j=JSON.parse(localStorage.getItem(LSD)||'null');
+      if(!j||typeof j!=='object')return;
+      if(window.state)Object.keys(j).forEach(function(k){window.state[k]=j[k]});
+      if(typeof window.render==='function')window.render();
+    }catch(e){}
+  }
+  function ligar(){
+    if(typeof window.save!=='function'||window.__jv86)return false;
+    window.__jv86=1;
+    var orig=window.save;
+    window.save=function(){
+      var r=orig.apply(this,arguments);
+      meuSalvar=Date.now();
+      try{canal&&canal.postMessage({t:'dados',em:meuSalvar})}catch(e){}
+      return r;
+    };
+    if(canal)canal.onmessage=function(e){ var d=e&&e.data; if(d&&d.t==='dados'&&(d.em||0)>meuSalvar+50)recarregar() };
+    addEventListener('storage',function(e){ if(e&&e.key===LSD)recarregar() });
+    addEventListener('focus',recarregar);
+    return true;
+  }
+  if(!ligar()){ var n=0, t=setInterval(function(){ if(ligar()||++n>60)clearInterval(t) },500) }
 })();
 </script>
 
