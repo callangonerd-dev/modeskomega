@@ -948,16 +948,35 @@ main:has(.agenda-shell)>.card:has(.agenda-quick){padding:11px 13px!important;mar
   .jvx-secure{right:14px}
 }
 </style>
-<style id="no-view-anim">
-/* desliga animações de abertura ao trocar de tela */
-.sect,main>section,.view,.screen,[data-view],
-.card,.syscard,.linkcard,.kpi-card,
-.mp-pane.on,.mn-slide.anim,.folder.open .fbody,
-tbody tr,.jx-empty{animation:none!important}
-.jc-hero{grid-template-columns:1fr!important;min-height:0!important;padding:22px 26px!important}
-.jc-hero>div{text-align:left}
-.jc-hero p.jc-lead{margin:0!important;max-width:760px!important}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800&amp;family=Barlow+Condensed:wght@600;700;800&amp;display=swap" rel="stylesheet">
+<style id="modesk-kinetic-glass-menu">
+/* Rodapé Kinetic Glass — ações organizadas e legíveis na lateral estreita. */
+aside{display:flex;flex-direction:column}
+#menu{flex:1 0 auto}
+.side-command{position:relative;margin-top:16px;padding:15px 4px 4px;border-top:1px solid rgba(35,40,54,.9);font-family:'Barlow',sans-serif}
+.side-command:before{content:"";position:absolute;left:0;right:0;top:-1px;height:1px;background:linear-gradient(90deg,rgba(34,211,238,.7),transparent 48%,rgba(230,0,35,.65))}
+.side-command-panel{position:relative;overflow:hidden;border:1px solid rgba(35,40,54,.9);border-radius:14px;background:rgba(18,20,28,.78);box-shadow:0 18px 42px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.035)}
+.side-command-panel:before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(120deg,rgba(34,211,238,.12),transparent 35%,transparent 62%,rgba(230,0,35,.11))}
+.side-system{position:relative;display:grid;grid-template-columns:8px minmax(0,1fr) auto;align-items:center;gap:10px;padding:11px 12px;border-bottom:1px solid rgba(35,40,54,.9)}
+.side-system-dot{width:8px;height:8px;border-radius:50%;background:#e60023;box-shadow:0 0 10px #e60023}
+.side-system-copy{min-width:0;line-height:1}.side-system-copy b{display:block;color:#22d3ee;font-size:9px;letter-spacing:.22em;text-transform:uppercase}.side-system-copy small{display:block;margin-top:5px;color:#eef2f8;font-size:10.5px;font-weight:600;white-space:nowrap}
+.side-system-time{color:#7c8698;font-size:9px;font-weight:700;white-space:nowrap}
+.side-command-btn{position:relative;width:100%;min-width:0;min-height:52px;margin:0!important;padding:8px 11px;display:grid;grid-template-columns:28px minmax(0,1fr) auto;align-items:center;gap:10px;border:0;border-bottom:1px solid rgba(35,40,54,.82);border-radius:0;background:transparent;color:#eef2f8;text-align:left;cursor:pointer;transition:background .18s,color .18s}
+.side-command-btn:last-child{border-bottom:0}.side-command-btn:hover{transform:none;background:rgba(255,255,255,.05);border-color:rgba(35,40,54,.82)}
+.side-command-icon{width:28px;height:28px;display:grid;place-items:center;border-radius:7px;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:800;color:#e60023;background:rgba(230,0,35,.13);border:1px solid rgba(230,0,35,.28)}
+.side-command-copy{min-width:0;line-height:1}.side-command-copy b{display:block;overflow:hidden;color:#eef2f8;font-size:12.5px;font-weight:600;letter-spacing:.02em;white-space:nowrap;text-overflow:ellipsis}.side-command-copy small{display:block;overflow:hidden;margin-top:5px;color:#7c8698;font-size:9.5px;white-space:nowrap;text-overflow:ellipsis}
+.side-command-end{color:#7c8698;font-size:12px;font-weight:700;white-space:nowrap}.side-command-btn:hover .side-command-end{color:#22d3ee}
+.side-command-btn.effects .side-command-icon{color:#22d3ee;background:rgba(34,211,238,.12);border-color:rgba(34,211,238,.28)}
+.side-command-state{display:inline-flex;align-items:center;gap:5px;color:#22d3ee;font-size:8.5px;font-weight:800;letter-spacing:.08em}.side-command-state:before{content:"";width:6px;height:6px;border-radius:50%;background:#22d3ee;box-shadow:0 0 8px #22d3ee;animation:sideStatePulse 2.4s ease-in-out infinite}
+.side-command-btn.exit .side-command-icon{color:#7c8698;background:rgba(255,255,255,.035);border-color:rgba(124,134,152,.22)}.side-command-btn.exit:hover .side-command-end{color:#e60023}
+@keyframes sideStatePulse{50%{opacity:.45}}
+@media(prefers-reduced-motion:reduce){.side-command-state:before{animation:none}}
+@media(max-width:960px){aside>.side-command{display:none!important}}
 </style>
+
+
 </head>
 <body>
 <!-- #winbar removido (v12.3) — navegação já existe na barra lateral -->
@@ -991,11 +1010,30 @@ tbody tr,.jx-empty{animation:none!important}
       <div><h3 style="font-size:16px">MODESK PESSOAL</h3><small>gestão de serviços</small></div>
     </div>
     <div id="menu"></div>
-    <div class="side-actions">
-      <button class="btn sm" onclick="exportJSON()">⬇ Backup</button>
+    <div class="side-command" aria-label="Ações do sistema">
+      <div class="side-command-panel">
+        <div class="side-system" aria-hidden="true">
+          <span class="side-system-dot"></span>
+          <span class="side-system-copy"><b>Sistema</b><small>Pronto para salvar</small></span>
+          <span class="side-system-time">ON</span>
+        </div>
+        <button class="side-command-btn backup" onclick="exportJSON()">
+          <span class="side-command-icon" aria-hidden="true">B</span>
+          <span class="side-command-copy"><b>Backup</b><small>Salva o estado atual</small></span>
+          <span class="side-command-end" aria-hidden="true">›</span>
+        </button>
+        <button class="side-command-btn effects" id="btn-fx" onclick="fxToggle()">
+          <span class="side-command-icon" aria-hidden="true">E</span>
+          <span class="side-command-copy"><b id="btn-fx-lbl">Efeitos: ligados</b><small>Ativar ou pausar</small></span>
+          <span class="side-command-state" aria-hidden="true">ON</span>
+        </button>
+        <button class="side-command-btn exit" onclick="logout()">
+          <span class="side-command-icon" aria-hidden="true">S</span>
+          <span class="side-command-copy"><b>Sair</b><small>Encerrar sessão</small></span>
+          <span class="side-command-end" aria-hidden="true">›</span>
+        </button>
+      </div>
     </div>
-    <button class="navbtn" id="btn-fx" style="margin-top:10px" onclick="fxToggle()"><span class="ic">✦</span><span id="btn-fx-lbl">Efeitos: ligados</span></button>
-    <button class="navbtn" onclick="logout()"><span class="ic">⏻</span>Sair</button>
   </aside>
 
   <main>
@@ -3911,7 +3949,7 @@ body.jvpip-off #jvx{display:none!important}
     if(!pop){aviso('O navegador bloqueou a nova aba. Libere pop-ups deste site.');return}
     try{
       pop.document.open();
-      pop.document.write('<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>J.A.R.V.I.S. \u2014 MODESK</title></head><body></body></html>');
+      pop.document.write('<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>J.A.R.V.I.S. — MODESK</title></head><body></body></html>');
       pop.document.close();
       estilos(pop.document);
       volta=document.createComment('jvx');
@@ -5180,7 +5218,7 @@ if(document.readyState==='loading')addEventListener('DOMContentLoaded',boot);els
   function auto(){
     var app=document.getElementById('app');
     if(!app||app.classList.contains('hidden'))return setTimeout(auto,400);
-    setTimeout(abrir,350);
+    /* abertura automática desativada: a Interface só abre quando o usuário escolher essa tela */
   }
   function boot(){ligarAba();auto();}
   if(document.readyState==='loading')addEventListener('DOMContentLoaded',boot);else boot();
@@ -12372,7 +12410,7 @@ main{padding:14px clamp(13px,2vw,28px) 54px!important}.sect{max-width:1500px!imp
    var clone=document.documentElement.cloneNode(true),t=clone.querySelector('#toast');if(t)t.innerHTML='';
    var html='<!doctype html>\n'+clone.outerHTML,blob=new Blob([html],{type:'text/html;charset=utf-8'}),a=document.createElement('a');
    a.href=URL.createObjectURL(blob);a.download='MODESK_Central_v17_Laudo_Fotos.html';document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(a.href)},1200);
-   if(window.toast)toast('HTML compacto v9 gerado');
+   if(window.toast)toast('HTML com laudos separados gerado');
  };
  console.log('[MODESK v9] painel compacto e rail integrado ao sidebar');
 })();
@@ -12697,7 +12735,7 @@ aside .side-actions .railmenu.open{transform:translateY(0)!important}
 .lb-tab td{padding:7px 8px;border-bottom:1px solid rgba(255,255,255,.06);color:#dbe6ee;vertical-align:top}
 .lb-itens{max-height:52vh;overflow:auto;border:1px solid rgba(113,220,250,.14);border-radius:8px}
 .lb-itens input,.lb-itens select{width:100%;padding:6px 8px;border:1px solid rgba(113,220,250,.16);border-radius:5px;background:rgba(255,255,255,.03);color:#e7f2f8;font-size:12px}
-.lb-fotos-item{display:grid;grid-template-columns:1fr 1fr;gap:6px;min-width:210px}.lb-foto-upload{position:relative;min-height:64px;border:1px dashed rgba(113,220,250,.3);border-radius:6px;background:rgba(255,255,255,.025);display:grid;place-items:center;text-align:center;overflow:hidden;cursor:pointer}.lb-foto-upload:hover{border-color:#71dcfa;background:rgba(113,220,250,.08)}.lb-foto-upload input{position:absolute;inset:0;opacity:0;cursor:pointer}.lb-foto-upload img{width:100%;height:64px;object-fit:cover}.lb-foto-upload span{padding:7px 4px;color:#9fb1bf;font-size:10px;line-height:1.25}.lb-foto-upload b{display:block;color:#d7f2ff;font-size:9px;text-transform:uppercase;letter-spacing:.04em}
+.lb-fotos-item{display:grid;grid-template-columns:1fr 1fr;gap:6px;min-width:210px}.lb-foto-upload{position:relative;min-height:64px;border:1px dashed rgba(113,220,250,.3);border-radius:6px;background:rgba(255,255,255,.025);display:grid;place-items:center;text-align:center;overflow:hidden;cursor:pointer}.lb-foto-upload:hover{border-color:#71dcfa;background:rgba(113,220,250,.08)}.lb-foto-upload:focus{outline:none}.lb-foto-upload.alvo{border-color:#71dcfa;border-style:solid;box-shadow:0 0 0 2px rgba(113,220,250,.35)}.lb-foto-upload input{position:absolute;inset:0;opacity:0;cursor:pointer}.lb-foto-upload img{width:100%;height:64px;object-fit:cover}.lb-foto-upload span{padding:7px 4px;color:#9fb1bf;font-size:10px;line-height:1.25}.lb-foto-upload b{display:block;color:#d7f2ff;font-size:9px;text-transform:uppercase;letter-spacing:.04em}
 .lb-tag{display:inline-block;padding:3px 9px;border-radius:999px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border:1px solid currentColor}
 .lb-tag.emitido{color:#4ce7b2}.lb-tag.rascunho{color:#ffc46b}
 .lb-vazio{padding:20px;text-align:center;color:#7d8fa0;font-size:12.5px}
@@ -12752,7 +12790,10 @@ aside .side-actions .railmenu.open{transform:translateY(0)!important}
   var LB={edit:null,q:'',itens:null};
 
   function st(){ return (typeof state!=='undefined'&&state)?state:(window.state||{}); }
-  function lista(){ var s=st(); if(!Array.isArray(s.laudos))s.laudos=[]; return s.laudos; }
+  function lista(){
+    var s=st(); if(!Array.isArray(s.laudos))s.laudos=[];
+    return s.laudos;
+  }
   function persistir(){ try{ (typeof save==='function'?save:window.save)(); }catch(e){} }
   function aviso(m){ try{ (typeof toast==='function'?toast:window.toast)(m); }catch(e){} }
   function esc(v){ return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]}); }
@@ -12772,11 +12813,13 @@ aside .side-actions .railmenu.open{transform:translateY(0)!important}
     if(l.equipamento)return [{equipamento:l.equipamento,patrimonio:l.patrimonio||'',serie:l.serie||'',defeito:l.defeito||l.motivo||'',solucao:l.solucao||l.destino||SOLUCOES[0],fotoFicha:l.fotoFicha||'',fotoEquipamento:l.fotoEquipamento||l.foto||''}];
     return [];
   }
-  function itensAtuais(){ if(!LB.itens)LB.itens=[linhaVazia()]; return LB.itens; }
+  function itensAtuais(){ if(!LB.itens||!LB.itens.length)LB.itens=[linhaVazia()]; return LB.itens; }
   function linhaVazia(){ return {equipamento:'',patrimonio:'',serie:'',defeito:DEFEITOS[0],solucao:SOLUCOES[0],fotoFicha:'',fotoEquipamento:''}; }
 
   function fotoCampo(i,tipo,rotulo,foto){
-    return '<label class="lb-foto-upload" title="Enviar '+rotulo.toLowerCase()+'">'+(foto?'<img src="'+foto+'" alt="'+esc(rotulo)+'"><span><b>'+rotulo+'</b>trocar foto</span>':'<span><b>'+rotulo+'</b>enviar foto</span>')+'<input type="file" accept="image/*" capture="environment" onchange="lbFoto('+i+',\''+tipo+'\',this.files[0])"></label>';
+    var alvo=(LB.alvo&&LB.alvo.i===i&&LB.alvo.tipo===tipo)?' alvo':'';
+    var dica=foto?'trocar foto ou Ctrl+V':'enviar foto ou Ctrl+V';
+    return '<label class="lb-foto-upload'+alvo+'" tabindex="0" data-i="'+i+'" data-tipo="'+tipo+'" title="Clique para escolher, arraste ou cole com Ctrl+V" onclick="lbAlvo('+i+',\''+tipo+'\')" onfocus="lbAlvo('+i+',\''+tipo+'\')" ondragover="event.preventDefault();this.classList.add(\'alvo\')" ondragleave="this.classList.remove(\'alvo\')" ondrop="lbSoltar(event,'+i+',\''+tipo+'\')">'+(foto?'<img src="'+foto+'" alt="'+esc(rotulo)+'"><span><b>'+rotulo+'</b>'+dica+'</span>':'<span><b>'+rotulo+'</b>'+dica+'</span>')+'<input type="file" accept="image/*" onchange="lbFoto('+i+',\''+tipo+'\',this.files[0])"></label>';
   }
   function comprimirFoto(file){return new Promise(function(ok){var r=new FileReader();r.onload=function(){var img=new Image();img.onload=function(){var m=1200,w=img.width,h=img.height,k=Math.min(1,m/Math.max(w,h));w=Math.round(w*k);h=Math.round(h*k);var c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);ok(c.toDataURL('image/jpeg',.78))};img.onerror=function(){ok('')};img.src=r.result};r.onerror=function(){ok('')};r.readAsDataURL(file)})}
 
@@ -12819,13 +12862,12 @@ aside .side-actions .railmenu.open{transform:translateY(0)!important}
     var I=itensAtuais();
     return I.map(function(it,i){
       return '<tr>'
-        +'<td class="lb-num">'+(i+1)+'</td>'
         +'<td><input value="'+esc(it.equipamento)+'" placeholder="Ex.: NOBREAK 1.400 VA" oninput="lbItem('+i+',\'equipamento\',this.value)"></td>'
         +'<td><input value="'+esc(it.patrimonio)+'" placeholder="Ex.: 35026" oninput="lbItem('+i+',\'patrimonio\',this.value)"></td>'
         +'<td><select onchange="lbItem('+i+',\'defeito\',this.value)">'+opts(DEFEITOS,it.defeito)+'</select></td>'
         +'<td><select onchange="lbItem('+i+',\'solucao\',this.value)">'+opts(SOLUCOES,it.solucao)+'</select></td>'
         +'<td><div class="lb-fotos-item">'+fotoCampo(i,'fotoFicha','Ficha patrimonial',it.fotoFicha)+fotoCampo(i,'fotoEquipamento','Equipamento',it.fotoEquipamento)+'</div></td>'
-        +'<td style="width:42px"><button class="lb-btn danger" style="padding:6px 9px" onclick="lbDelItem('+i+')">×</button></td>'
+        +'<td style="text-align:center"><button class="lb-btn danger" onclick="lbDelItem('+i+')">Remover</button></td>'
         +'</tr>';
     }).join('');
   }
@@ -12841,7 +12883,7 @@ aside .side-actions .railmenu.open{transform:translateY(0)!important}
     return L.slice().reverse().map(function(l){
       var cls=(l.status==='Emitido')?'emitido':'rascunho', it=itensDe(l);
       return '<tr><td><b>'+esc(l.numero)+'</b><br><small style="color:#7d8fa0">'+esc(dataBR(l.data))+'</small></td>'
-        +'<td>'+it.length+' item(ns)<br><small style="color:#7d8fa0">'+esc((it[0]&&it[0].equipamento)||'—')+(it.length>1?' +'+(it.length-1):'')+'</small></td>'
+        +'<td>'+(it.length?it.map(function(x){return esc(x.equipamento||'—')+' <small style="color:#7d8fa0">(Ficha: '+esc(x.patrimonio||'—')+')</small>'}).join('<br>'):'—')+'</td>'
         +'<td>'+esc(l.de||'—')+'</td>'
         +'<td>'+esc(l.para||'—')+'</td>'
         +'<td><span class="lb-tag '+cls+'">'+esc(l.status||'Rascunho')+'</span></td>'
@@ -12854,7 +12896,7 @@ aside .side-actions .railmenu.open{transform:translateY(0)!important}
   function view(){
     var atual=LB.edit?lista().filter(function(l){return l.id===LB.edit})[0]:null;
     return '<h2 class="page">Laudo de Baixa de Equipamento</h2>'
-      +'<div class="hint">Cadastro no mesmo padrão do laudo oficial: cabeçalho fixo (Cidade/Data, De, Para), tabela Nº · Equipamento · Ficha Patrimonial · Defeito/Condições · Solução e blocos de assinatura. A exportação sai já no papel timbrado do SENAC.</div>'
+      +'<div class="hint">Um laudo pode conter vários equipamentos, cada um em seu próprio bloco, seguindo o padrão oficial com Cidade/Data, De, Para, Ficha Patrimonial, Defeito/Condições, Solução e assinaturas. A exportação sai no papel timbrado do SENAC.</div>'
       +'<div class="lb-wrap"><div class="card" style="padding:18px">'
       +'<h3 style="margin:0 0 12px;font-size:15px">'+(atual?'Editando laudo '+esc(atual.numero):'Novo laudo')+'</h3>'
       +campos(atual)
@@ -12862,8 +12904,8 @@ aside .side-actions .railmenu.open{transform:translateY(0)!important}
       +'<div class="card" style="padding:18px">'
       +'<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px">'
       +'<h3 style="margin:0;font-size:15px">Equipamentos do laudo</h3>'
-      +'<button class="lb-btn" onclick="lbAbrirGaveta()">☰ Escolher itens</button><button class="lb-btn" onclick="lbAddItem()">+ Adicionar equipamento</button></div>'
-      +'<div class="lb-itens"><table class="lb-tab"><thead><tr><th style="width:42px">Nº</th><th>Equipamento</th><th style="width:140px">Ficha Patrimonial</th><th style="width:240px">Defeito / Condições</th><th style="width:220px">Solução</th><th style="width:230px">Fotos para a página 2</th><th></th></tr></thead>'
+      +'<button class="lb-btn" onclick="lbAddItem()">+ Adicionar equipamento</button></div>'
+      +'<div class="lb-itens"><table class="lb-tab"><thead><tr><th>Equipamento</th><th style="width:140px">Ficha Patrimonial</th><th style="width:240px">Defeito / Condições</th><th style="width:220px">Solução</th><th style="width:230px">Fotos para a página 2</th><th style="width:90px"></th></tr></thead>'
       +'<tbody id="lb-itens-tb">'+linhasItens()+'</tbody></table></div></div>'
       +'<div class="card" style="padding:18px"><h3 style="margin:0 0 12px;font-size:15px">Assinaturas</h3>'+assinaturas(atual)
       +'<div class="lb-acoes"><button class="lb-btn" onclick="lbSalvar()">'+(atual?'Salvar alterações':'Registrar laudo')+'</button>'
@@ -12874,7 +12916,7 @@ aside .side-actions .railmenu.open{transform:translateY(0)!important}
       +'<div style="display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:10px">'
       +'<h3 style="margin:0;font-size:15px">Laudos registrados</h3>'
       +'<input id="lb-q" placeholder="Buscar por equipamento, patrimônio, setor…" value="'+esc(LB.q)+'" oninput="lbBuscar(this.value)" style="flex:1;min-width:200px;max-width:340px;padding:8px 11px;border:1px solid rgba(113,220,250,.18);border-radius:6px;background:rgba(255,255,255,.03);color:#e7f2f8;font-size:12.5px"></div>'
-      +'<div style="overflow:auto"><table class="lb-tab resp"><thead><tr><th>Laudo</th><th>Equipamentos</th><th>De</th><th>Para</th><th>Situação</th><th>Ações</th></tr></thead>'
+      +'<div style="overflow:auto"><table class="lb-tab resp"><thead><tr><th>Laudo</th><th>Equipamento</th><th>De</th><th>Para</th><th>Situação</th><th>Ações</th></tr></thead>'
       +'<tbody id="lb-tb">'+linhas()+'</tbody></table></div></div></div>';
   }
 
@@ -12887,7 +12929,22 @@ aside .side-actions .railmenu.open{transform:translateY(0)!important}
   }
 
   window.lbItem=function(i,k,v){ var I=itensAtuais(); if(I[i])I[i][k]=v; };
-  window.lbFoto=async function(i,tipo,file){if(!file||!/^image\//.test(file.type||'')){aviso('Selecione uma imagem válida');return}var foto=await comprimirFoto(file);if(!foto){aviso('Não foi possível ler a imagem');return}var I=itensAtuais();if(I[i])I[i][tipo]=foto;var tb=document.getElementById('lb-itens-tb');if(tb)tb.innerHTML=linhasItens();aviso('Foto anexada para a página 2')};
+  window.lbFoto=async function(i,tipo,file){if(!file||!/^image\//.test(file.type||'')){aviso('Selecione uma imagem válida');return}var foto=await comprimirFoto(file);if(!foto){aviso('Não foi possível ler a imagem');return}var I=itensAtuais();if(I[i])I[i][tipo]=foto;LB.alvo={i:i,tipo:tipo};var tb=document.getElementById('lb-itens-tb');if(tb)tb.innerHTML=linhasItens();aviso('Foto anexada para a página 2')};
+  window.lbAlvo=function(i,tipo){ LB.alvo={i:i,tipo:tipo}; var ls=document.querySelectorAll('#lb-itens-tb .lb-foto-upload'); for(var k=0;k<ls.length;k++){ ls[k].classList.toggle('alvo', +ls[k].getAttribute('data-i')===i && ls[k].getAttribute('data-tipo')===tipo); } };
+  window.lbSoltar=function(ev,i,tipo){ ev.preventDefault(); ev.currentTarget.classList.remove('alvo'); var f=ev.dataTransfer&&ev.dataTransfer.files&&ev.dataTransfer.files[0]; if(f)window.lbFoto(i,tipo,f); };
+  if(!window.__lbPasteOn){
+    window.__lbPasteOn=true;
+    document.addEventListener('paste',function(ev){
+      var tb=document.getElementById('lb-itens-tb'); if(!tb)return;
+      var itemsCb=(ev.clipboardData&&ev.clipboardData.items)||[]; var file=null;
+      for(var k=0;k<itemsCb.length;k++){ if(itemsCb[k].kind==='file'&&/^image\//.test(itemsCb[k].type)){ file=itemsCb[k].getAsFile(); break; } }
+      if(!file)return;
+      var a=LB.alvo;
+      if(!a){ var first=tb.querySelector('.lb-foto-upload'); if(!first){aviso('Abra um laudo para colar a foto');return} a={i:+first.getAttribute('data-i'),tipo:first.getAttribute('data-tipo')}; LB.alvo=a; }
+      ev.preventDefault();
+      window.lbFoto(a.i,a.tipo,file);
+    });
+  }
   window.lbAddItem=function(){ itensAtuais().push(linhaVazia()); var tb=document.getElementById('lb-itens-tb'); if(tb)tb.innerHTML=linhasItens(); };
   window.lbDelItem=function(i){ var I=itensAtuais(); I.splice(i,1); if(!I.length)I.push(linhaVazia()); var tb=document.getElementById('lb-itens-tb'); if(tb)tb.innerHTML=linhasItens(); };
   window.lbBuscar=function(v){ LB.q=v||''; var tb=document.getElementById('lb-tb'); if(tb)tb.innerHTML=linhas(); };
@@ -12966,7 +13023,7 @@ aside .side-actions .railmenu.open{transform:translateY(0)!important}
       +'.ass-linha{border-top:1px solid #333;width:100%;margin-bottom:5px}'
       +'.ass-rot{font-weight:700;margin-bottom:2px}'
       +'.ass-nome{font-weight:700}'
-      +'.pagina-fotos{break-before:page;page-break-before:always}.fotos-titulo{font-size:15px;text-align:center;text-transform:uppercase;letter-spacing:.06em;margin:4px 0 12px}.fotos-grid{display:grid;grid-template-columns:1fr 1fr;gap:8mm 6mm}.foto-item{border:1px solid #777;break-inside:avoid;page-break-inside:avoid}.foto-titulo{padding:4px 6px;background:#e9edf2;border-bottom:1px solid #777;font-size:9px;display:flex;justify-content:space-between;gap:8px}.foto-titulo span{white-space:nowrap}.foto-dupla{display:grid;grid-template-columns:1fr 1fr}.foto-painel{min-width:0}.foto-painel+ .foto-painel{border-left:1px solid #999}.foto-rotulo{text-align:center;font-size:8px;font-weight:700;text-transform:uppercase;padding:3px;border-bottom:1px solid #aaa}.foto-painel img,.sem-foto{display:block;width:100%;height:45mm;object-fit:contain}.sem-foto{display:grid;place-items:center;color:#777;font-size:9px;background:#f4f4f4}'
+      +'.pagina-fotos{break-before:page;page-break-before:always}.fotos-titulo{font-size:15px;text-align:center;text-transform:uppercase;letter-spacing:.06em;margin:4px 0 12px}.fotos-grid{display:block}.foto-item+.foto-item{margin-top:7mm}.foto-item{border:1px solid #777;break-inside:avoid;page-break-inside:avoid}.foto-titulo{padding:4px 6px;background:#e9edf2;border-bottom:1px solid #777;font-size:9px;display:flex;justify-content:space-between;gap:8px}.foto-titulo span{white-space:nowrap}.foto-dupla{display:grid;grid-template-columns:1fr 1fr}.foto-painel{min-width:0}.foto-painel+ .foto-painel{border-left:1px solid #999}.foto-rotulo{text-align:center;font-size:8px;font-weight:700;text-transform:uppercase;padding:3px;border-bottom:1px solid #aaa}.foto-painel img,.sem-foto{display:block;width:100%;height:62mm;object-fit:contain}.sem-foto{display:grid;place-items:center;color:#777;font-size:9px;background:#f4f4f4}'
       +'@media screen{body{background:#fff}}'
       +'</style></head><body>'
       +'<div class="timbre-topo"><img src="'+TIMBRADO_TOPO+'" alt=""></div>'
@@ -13400,7 +13457,7 @@ aside .side-actions .railmenu.open{transform:translateY(0)!important}
     var html='<!doctype html>\n'+clone.outerHTML;
     var b=new Blob([html],{type:'text/html;charset=utf-8'});
     var a=document.createElement('a');
-    a.href=URL.createObjectURL(b); a.download='MODESK_Central_v17_Laudo_Fotos.html';
+    a.href=URL.createObjectURL(b); a.download='MODESK_PESSOAL_Laudos_Separados.html';
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(function(){URL.revokeObjectURL(a.href)},1500);
     if(window.toast)toast('HTML v17 com fotos do laudo gerado — confira em Downloads');
@@ -13974,6 +14031,9 @@ aside .side-actions .railmenu.open{transform:translateY(0)!important}
     w.appendChild(b);return w;
   }
   function criarRail(){
+    var duplicado=document.getElementById('rail');
+    if(duplicado)duplicado.remove();
+    return;
     if(document.getElementById('rail'))return;
     var app=document.getElementById('app');
     if(!app||app.classList.contains('hidden'))return;
@@ -14233,6 +14293,129 @@ aside .side-actions .railmenu.open{transform:translateY(0)!important}
   document.addEventListener('click',function(){ setTimeout(agora,120) },true);
   window.jvJuntarConversas=agora;
   console.log('[MODESK v87] JARVIS com a mesma conversa dentro e fora do site');
+})();
+</script>
+
+
+
+<!-- ===== MODESK v60 · MENU REORGANIZADO + EDIÇÃO DIRETA DO MAPEAMENTO ===== -->
+<style id="mdk-v60-css">
+/* Menu lateral: grupos mais curtos, hierarquia clara e ações separadas */
+aside{display:flex!important;flex-direction:column!important;overflow:hidden!important}
+#menu{flex:1;min-height:0;overflow-y:auto;padding-right:4px;margin-top:8px}
+#menu .folder{margin-bottom:7px;border:1px solid rgba(148,163,184,.10);border-radius:10px;overflow:hidden;background:rgba(15,23,42,.22)}
+#menu .fhead{min-height:40px;padding:8px 10px}
+#menu .fbody{padding:0 5px 6px}
+#menu .navbtn{min-height:38px;margin:2px 0;border-radius:8px}
+.side-actions{display:grid!important;grid-template-columns:1fr!important;gap:6px!important;margin-top:10px!important;padding-top:10px!important;border-top:1px solid rgba(148,163,184,.18)}
+.side-actions .btn,.side-actions .navbtn,aside>#btn-fx,aside>.navbtn{width:100%!important;min-height:38px!important;margin:0!important;justify-content:flex-start!important;border-radius:8px!important}
+aside>#btn-fx{margin-top:6px!important}
+
+/* Edição direta: formulário completo aberto logo abaixo do equipamento */
+.mp-edit-btn{width:auto!important;min-width:40px;padding:0 10px!important;gap:6px;font-size:12px!important}
+.mp-edit-row td{padding:0!important;border-top:0!important}
+.mp-inline-editor{padding:16px;margin:0 8px 12px;border:1px solid rgba(56,189,248,.38);border-radius:10px;background:rgba(8,20,34,.92);box-shadow:inset 3px 0 0 #38bdf8}
+.mp-inline-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.mp-edit-grid{display:grid;grid-template-columns:repeat(4,minmax(150px,1fr));gap:11px}
+.mp-edit-grid .wide{grid-column:span 2}.mp-edit-grid .full{grid-column:1/-1}
+.mp-edit-grid label{display:block;margin-bottom:5px;font-size:11px;text-transform:uppercase;color:#94a3b8}
+.mp-edit-grid input,.mp-edit-grid textarea{width:100%;min-width:0}
+.mp-edit-grid textarea{min-height:70px;resize:vertical}
+.mp-edit-actions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:14px}
+@media(max-width:1100px){.mp-edit-grid{grid-template-columns:repeat(2,minmax(140px,1fr))}}
+@media(max-width:700px){.mp-edit-grid{grid-template-columns:1fr}.mp-edit-grid .wide,.mp-edit-grid .full{grid-column:auto}.mp-inline-editor{margin:0 2px 10px;padding:12px}.mp-edit-actions .btn{flex:1}}
+</style>
+<script id="mdk-v60-script">
+(function(){
+  'use strict';
+  var MP_EDIT_KEY='mdk_mapeamento_edicoes_v60';
+  var mpEditando=null;
+  var CAMPOS=['andar','setor','pat','nome','vnc','ipant','mac','macant','anydesk','anyant','so','ram','disco','drivers','update','usuario','setoruser','obs'];
+  var ROTULOS={andar:'Andar',setor:'Setor',pat:'Patrimônio',nome:'Nome do computador',vnc:'IP / VNC',ipant:'IP anterior',mac:'MAC',macant:'MAC anterior',anydesk:'AnyDesk',anyant:'AnyDesk anterior',so:'Sistema operacional',ram:'Memória RAM',disco:'Armazenamento',drivers:'Drivers',update:'Windows Update',usuario:'Usuário',setoruser:'Setor do usuário',obs:'Observações'};
+
+  function aplicarMenuOrganizado(){
+    try{
+      MENU.splice(0,MENU.length,
+        {nome:'Início',icone:'dashboard',itens:[{k:'dashboard',n:'Dashboard',i:'dashboard'},{k:'agenda',n:'Agenda & Avisos',i:'calendar'},{k:'jarvis',n:'JARVIS (IA)',i:'pulse'}]},
+        {nome:'Gestão',icone:'folder',itens:[{k:'pedidos',n:'Compras',i:'cart'},{k:'send',n:'Acompanhamento SEND',i:'mail'},{k:'arquivos',n:'Central de Arquivos',i:'folder'},{k:'itens',n:'Cadastro de Itens',i:'boxes'}]},
+        {nome:'TI & Unidade',icone:'monitor',itens:[{k:'mapa',n:'Acessos & Mapeamento',i:'monitor'},{k:'links',n:'Sistemas & Sites',i:'link'},{k:'manual',n:'Manual Operacional',i:'shield'}]},
+        {nome:'Sistema',icone:'gear',itens:[{k:'interface',n:'Central de Interface',i:'monitor'},{k:'config',n:'Configurações',i:'gear'},{k:'entrega',n:'Mapa do Site & Tutorial',i:'package'}]}
+      );
+      buildMenu();
+      var area=document.querySelector('.side-actions');
+      var fx=document.getElementById('btn-fx');
+      var sair=fx&&fx.nextElementSibling;
+      if(area&&fx&&sair){area.appendChild(fx);area.appendChild(sair)}
+    }catch(e){console.warn('[MODESK v60] menu:',e)}
+  }
+
+  function prepararIds(){
+    try{PCS_UNIDADE.forEach(function(p,i){if(!p._mpid)p._mpid='pc-'+i})}catch(e){}
+  }
+  function restaurarEdicoes(){
+    prepararIds();
+    try{
+      var dados=JSON.parse(localStorage.getItem(MP_EDIT_KEY)||'{}');
+      PCS_UNIDADE.forEach(function(p){if(dados[p._mpid])Object.assign(p,dados[p._mpid])});
+    }catch(e){console.warn('[MODESK v60] restauração:',e)}
+  }
+  function persistir(p){
+    try{
+      var dados=JSON.parse(localStorage.getItem(MP_EDIT_KEY)||'{}');
+      dados[p._mpid]={}; CAMPOS.forEach(function(c){dados[p._mpid][c]=p[c]||''});
+      localStorage.setItem(MP_EDIT_KEY,JSON.stringify(dados));
+    }catch(e){console.warn('[MODESK v60] salvamento:',e)}
+  }
+  function attr(v){return esc(String(v==null?'':v)).replace(/"/g,'&quot;')}
+  function campo(p,c){
+    var cls=(c==='obs'?'full':(['nome','setoruser'].indexOf(c)>=0?'wide':''));
+    if(c==='obs')return '<div class="'+cls+'"><label>'+ROTULOS[c]+'</label><textarea id="mpe-'+c+'">'+esc(p[c]||'')+'</textarea></div>';
+    return '<div class="'+cls+'"><label>'+ROTULOS[c]+'</label><input id="mpe-'+c+'" value="'+attr(p[c]||'')+'"></div>';
+  }
+  function editor(p){
+    return '<tr class="mp-edit-row"><td colspan="7"><div class="mp-inline-editor">'+
+      '<div class="mp-inline-title"><div><b>Editar equipamento</b><div class="dim">Todos os dados deste item podem ser alterados aqui.</div></div></div>'+
+      '<div class="mp-edit-grid">'+CAMPOS.map(function(c){return campo(p,c)}).join('')+'</div>'+
+      '<div class="mp-edit-actions"><button class="btn" onclick="mpCancelarEdicao()">Cancelar</button><button class="btn primary" onclick="mpSalvarEdicao(\''+p._mpid+'\')">💾 Salvar alterações</button></div>'+
+      '</div></td></tr>';
+  }
+
+  window.mpEditarLinha=function(id){mpEditando=id;mpPintar();setTimeout(function(){var e=document.querySelector('.mp-inline-editor');if(e)e.scrollIntoView({behavior:'smooth',block:'center'})},30)};
+  window.mpCancelarEdicao=function(){mpEditando=null;mpPintar()};
+  window.mpSalvarEdicao=function(id){
+    var p=PCS_UNIDADE.find(function(x){return x._mpid===id}); if(!p)return;
+    CAMPOS.forEach(function(c){var e=document.getElementById('mpe-'+c);if(e)p[c]=e.value.trim()});
+    persistir(p);mpEditando=null;mpPintar();toast('Equipamento atualizado e salvo');
+  };
+
+  /* Substitui apenas a montagem das linhas; filtros, ordenação e acessos continuam iguais. */
+  window.mpLinhas=function(){
+    prepararIds();
+    var L=mpLista();
+    if(!L.length)return '<tr><td colspan="7" class="dim">Nenhum computador encontrado.</td></tr>';
+    return L.map(function(p){
+      var linha='<tr><td><b>'+esc(p.nome||'—')+'</b><div class="dim mono">Patrimônio '+esc(p.pat||'—')+'</div>'+(p.origem==='scan'?'<span class="tag t-warn">só varredura</span>':(p.rede?'<span class="tag t-ok">na rede</span>':'<span class="tag t-info">só planilha</span>'))+(p.obs?'<div class="dim">⚠ '+esc(p.obs)+'</div>':'')+'</td>'+
+      '<td>'+esc(p.setor||'—')+'<div class="dim">'+esc(p.andar||'')+'</div>'+(p.usuario?'<div class="dim">👤 '+esc(p.usuario)+(p.setoruser?' · '+esc(p.setoruser):'')+'</div>':'')+'</td>'+
+      '<td class="mono">'+esc(mpIP(p.vnc)||'—')+(p.scan?' <span class="tag t-ok">varredura</span>':'')+(p.ipant?'<div class="dim">IP anterior: '+esc(p.ipant)+'</div>':'')+(p.iprede?'<div class="dim">Varredura: '+esc(p.iprede)+'</div>':'')+(p.mac?'<div class="dim mono">'+esc(p.mac)+(p.macant?' <span class="tag t-info">antes: '+esc(p.macant)+'</span>':'')+'</div>':'<div class="dim">MAC não cadastrado</div>')+'</td>'+
+      '<td class="mono">'+esc(mpFmtAny(p.anydesk)||'—')+(p.anyant?'<div class="dim">antes: '+esc(mpFmtAny(p.anyant))+'</div>':'')+'</td>'+
+      '<td>'+esc(p.so||'—')+'<div class="dim">'+esc(p.ram||'')+' '+esc(p.disco?'· '+p.disco:'')+'</div><div class="dim">Drivers: '+esc(p.drivers||'—')+' · Update: '+esc(p.update||'—')+'</div></td>'+
+      '<td><div class="acc-grid"><button class="accbtn vnc" onclick="mpVnc(\''+attr(p.vnc)+'\')" '+(p.vnc?'':'disabled')+' title="Conectar por VNC"><img src="'+MP_ICO_VNC+'" alt="VNC"></button><button class="accbtn any" onclick="mpAnydesk(\''+attr(p.anydesk)+'\')" '+(p.anydesk?'':'disabled')+' title="Conectar por AnyDesk"><img src="'+MP_ICO_ANY+'" alt="AnyDesk"></button><button class="accbtn key" onclick="mpReset(\''+attr(p.nome||p.pat)+'\',\''+attr(p.vnc)+'\')" title="Reset de senha">🔑</button><button class="accbtn cp" onclick="mpCopiar(\''+attr(mpIP(p.vnc)||p.anydesk)+'\',\'Acesso copiado\')" title="Copiar acesso">⧉</button></div></td>'+
+      '<td><button class="btn sm mp-edit-btn" onclick="mpEditarLinha(\''+p._mpid+'\')">✏ Editar</button></td></tr>';
+      return linha+(mpEditando===p._mpid?editor(p):'');
+    }).join('');
+  };
+
+  /* Acrescenta a coluna Editar ao cabeçalho sem alterar o restante da página. */
+  var vMapa60=window.vMapa;
+  if(typeof vMapa60==='function')window.vMapa=function(){
+    var h=String(vMapa60.apply(this,arguments));
+    h=h.replace('<th>Acesso</th></tr></thead>','<th>Acesso</th><th>Editar</th></tr></thead>');
+    return h;
+  };
+  window.vRemoto=function(){return window.vMapa()};
+
+  restaurarEdicoes();
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',aplicarMenuOrganizado);else aplicarMenuOrganizado();
 })();
 </script>
 
