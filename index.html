@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="MODESK"/>
 <meta name="theme-color" content="#03060c"/>
 <link rel="manifest" href="/manifest.webmanifest"/>
-<title>MODESK PESSOAL — Central Compacto (v26)</title>
+<title>MODESK PESSOAL — Central Compacto (v28)</title>
 <script id="mdk-v10-boot">
 /* ===== MODESK v10 · GOVERNADOR DE DESEMPENHO (carrega antes de tudo) =====
    O arquivo acumulou dezenas de rotinas repetitivas (setInterval de 600-1200ms
@@ -15111,6 +15111,118 @@ aside>#btn-fx{margin-top:6px!important}
   }
   document.addEventListener('DOMContentLoaded',function(){integrar();setTimeout(integrar,400)});
   setTimeout(integrar,60); setTimeout(integrar,900);
+})();
+</script>
+
+<script id="mdk-compras-atas-2026-v28">
+/* ===== MODESK v28 · CARGA OFICIAL DAS ATAS/OS 2026 NO AMBIENTE DE COMPRAS =====
+   - preenche fornecedor, item, valor unitario, unidade, pedido MXM, data do pedido,
+     e-mail do fornecedor e status/observacoes
+   - cria o deadline de entrega (30 dias corridos a partir da data do pedido)
+   - lanca cada deadline na AGENDA (atividade com aviso) para disparar o alerta
+========================================================================= */
+(function(){
+  var VER='atas2026v28';
+  var PRAZO_DIAS=30;
+
+  var L=[
+  ['136/2026','Claudinei Tonietti EPP','Microfone Gooseneck Kadosh K-353','128,00','UN','134797','2026-08-18','fabricadosom3@gmail.com','Autorizacao enviada pelo sistema.'],
+  ['136/2026','Claudinei Tonietti EPP','Cabo XLR (30 metros)','138,00','UN','134797','2026-08-18','fabricadosom3@gmail.com','Autorizacao enviada pelo sistema.'],
+  ['136/2026','Claudinei Tonietti EPP','Cabo XLR (10 metros)','58,00','LIN','134797','2026-08-18','fabricadosom3@gmail.com','Autorizacao enviada pelo sistema.'],
+  ['136/2026','Claudinei Tonietti EPP','Cabo XLR (1,5 metros)','22,00','UN','134797','2026-08-18','fabricadosom3@gmail.com','Autorizacao enviada pelo sistema.'],
+  ['136/2026','Claudinei Tonietti EPP','Suporte de Caixa p/ Parede (80kg, Ibox)','74,00','LIN','134797','2026-08-18','fabricadosom3@gmail.com','Autorizacao enviada pelo sistema.'],
+  ['136/2026','Claudinei Tonietti EPP','Cabo Audio SC-30 Blindado Estereo (100m)','358,00','LIN','134797','2026-08-18','fabricadosom3@gmail.com','Autorizacao enviada pelo sistema.'],
+  ['137/2026','Dourados Comercio Varejista Ltda','Suporte Tripe para Caixa de Som','129,90','UN','','2026-08-19','','Divergencia notificada: Item 1 c/ erro na entrega (Req. 477740).'],
+  ['137/2026','Dourados Comercio Varejista Ltda','Plug XLR Macho de Linha (Datalink)','18,00','UN','','2026-08-19','','Em acompanhamento tecnico.'],
+  ['137/2026','Dourados Comercio Varejista Ltda','Plug XLR Femea de Linha (Santo Angelo)','18,00','UN','','2026-08-19','','Em acompanhamento tecnico.'],
+  ['138/2026','Sete Distribuidora Ltda','Cabo de Rede Landutti Cat6','8,47','MT','134720 / 134811','2026-08-18','SETEDISTRIBUIDORALTDA@HOTMAIL.COM','Autorizacao enviada.'],
+  ['138/2026','Sete Distribuidora Ltda','Camera PTZ SDI HDMI USB3 IP PoE','4.445,00','UN','134720 / 134811','2026-08-18','SETEDISTRIBUIDORALTDA@HOTMAIL.COM','Autorizacao enviada.'],
+  ['139/2026','F & K Brasil Ltda','Monitor 24" Dell C2423H','1.277,75','UN','134793','2026-08-18','fekbrasil@gmail.com','Confirmado recebimento e dados de entrega enviados.'],
+  ['139/2026','F & K Brasil Ltda','Smart TV 43" TCL QLED Google TV','1.741,49','UN','134793','2026-08-18','fekbrasil@gmail.com','Confirmado recebimento e dados de entrega enviados.'],
+  ['140/2026','Carvalho Miranda Equipamentos','Multicabo de 24 Vias (36 metros)','3.089,00','UN','','2026-08-18','docs@mcconsultoria.srv.br','Pedido de compras em andamento.'],
+  ['141/2026','Cameras Les Chansons Ltda','Mesa de Corte Blackmagic ATEM Mini Pro','2.627,37','UN','','','','Ata homologada no sistema.'],
+  ['142/2026','Lumos Consultoria e Tecnologia Ltda','Suporte de Microfone Preto PSU135 (RMV)','166,00','UN','','2026-08-19','contato@lumostecnologia.com.br','Confirmado (Protocolo de Atendimento no #778).'],
+  ['143/2026','Eletroquip Comercio e Licitacoes','Extensor HDMI (All Sine AS-EX 500)','105,00','UN','134905','2026-08-18','amanda@eletroquipsp.com.br','Autorizacao enviada pelo sistema.'],
+  ['144/2026','Vinicius Chaves dos Santos EPP','Smart TV 50" TCL QLED Google TV 4K','2.145,00','UN','','','','Ata homologada no sistema.'],
+  ['145/2026','H. A. Rossi Comercio e Locacoes','Suporte Movel de Chao p/ TV (32" a 70")','499,00','UN','134983','2026-08-19','gerencia@lojamaxsom.com.br','Autorizacao enviada pelo sistema.'],
+  ['146/2026','ASYS Tecnologia Ltda','Notebook Gamer Alienware m16 R2','9.828,00','UN','','','','Ata homologada no sistema.'],
+  ['147/2026','Nexo Hub Ltda','Mesa Digital Behringer 32 Canais (X32)','18.975,00','UN','','2026-08-18','contato.nexohub@gmail.com','Pedido respondido pelo fornecedor.'],
+  ['148/2026','B2G Comercio de Produtos Ltda','Pulpito com Suporte de TV (p/ TVs de 43")','3.600,00','UN','','','','Ata homologada no sistema.'],
+  ['149/2026','Alta Frequencia Ltda','Caixa de Som Ativa 1000W (EV ZLX12)','3.552,00','UN','','2026-08-20','licitaaf@gmail.com','Recebimento confirmado / Falha de envio em 26/08.'],
+  ['151/2026','45.166.656 Cristina Pereira Costa Romao','Instalacao e Configuracao do Auditorio','9.930,00','SV','','','','Ata homologada no sistema.'],
+  ['152/2026','A Frente Solucoes Integradas Ltda','Nobreak Intelbras 1500VA','707,14','UN','','2026-08-18','afrentelicitacoes@gmail.com','Nota Fiscal 975 enviada em 31/08/2026.'],
+  ['Outros','Ara Suprimentos em Geral Ltda','Suprimentos Gerais','','UN','135311','2026-08-24','comercialarasupri@gmail.com','Autorizacao enviada pelo sistema.'],
+  ['Outros','Igor Targino da Silva Ltda','Equipamentos / Servicos','','UN','135310','2026-08-24','igortargino97@gmail.com','Autorizacao enviada pelo sistema.'],
+  ['Outros','CIL - Comercio de Informatica Ltda','Equipamentos de Informatica','','UN','135306','2026-08-24','roberio.oliveira@nagem.com.br','Autorizacao enviada pelo sistema.'],
+  ['Outros','Clayvert Forlan Brasileiro Madeira Silva','Materiais Gerais','','UN','135305','2026-08-24','idaleciamo@gmail.com','Autorizacao enviada pelo sistema.']
+  ];
+
+  function uid(){try{return u()}catch(e){return 'at'+Math.random().toString(36).slice(2)}}
+  function mais(iso,d){ if(!iso)return ''; var x=new Date(iso+'T12:00:00'); x.setDate(x.getDate()+d);
+    return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0'); }
+  function chave(ata,desc){ return (ata+'|'+desc).toLowerCase().replace(/[^a-z0-9|]/g,''); }
+
+  function aplicar(){
+    if(!window.state||!window.comprasDados)return false;
+    var c=window.comprasDados(); if(!c)return false;
+    c.pedidos=c.pedidos||[]; c.projetos=c.projetos||[];
+    if(c.projetos.indexOf('Atas / OS 2026')<0)c.projetos.push('Atas / OS 2026');
+    if(c[VER])return true;
+
+    var s=window.state; s.atividades=s.atividades||[];
+
+    L.forEach(function(r){
+      var ata=r[0],forn=r[1],desc=r[2],val=r[3],un=r[4],mxm=r[5],data=r[6],mail=r[7],st=r[8];
+      var k=chave(ata,desc);
+      var obs=(val?'R$ '+val+' / '+un:un)+' · '+desc+(mxm?' · pedido MXM '+mxm:' · pedido MXM pendente')+(mail?' · '+mail:'')+' · '+st;
+      var deadline=data?mais(data,PRAZO_DIAS):'';
+      var status=/entrega confirmada|recebid[oa] e conferid/i.test(st)?'Entrega confirmada':'Aguardando entrega';
+
+      var p=c.pedidos.filter(function(x){return x.chaveAta===k})[0];
+      if(!p){
+        p={id:uid(),docs:{},paths:{},em:Date.now()};
+        c.pedidos.push(p);
+      }
+      p.chaveAta=k;
+      p.ri='Ata/OS '+ata;
+      p.catRi='Ata de registro';
+      p.rc=mxm||'';
+      p.catRc='COMP01';
+      p.num=mxm||('Ata '+ata);
+      p.proj='Atas / OS 2026';
+      p.forn=forn;
+      p.contato=mail||'';
+      p.item=desc; p.valorUnit=val; p.un=un; p.mxm=mxm; p.ata=ata; p.email=mail||'';
+      p.data=data||'';
+      p.deadline=deadline;
+      p.status=status;
+      p.statusTxt=st;
+      p.obs=obs;
+
+      /* ---- deadline na agenda (gera o alerta) ---- */
+      if(deadline&&status!=='Entrega confirmada'){
+        var tit='Entrega Ata/OS '+ata+' — '+forn;
+        var ja=s.atividades.some(function(a){return a.titulo===tit&&a.prazo===deadline});
+        if(!ja){
+          s.atividades.push({id:uid(),titulo:tit,prazo:deadline,hora:'09:00',tipo:'Trabalho',
+            prioridade:'Alta',repetir:'',aviso:30,
+            desc:'Deadline de entrega ('+PRAZO_DIAS+' dias do pedido de '+data+'). '+desc+(val?' — R$ '+val+'/'+un:'')+
+                 (mxm?' — pedido MXM '+mxm:'')+(mail?' — cobrar em '+mail:'')+' — '+st,
+            arquivo:null,feito:false,criado:Date.now()});
+        }
+      }
+    });
+
+    c[VER]=1;
+    try{save(true)}catch(e){}
+    try{checarDeadlines()}catch(e){}
+    try{render()}catch(e){}
+    console.log('[MODESK v28] '+L.length+' linhas das atas 2026 aplicadas em Compras + Agenda');
+    return true;
+  }
+
+  var n=0, t=setInterval(function(){ try{ if(aplicar()||++n>40)clearInterval(t) }catch(e){ if(++n>40)clearInterval(t) } },1500);
+  setTimeout(function(){try{aplicar()}catch(e){}},1400);
 })();
 </script>
 
