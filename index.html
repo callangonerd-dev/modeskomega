@@ -11249,6 +11249,9 @@ html[data-jv90="1"] #jv-orb{background:radial-gradient(circle at 34% 28%,#fff,va
     '<div class="wide"><label>PDF da requisicao de compra</label><div class="row" id="cp11-up-rc">'+upBox('rc')+'</div></div>'+
     '</div><div class="cp11-fbar"><button class="btn sm primary" onclick="cp11Add()">'+ico('mais')+' Lancar pedido</button>'+
     '<button class="btn sm" onclick="cp10CSV()">'+ico('baixar')+' Exportar CSV</button>'+
+    '<input id="cp11-imp" type="file" accept=".csv,text/csv" style="display:none" onchange="cp11ImportarCSV(this)"/>'+
+    '<button class="btn sm" onclick="document.getElementById(\'cp11-imp\').click()">'+ico('upload')+' Importar CSV (substitui a lista)</button>'+
+    '<button class="btn sm" onclick="cp11LimparControle()">'+ico('fechar')+' Limpar controle</button>'+
     '<button class="btn sm" onclick="cp11AlertaEntrega(true)">'+ico('sino')+' Testar alerta</button></div></div></details>';
   }
 
@@ -11340,6 +11343,124 @@ html[data-jv90="1"] #jv-orb{background:radial-gradient(circle at 34% 28%,#fff,va
     var r=document.getElementById('cpv11'); if(!r){try{render()}catch(e){}return}
     Array.prototype.forEach.call(r.querySelectorAll('.cp11-aba'),function(b){b.classList.toggle('on',b.getAttribute('data-k')===k)});
     Array.prototype.forEach.call(r.querySelectorAll('.cp11-pane'),function(p){p.classList.toggle('on',p.getAttribute('data-k')===k)});
+  };
+
+  /* ---------- importar planilha CSV: substitui a lista e agenda as cobrancas ---------- */
+  function cpCsvLinhas(txt){
+    txt=String(txt||'').replace(/^\uFEFF/,'').replace(/\r\n?/g,'\n');
+    var prim=txt.split('\n')[0]||'';
+    var sep=(prim.split(';').length>=prim.split(',').length)?';':',';
+    var linhas=[],campo='',atual=[],dentro=false;
+    for(var i=0;i<txt.length;i++){var ch=txt[i];
+      if(dentro){ if(ch==='"'){ if(txt[i+1]==='"'){campo+='"';i++} else dentro=false } else campo+=ch }
+      else if(ch==='"')dentro=true;
+      else if(ch===sep){atual.push(campo);campo=''}
+      else if(ch==='\n'){atual.push(campo);linhas.push(atual);atual=[];campo=''}
+      else campo+=ch;
+    }
+    if(campo!==''||atual.length){atual.push(campo);linhas.push(atual)}
+    return linhas.filter(function(l){return l.join('').trim()!==''});
+  }
+  function cpNorm(x){return String(x==null?'':x).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]/g,'')}
+  function cpCol(cab,nomes){
+    for(var j=0;j<nomes.length;j++){ for(var i=0;i<cab.length;i++){ if(cab[i]===nomes[j])return i } }
+    for(var j2=0;j2<nomes.length;j2++){ for(var i2=0;i2<cab.length;i2++){ if(cab[i2].indexOf(nomes[j2])>=0)return i2 } }
+    return -1;
+  }
+  function cpData(v){
+    v=String(v==null?'':v).trim(); if(!v)return '';
+    var m=v.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+    if(m)return m[1]+'-'+('0'+m[2]).slice(-2)+'-'+('0'+m[3]).slice(-2);
+    m=v.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})/);
+    if(m){var a=m[3].length===2?'20'+m[3]:m[3];return a+'-'+('0'+m[2]).slice(-2)+'-'+('0'+m[1]).slice(-2)}
+    return '';
+  }
+  function cpStatusValido(v){
+    var n=cpNorm(v),achou='';
+    STATUS.forEach(function(s){var k=(s&&s.k)?s.k:s; if(!achou&&cpNorm(k)===n)achou=k});
+    if(achou)return achou;
+    if(n.indexOf('confirm')>=0||n.indexOf('entregue')>=0)return 'Entrega confirmada';
+    if(n.indexOf('cancel')>=0)return 'Cancelado';
+    if(n.indexOf('parcial')>=0)return 'Entrega parcial';
+    if(n.indexOf('transito')>=0)return 'Em transito';
+    if(n.indexOf('cobrad')>=0)return 'Cobrado';
+    return 'Aguardando entrega';
+  }
+  function cpLimparCobrancas(){
+    var s=window.state; if(!s)return;
+    s.atividades=(s.atividades||[]).filter(function(a){return a && a.fonte!=='ImportCSV'});
+    s.eventos=(s.eventos||[]).filter(function(e){return e && e.fonte!=='ImportCSV'});
+  }
+  window.cp11LimparControle=function(){
+    if(!confirm('Apagar TODOS os lancamentos da planilha de controle e as cobrancas importadas para a agenda?'))return;
+    var c=C(); c.pedidos=[]; cpLimparCobrancas();
+    try{save(true)}catch(e){} toast('Planilha de controle limpa'); try{render()}catch(e){}
+  };
+  window.cp11ImportarCSV=function(input){
+    var f=input&&input.files&&input.files[0]; if(!f){return}
+    var r=new FileReader();
+    r.onload=function(){
+      try{
+        var linhas=cpCsvLinhas(r.result);
+        if(linhas.length<2){toast('A planilha esta vazia');input.value='';return}
+        var cab=linhas[0].map(cpNorm);
+        var iRi=cpCol(cab,['reqinterna','requisicaointerna','ri','interna']);
+        var iCri=cpCol(cab,['catinterna','categoriainterna','catri']);
+        var iRc=cpCol(cab,['reqcompra','requisicaodecompra','requisicaocompra','rc','pedido','numero']);
+        var iCrc=cpCol(cab,['catcompra','categoriadecompra','categoriacompra','catrc','categoria']);
+        var iPj=cpCol(cab,['projeto']);
+        var iF=cpCol(cab,['fornecedor','empresa','razaosocial']);
+        var iCt=cpCol(cab,['contato','quemcobrar','responsavel']);
+        var iD=cpCol(cab,['data','datadopedido','emissao']);
+        var iDl=cpCol(cab,['prazoentrega','prazodeentrega','prazo','entrega','previsao','vencimento','datacobranca','cobranca']);
+        var iSt=cpCol(cab,['status','situacao']);
+        var iRec=cpCol(cab,['entregaem','recebidoem','entregueem']);
+        var iOb=cpCol(cab,['obs','observacao','observacoes']);
+        var G=function(l,i){return i<0?'':String(l[i]==null?'':l[i]).trim()};
+
+        var c=C();
+        c.pedidos=[];            /* exclui o que existia */
+        cpLimparCobrancas();     /* e as cobrancas antes importadas */
+        var s=window.state; s.atividades=s.atividades||[];
+        var nPed=0,nCob=0;
+        for(var k=1;k<linhas.length;k++){
+          var l=linhas[k];
+          var ri=G(l,iRi),rc=G(l,iRc);
+          var forn=G(l,iF);
+          if(!ri&&!rc&&!forn)continue;
+          var dl=cpData(G(l,iDl)), st=cpStatusValido(G(l,iSt));
+          var ped={id:u(),ri:ri,rc:rc,num:ri||rc,
+            catRi:G(l,iCri),catRc:G(l,iCrc),cat:G(l,iCrc)||G(l,iCri),
+            proj:G(l,iPj),forn:forn,contato:G(l,iCt),
+            data:cpData(G(l,iD))||hoje(),deadline:dl,status:st,
+            recebidoEm:cpData(G(l,iRec)),obs:G(l,iOb),
+            paths:{},docs:{},hist:[],em:Date.now(),origem:'ImportCSV'};
+          c.pedidos.push(ped); nPed++;
+          /* categorias e projetos novos entram nas listas */
+          try{
+            if(ped.catRi&&RI().indexOf(ped.catRi)<0)RI().push(ped.catRi);
+            if(ped.catRc&&RC().indexOf(ped.catRc)<0)RC().push(ped.catRc);
+            if(ped.proj&&PJ().indexOf(ped.proj)<0)PJ().push(ped.proj);
+          }catch(e){}
+          /* data de cobranca na agenda */
+          if(dl&&st!=='Entrega confirmada'&&st!=='Cancelado'){
+            s.atividades.unshift({id:u(),
+              titulo:'Cobrar entrega '+(ri||rc||forn||''),
+              info:(forn||'')+(ped.contato?' \u00B7 falar com '+ped.contato:'')+(ped.proj?' \u00B7 projeto '+ped.proj:''),
+              desc:'Cobranca importada da planilha de controle de pedidos.',
+              data:dl,prazo:dl,hora:'08:00',tipo:'Trabalho',prioridade:'Alta',prio:'alta',
+              repetir:'',aviso:30,arquivo:null,feito:false,fonte:'ImportCSV',criado:Date.now(),em:Date.now()});
+            nCob++;
+          }
+        }
+        try{save(true)}catch(e){}
+        toast(nPed+' pedido(s) importado(s) \u00B7 '+nCob+' cobranca(s) na agenda');
+        try{render()}catch(e){}
+      }catch(e){ toast('Nao consegui ler essa planilha CSV') }
+      input.value='';
+    };
+    r.onerror=function(){toast('Falha ao abrir o arquivo');input.value=''};
+    r.readAsText(f,'utf-8');
   };
 
   window.vPedidos=function(){
