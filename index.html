@@ -5601,7 +5601,7 @@ console.log('[MODESK v80] brilho por cor · telas sem rolagem · menu arrastáve
       return '<div class="cp11-card '+cls+'">'+
         '<div class="cp16-controls"><div><i>Requisição interna</i><strong>'+esc(p.ri||'—')+'</strong><span>'+esc(p.catRi||'Sem categoria interna')+'</span></div><div><i>Requisição de compra</i><strong>'+esc(p.rc||'—')+'</strong><span>'+esc(p.catRc||'Sem categoria de compra')+'</span></div></div>'+
         '<h4><span class="cp11-num">'+esc(p.proj||'Sem projeto')+'</span><span style="margin-left:auto">'+botaoStatus(p)+'</span></h4>'+
-        '<div class="dim cp16-supplier" style="font-size:12.4px"><i>Fornecedor</i><b>'+esc(p.forn||'não informado')+'</b></div>'+(p.desc?'<div class="dim" style="font-size:12px"><i>Item</i><b>'+esc(p.desc)+'</b>'+(p.qtd?' &middot; '+esc(p.qtd):'')+(p.mxm?' &middot; MXM '+esc(p.mxm):'')+'</div>':'')+
+        '<div class="dim cp16-supplier" style="font-size:12.4px"><i>Fornecedor</i><b>'+esc(p.forn||'não informado')+'</b></div>'+(p.desc?'<div class="dim" style="font-size:12px"><i>Item  </i><b>'+esc(p.desc)+'</b>'+(p.qtd?' &middot; '+esc(p.qtd):'')+(p.mxm?' &middot; MXM '+esc(p.mxm):'')+'</div>':'')+
         '<div class="cp11-meta">'+
           '<div><i>Pedido</i>'+(p.data?fmt(p.data):'\u2014')+'</div>'+
           '<div><i>Entrega</i>'+(p.deadline?fmt(p.deadline):'\u2014')+'</div>'+
