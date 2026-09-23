@@ -929,6 +929,30 @@ main:has(#mp-tb){padding-left:18px;padding-right:18px}
 #app aside .navbtn:hover .ui-icon>svg,#app aside .sbu-c:hover .ui-icon>svg{animation-play-state:paused!important;transform:scale(1.12)!important}
 @media(prefers-reduced-motion:reduce){#app aside .ui-icon,#app aside .ui-icon>svg{animation:none!important}}
 </style>
+<style id="modesk-v111-sidebar-fixed">
+/* v111 · sidebar fixa conforme ajuste enviado */
+@media(min-width:701px){
+  #app>aside{
+    position:fixed !important;
+    inset:0 auto 0 0 !important;
+    z-index:1000 !important;
+    width:218px !important;
+    min-width:218px !important;
+    max-width:218px !important;
+    height:100dvh !important;
+    max-height:100dvh !important;
+    margin:0 !important;
+    padding:8px 0px 5px 10px !important;
+    border-radius:0 !important;
+    overflow:hidden !important;
+    align-self:auto !important;
+    transform:none !important;
+  }
+  /* coluna 218px continua reservada; conteúdo principal fica na 2a coluna */
+  #app.app{grid-template-columns:218px minmax(0,1fr) !important}
+  #app>main{grid-column:2 !important}
+}
+</style>
 </head>
 <body>
 <!-- #winbar removido (v12.3) — navegação já existe na barra lateral -->
@@ -1050,7 +1074,27 @@ const DEF={
     hist:[]
   }
 };
-let state=load(), tab='dashboard';
+function limparComprasV121(st){
+  if(!st)return st;
+  if(!st._comprasLimpoV121){
+    st.pedidos=[];
+    st.compras=Object.assign({},st.compras||{},{lista:[],internas:[],reqs:[],pedidos:[],arquivados:[],docs:{},migrado:1});
+    st._comprasLimpoV121=1;
+  }
+  const ligadoACompras=x=>x&&(x.fonte==='Compras'||x.fonte==='ImportCSV'||/cobrar\s+entrega|cobran[cç]a.*(compra|pedido)|pedido.*(cobran[cç]a|entrega)|^entrega\s+(ata|pedido|compra)/i.test([x.titulo,x.desc,x.info].filter(Boolean).join(' ')));
+  st.atividades=(st.atividades||[]).filter(x=>!ligadoACompras(x));
+  st.eventos=(st.eventos||[]).filter(x=>!ligadoACompras(x));
+  st._avisosComprasRemovidosV122=1;
+  return st;
+}
+let state=limparComprasV121(load()), tab='dashboard';
+try{localStorage.setItem(LS,JSON.stringify(state))}catch(e){}
+try{
+  if(localStorage.getItem('modesk.compras.limpo.v121')!=='1'){
+    indexedDB.deleteDatabase('modeskCompras');
+    localStorage.setItem('modesk.compras.limpo.v121','1');
+  }
+}catch(e){}
 // expoe o estado para os demais modulos (window.state espelha a variavel real)
 try{Object.defineProperty(window,'state',{get:function(){return state},set:function(v){state=v},configurable:true})}catch(e){window.state=state}
 
@@ -1116,8 +1160,11 @@ function connectCloud(){
     unsub&&unsub();
     unsub=db.collection('modesk_pessoal').doc(GESTOR).onSnapshot(d=>{
       const data=d.data(); if(!data?.payload)return;
-      const remote=JSON.parse(data.payload);
-      if(JSON.stringify(remote)!==JSON.stringify(state)){state=Object.assign(structuredClone(DEF),remote);localStorage.setItem(LS,JSON.stringify(state));render();setSyncStatus('online');}
+      const remote=limparComprasV121(JSON.parse(data.payload));
+      if(JSON.stringify(remote)!==JSON.stringify(state)){
+        state=Object.assign(structuredClone(DEF),remote);localStorage.setItem(LS,JSON.stringify(state));render();setSyncStatus('online');
+        if(remote._comprasLimpoV121===1)db.collection('modesk_pessoal').doc(GESTOR).set({payload:JSON.stringify(state),at:Date.now()});
+      }
     });
     ($('tb-sync')||{}).textContent='nuvem · tempo real ativo';
     setSyncStatus('online');
@@ -1396,16 +1443,14 @@ function go(k){tab=ALIAS_TELA[k]||k;render();window.scrollTo({top:0,behavior:'sm
 
 /* ================= ALERTAS DE DATAS ================= */
 function dias(d){return Math.ceil((new Date(d)-new Date().setHours(0,0,0,0))/864e5)}
+function avisoLigadoACompras(x){return !!(x&&(x.fonte==='Compras'||x.fonte==='ImportCSV'||/cobrar\s+entrega|cobran[cç]a.*(compra|pedido)|pedido.*(cobran[cç]a|entrega)|^entrega\s+(ata|pedido|compra)/i.test([x.titulo,x.desc,x.info].filter(Boolean).join(' '))))}
 function alertas(){
   const out=[];
   state.eventos.forEach(e=>{const d=dias(e.data);
     if(d<0)out.push({t:'err',m:`Evento vencido: ${e.titulo} (${fmt(e.data)})`});
     else if(d===0)out.push({t:'err',m:`HOJE: ${e.titulo} às ${e.hora||'--:--'}`});
     else if(d<=3)out.push({t:'w',m:`Em ${d} dia(s): ${e.titulo} — ${fmt(e.data)} ${e.hora||''}`});});
-  state.pedidos.forEach(p=>{if(!p.prazo)return;const d=dias(p.prazo);
-    if(p.status!=='Concluído'&&d<0)out.push({t:'err',m:`Pedido ${p.numero} atrasado ${Math.abs(d)}d`});
-    else if(p.status!=='Concluído'&&d<=5)out.push({t:'w',m:`Pedido ${p.numero} vence em ${d}d`});});
-  state.atividades.forEach(a=>{if(a.feito||!a.prazo)return;const st=statusAtiv(a);
+  state.atividades.forEach(a=>{if(a.feito||!a.prazo||avisoLigadoACompras(a))return;const st=statusAtiv(a);
     if(st.late)out.push({t:'err',m:`ATIVIDADE ${a.tipo||''}: ${a.titulo} — prazo ${fmt(a.prazo)} ${a.hora||''}`});
     else if(dias(a.prazo)<=2)out.push({t:'w',m:`Atividade em breve: ${a.titulo} (${fmt(a.prazo)})`});});
   state.sends.forEach(s=>{if(s.status==='Aguardando retorno'&&dias(s.data)<-2)out.push({t:'w',m:`SEND "${s.assunto}" sem retorno há ${Math.abs(dias(s.data))} dias`})});
@@ -1603,8 +1648,8 @@ let agendaCursor=new Date(), agendaSelecionada=new Date().toISOString().slice(0,
 function agendaISO(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 function agendaItens(){
   const itens=[];
-  (state.eventos||[]).forEach(e=>{if(e.data)itens.push({id:e.id,data:e.data,hora:e.hora||'',titulo:e.titulo,tipo:'evento',sub:e.local||e.info||'',feito:false})});
-  (state.atividades||[]).forEach(a=>{if(a.prazo)itens.push({id:a.id,data:a.prazo,hora:a.hora||'',titulo:a.titulo,tipo:(a.tipo==='Pessoal'?'lembrete':'atividade'),sub:a.desc||a.prioridade||'',feito:!!a.feito})});
+  (state.eventos||[]).forEach(e=>{if(e.data&&!avisoLigadoACompras(e))itens.push({id:e.id,data:e.data,hora:e.hora||'',titulo:e.titulo,tipo:'evento',sub:e.local||e.info||'',feito:false})});
+  (state.atividades||[]).forEach(a=>{if(a.prazo&&!avisoLigadoACompras(a))itens.push({id:a.id,data:a.prazo,hora:a.hora||'',titulo:a.titulo,tipo:(a.tipo==='Pessoal'?'lembrete':'atividade'),sub:a.desc||a.prioridade||'',feito:!!a.feito})});
   return itens.sort((a,b)=>(a.data+a.hora).localeCompare(b.data+b.hora));
 }
 function agendaMudar(delta){agendaCursor=new Date(agendaCursor.getFullYear(),agendaCursor.getMonth()+delta,1);render()}
@@ -2539,26 +2584,13 @@ function verAtiv(id){const a=state.atividades.find(x=>x.id===id);if(!a)return;co
 function pedirNotificacao(){if(!('Notification'in window))return toast('Navegador sem suporte');
   Notification.requestPermission().then(p=>toast(p==='granted'?'Notificações ativadas':'Notificações negadas'))}
 
-function ativarNotificacoes(){if(!('Notification'in window))return;
-  if(Notification.permission==='default'){Notification.requestPermission().then(perm=>{if(perm==='granted')notificarPedidosHoje(true)})}
-  else if(Notification.permission==='granted')notificarPedidosHoje();}
-let pedidosAvisados={};
-function notificarPedidosHoje(forcar){
-  if(!('Notification'in window)||Notification.permission!=='granted')return;
-  (state.pedidos||[]).forEach(p=>{
-    if(!p.prazo||p.status==='Concluído')return;
-    const d=dias(p.prazo); if(d>0) return;
-    const chave=p.id+'|'+p.prazo; if(pedidosAvisados[chave]&&!forcar)return; pedidosAvisados[chave]=1;
-    try{new Notification('MODESK: Pedido '+(d<0?'está atrasado!':'vence hoje!'),
-      {body:'#'+(p.numero||'—')+' '+(p.forn||'')+' — prazo '+fmt(p.prazo)});}catch(e){}
-  });
-}
+function ativarNotificacoes(){/* notificações de compras removidas */}
 
 /* ---------- MONITOR DE DEADLINE (pisca em vermelho) ---------- */
 let deadlineAtivas=[],avisadas={};
 function checarDeadlines(){
-  deadlineAtivas=state.atividades.filter(a=>!a.feito&&statusAtiv(a).late);
-  const evHoje=state.eventos.filter(e=>dias(e.data)<=0);
+  deadlineAtivas=state.atividades.filter(a=>!a.feito&&!avisoLigadoACompras(a)&&statusAtiv(a).late);
+  const evHoje=state.eventos.filter(e=>!avisoLigadoACompras(e)&&dias(e.data)<=0);
   const bar=$('deadline-bar');
   if(bar){
     if(deadlineAtivas.length||evHoje.length){
@@ -2826,7 +2858,6 @@ function winClose(){if(confirm('Sair do MODESK?'))logout()}
   setInterval(checarDeadlines,20000);
   setTimeout(checarDeadlines,800);
   setTimeout(ativarNotificacoes,1500);
-  setInterval(notificarPedidosHoje,600000);
   setInterval(()=>{if(tab==='agenda')render()},60000);
   window.addEventListener('online',atualizarStatusbar);
   window.addEventListener('offline',atualizarStatusbar);
@@ -3425,7 +3456,6 @@ function compromissos(){
   var out=[],St=S();
   (St.eventos||[]).forEach(function(e){var ms=quando(e.data,e.hora);if(ms)out.push({id:'e:'+(e.id||e.titulo+e.data+e.hora),titulo:e.titulo||'Evento',ms:ms,local:e.local||'',info:e.info||'',fonte:'Agenda MODESK'})});
   (St.atividades||[]).forEach(function(a){if(a.feito)return;var ms=quando(a.prazo,a.hora);if(ms&&a.hora)out.push({id:'a:'+(a.id||a.titulo+a.prazo),titulo:a.titulo||'Atividade',ms:ms,local:'',info:(a.prioridade||'')+' '+(a.obs||''),fonte:'Atividades'})});
-  (St.pedidos||[]).forEach(function(p){var ms=quando(p.prazo,'08:00');if(ms&&!/entreg|conclu|cancel/i.test(p.status||''))out.push({id:'p:'+(p.id||p.numero),titulo:'Pedido '+(p.numero||'')+' vence hoje',ms:ms,local:p.fornecedor||'',info:p.obs||'',fonte:'Pedidos'})});
   return out.sort(function(a,b){return a.ms-b.ms});
 }
 function beep(){
@@ -4358,36 +4388,6 @@ console.log('[MODESK v80] brilho por cor · telas sem rolagem · menu arrastáve
   window.cpDelPedidoC=function(id){var c=C();c.pedidos=c.pedidos.filter(function(x){return x.id!==id});sv('Pedido removido')};
 
   /* ---------- ALERTAS DE ENTREGA (igual agenda) ---------- */
-  window.comprasAlertas=function(){
-    var out=[];
-    C().pedidos.forEach(function(p){
-      if(!p.deadline||p.status==='Recebido'||p.status==='Entrega confirmada'||p.status==='Cancelado')return;
-      var d=dias(p.deadline),rot=(p.ri||p.rc||p.num||'sem numero'),
-          quem=(p.forn||'sem fornecedor')+(p.contato?' · cobrar com '+p.contato:'')+(p.proj?' · projeto '+p.proj:'');
-      if(d<0)out.push({t:'err',m:'ENTREGA ATRASADA '+Math.abs(d)+'d — COBRAR — '+rot+' ('+quem+')'});
-      else if(d===0)out.push({t:'err',m:'ENTREGA HOJE — COBRAR — '+rot+' ('+quem+')'});
-      else if(d<=5)out.push({t:'w',m:'Entrega em '+d+'d — '+rot+' ('+quem+')'});
-    });
-    return out;
-  };
-  var _alertas=window.alertas;
-  window.alertas=function(){
-    var base=[]; try{base=_alertas()||[]}catch(e){}
-    return base.concat(window.comprasAlertas());
-  };
-  var avisadosCp={};
-  function notificarCompras(){
-    if(!('Notification'in window)||Notification.permission!=='granted')return;
-    C().pedidos.forEach(function(p){
-      if(!p.deadline||p.status==='Recebido'||p.status==='Entrega confirmada'||p.status==='Cancelado')return;
-      var d=dias(p.deadline); if(d>0)return;
-      var k=p.id+'|'+p.deadline; if(avisadosCp[k])return; avisadosCp[k]=1;
-      try{new Notification('MODESK Compras: COBRAR '+(p.ri||p.rc||p.num||'')+(d<0?' — ATRASADO':' — entrega hoje'),
-        {body:(p.forn||'')+(p.contato?' · '+p.contato:'')+' — prazo '+fmt(p.deadline)})}catch(e){}
-    });
-  }
-  setInterval(notificarCompras,300000); setTimeout(notificarCompras,4000);
-
   /* ---------- VIEW ---------- */
   window.cpAba=function(k){
     CP.aba=k;
@@ -4475,14 +4475,10 @@ console.log('[MODESK v80] brilho por cor · telas sem rolagem · menu arrastáve
     var abas=[['pedidos','Planilha de controle ('+c.pedidos.length+')'],
       ['lista','Lista previa — apoio ('+c.lista.length+')']];
     if(!ab||['pedidos','lista'].indexOf(ab)<0){ab='pedidos';CP.aba='pedidos'}
-    var al=window.comprasAlertas();
-    var aviso=al.length?'<div class="card" style="margin-bottom:14px"><h3>Cobrancas de entrega</h3>'+
-      al.map(function(a){return '<div class="row" style="gap:8px;margin:6px 0"><span class="tag '+(a.t==='err'?'t-err blink':'t-warn')+'">'+(a.t==='err'?'urgente':'atencao')+'</span><span>'+esc(a.m)+'</span></div>'}).join('')+'</div>':'';
     return page('Pedidos de Compra — planilha de controle',
       'Controle de datas, prazo de entrega e status com confirmacao de entrega. Colunas: requisicao interna, requisicao de compra, categoria, projeto, fornecedor, contato para cobrar, prazo e PDFs abertos direto na tela.',
       '<div class="cp-flow"><span class="cp-chip">Req. interna</span><b>&rsaquo;</b><span class="cp-chip">Req. de compra</span><b>&rsaquo;</b>'+
       '<span class="cp-chip">Prazo de entrega</span><b>&rsaquo;</b><span class="cp-chip">Cobranca</span><b>&rsaquo;</b><span class="cp-chip">Entrega confirmada</span></div>'+
-      aviso+
       '<div id="cp-abas">'+abas.map(function(a){return '<button class="cp-aba '+(a[0]===ab?'on':'')+'" data-k="'+a[0]+'" onclick="cpAba(\''+a[0]+'\')">'+a[1]+'</button>'}).join('')+'</div>'+
       '<div class="cp-pane '+(ab==='lista'?'on':'')+'" data-k="lista">'+paneLista()+'</div>'+
       '<div class="cp-pane '+(ab==='pedidos'?'on':'')+'" data-k="pedidos">'+panePedidos()+'</div>'+
@@ -4994,17 +4990,6 @@ console.log('[MODESK v80] brilho por cor · telas sem rolagem · menu arrastáve
     C().pedidos.unshift(n); sv('Lancamento duplicado');
   };
 
-  /* ---------- lembrete de cobranca na agenda ---------- */
-  window.cp10Lembrete=function(id){
-    var p=C().pedidos.find(function(x){return x.id===id}); if(!p)return;
-    var s=window.state; s.atividades=s.atividades||[];
-    var quando=p.deadline||hoje();
-    s.atividades.unshift({id:u(),titulo:'Cobrar entrega '+(p.ri||p.rc||''),
-      info:(p.forn||'')+(p.contato?' · falar com '+p.contato:'')+(p.proj?' · projeto '+p.proj:''),
-      data:quando,hora:'08:00',prazo:quando,prio:'alta',feito:false,fonte:'Compras',em:Date.now()});
-    sv('Lembrete de cobranca criado para '+(window.fmt?fmt(quando):quando));
-  };
-
   /* ---------- exportar CSV ---------- */
   window.cp10CSV=function(){
     var cab=['Req. interna','Cat. interna','Req. compra','Cat. compra','Projeto','Fornecedor','Contato','Data','Prazo entrega','Status','Entrega em','Obs'];
@@ -5089,7 +5074,6 @@ console.log('[MODESK v80] brilho por cor · telas sem rolagem · menu arrastáve
           STATUS.map(function(s){return '<option '+(s===st?'selected':'')+'>'+s+'</option>'}).join('')+'</select>'+
           '<div style="margin-top:4px">'+tagSt(st)+(p.recebidoEm?'<div class="dim mono">entregue '+fmt(p.recebidoEm)+'</div>':'')+'</div>'+
           '<div class="row" style="gap:4px;margin-top:6px">'+
-          (ativo?'<button class="btn sm" title="criar lembrete de cobranca na agenda" onclick="cp10Lembrete(\''+p.id+'\')">lembrar</button>':'')+
           (ativo?'<button class="btn sm" onclick="cp10Status(\''+p.id+'\',\'Entrega confirmada\')">confirmar</button>':'')+
           '<button class="btn sm primary" onclick="cp10Salvar(\''+p.id+'\')">salvar</button>'+
           '<button class="btn sm" onclick="cp10Dup(\''+p.id+'\')">copiar</button>'+
@@ -5185,14 +5169,11 @@ console.log('[MODESK v80] brilho por cor · telas sem rolagem · menu arrastáve
   window.vPedidos=function(){
     migrar();
     var c=C(),ab=(window.CP&&CP.aba==='controle')?'controle':'lista';
-    var al=[];
-    setTimeout(function(){try{pintarPend()}catch(e){}},60); try{al=window.comprasAlertas()||[]}catch(e){}
-    var aviso=al.length?'<div class="card cp10-sec"><h3>Cobrancas de entrega</h3>'+
-      al.map(function(a){return '<div class="row" style="gap:8px;margin:6px 0"><span class="tag '+(a.t==='err'?'t-err blink':'t-warn')+'">'+(a.t==='err'?'urgente':'atencao')+'</span><span>'+esc(a.m)+'</span></div>'}).join('')+'</div>':'';
+    setTimeout(function(){try{pintarPend()}catch(e){}},60);
     var abas=[['lista','Lista previa ('+c.lista.length+')'],['controle','Planilha de controle ('+c.pedidos.length+')']];
     return page('Pedidos de Compra — planilha de controle',
       'Datas, prazo de entrega e status com confirmacao de entrega. Requisicao interna e de compra com numero e categoria proprios, projeto, fornecedor, contato para cobrar e PDFs abertos dentro do site.',
-      '<div id="cpv10">'+aviso+
+      '<div id="cpv10">'+
       '<div id="cp-abas">'+abas.map(function(a){return '<button class="cp-aba '+(a[0]===ab?'on':'')+'" data-k="'+a[0]+'" onclick="cpAba(\''+a[0]+'\')">'+a[1]+'</button>'}).join('')+'</div>'+
       '<div class="cp-pane '+(ab==='lista'?'on':'')+'" data-k="lista">'+paneLista()+'</div>'+
       '<div class="cp-pane '+(ab==='controle'?'on':'')+'" data-k="controle">'+paneControle()+'</div>'+
@@ -5525,7 +5506,7 @@ console.log('[MODESK v80] brilho por cor · telas sem rolagem · menu arrastáve
       '<div style="margin-top:14px"><label>Atualizacao do status (texto)</label>'+
       '<textarea id="cp11-txt" placeholder="Ex.: fornecedor confirmou envio para sexta">'+esc(p.statusTxt||'')+'</textarea>'+
       '<div class="row" style="gap:6px;margin-top:8px"><button class="btn sm primary" onclick="cp11SalvarTxt(\''+p.id+'\')">Salvar atualizacao</button>'+
-      (arq?'':'<button class="btn sm" onclick="cp11Lembrar(\''+p.id+'\')">Criar cobranca na agenda</button>')+'</div></div>'+
+      '</div></div>'+
       (hist.length?'<div class="hist">'+hist.map(function(h){return '<div><b>'+esc(h.st||'')+'</b> '+esc(h.txt||'')+'<small>'+esc(h.em||'')+'</small></div>'}).join('')+'</div>':'<p class="dim" style="margin-top:14px">Sem historico ainda.</p>')+
       '</div><div class="df">'+
       (arq?'<span class="tag t-ok">Ja arquivado em '+fmt(p.arquivadoEm)+'</span><button class="btn sm" onclick="cp11Desarquivar(\''+p.id+'\')">Voltar para a planilha</button>':
@@ -5549,7 +5530,6 @@ console.log('[MODESK v80] brilho por cor · telas sem rolagem · menu arrastáve
     p.statusTxt=v; logar(p,v); try{save(true)}catch(e){}
     toast('Atualizacao registrada'); pintar(); cp11Gaveta(id);
   };
-  window.cp11Lembrar=function(id){try{cp10Lembrete(id)}catch(e){}};
   window.cp11Arquivar=function(id){
     var c=C(),p=c.pedidos.find(function(x){return x.id===id}); if(!p)return;
     if((p.status||'')!=='Entrega confirmada')return toast('Confirme a entrega antes de arquivar');
@@ -5562,42 +5542,6 @@ console.log('[MODESK v80] brilho por cor · telas sem rolagem · menu arrastáve
     delete p.arquivadoEm; logar(p,'voltou para a planilha ativa');
     c.arquivados=c.arquivados.filter(function(x){return x.id!==id}); c.pedidos.unshift(p);
     cp11Fechar(); try{save(true)}catch(e){} toast('Pedido voltou para a planilha'); try{render()}catch(e){}
-  };
-
-  /* ---------- alerta na tela no dia da entrega ---------- */
-  function jaAvisado(k){try{return localStorage.getItem('mdk.cp11.aviso.'+k)===hoje()}catch(e){return false}}
-  function marcar(k){try{localStorage.setItem('mdk.cp11.aviso.'+k,hoje())}catch(e){}}
-  function caixaAlerta(){
-    var e=document.getElementById('cp11-alerta');
-    if(e)return e;
-    e=document.createElement('div'); e.id='cp11-alerta'; document.body.appendChild(e); return e;
-  }
-  window.cp11FecharAlerta=function(){var e=document.getElementById('cp11-alerta');if(e)e.classList.remove('on')};
-  window.cp11AlertaEntrega=function(forcar){
-    var c; try{c=C()}catch(e){return}
-    var lista=c.pedidos.filter(function(p){
-      var st=p.status||'';
-      if(st==='Entrega confirmada'||st==='Cancelado')return false;
-      if(!p.deadline)return false;
-      var d=dias(p.deadline);
-      return d<=0;
-    });
-    lista=lista.filter(function(p){return forcar||!jaAvisado(p.id)});
-    if(!lista.length)return;
-    lista.forEach(function(p){marcar(p.id)});
-    var e=caixaAlerta();
-    e.innerHTML='<div class="bx"><div style="width:30px;height:30px;color:#ff6a74">'+ico('sino')+'</div>'+
-      '<div style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#ff6a74;font-weight:800">Entrega de pedido \u00B7 cobrar hoje</div>'+
-      '<h2>'+lista.length+' pedido(s) precisam de cobranca</h2>'+
-      lista.slice(0,6).map(function(p){var d=dias(p.deadline);
-        return '<p style="margin:8px 0"><b>'+esc(p.ri||p.rc||'sem numero')+'</b> \u00B7 '+esc(p.forn||'sem fornecedor')+
-        '<br><span style="opacity:.85">'+(d<0?'atrasado '+Math.abs(d)+' dia(s)':'entrega marcada para hoje')+
-        (p.contato?' \u00B7 falar com '+esc(p.contato):'')+'</span></p>'}).join('')+
-      (lista.length>6?'<p style="opacity:.7">e mais '+(lista.length-6)+'...</p>':'')+
-      '<div class="r"><button class="btn primary" onclick="cp11FecharAlerta();go(\'pedidos\')">Ver na planilha</button>'+
-      '<button class="btn" onclick="cp11FecharAlerta()">Ciente</button></div></div>';
-    e.classList.add('on');
-    try{if(window.Notification&&Notification.permission==='granted')new Notification('MODESK: cobrar entrega de pedido',{body:lista.length+' pedido(s) com entrega vencendo hoje'})}catch(x){}
   };
 
   /* ---------- filtros / KPIs ---------- */
@@ -5643,8 +5587,7 @@ console.log('[MODESK v80] brilho por cor · telas sem rolagem · menu arrastáve
     return '<button class="cp11-icobtn '+(cls||'')+'" title="'+esc(rot)+'" aria-label="'+esc(rot)+'" onclick="'+acao+'">'+ico(g)+'</button>';
   }
   function acoes(p){
-    return btnIco('sino','cobrar / criar lembrete',"cp11Lembrar('"+p.id+"')")+
-           btnIco('copiar','duplicar pedido',"cp10Dup('"+p.id+"')")+
+    return btnIco('copiar','duplicar pedido',"cp10Dup('"+p.id+"')")+
            btnIco('lixo','apagar pedido',"cp10Del('"+p.id+"')",'danger');
   }
 
@@ -5757,8 +5700,7 @@ console.log('[MODESK v80] brilho por cor · telas sem rolagem · menu arrastáve
     '<button class="btn sm" onclick="cp10CSV()">'+ico('baixar')+' Exportar CSV</button>'+
     '<input id="cp11-imp" type="file" accept=".csv,text/csv" style="display:none" onchange="cp11ImportarCSV(this)"/>'+
     '<button class="btn sm" onclick="document.getElementById(\'cp11-imp\').click()">'+ico('upload')+' Importar CSV (substitui a lista)</button>'+
-    '<button class="btn sm" onclick="cp11LimparControle()">'+ico('fechar')+' Limpar controle</button>'+
-    '<button class="btn sm" onclick="cp11AlertaEntrega(true)">'+ico('sino')+' Testar alerta</button></div></div></details>';
+    '<button class="btn sm" onclick="cp11LimparControle()">'+ico('fechar')+' Limpar controle</button></div></div></details>';
   }
 
   function barra(){
@@ -5927,8 +5869,7 @@ console.log('[MODESK v80] brilho por cor · telas sem rolagem · menu arrastáve
         var c=C();
         c.pedidos=[];            /* exclui o que existia */
         cpLimparCobrancas();     /* e as cobrancas antes importadas */
-        var s=window.state; s.atividades=s.atividades||[];
-        var nPed=0,nCob=0;
+        var nPed=0;
         for(var k=1;k<linhas.length;k++){
           var l=linhas[k];
           var ri=G(l,iRi),rc=G(l,iRc);
@@ -5948,19 +5889,9 @@ console.log('[MODESK v80] brilho por cor · telas sem rolagem · menu arrastáve
             if(ped.catRc&&RC().indexOf(ped.catRc)<0)RC().push(ped.catRc);
             if(ped.proj&&PJ().indexOf(ped.proj)<0)PJ().push(ped.proj);
           }catch(e){}
-          /* data de cobranca na agenda */
-          if(dl&&st!=='Entrega confirmada'&&st!=='Cancelado'){
-            s.atividades.unshift({id:u(),
-              titulo:'Cobrar entrega '+(ri||rc||forn||''),
-              info:(forn||'')+(ped.contato?' \u00B7 falar com '+ped.contato:'')+(ped.proj?' \u00B7 projeto '+ped.proj:''),
-              desc:'Cobranca importada da planilha de controle de pedidos.',
-              data:dl,prazo:dl,hora:'08:00',tipo:'Trabalho',prioridade:'Alta',prio:'alta',
-              repetir:'',aviso:30,arquivo:null,feito:false,fonte:'ImportCSV',criado:Date.now(),em:Date.now()});
-            nCob++;
-          }
         }
         try{save(true)}catch(e){}
-        toast(nPed+' pedido(s) importado(s) \u00B7 '+nCob+' cobranca(s) na agenda');
+        toast(nPed+' pedido(s) importado(s)');
         try{render()}catch(e){}
       }catch(e){ toast('Nao consegui ler essa planilha CSV') }
       input.value='';
@@ -5972,7 +5903,6 @@ console.log('[MODESK v80] brilho por cor · telas sem rolagem · menu arrastáve
   window.vPedidos=function(){
     var c=C();
     try{if(window.CP)window.CP.aba=V.aba}catch(e){}
-    setTimeout(function(){try{cp11AlertaEntrega()}catch(e){}},400);
     var abas=[['lista','Lista previa ('+(c.lista||[]).length+')','lista'],['controle','Controle ('+c.pedidos.length+')','prancheta'],['arquivo','Pedidos realizados ('+c.arquivados.length+')','arquivo']];
     return page('Controle de Pedidos',
       'Comece pela lista previa, depois lance o pedido, anexe os PDFs das requisicoes (visiveis aqui dentro) e arquive os entregues por periodo.',
@@ -5984,8 +5914,6 @@ console.log('[MODESK v80] brilho por cor · telas sem rolagem · menu arrastáve
       '</div>');
   };
   window.vCompras=window.vPedidos;
-  setTimeout(function(){try{cp11AlertaEntrega()}catch(e){}},2500);
-  setInterval(function(){try{cp11AlertaEntrega()}catch(e){}},1800000);
   console.log('[MODESK v11] controle de pedidos: cards/planilha, status por icone, gaveta e arquivo por periodo');
 })();
 </script>
@@ -10112,5 +10040,131 @@ html{scrollbar-gutter:stable both-edges}
   addEventListener('resize',function(){if(!mobile())document.body.classList.remove('mdk-drawer-open')});
 })();
 </script>
+
+<!-- ===== v119 · MENU ESTÁTICO ACOPLADO À TELA ===== -->
+<style id="modesk-v119-menu-estatico">
+@media (min-width:701px){
+ html,body{overflow-x:hidden!important}
+ #app.app{display:block!important;width:100%!important;min-height:100vh!important;padding-left:218px!important}
+ #app>aside{position:fixed!important;inset:0 auto 0 0!important;z-index:1000!important;width:218px!important;min-width:218px!important;max-width:218px!important;height:100dvh!important;max-height:100dvh!important;margin:0!important;padding:8px 7px!important;border-radius:0!important;overflow:hidden!important;align-self:auto!important;transform:none!important}
+ #app>aside>.brand{margin:-8px -7px 6px!important}
+ #app>aside>#menu{flex:1 1 auto!important;min-height:0!important;overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior:contain!important}
+ #app>aside .side-actions,#app>aside .side-command{flex:0 0 auto!important}
+ #app>main{display:block!important;width:calc(100vw - 218px)!important;min-width:0!important;max-width:none!important;margin:0!important;overflow:visible!important;padding-left:clamp(12px,2vw,26px)!important;padding-right:clamp(12px,2vw,26px)!important}
+}
+@media (max-width:700px){
+ #app.app{display:block!important;padding-left:0!important}
+ #app aside{position:fixed!important;inset:max(3px,env(safe-area-inset-top)) 3px max(3px,env(safe-area-inset-bottom)) 3px!important;margin:0!important;border-radius:7px!important}
+ #app main{width:100%!important;margin:0!important}
+}
+</style>
+<script id="mdk-controle-pedidos-36-v2">
+/* ===== MODESK · CONTROLE GERAL DE PEDIDOS (36 ITENS) =====
+   Carga dos itens do TR 2026 (Audio e Video) + Suprimentos de TI / Materiais de Apoio
+   na secao de Acompanhamento de Compras. Deadline = data do pedido + 30 dias corridos.
+========================================================================= */
+(function(){
+  var VER='controlePedidos36v2';
+  var PRAZO_DIAS=30;
+  var PROJ='Controle de Pedidos 2026';
+
+  var L=[
+  ['Item 05','TR 2026 - Audio e Video','Ata 140/2026','PT10215','','1 UN','Multicabo Medusa (24 vias, 36m)','Carvalho Miranda Equipamentos','','ADQUIRIDO EXTERNAMENTE'],
+  ['Item 06','TR 2026 - Audio e Video','Ata 136/2026','47739','134797','10 UN','Microfone Gooseneck (Kadosh K-353)','Claudinei Tonietti EPP','2026-08-18','PENDENTE'],
+  ['Item 07','TR 2026 - Audio e Video','Ata 147/2026','PT10219','134831','1 UN','Mesa de Som Digital (Behringer X32)','Nexo Hub Ltda','2026-08-18','PENDENTE'],
+  ['Item 08','TR 2026 - Audio e Video','Ata 152/2026','PT10614','134869','2 UN','Nobreak 1500VA (Intelbras)','A Frente Solucoes Integradas','2026-08-18','PENDENTE'],
+  ['Item 09','TR 2026 - Audio e Video','Ata 149/2026','PT10220','134898','8 UN','Caixa de Som Ativa 1000W (EV ZLX-12P)','Alta Frequencia Ltda','2026-08-20','PENDENTE'],
+  ['Item 10','TR 2026 - Audio e Video','Pendente (Ajuste)','PT11101','','1 UN','Pulpito com Suporte de TV','B2G Comercio','','PENDENTE (A Emitir Mais Tarde)'],
+  ['Item 11','TR 2026 - Audio e Video','Ata 138/2026','PT10221','134720','2 UN','Camera PTZ SDI/HDMI/USB/IP/PoE','Sete Distribuidora Ltda','2026-08-18','PENDENTE'],
+  ['Item 12','TR 2026 - Audio e Video','Ata 139/2026','PT1248','134793','1 UN','TV Smart 43" (TCL Google TV)','F & K Brasil Ltda','2026-08-18','RECEBIDO'],
+  ['Item 13','TR 2026 - Audio e Video','Ata 144/2026','PT1025','134907','2 UN','TV Smart 50" 4K (TCL Google TV)','Vinicius Chaves dos Santos EPP','2026-08-18','PENDENTE'],
+  ['Item 14','TR 2026 - Audio e Video','Ata 139/2026','PT10613','134796','1 UN','Monitor Dell 24" Videoconferencia','F & K Brasil Ltda','2026-08-18','PENDENTE'],
+  ['Item 15','TR 2026 - Audio e Video','Ata 146/2026','PT10615','','2 UN','Notebook Gamer i7 / 32GB RAM / SSD 1TB','Asys Tecnologia Ltda','','ADQUIRIDO EXTERNAMENTE'],
+  ['Item 16','TR 2026 - Audio e Video','Ata 136/2026','47740','134797','5 UN','Cabo XLR 30 Metros','Claudinei Tonietti EPP','2026-08-18','PENDENTE'],
+  ['Item 17','TR 2026 - Audio e Video','Ata 136/2026','47741','134797','10 UN','Cabo XLR 10 Metros','Claudinei Tonietti EPP','2026-08-18','PENDENTE'],
+  ['Item 18','TR 2026 - Audio e Video','Ata 136/2026','47742','134797','10 UN','Cabo XLR 1,5 Metros','Claudinei Tonietti EPP','2026-08-18','PENDENTE'],
+  ['Item 19','TR 2026 - Audio e Video','Ata 141/2026','PT10223','134899','1 UN','Switcher de Video (ATEM Mini Pro)','Cameras Les Chansons Ltda','2026-08-18','PENDENTE'],
+  ['Item 20','TR 2026 - Audio e Video','Ata 136/2026','47743','134797','6 UN','Suporte de Caixa de Som para Parede','Claudinei Tonietti EPP','2026-08-18','PENDENTE'],
+  ['Item 21','TR 2026 - Audio e Video','Ata 145/2026','47789','134983','2 UN','Suporte Movel de Chao para TV','H. A. Rossi Comercio','2026-08-19','PENDENTE'],
+  ['Item 22','TR 2026 - Audio e Video','Ata 142/2026','47745','134981','4 UN','Pedestal de Microfone Tripe (RMV)','Lumos Consultoria e Tecnologia','2026-08-19','PENDENTE'],
+  ['Item 23','TR 2026 - Audio e Video','Ata 143/2026','PT10224','134905','3 UN','Extensor HDMI via Cabo de Rede 50m','Eletroquip Comercio','2026-08-18','PENDENTE'],
+  ['Item 24','TR 2026 - Audio e Video','Ata 138/2026','47744','134811','100 MT','Cabo de Rede CAT6 UTP (Landutti)','Sete Distribuidora Ltda','2026-08-18','PENDENTE'],
+  ['Item 25','TR 2026 - Audio e Video','Ata 151/152/2026','47788','134977','2 UN','Tripe para Caixa de Som Acustica','Dourados Comercio Varejista','2026-08-19','PENDENTE'],
+  ['Item 26','TR 2026 - Audio e Video','Ata 151/152/2026','15820','134977','4 UN','Plug XLR Macho de Linha','Dourados Comercio Varejista','2026-08-19','PENDENTE'],
+  ['Item 27','TR 2026 - Audio e Video','Ata 151/152/2026','15816','134977','4 UN','Plug XLR Femea de Linha','Dourados Comercio Varejista','2026-08-19','PENDENTE'],
+  ['Item 28','TR 2026 - Audio e Video','Ata 136/2026','47746','134797','100 MT','Cabo de Audio SC-30 Blindado','Claudinei Tonietti EPP','2026-08-18','PENDENTE'],
+  ['Extra 01','Suprimentos TI','Ata/OS Outros','46252','135311','1 UN','Extensor HDMI x Ethernet RJ45 ate 120m (Exbom)','ARA Suprimentos em Geral Ltda','2026-08-24','PENDENTE'],
+  ['Extra 02','Suprimentos TI','Ata/OS Outros','48320','135311','5 UN','HD SSD M.2 512GB NVMe v3 (Kingston / SanDisk)','ARA Suprimentos em Geral Ltda','2026-08-24','PENDENTE'],
+  ['Extra 03','Suprimentos TI','Ata/OS Outros','32080','135306','4 UN','Apresentador / Passador de Slides (Logitech)','CIL - Comercio de Informatica Ltda','2026-08-24','PENDENTE'],
+  ['Extra 04','Suprimentos TI','Ata/OS Outros','48728','135306','1 UN','Pen Drive USB 3.2 de 64GB (Kingston / SanDisk)','CIL - Comercio de Informatica Ltda','2026-08-24','PENDENTE'],
+  ['Extra 05','Suprimentos TI','Ata/OS Outros','43346','135310','1 UN','Testador/Localizador de Cabos RJ45/RJ11 (Noyafa)','Igor Targino da Silva Ltda','2026-08-24','PENDENTE'],
+  ['Extra 06','Suprimentos TI','Ata/OS Outros','44443','135310','2 UN','Fonte 12V 1A com Filtro','Igor Targino da Silva Ltda','2026-08-24','PENDENTE'],
+  ['Extra 07','Suprimentos TI','Ata/OS Outros','45829','135305','1 UN','Case para SSD M.2 NVMe USB 3.0 / Tipo C (X-Drive)','Clayvert Forlan Brasileiro Madeira Silva','2026-08-24','PENDENTE'],
+  ['Extra 08','Suprimentos TI','Ata/OS Outros','15220','135305','3 UN','Cabo HDMI 20 Metros Ultra HD Emborrachado','Clayvert Forlan Brasileiro Madeira Silva','2026-08-24','PENDENTE'],
+  ['Extra 09','Suprimentos TI','Ata/OS Outros','9778','135305','10 UN','Combo Teclado e Mouse Sem Fio 2.4GHz ABNT2 (Dell)','Clayvert Forlan Brasileiro Madeira Silva','2026-08-24','PENDENTE'],
+  ['Extra 10','Materiais Apoio','Ata/OS Outros','29341','134613','2 UN','Fita Banana Espuma Dupla Face 12mm Branca','Guimed Importacao Distribuicao e Comercio','2026-08-18','PENDENTE'],
+  ['Extra 11','Materiais Apoio','Ata/OS Outros','30065','134613','1 UN','Pistola de Cola Quente Bivolt 280W / 32W (Hikari)','Guimed Importacao Distribuicao e Comercio','2026-08-18','PENDENTE'],
+  ['Extra 12','Materiais Apoio','Ata/OS Outros','164','134613','1 UN','Pincel Escolar Chato N 20 Cabo Longo Amarelo','Guimed Importacao Distribuicao e Comercio','2026-08-18','PENDENTE']
+  ];
+
+  function uid(){try{return u()}catch(e){return 'cp'+Math.random().toString(36).slice(2)}}
+  function mais(iso,d){ if(!iso)return ''; var x=new Date(iso+'T12:00:00'); x.setDate(x.getDate()+d);
+    return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0'); }
+
+  function aplicar(){
+    if(!window.state||!window.comprasDados)return false;
+    var c=window.comprasDados(); if(!c)return false;
+    c.pedidos=c.pedidos||[]; c.projetos=c.projetos||[];
+    if(c.projetos.indexOf(PROJ)<0)c.projetos.push(PROJ);
+    if(c[VER])return true;
+
+    var s=window.state; s.atividades=s.atividades||[];
+
+    L.forEach(function(r){
+      var cod=r[0],origem=r[1],ata=r[2],mxm=r[3],pdd=r[4],qtd=r[5],desc=r[6],forn=r[7],data=r[8],st=r[9];
+      var k=('cp36|'+cod).toLowerCase();
+      var deadline=data?mais(data,PRAZO_DIAS):'';
+      var status=/recebido/i.test(st)?'Entrega confirmada':'Aguardando entrega';
+      var obs=cod+' · '+origem;
+
+      var p=c.pedidos.filter(function(x){return x.chaveCP36===k})[0];
+      if(!p){ p={id:uid(),docs:{},paths:{},em:Date.now()}; c.pedidos.push(p); }
+      p.chaveCP36=k;
+      p.ri=ata; p.catRi='Ata de registro';
+      p.rc=pdd||''; p.catRc='COMP01';
+      p.num=pdd||mxm||cod;
+      p.proj=PROJ;
+      p.forn=forn; p.contato='';
+      p.codItem=cod; p.origem=origem; p.item=desc; p.desc=desc; p.qtd=qtd; p.un=(qtd.split(' ')[1]||'UN');
+      p.mxm=mxm; p.pdd=pdd; p.ata=ata;
+      p.data=data||''; p.deadline=deadline;
+      p.status=status; p.statusTxt=st; p.obs=obs;
+
+      if(deadline&&status!=='Entrega confirmada'){
+        var tit='Entrega '+cod+' — '+forn;
+        var ja=s.atividades.some(function(a){return a.titulo===tit&&a.prazo===deadline});
+        if(!ja){
+          s.atividades.push({id:uid(),titulo:tit,prazo:deadline,hora:'09:00',tipo:'Trabalho',
+            prioridade:'Alta',repetir:'',aviso:30,
+            desc:'Deadline de entrega ('+PRAZO_DIAS+' dias do pedido de '+data+'). '+qtd+' — '+desc+
+                 ' — '+ata+' — MXM '+(mxm||'-')+' — PDD '+(pdd||'-')+' — '+forn,
+            arquivo:null,feito:false,criado:Date.now()});
+        }
+      }
+    });
+
+    c[VER]=1;
+    try{save(true)}catch(e){}
+    try{checarDeadlines()}catch(e){}
+    try{render()}catch(e){}
+    console.log('[MODESK] Controle geral de pedidos: '+L.length+' itens aplicados em Compras + Agenda');
+    return true;
+  }
+
+  var n=0, t=setInterval(function(){ try{ if(aplicar()||++n>40)clearInterval(t) }catch(e){ if(++n>40)clearInterval(t) } },1500);
+  setTimeout(function(){try{aplicar()}catch(e){}},1600);
+})();
+</script>
+
 </body>
 </html>
