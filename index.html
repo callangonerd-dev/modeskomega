@@ -851,25 +851,25 @@ main:has(.agenda-shell)>.card:has(.agenda-quick){padding:11px 13px!important;mar
 /* Rodapé Kinetic Glass — ações organizadas e legíveis na lateral estreita. */
 aside{display:flex;flex-direction:column}
 #menu{flex:1 0 auto}
-.side-command{position:relative;margin-top:16px;padding:15px 4px 4px;border-top:1px solid rgba(35,40,54,.9);font-family:'Barlow',sans-serif}
+.side-command{position:relative;margin-top:16px;padding:15px 4px 4px;border-top:1px solid rgba(35,40,54,.9);font-family:'Manrope',sans-serif}
 .side-command:before{content:"";position:absolute;left:0;right:0;top:-1px;height:1px;background:linear-gradient(90deg,rgba(34,211,238,.7),transparent 48%,rgba(230,0,35,.65))}
-.side-command-panel{position:relative;overflow:hidden;border:1px solid rgba(35,40,54,.9);border-radius:14px;background:rgba(18,20,28,.78);box-shadow:0 18px 42px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.035)}
-.side-command-panel:before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(120deg,rgba(34,211,238,.12),transparent 35%,transparent 62%,rgba(230,0,35,.11))}
-.side-system{position:relative;display:grid;grid-template-columns:8px minmax(0,1fr) auto;align-items:center;gap:10px;padding:11px 12px;border-bottom:1px solid rgba(35,40,54,.9)}
-.side-system-dot{width:8px;height:8px;border-radius:50%;background:#e60023;box-shadow:0 0 10px #e60023}
-.side-system-copy{min-width:0;line-height:1}.side-system-copy b{display:block;color:#22d3ee;font-size:9px;letter-spacing:.22em;text-transform:uppercase}.side-system-copy small{display:block;margin-top:5px;color:#eef2f8;font-size:10.5px;font-weight:600;white-space:nowrap}
-.side-system-time{color:#7c8698;font-size:9px;font-weight:700;white-space:nowrap}
-.side-command-btn{position:relative;width:100%;min-width:0;min-height:52px;margin:0!important;padding:8px 11px;display:grid;grid-template-columns:28px minmax(0,1fr) auto;align-items:center;gap:10px;border:0;border-bottom:1px solid rgba(35,40,54,.82);border-radius:0;background:transparent;color:#eef2f8;text-align:left;cursor:pointer;transition:background .18s,color .18s}
-.side-command-btn:last-child{border-bottom:0}.side-command-btn:hover{transform:none;background:rgba(255,255,255,.05);border-color:rgba(35,40,54,.82)}
-.side-command-icon{width:28px;height:28px;display:grid;place-items:center;border-radius:7px;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:800;color:#e60023;background:rgba(230,0,35,.13);border:1px solid rgba(230,0,35,.28)}
-.side-command-copy{min-width:0;line-height:1}.side-command-copy b{display:block;overflow:hidden;color:#eef2f8;font-size:12.5px;font-weight:600;letter-spacing:.02em;white-space:nowrap;text-overflow:ellipsis}.side-command-copy small{display:block;overflow:hidden;margin-top:5px;color:#7c8698;font-size:9.5px;white-space:nowrap;text-overflow:ellipsis}
-.side-command-end{color:#7c8698;font-size:12px;font-weight:700;white-space:nowrap}.side-command-btn:hover .side-command-end{color:#22d3ee}
-.side-command-btn.effects .side-command-icon{color:#22d3ee;background:rgba(34,211,238,.12);border-color:rgba(34,211,238,.28)}
-.side-command-state{display:inline-flex;align-items:center;gap:5px;color:#22d3ee;font-size:8.5px;font-weight:800;letter-spacing:.08em}.side-command-state:before{content:"";width:6px;height:6px;border-radius:50%;background:#22d3ee;box-shadow:0 0 8px #22d3ee;animation:sideStatePulse 2.4s ease-in-out infinite}
-.side-command-btn.exit .side-command-icon{color:#7c8698;background:rgba(255,255,255,.035);border-color:rgba(124,134,152,.22)}.side-command-btn.exit:hover .side-command-end{color:#e60023}
+.side-command-panel{position:relative;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;overflow:hidden;padding:8px;border:1px solid rgba(35,40,54,.9);border-radius:8px;background:rgba(9,13,20,.88);box-shadow:0 18px 42px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.035)}
+.side-command-panel:before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(120deg,rgba(34,211,238,.09),transparent 38%,transparent 70%,rgba(230,0,35,.08))}
+.side-system{position:relative;grid-column:1/-1;display:grid;grid-template-columns:8px minmax(0,1fr) auto;align-items:center;gap:10px;padding:5px 4px 9px;border-bottom:1px solid rgba(35,40,54,.9)}
+.side-system-dot{width:8px;height:8px;border-radius:50%;background:#22d3ee;box-shadow:0 0 10px #22d3ee}
+.side-system-copy{min-width:0;line-height:1}.side-system-copy b{display:block;color:#22d3ee;font-size:9px;letter-spacing:.18em;text-transform:uppercase}.side-system-copy small{display:block;overflow:hidden;margin-top:5px;color:#eef2f8;font-size:10px;font-weight:600;white-space:nowrap;text-overflow:ellipsis}
+.side-system-time{padding:3px 5px;border:1px solid rgba(34,211,238,.22);border-radius:4px;background:rgba(34,211,238,.08);color:#67e8f9;font-size:8px;font-weight:800;white-space:nowrap}
+.side-command-btn{position:relative;width:100%;min-width:0;min-height:72px;margin:0!important;padding:9px 7px;display:grid;grid-template-columns:28px minmax(0,1fr);grid-template-rows:auto auto;align-content:center;align-items:center;gap:3px 7px;border:1px solid rgba(35,40,54,.9);border-radius:7px;background:rgba(255,255,255,.025);color:#eef2f8;text-align:left;cursor:pointer;transition:background .18s,border-color .18s,box-shadow .18s}
+.side-command-btn:hover{transform:none;background:rgba(255,255,255,.055);border-color:rgba(34,211,238,.3);box-shadow:inset 0 0 18px rgba(34,211,238,.035)}
+.side-command-icon{grid-row:1/-1;width:28px;height:28px;display:grid;place-items:center;border-radius:6px;color:#ff4054;background:rgba(230,0,35,.11);border:1px solid rgba(230,0,35,.28)}
+.side-command-icon svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.side-command-copy{min-width:0;line-height:1}.side-command-copy b{display:block;overflow:hidden;color:#eef2f8;font-size:10.5px;font-weight:700;white-space:nowrap;text-overflow:ellipsis}.side-command-copy small{display:block;overflow:hidden;margin-top:4px;color:#7c8698;font-size:8px;white-space:nowrap;text-overflow:ellipsis}
+.side-command-end{display:none}.side-command-btn.effects .side-command-icon{color:#22d3ee;background:rgba(34,211,238,.1);border-color:rgba(34,211,238,.28)}
+.side-command-state{position:absolute;right:6px;top:6px;display:inline-flex;align-items:center;gap:4px;color:#22d3ee;font-size:7px;font-weight:800}.side-command-state:before{content:"";width:5px;height:5px;border-radius:50%;background:#22d3ee;box-shadow:0 0 8px #22d3ee;animation:sideStatePulse 2.4s ease-in-out infinite}
+.side-command-btn.exit{grid-column:1/-1;min-height:46px;grid-template-columns:28px minmax(0,1fr);grid-template-rows:1fr}.side-command-btn.exit .side-command-icon{color:#8d97a8;background:rgba(255,255,255,.035);border-color:rgba(124,134,152,.22)}.side-command-btn.exit:hover{border-color:rgba(255,32,53,.34);background:rgba(255,32,53,.06)}
 @keyframes sideStatePulse{50%{opacity:.45}}
 @media(prefers-reduced-motion:reduce){.side-command-state:before{animation:none}}
-@media(max-width:960px){aside>.side-command{display:none!important}}
+@media(max-width:960px){aside>.side-command{margin-top:8px;padding:8px 3px 10px}}
 </style>
 <!-- MODESK v62 — blocos padronizados em todas as páginas -->
 
@@ -963,21 +963,21 @@ main:has(#mp-tb){padding-left:18px;padding-right:18px}
 <div class="side-command-panel">
 <div aria-hidden="true" class="side-system">
 <span class="side-system-dot"></span>
-<span class="side-system-copy"><b>Sistema</b><small>Pronto para salvar</small></span>
-<span class="side-system-time">ON</span>
+<span class="side-system-copy"><b>Sistema</b><small id="side-sync-label">Dados salvos neste aparelho</small></span>
+<span class="side-system-time" id="side-sync-state">LOCAL</span>
 </div>
 <button class="side-command-btn backup" onclick="exportJSON()">
-<span aria-hidden="true" class="side-command-icon">B</span>
+<span aria-hidden="true" class="side-command-icon"><svg viewBox="0 0 24 24"><path d="M4 4h13l3 3v13H4zM8 4v6h8V4M8 20v-6h8v6"/></svg></span>
 <span class="side-command-copy"><b>Backup</b><small>Salva o estado atual</small></span>
 <span aria-hidden="true" class="side-command-end">›</span>
 </button>
 <button class="side-command-btn effects" id="btn-fx" onclick="fxToggle()">
-<span aria-hidden="true" class="side-command-icon">E</span>
+<span aria-hidden="true" class="side-command-icon"><svg viewBox="0 0 24 24"><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6 7 7M17 17l1.4 1.4M18.4 5.6 17 7M7 17l-1.4 1.4"/><circle cx="12" cy="12" r="4"/></svg></span>
 <span class="side-command-copy"><b id="btn-fx-lbl">Efeitos: ligados</b><small>Ativar ou pausar</small></span>
 <span aria-hidden="true" class="side-command-state">ON</span>
 </button>
 <button class="side-command-btn exit" onclick="logout()">
-<span aria-hidden="true" class="side-command-icon">S</span>
+<span aria-hidden="true" class="side-command-icon"><svg viewBox="0 0 24 24"><path d="M10 5H5v14h5M14 8l4 4-4 4M8 12h10"/></svg></span>
 <span class="side-command-copy"><b>Sair</b><small>Encerrar sessão</small></span>
 <span aria-hidden="true" class="side-command-end">›</span>
 </button>
@@ -1109,7 +1109,7 @@ function detectOS(){
 /* ================= NUVEM (tempo real) ================= */
 let db=null,unsub=null;
 function connectCloud(){
-  const c=state.fb; if(!c.apiKey||!c.projectId)return;
+  const c=state.fb; if(!c.apiKey||!c.projectId){setSyncStatus('local');return}
   try{
     const app=firebase.apps.length?firebase.app():firebase.initializeApp({apiKey:c.apiKey,projectId:c.projectId,authDomain:c.authDomain||c.projectId+'.firebaseapp.com',appId:c.appId});
     db=firebase.firestore(app);
@@ -1117,13 +1117,20 @@ function connectCloud(){
     unsub=db.collection('modesk_pessoal').doc(GESTOR).onSnapshot(d=>{
       const data=d.data(); if(!data?.payload)return;
       const remote=JSON.parse(data.payload);
-      if(JSON.stringify(remote)!==JSON.stringify(state)){state=Object.assign(structuredClone(DEF),remote);localStorage.setItem(LS,JSON.stringify(state));render();}
+      if(JSON.stringify(remote)!==JSON.stringify(state)){state=Object.assign(structuredClone(DEF),remote);localStorage.setItem(LS,JSON.stringify(state));render();setSyncStatus('online');}
     });
     ($('tb-sync')||{}).textContent='nuvem · tempo real ativo';
+    setSyncStatus('online');
     toast('Tempo real conectado');
-  }catch(e){toast('Falha na nuvem: '+e.message)}
+  }catch(e){setSyncStatus('erro');toast('Falha na nuvem: '+e.message)}
 }
-function pushCloud(){if(!db)return;db.collection('modesk_pessoal').doc(GESTOR).set({payload:JSON.stringify(state),at:Date.now()}).catch(()=>{})}
+function pushCloud(){if(!db)return;setSyncStatus('sync');db.collection('modesk_pessoal').doc(GESTOR).set({payload:JSON.stringify(state),at:Date.now()}).then(()=>setSyncStatus('online')).catch(()=>setSyncStatus('erro'))}
+function setSyncStatus(status){
+  const label=$('side-sync-label'),badge=$('side-sync-state'),bar=$('statusbar');
+  const cfg={online:['Sincronizado em todos os aparelhos','NUVEM'],sync:['Salvando alterações…','SYNC'],erro:['Sem conexão com a nuvem','ERRO'],local:['Dados salvos neste aparelho','LOCAL']}[status]||['Verificando sincronização…','...'];
+  if(label)label.textContent=cfg[0];if(badge)badge.textContent=cfg[1];
+  if(bar){const s=bar.querySelector('.sb-i:nth-of-type(3)');if(s)s.textContent=cfg[0]}
+}
 
 /* ================= MENU (pastas/subpastas) ================= */
 const ICONS={
@@ -8489,6 +8496,11 @@ function bolha(txt,fixo){
   /* v117: sincronização continua ativa, sem a bolha MDK-Sync no rodapé. */
   var b=document.getElementById('mdk-sync');if(b)b.remove();
   var tb=document.getElementById('tb-sync');if(tb)tb.textContent=txt;
+  if(typeof setSyncStatus==='function'){
+    if(/sincronizado|Firebase/.test(txt))setSyncStatus('online');
+    else if(/tentando|erro|falha/i.test(txt))setSyncStatus('erro');
+    else setSyncStatus('sync');
+  }
 }
 
 /* ---------- Firebase Firestore (REST, sem depender do SDK) ---------- */
@@ -10055,7 +10067,15 @@ html{scrollbar-gutter:stable both-edges}
   #app aside #menu .navbtn .ui-icon{width:15px!important;height:15px!important;color:var(--mm-muted)!important}
   #app aside #menu .navbtn.active{border-color:rgba(255,48,74,.55)!important;background:linear-gradient(135deg,rgba(255,48,74,.2),rgba(113,220,250,.06))!important;color:var(--mm-text)!important;box-shadow:inset 3px 0 0 var(--mm-red)!important}
   #app aside #menu .navbtn.active .ui-icon{color:var(--mm-red)!important}
-  #app aside .side-command,#app aside .side-actions,#app aside>#rail,#app aside>button[onclick="logout()"]{display:none!important}
+  #app aside .side-actions,#app aside>#rail,#app aside>button[onclick="logout()"]{display:none!important}
+  #app aside .side-command{display:block!important;flex:0 0 auto!important;margin:0 7px 8px!important;padding:7px 0 0!important}
+  #app aside .side-command-panel{grid-template-columns:repeat(3,minmax(0,1fr))!important;padding:6px!important;gap:5px!important}
+  #app aside .side-system{padding:4px 3px 7px!important}
+  #app aside .side-command-btn{min-height:54px!important;padding:6px!important;grid-template-columns:22px minmax(0,1fr)!important;gap:5px!important}
+  #app aside .side-command-btn.exit{grid-column:auto!important;grid-template-rows:auto auto!important}
+  #app aside .side-command-icon{width:22px!important;height:22px!important}
+  #app aside .side-command-copy b{font-size:9px!important}
+  #app aside .side-command-copy small{display:none!important}
   #mdk-menu-btn{
     display:flex!important;position:fixed!important;top:max(10px,env(safe-area-inset-top))!important;left:10px!important;z-index:1501!important;
     width:40px!important;height:40px!important;border-radius:7px!important;border:1px solid var(--mm-line)!important;
