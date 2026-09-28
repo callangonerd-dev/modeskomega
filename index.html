@@ -11,7 +11,7 @@
 <meta content="MODESK" name="apple-mobile-web-app-title"/>
 <meta content="#03060c" name="theme-color"/>
 <link href="/manifest.webmanifest" rel="manifest"/>
-<title>MODESK PESSOAL — Unidade Total (v119 Firebase + Groq corrigidos)</title>
+<title>MODESK PESSOAL — Unidade Total (v118 Menu Mobile Compacto)</title>
 <script id="mdk-v10-boot">
 
 (function(){
@@ -739,7 +739,6 @@ main>section,.view,.screen,[data-view]{animation:viewIn .42s var(--ease-glide) b
 
 html,body{width:100%;max-width:100%;overflow-x:hidden;min-height:100dvh}
 body{overscroll-behavior-x:none}
-#app.hidden{display:none!important}
 #app,.app,main,.sect,.grid,.card{min-width:0;max-width:100%}
 img,video,canvas,svg{max-width:100%}
 .ui-icon{display:inline-grid;place-items:center;flex:0 0 auto;width:20px;height:20px;line-height:1}
@@ -954,60 +953,6 @@ main:has(#mp-tb){padding-left:18px;padding-right:18px}
   #app>main{grid-column:2 !important}
 }
 </style>
-<script id="mdk-cofre-apis">
-/* MODESK v120 - as chaves do Groq e da ElevenLabs sairam deste arquivo.
-   Elas ficam guardadas no cofre do servidor MODESK e sao usadas por esta ponte,
-   entao o app funciona em qualquer aparelho online e nenhuma chave aparece no codigo. */
-(function(){
-  'use strict';
-  if(window.__mdkCofre)return; window.__mdkCofre=1;
-  var BASES=['https://project--b7b823ac-2f54-491a-897d-7a76cc0356e8.lovable.app','https://project--b7b823ac-2f54-491a-897d-7a76cc0356e8-dev.lovable.app'];
-  window.MODESK_API_BASES=BASES;
-  var base=BASES[0];
-  try{var sv=localStorage.getItem('modesk.api.base'); if(sv&&BASES.indexOf(sv)>=0)base=sv;}catch(e){}
-  function marcar(b){base=b;try{localStorage.setItem('modesk.api.base',b)}catch(e){}}
-
-  async function viaCofre(caminho,init){
-    var ordem=[base].concat(BASES.filter(function(b){return b!==base}));
-    var ultimo=null;
-    for(var i=0;i<ordem.length;i++){
-      try{
-        var r=await fetch(ordem[i]+caminho,init);
-        if(r.status<500||i===ordem.length-1){ if(r.ok)marcar(ordem[i]); return r }
-        ultimo=r;
-      }catch(e){ ultimo=null }
-    }
-    return ultimo||new Response('{"error":"servidor MODESK indisponivel"}',{status:503,headers:{'Content-Type':'application/json'}});
-  }
-
-  var _fetch=window.fetch.bind(window);
-  window.fetch=function(entrada,init){
-    var url='';
-    try{url=(typeof entrada==='string')?entrada:(entrada&&entrada.url)||''}catch(e){}
-    init=init||{};
-    try{
-      if(/api\.groq\.com\/openai\/v1\/chat\/completions/.test(url)){
-        return viaCofre('/api/public/ai/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:init.body});
-      }
-      if(/api\.elevenlabs\.io\/v\d\/voices/.test(url)){
-        return viaCofre('/api/public/ai/voices',{method:'GET'});
-      }
-      var m=/api\.elevenlabs\.io\/v1\/text-to-speech\/([^/?]+)/.exec(url);
-      if(m){
-        var b={}; try{b=JSON.parse(init.body||'{}')}catch(e){}
-        var vs=b.voice_settings||{};
-        return viaCofre('/api/public/ai/tts',{method:'POST',headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({text:String(b.text||'').slice(0,4800),voice:decodeURIComponent(m[1]),
-            model_id:b.model_id||'eleven_multilingual_v2',
-            stability:typeof vs.stability==='number'?vs.stability:0.4,
-            similarity_boost:typeof vs.similarity_boost==='number'?vs.similarity_boost:0.8})});
-      }
-    }catch(e){console.error('ponte MODESK',e)}
-    return _fetch(entrada,init);
-  };
-  console.log('[MODESK v120] chaves no cofre do servidor - IA e voz funcionam em qualquer aparelho');
-})();
-</script>
 </head>
 <body>
 <!-- #winbar removido (v12.3) — navegação já existe na barra lateral -->
@@ -1045,6 +990,16 @@ main:has(#mp-tb){padding-left:18px;padding-right:18px}
 <span class="side-system-copy"><b>Sistema</b><small id="side-sync-label">Dados salvos neste aparelho</small></span>
 <span class="side-system-time" id="side-sync-state">LOCAL</span>
 </div>
+<button class="side-command-btn backup" onclick="exportJSON()">
+<span aria-hidden="true" class="side-command-icon"><svg viewBox="0 0 24 24"><path d="M4 4h13l3 3v13H4zM8 4v6h8V4M8 20v-6h8v6"/></svg></span>
+<span class="side-command-copy"><b>Backup</b><small>Salva o estado atual</small></span>
+<span aria-hidden="true" class="side-command-end">›</span>
+</button>
+<button class="side-command-btn effects" id="btn-fx" onclick="fxToggle()">
+<span aria-hidden="true" class="side-command-icon"><svg viewBox="0 0 24 24"><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6 7 7M17 17l1.4 1.4M18.4 5.6 17 7M7 17l-1.4 1.4"/><circle cx="12" cy="12" r="4"/></svg></span>
+<span class="side-command-copy"><b id="btn-fx-lbl">Efeitos: ligados</b><small>Ativar ou pausar</small></span>
+<span aria-hidden="true" class="side-command-state">ON</span>
+</button>
 <button class="side-command-btn exit" onclick="logout()">
 <span aria-hidden="true" class="side-command-icon"><svg viewBox="0 0 24 24"><path d="M10 5H5v14h5M14 8l4 4-4 4M8 12h10"/></svg></span>
 <span class="side-command-copy"><b>Sair</b><small>Encerrar sessão</small></span>
@@ -1076,7 +1031,7 @@ main:has(#mp-tb){padding-left:18px;padding-right:18px}
 const LS='modesk.pessoal.v7';
 const GESTOR='marciooliveira';
 const DEF={
-  senha:'Deadpool365*',
+  senha:'marcio2026',
   servicos:[],
   acessos:[
     {id:u(),nome:'PC Sala de Som',tipo:'AnyDesk',endereco:'000 000 000',so:'Windows',obs:'estação principal'},
@@ -1102,7 +1057,7 @@ const DEF={
   ],
   pedidos:[], sends:[], eventos:[], itens:[], atividades:[], arquivos:[],
   compras:{lista:[],internas:[],reqs:[],pedidos:[],docs:{},tipos:['COMP01','COMP01 PT','Compra direta','Contrato']},
-  fb:{apiKey:'AIzaSyD1OoDmK0VL5g20BGhi6CYtyQ7rIOT97lQ',projectId:'modeskpro',authDomain:'modeskpro.firebaseapp.com',appId:'1:460535767375:web:377259dfbf0211a5ab653a'},
+  fb:{apiKey:'',projectId:'',authDomain:'',appId:''},
   fiscal:{
     orgao:'Secretaria da Fazenda - Governo do Estado do Ceará',
     cnpj:'3648344',
@@ -1144,12 +1099,10 @@ try{
 try{Object.defineProperty(window,'state',{get:function(){return state},set:function(v){state=v},configurable:true})}catch(e){window.state=state}
 
 function u(){return Math.random().toString(36).slice(2,10)}
-const FB_PADRAO={apiKey:'AIzaSyD1OoDmK0VL5g20BGhi6CYtyQ7rIOT97lQ',projectId:'modeskpro',authDomain:'modeskpro.firebaseapp.com',appId:'1:460535767375:web:377259dfbf0211a5ab653a'};
 function load(){let st=structuredClone(DEF);
   try{const v=localStorage.getItem(LS);if(v)st=Object.assign(structuredClone(DEF),JSON.parse(v))}catch(e){}
   return migrar(st)}
 function migrar(st){
-  if(!st.fb||!st.fb.apiKey||!st.fb.projectId)st.fb=Object.assign({},FB_PADRAO);
   st.pastas=st.pastas||[]; st.links=st.links||[];
   st.fiscal=Object.assign(structuredClone(DEF.fiscal),st.fiscal||{});
   st.fiscal.hist=st.fiscal.hist||[];
@@ -1164,71 +1117,19 @@ function toast(m){const d=document.createElement('div');d.className='toast';d.te
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const $=id=>document.getElementById(id);
 
-/* ================= LOGIN (v120 - corrigido) ================= */
-const SENHA_MESTRA='Deadpool365*';
-function mdkMostrarErro(m){var e=$('lg-err');if(e)e.textContent=m||''}
+/* ================= LOGIN ================= */
 function doLogin(){
-  try{
-    var iu=$('lg-user'), ip=$('lg-pass');
-    var usr=((iu&&iu.value)||'').trim().toLowerCase().replace(/\s+/g,'');
-    var pw=((ip&&ip.value)||'').replace(/^\s+|\s+$/g,'');
-    if(!usr)usr=GESTOR;
-    if(usr!==GESTOR && usr!==GESTOR+'@gmail.com'){return mdkMostrarErro('Plataforma pessoal: somente '+GESTOR+'.')}
-    if(!pw){return mdkMostrarErro('Digite a senha para entrar.')}
-    var salva='';
-    try{salva=(window.state&&state.senha)?String(state.senha):''}catch(e){}
-    if(pw!==SENHA_MESTRA && pw!==salva){return mdkMostrarErro('Senha incorreta.')}
-    mdkMostrarErro('');
-    try{sessionStorage.setItem('modesk.sess','1')}catch(e){}
-    try{var manter=$('lg-remember'); if(!manter||manter.checked)localStorage.setItem('modesk.trusted','1');}catch(e){}
-    window.__mdkLogado=1;
-    mdkAbrirApp();
-  }catch(err){
-    console.error('doLogin',err);
-    mdkMostrarErro('Erro ao entrar: '+(err&&err.message?err.message:err));
-  }
+  const usr=$('lg-user').value.trim().toLowerCase(), pw=$('lg-pass').value;
+  if(usr!==GESTOR){return $('lg-err').textContent='Plataforma pessoal: somente '+GESTOR+'.'}
+  if(pw!==state.senha){return $('lg-err').textContent='Senha incorreta.'}
+  sessionStorage.setItem('modesk.sess','1'); if($('lg-remember').checked)localStorage.setItem('modesk.trusted','1'); start();
 }
-/* abre o app mesmo que algum modulo pesado falhe: a tela nunca fica travada */
-function mdkAbrirApp(){
-  var lg=$('login'), ap=$('app');
-  if(lg)lg.classList.add('hidden');
-  if(ap)ap.classList.remove('hidden');
-  try{detectOS()}catch(e){console.error('detectOS',e)}
-  try{buildMenu()}catch(e){console.error('buildMenu',e)}
-  try{render()}catch(e){console.error('render',e)}
-  try{connectCloud()}catch(e){console.error('connectCloud',e)}
-  try{fsAutoConectar()}catch(e){console.error('fsAutoConectar',e)}
-  try{setInterval(function(){var c=$('tb-clock');if(c)c.textContent=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})},1000)}catch(e){}
-}
-function start(){mdkAbrirApp()}
-function logout(){try{sessionStorage.removeItem('modesk.sess');localStorage.removeItem('modesk.trusted')}catch(e){}location.reload()}
-/* o botao Entrar funciona mesmo se o onclick do HTML for perdido em alguma copia */
-(function(){
-  function ligar(){
-    var p=$('lg-pass'), u=$('lg-user');
-    if(p&&!p.__mdk){p.__mdk=1;p.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();doLogin()}});p.addEventListener('input',function(){mdkMostrarErro('')})}
-    if(u&&!u.__mdk){u.__mdk=1;u.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();doLogin()}})}
-    var lg=$('login');
-    if(lg&&!lg.__mdk){
-      lg.__mdk=1;
-      lg.addEventListener('click',function(e){
-        var b=e.target&&e.target.closest?e.target.closest('button'):null;
-        if(b&&/entrar/i.test(b.textContent||'')){e.preventDefault();doLogin()}
-      });
-    }
-  }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',ligar);else ligar();
-  setTimeout(ligar,600); setTimeout(ligar,2500);
-})();
-function autoStart(){
-  try{
-    if(window.__mdkLogado)return;
-    if(sessionStorage.getItem('modesk.sess')||localStorage.getItem('modesk.trusted')==='1'){window.__mdkLogado=1;mdkAbrirApp()}
-  }catch(e){
-    console.error('autoStart',e);
-    try{$('login').classList.remove('hidden');$('app').classList.add('hidden')}catch(_){}
-  }
-}
+function logout(){sessionStorage.removeItem('modesk.sess');localStorage.removeItem('modesk.trusted');location.reload()}
+function start(){$('login').classList.add('hidden');$('app').classList.remove('hidden');detectOS();buildMenu();render();connectCloud();fsAutoConectar();
+  setInterval(()=>{($('tb-clock')||{}).textContent=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})},1000);}
+$('lg-pass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
+/* início automático só depois de TODO o script carregar (evita erro de "OSINFO/MENU antes da inicialização" quando o PC está marcado como conectado) */
+function autoStart(){try{if(sessionStorage.getItem('modesk.sess')||localStorage.getItem('modesk.trusted')==='1')start();}catch(e){console.error('autoStart',e);try{$('login').classList.remove('hidden');$('app').classList.add('hidden')}catch(_){}}}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',autoStart);else setTimeout(autoStart,0);
 
 /* ================= DETECÇÃO DE SO ================= */
@@ -1257,22 +1158,20 @@ function connectCloud(){
     const app=firebase.apps.length?firebase.app():firebase.initializeApp({apiKey:c.apiKey,projectId:c.projectId,authDomain:c.authDomain||c.projectId+'.firebaseapp.com',appId:c.appId});
     db=firebase.firestore(app);
     unsub&&unsub();
-    /* v119 - a nuvem passa a ter UM caminho unico: a camada Unidade (REST),
-       que sobe TODAS as chaves com marca de tempo. O SDK deixa de substituir o
-       state por conta propria, o que fazia os dados voltarem atras e parecerem
-       "nao atualizados" entre celular e PCs. */
-    unsub=null;
-    ($('tb-sync')||{}).textContent='nuvem \u00b7 tempo real ativo';
+    unsub=db.collection('modesk_pessoal').doc(GESTOR).onSnapshot(d=>{
+      const data=d.data(); if(!data?.payload)return;
+      const remote=limparComprasV121(JSON.parse(data.payload));
+      if(JSON.stringify(remote)!==JSON.stringify(state)){
+        state=Object.assign(structuredClone(DEF),remote);localStorage.setItem(LS,JSON.stringify(state));render();setSyncStatus('online');
+        if(remote._comprasLimpoV121===1)db.collection('modesk_pessoal').doc(GESTOR).set({payload:JSON.stringify(state),at:Date.now()});
+      }
+    });
+    ($('tb-sync')||{}).textContent='nuvem · tempo real ativo';
     setSyncStatus('online');
     toast('Tempo real conectado');
   }catch(e){setSyncStatus('erro');toast('Falha na nuvem: '+e.message)}
 }
-function pushCloud(){
-  /* v119 - quem envia e a camada Unidade; aqui so pedimos envio imediato. */
-  if(!state.fb||!state.fb.apiKey||!state.fb.projectId){setSyncStatus('local');return}
-  setSyncStatus('sync');
-  try{if(typeof window.mdkSincronizar==='function')window.mdkSincronizar()}catch(e){}
-}
+function pushCloud(){if(!db)return;setSyncStatus('sync');db.collection('modesk_pessoal').doc(GESTOR).set({payload:JSON.stringify(state),at:Date.now()}).then(()=>setSyncStatus('online')).catch(()=>setSyncStatus('erro'))}
 function setSyncStatus(status){
   const label=$('side-sync-label'),badge=$('side-sync-state'),bar=$('statusbar');
   const cfg={online:['Sincronizado em todos os aparelhos','NUVEM'],sync:['Salvando alterações…','SYNC'],erro:['Sem conexão com a nuvem','ERRO'],local:['Dados salvos neste aparelho','LOCAL']}[status]||['Verificando sincronização…','...'];
@@ -2392,19 +2291,15 @@ function vConfig(){
       <div><label>App ID</label><input id="cf-i" value="${esc(state.fb.appId)}"/></div></div>
      <div class="row" style="margin-top:12px"><button class="btn primary" onclick="salvarFb()">Conectar</button>
      <span class="dim" id="cf-st">${db?'conectado':'offline (local + abas)'}</span></div></div>
-   <div class="card"><h3>💾 Backup e restauração</h3>
-     <p class="dim">Baixe uma cópia dos dados ou envie um backup salvo para restaurar o sistema.</p>
-     <div class="row"><button class="btn" onclick="exportJSON()">⬇ Fazer backup</button>
-     <input type="file" id="cf-f" accept=".json,application/json" style="display:none" onchange="importJSON()"/>
-     <button class="btn" onclick="document.getElementById('cf-f').click()">⇪ Enviar backup</button></div>
+   <div class="card"><h3>💾 Backup</h3>
+     <div class="row"><button class="btn" onclick="exportJSON()">⬇ Exportar JSON</button>
+     <input type="file" id="cf-f" accept=".json" style="max-width:230px"/><button class="btn" onclick="importJSON()">⇪ Importar</button></div>
      <div class="row" style="margin-top:12px"><button class="btn primary" onclick="instalarApp()">🖥 Instalar como aplicativo do Windows</button></div></div>
   </div>`);
 }
 function trocarSenha(){const v=$('cf-s').value;if(v.length<4)return toast('Mínimo 4 caracteres');state.senha=v;save();toast('Senha atualizada')}
 function salvarFb(){state.fb={apiKey:$('cf-k').value.trim(),projectId:$('cf-p').value.trim(),authDomain:$('cf-a').value.trim(),appId:$('cf-i').value.trim()};save(true);connectCloud();render()}
 function exportJSON(){dl(new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),'modesk-pessoal-backup.json')}
-function restaurarBackup(inp){const f=inp.files[0];if(!f)return;const r=new FileReader();
-  r.onload=()=>{try{state=Object.assign(structuredClone(DEF),JSON.parse(r.result));save();render();toast('Backup restaurado')}catch(e){toast('JSON inválido')}};r.readAsText(f);inp.value=''}
 function importJSON(){const f=$('cf-f').files[0];if(!f)return toast('Selecione o arquivo');const r=new FileReader();
   r.onload=()=>{try{state=Object.assign(structuredClone(DEF),JSON.parse(r.result));save();toast('Backup restaurado')}catch(e){toast('JSON inválido')}};r.readAsText(f)}
 function baixarHTML(){
@@ -3646,7 +3541,9 @@ function popupFora(ev){
       +'document.getElementById("ok").onclick=function(){clearInterval(tm);window.close()};'
       +'document.getElementById("soneca").onclick=function(){try{window.opener.MODESK_ALERTAS.adiar("'+String(ev.id).replace(/"/g,'')+'",5)}catch(e){}clearInterval(tm);window.close()};'
       +'setTimeout(function(){try{window.focus();window.moveTo('+L+','+T+');window.resizeTo(340,340)}catch(e){}},60);'
-      +'<\/script><\/body><\/html>');
+      +'<\/script>\n
+
+</body></html>');
     w.document.close();
     try{w.focus()}catch(e){}
     return true;
@@ -7959,7 +7856,7 @@ var ASSINATURA_PM='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAA4QAAAEVCAYAAAC
   }
   async function tocarEleven(texto){
     var c=window.MODESK_ELEVEN&&window.MODESK_ELEVEN.cfg;
-    if(!c||!c.ativo||!c.voice)return false;
+    if(!c||!c.ativo||!c.key||!c.voice)return false;
     var r=await fetch('https://api.elevenlabs.io/v1/text-to-speech/'+encodeURIComponent(c.voice)+'?output_format=mp3_44100_128',{
       method:'POST',headers:{'xi-api-key':c.key,'Content-Type':'application/json'},
       body:JSON.stringify({text:String(texto).slice(0,4800),model_id:c.modelo||'eleven_multilingual_v2',
@@ -8056,20 +7953,24 @@ var ASSINATURA_PM='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAA4QAAAEVCAYAAAC
   console.log('[MODESK v13] Groq e ElevenLabs movidos para dentro do estudio do JARVIS');
 })();
 </script>
-
+<style id="mdk-fxbtn-css">
+/* botão Efeitos no estado desligado */
+.navbtn.fx-off{opacity:.6;border-style:dashed}
+.navbtn.fx-off .ic{filter:grayscale(1)}
+</style>
 <script id="mdk-fxbtn-rail-js">
 /* ===== v13.1 · MENU RAIL de volta + botão LIGAR/DESLIGAR EFEITOS ===== */
 (function(){
   'use strict';
   var KEY='modesk.v15.ui';
-  function fxLigado(){return true;try{return JSON.parse(localStorage.getItem(KEY)||'{}').fx!==false}catch(e){return true}}
+  function fxLigado(){try{return JSON.parse(localStorage.getItem(KEY)||'{}').fx!==false}catch(e){return true}}
   function fxRotulo(){
     var on=fxLigado(),l=document.getElementById('btn-fx-lbl'),b=document.getElementById('btn-fx');
     var txt='Efeitos: '+(on?'ligados':'desligados');
     if(l&&l.textContent!==txt)l.textContent=txt;
     if(b&&b.classList.contains('fx-off')!==!on)b.classList.toggle('fx-off',!on);
   }
-  window.fxToggle=function(){return;
+  window.fxToggle=function(){
     var s={};try{s=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){}
     s.fx=!fxLigado();
     try{localStorage.setItem(KEY,JSON.stringify(s))}catch(e){}
@@ -8100,12 +8001,12 @@ var ASSINATURA_PM='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAA4QAAAEVCAYAAAC
     document.body.appendChild(r);
     /* os módulos existentes (v9 / compacto) encaixam o rail na barra lateral sozinhos */
   }
-  function boot(){criarRail();}
+  function boot(){fxRotulo();criarRail();}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
   var agendado=false;
-  function agendar(){if(agendado)return;agendado=true;setTimeout(function(){agendado=false;criarRail()},300)}
+  function agendar(){if(agendado)return;agendado=true;setTimeout(function(){agendado=false;fxRotulo();criarRail()},300)}
   if(document.body)new MutationObserver(agendar).observe(document.body,{childList:true});
-  setInterval(function(){criarRail()},2000);
+  setInterval(function(){fxRotulo();criarRail()},2000);
   console.log('[MODESK v13.1] menu rail restaurado + botao de efeitos ao lado de Sair');
 })();
 </script>
@@ -8588,25 +8489,12 @@ function aplicar(remoto){
   refletir(mudou);
   return mudou;
 }
-/* v119 - toda chave que ja estava salva neste aparelho tambem entra na nuvem.
-   Antes, so subia o que fosse gravado DEPOIS do sistema iniciar, entao os dados
-   antigos nunca chegavam nos outros aparelhos. Marca antiga (1) para nao
-   atropelar versoes mais novas que ja estejam na nuvem. */
-function semear(){
-  var o=marcas(),mudou=false,i,k;
-  for(i=0;i<localStorage.length;i++){
-    k=localStorage.key(i);
-    if(!pode(k))continue;
-    if(!o[k]){o[k]=1;mudou=true}
-  }
-  if(mudou)gravarMarcas(o);
-}
 function refletir(chaves){
   chaves.forEach(function(k){
     try{
       if(k==='modesk.pessoal.v7'){
         var d=JSON.parse(localStorage.getItem(k)||'null');
-        if(d){ try{if(typeof limparComprasV121==='function')d=limparComprasV121(d)}catch(x){} window.state=d; if(typeof window.render==='function')window.render(); }
+        if(d){ window.state=d; if(typeof window.render==='function')window.render(); }
       }
     }catch(e){}
   });
@@ -8618,32 +8506,27 @@ function agenda(ms){clearTimeout(agendado);agendado=setTimeout(enviar,ms||900)}
 async function enviar(){
   if(enviando){agenda(1200);return}
   enviando=true;
-  var lote=Object.keys(sujos);
   try{
-    semear();
     var remoto=await baixar();
     aplicar(remoto);
-    var meus=marcas(), payload={}, grande=false;
+    var meus=marcas(), payload={}, k;
     Object.keys(remoto||{}).forEach(function(k){payload[k]=remoto[k]});
     Object.keys(meus).forEach(function(k){
       if(!pode(k))return;
       var v=localStorage.getItem(k); if(v==null)return;
-      if(v.length>LIMITE){grande=true;return}
-      var atual=payload[k], tl=meus[k]||0;
-      if(!atual||tl>(atual.t||0)||(atual.v!==v&&tl>=(atual.t||0)))payload[k]={v:v,t:tl||Date.now()};
+      if(v.length>LIMITE)return;
+      var atual=payload[k];
+      if(!atual||(meus[k]||0)>(atual.t||0))payload[k]={v:v,t:meus[k]};
     });
     await subir(payload);
-    /* so limpa o que foi enviado: o que mudou durante o envio continua na fila */
-    lote.forEach(function(k){delete sujos[k]});
-    bolha(ondeEstou()+(grande?' \u00b7 sincronizado (um item muito grande ficou so neste aparelho)':' \u00b7 tudo sincronizado'));
-    if(Object.keys(sujos).length)agenda(600);
+    sujos={};
+    bolha(ondeEstou()+' · tudo sincronizado');
   }catch(e){
-    bolha('nuvem \u00b7 tentando de novo');
+    bolha('nuvem · tentando de novo');
     agenda(6000);
   }
   enviando=false;
 }
-
 async function puxar(){
   if(enviando||document.hidden)return;
   try{ aplicar(await baixar()); }catch(e){}
@@ -8659,7 +8542,6 @@ localStorage.setItem=function(k,v){
 
 /* ---------- ritmo ---------- */
 function iniciar(){
-  semear();
   bolha(ondeEstou()+' · sincronizando…');
   puxar().then(function(){return enviar()});
   setInterval(puxar,5000);
@@ -8844,29 +8726,14 @@ window.mdkSincronizar=function(){agenda(50);return 'sincronizando com '+ondeEsto
 if(window.SIRIUS)return;
 
 /* ---------- chaves (ofuscadas em base64) ---------- */
-var K={el:'TU9ERVNLX1BST1hZ',old:''};
+var K={el:'c2tfYTExZDkxMzZhOGM5YjVhY2Y2OTJkZGU1OTk4NDIzYThlYmNlNTU2NTQ5ZmRjZDRi'};
 function dec(s){try{return atob(s)}catch(e){return ''}}
 /* pool de chaves Groq — revezamento automatico quando os creditos acabam */
-var GKP=['TU9ERVNLX1BST1hZ'];
+var GKP=['Z3NrXzhYWWJXZDRVQnhxdmZ3NWRzTjBVV0dkeWIzRllBREs3eTZlTnoxZVFRR0owZXV2Rk5nbzY=','Z3NrX04wOE9zOEF5RG1MUjdIYUxCR0pMV0dkeWIzRllFWE05ZXJXOFlyNzh6NjJLTVVCZ0FCSHk=','Z3NrX0ZNR0JnMjFzR05IMFZ5TXRuS09vV0dkeWIzRllld2JWWHVINmpzY2RDNUlIVXFSVlE2MjU=','Z3NrX2tVV2YwV0FOaEFqN1B3UlkwbTJZV0dkeWIzRllhV2xNT1pITjNWWTk4VXlLYklodlBENTM=','Z3NrX2ZJVkJvTGN1cFZFUEE1Q2tEV0NEV0dkeWIzRllPZkpybzhjenpIVnBXY0pyNUQxeGc5Wkw='];
 var MODELOS=['openai/gpt-oss-120b','openai/gpt-oss-20b','groq/compound','qwen/qwen3.8-27b'];
 var MODELO_PADRAO=MODELOS[0];
 var MODELOS_MORTOS=/llama-3\.3-70b|llama-3\.1|llama3|mixtral|gemma|70b-versatile|8b-instant/i;
-/* v119 - as 5 chaves do pool ficam SEMPRE na mesma ordem e nunca sao removidas.
-   A chave extra do usuario entra no FIM da fila, para nao deslocar o indice do
-   revezamento (antes ela entrava na frente e o sistema perdia a conta de qual
-   chave estava usando). */
-function chavesGroq(){
-  var a=[],vistos={};
-  GKP.forEach(function(s){var d=(dec(s)||'').trim();if(d&&!vistos[d]){vistos[d]=1;a.push(d)}});
-  var m=((S&&S.cfg&&S.cfg.groq)||'').trim();
-  if(m&&!vistos[m])a.push(m);
-  return a;
-}
-/* descanso por chave: nenhuma chave e apagada, ela so espera e volta sozinha */
-var GK_PAUSA={}, OCUPADO=false;
-function pausaDe(s){return s===429?60000:s===402?1800000:(s===401||s===403)?600000:30000}
-function pausarChave(k,s){GK_PAUSA[k]=Date.now()+pausaDe(s)}
-function chaveLivre(k,agora){return !(GK_PAUSA[k]>agora)}
+function chavesGroq(){var a=GKP.map(dec).filter(Boolean);var m=(S&&S.cfg&&S.cfg.groq||'').trim();if(m)a.unshift(m);return a}
 
 
 /* v116 — proteção REMOVIDA: Ctrl+U, Ctrl+S, F12, Ctrl+Shift+I/J/C e o menu do
@@ -8880,11 +8747,11 @@ var DEFS={cfg:{groq:'',modelo:MODELO_PADRAO,eleven:dec(K.el),voz:'21m00Tcm4TlvDq
 var S=carregar();
 var ELEVEN_VOICES=[], elevenCarregando=false, elevenErro='', elevenAudio=null;
 function id(){return Math.random().toString(36).slice(2,10)}
-function carregar(){var s=JSON.parse(JSON.stringify(DEFS));try{var v=localStorage.getItem(LSS);if(v){var p=JSON.parse(v);s=Object.assign(s,p);s.cfg=Object.assign(JSON.parse(JSON.stringify(DEFS.cfg)),p.cfg||{})}}catch(e){}if(!s.cfg.eleven||s.cfg.eleven===dec(K.old))s.cfg.eleven=dec(K.el);if(!s.cfg.modelo||MODELOS_MORTOS.test(s.cfg.modelo))s.cfg.modelo=MODELO_PADRAO;return s}
+function carregar(){var s=JSON.parse(JSON.stringify(DEFS));try{var v=localStorage.getItem(LSS);if(v){var p=JSON.parse(v);s=Object.assign(s,p);s.cfg=Object.assign(JSON.parse(JSON.stringify(DEFS.cfg)),p.cfg||{})}}catch(e){}if(!s.cfg.eleven)s.cfg.eleven=dec(K.el);if(!s.cfg.modelo||MODELOS_MORTOS.test(s.cfg.modelo))s.cfg.modelo=MODELO_PADRAO;return s}
 function gravar(){try{localStorage.setItem(LSS,JSON.stringify(S))}catch(e){}try{bc.postMessage({t:'s',s:S})}catch(e){}}
-var bc=null;try{bc=new BroadcastChannel('sirius-modesk');bc.onmessage=function(e){if(e.data&&e.data.t==='s'&&!OCUPADO){S=e.data.s;pintar()}}}catch(e){}
-addEventListener('storage',function(e){if(e.key===LSS&&!OCUPADO){S=carregar();pintar()}});
-setInterval(function(){if(OCUPADO)return;var n=carregar();if(JSON.stringify(n)!==JSON.stringify(S)){S=n;pintar()}},5000);
+var bc=null;try{bc=new BroadcastChannel('sirius-modesk');bc.onmessage=function(e){if(e.data&&e.data.t==='s'){S=e.data.s;pintar()}}}catch(e){}
+addEventListener('storage',function(e){if(e.key===LSS){S=carregar();pintar()}});
+setInterval(function(){var n=carregar();if(JSON.stringify(n)!==JSON.stringify(S)){S=n;pintar()}},5000);
 function aviso(m){try{if(typeof toast==='function')return toast(m)}catch(e){}log(m)}
 function log(m){S.logs.unshift({t:Date.now(),m:m});S.logs=S.logs.slice(0,60)}
 
@@ -8916,64 +8783,45 @@ async function chamarIA(msgs){
   var mods=[]; var mp=(cfg.modelo||'').trim();
   if(mp&&!MODELOS_MORTOS.test(mp))mods.push(mp);
   MODELOS.forEach(function(m){if(mods.indexOf(m)<0)mods.push(m)});
-  var ult=null;
+  var ini=Math.min(Math.max(0,S.cfg.gkIdx|0),ks.length-1), ult=null;
   function corpoDe(m){return JSON.stringify({model:m,temperature:.5,max_completion_tokens:1800,messages:[{role:'system',content:SYS+' Persona: '+PERSONAS[cfg.persona]+' Contexto: '+contexto()}].concat(msgs)})}
-  OCUPADO=true;
-  try{
-    for(var mi=0;mi<mods.length;mi++){
-      var modelo=mods[mi], corpo=corpoDe(modelo), modeloRuim=false;
-      var ini=Math.min(Math.max(0,S.cfg.gkIdx|0),ks.length-1), agora=Date.now();
-      /* fila desta rodada: comeca na chave atual e pula as que estao descansando */
-      var ordem=[],n,i;
-      for(n=0;n<ks.length;n++){i=(ini+n)%ks.length;if(chaveLivre(ks[i],agora))ordem.push(i)}
-      if(!ordem.length){
-        /* todas descansando: usa a que volta primeiro. Nenhuma chave e descartada. */
-        var melhor=0;
-        for(n=1;n<ks.length;n++){if((GK_PAUSA[ks[n]]||0)<(GK_PAUSA[ks[melhor]]||0))melhor=n}
-        GK_PAUSA[ks[melhor]]=0; ordem=[melhor];
-      }
-      for(var oi=0;oi<ordem.length;oi++){
-        i=ordem[oi];
-        try{
-          var r=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+ks[i]},body:corpo});
-          if(r.status===404||r.status===400){
-            var tx=await r.text();
-            if(/model/i.test(tx)){
-              ult=new Error('modelo '+modelo+' indisponivel');
-              log('Groq: modelo '+modelo+' indisponivel, trocando de modelo');
-              modeloRuim=true; break;
-            }
-            throw new Error('Groq '+r.status+' \u2014 '+tx.slice(0,140));
+  for(var mi=0;mi<mods.length;mi++){
+    var modelo=mods[mi], corpo=corpoDe(modelo), modeloRuim=false;
+    for(var n=0;n<ks.length;n++){
+      var i=(ini+n)%ks.length;
+      try{
+        var r=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+ks[i]},body:corpo});
+        if(r.status===404||r.status===400){
+          var tx=await r.text();
+          if(/model/i.test(tx)){
+            ult=new Error('modelo '+modelo+' indisponivel');
+            log('Groq: modelo '+modelo+' indisponivel, trocando de modelo');
+            modeloRuim=true; break;
           }
-          if(r.status===429||r.status===401||r.status===402||r.status===403||r.status>=500){
-            ult=new Error('Groq '+r.status);
-            pausarChave(ks[i],r.status);
-            var seg=(oi+1<ordem.length?ordem[oi+1]:ordem[0]);
-            st('chave '+(i+1)+'/'+ks.length+' '+motivoTroca(r.status)+' \u2014 usando chave '+(seg+1)+'\u2026');
-            log('Groq: chave '+(i+1)+' '+motivoTroca(r.status)+', revezando para a '+(seg+1)+' (a chave continua guardada e volta sozinha)');
-            S.cfg.gkIdx=(i+1)%ks.length; gravar();
-            continue;
-          }
-          if(!r.ok)throw new Error('Groq '+r.status+' \u2014 '+(await r.text()).slice(0,140));
-          var j=await r.json();
-          var msg=(j.choices&&j.choices[0]&&j.choices[0].message)||{};
-          var txt=(msg.content||'').trim()||(msg.reasoning||'').trim();
-          if(!txt){ult=new Error('resposta vazia');continue}
-          GK_PAUSA[ks[i]]=0;
-          S.cfg.gkIdx=i; S.cfg.modelo=modelo; S.tokens+=(j.usage&&j.usage.total_tokens)||0; gravar();
-          st('nucleo operacional do MODESK \u00b7 chave '+(i+1)+'/'+ks.length+' \u00b7 '+modelo);
-          return txt;
-        }catch(e){
-          /* falha de rede: nao pausa nem descarta a chave, apenas tenta a proxima */
-          ult=e;
+          throw new Error('Groq '+r.status+' \u2014 '+tx.slice(0,140));
         }
-      }
-      if(!modeloRuim&&mi<mods.length-1)log('Groq: tentando modelo alternativo');
+        if(r.status===429||r.status===401||r.status===402||r.status===403||r.status>=500){
+          ult=new Error('Groq '+r.status);
+          var prox=((i+1)%ks.length)+1;
+          st('chave '+(i+1)+'/'+ks.length+' '+motivoTroca(r.status)+' \u2014 usando chave '+prox+'\u2026');
+          log('Groq: chave '+(i+1)+' '+motivoTroca(r.status)+', revezando para a '+prox);
+          S.cfg.gkIdx=(i+1)%ks.length; gravar();
+          continue;
+        }
+        if(!r.ok)throw new Error('Groq '+r.status+' \u2014 '+(await r.text()).slice(0,140));
+        var j=await r.json();
+        var msg=(j.choices&&j.choices[0]&&j.choices[0].message)||{};
+        var txt=(msg.content||'').trim()||(msg.reasoning||'').trim();
+        if(!txt){ult=new Error('resposta vazia');continue}
+        S.cfg.gkIdx=i; S.cfg.modelo=modelo; S.tokens+=(j.usage&&j.usage.total_tokens)||0; gravar();
+        st('nucleo operacional do MODESK \u00b7 chave '+(i+1)+'/'+ks.length+' \u00b7 '+modelo);
+        return txt;
+      }catch(e){ ult=e; S.cfg.gkIdx=(i+1)%ks.length; gravar(); }
     }
-  }finally{ OCUPADO=false; }
+    if(!modeloRuim&&mi<mods.length-1)log('Groq: tentando modelo alternativo');
+  }
   throw new Error('Nao foi possivel falar com a Groq ('+((ult&&ult.message)||'sem resposta')+'). A conversa foi preservada \u2014 tente novamente.');
 }
-
 function contexto(){var st=window.state||{};return JSON.stringify({eventos:(st.eventos||[]).length,itens:(st.itens||[]).length,arquivos:(st.arquivos||[]).length,pedidos:(st.pedidos||[]).length,chamados:S.chamados.length,abertos:S.chamados.filter(function(c){return c.col!=='resolvidos'}).length})}
 function simulado(t){
   var base='**Modo local** — nenhuma chave Groq disponivel no momento.\n\n';
@@ -8992,7 +8840,7 @@ function detalheVoz(v){var l=v.labels||{};return [l.accent||l.language||'',l.gen
 async function carregarVozes(forcar){
   var campo=document.getElementById('sr-eleven');if(campo)S.cfg.eleven=campo.value.trim();
   if(elevenCarregando||(!forcar&&ELEVEN_VOICES.length))return;
-  
+  if(!S.cfg.eleven){elevenErro='Informe a chave ElevenLabs para carregar as vozes.';pintar();return}
   elevenCarregando=true;elevenErro='';pintar();
   try{
     var r=await fetch('https://api.elevenlabs.io/v2/voices?page_size=100',{headers:{'xi-api-key':S.cfg.eleven}});
@@ -9010,11 +8858,11 @@ function ouvirAmostra(id){
 }
 async function testeEleven(){
   var campo=document.getElementById('sr-eleven');if(campo)S.cfg.eleven=campo.value.trim();
-  if(!S.cfg.voz){aviso('Carregue e escolha uma voz primeiro');return}
+  if(!S.cfg.eleven||!S.cfg.voz){aviso('Carregue e escolha uma voz primeiro');return}
   try{st('gerando teste de voz…');var r=await fetch('https://api.elevenlabs.io/v1/text-to-speech/'+encodeURIComponent(S.cfg.voz),{method:'POST',headers:{'xi-api-key':S.cfg.eleven,'Content-Type':'application/json'},body:JSON.stringify({text:'Olá! Esta é a voz selecionada para o Sirius.',model_id:'eleven_multilingual_v2',voice_settings:{stability:.4,similarity_boost:.8}})});if(!r.ok)throw new Error('Falha '+r.status);if(elevenAudio)elevenAudio.pause();var u=URL.createObjectURL(await r.blob());elevenAudio=new Audio(u);elevenAudio.onended=function(){URL.revokeObjectURL(u);elevenAudio=null};await elevenAudio.play()}catch(e){aviso('Teste de voz indisponível: '+e.message)}finally{st('núcleo operacional do MODESK')}
 }
 async function falar(t){
-  var cfg=S.cfg;if(!cfg.falar)return;
+  var cfg=S.cfg;if(!cfg.falar||!cfg.eleven)return;
   try{
     st('sintetizando voz…');
     var r=await fetch('https://api.elevenlabs.io/v1/text-to-speech/'+encodeURIComponent(cfg.voz||'21m00Tcm4TlvDq8ikWAM'),{method:'POST',headers:{'xi-api-key':cfg.eleven,'Content-Type':'application/json'},
@@ -9164,7 +9012,7 @@ function vCfg(){var c=S.cfg;
  return '<div class="sr-card"><h5>Chaves Groq · revezamento</h5><div style="font-size:12px;color:#cbd5e1">'+chavesGroq().length+' chave(s) ativas. Quando uma fica sem creditos, o Sirius passa para a proxima automaticamente e continua a mesma conversa.</div>'+
  '<div class="sr-row" style="margin-top:8px;flex-wrap:wrap">'+chavesGroq().map(function(_,i){return '<span class="sr-cmd" style="cursor:default;'+(((c.gkIdx|0)===i)?'background:#22d3ee;color:#03121a':'')+'">chave '+(i+1)+'</span>'}).join('')+'</div>'+
  '<div class="sr-row" style="margin-top:8px"><button class="sr-btn gh" id="sr-gk-next">Forcar proxima chave</button></div></div>'+
- '<div class="sr-card"><h5>Engine de IA (Groq)</h5><span class="sr-lbl">Chave extra (opcional, entra no fim da fila)</span><input class="sr-inp" id="sr-groq" type="password" value="'+esc2(c.groq)+'" placeholder="gsk_…">'+
+ '<div class="sr-card"><h5>Engine de IA (Groq)</h5><span class="sr-lbl">Chave extra (opcional, entra na frente)</span><input class="sr-inp" id="sr-groq" type="password" value="'+esc2(c.groq)+'" placeholder="gsk_…">'+
  '<span class="sr-lbl">Modelo</span><input class="sr-inp" id="sr-modelo" value="'+esc2(c.modelo)+'">'+
  '<span class="sr-lbl">Persona</span><select class="sr-sel" id="sr-persona">'+Object.keys(PERSONAS).map(function(k){return '<option value="'+k+'"'+(c.persona===k?' selected':'')+'>'+k+'</option>'}).join('')+'</select></div>'+
  '<div class="sr-card"><div class="sr-voice-head"><h5 style="margin:0">Voz do Sirius · ElevenLabs</h5><span class="sr-voice-state '+(elevenErro?'sr-voice-error':ELEVEN_VOICES.length?'sr-voice-ok':'')+'">'+(elevenCarregando?'carregando…':elevenErro?esc2(elevenErro):ELEVEN_VOICES.length+' disponíveis')+'</span></div>'+
@@ -10318,14 +10166,5 @@ html{scrollbar-gutter:stable both-edges}
 })();
 </script>
 
-<div id="mdk-status" title="Status do sistema"><span class="d" id="st-net"></span><b>Sistema</b><span class="d" id="st-api"></span><b>APIs</b><small id="st-txt">verificando…</small></div>
-<style>#mdk-status{position:fixed;right:260px;top:12px;white-space:nowrap;z-index:9999;display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:rgba(10,14,21,.88);border:1px solid rgba(255,255,255,.12);font:600 11px system-ui;color:#dfe6ee;backdrop-filter:blur(6px)}
-#mdk-status .d{width:9px;height:9px;border-radius:50%;background:#888;box-shadow:0 0 6px currentColor}#mdk-status .ok{background:#2ecc71;color:#2ecc71}#mdk-status .bad{background:#e74c3c;color:#e74c3c}#mdk-status .warn{background:#f1c40f;color:#f1c40f}#mdk-status small{opacity:.7;font-weight:500;margin-left:4px}</style>
-<script>(function(){function set(id,c){var e=document.getElementById(id);if(e)e.className='d '+c}
-async function ping(u){try{var c=new AbortController();setTimeout(function(){c.abort()},6000);await fetch(u,{mode:'no-cors',cache:'no-store',signal:c.signal});return true}catch(e){return false}}
-async function chk(){var on=navigator.onLine;set('st-net',on?'ok':'bad');if(!on){set('st-api','bad');document.getElementById('st-txt').textContent='offline';return}
-var r=await Promise.all([ping('https://api.groq.com/'),ping('https://api.elevenlabs.io/'),ping('https://firestore.googleapis.com/')]);var n=r.filter(Boolean).length;
-set('st-api',n===r.length?'ok':(n?'warn':'bad'));document.getElementById('st-txt').textContent=n===r.length?'online · APIs ok':(n?'APIs parciais ('+n+'/'+r.length+')':'APIs indisponíveis')}
-addEventListener('online',chk);addEventListener('offline',chk);chk();setInterval(chk,60000)})();</script>
 </body>
 </html>
