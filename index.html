@@ -1,4 +1,3 @@
-<!doctype html>
 <!DOCTYPE html>
 
 <html lang="pt-BR">
@@ -11,7 +10,7 @@
 <meta content="MODESK" name="apple-mobile-web-app-title"/>
 <meta content="#03060c" name="theme-color"/>
 <link href="/manifest.webmanifest" rel="manifest"/>
-<title>MODESK PESSOAL — v130 (eventos só com sala do SENAC Aldeota)</title>
+<title>MODESK PESSOAL — v141 (Impressoras em lista separada)</title>
 <script id="mdk-v10-boot">
 
 (function(){
@@ -1493,17 +1492,17 @@ const MN_SLIDES=[
 {t:'7 · Impressoras de Rede & Matriz Rápida de Contatos',s:'Consulta rápida do dia a dia',h:`
  <div class="mn-2col">
   <div class="mn-card"><b>Impressoras de rede</b>
-   <table class="mn-tb"><thead><tr><th>IP</th><th>Local</th></tr></thead><tbody>
-   <tr><td class="mono">10.18.1.201</td><td>Faculdade</td></tr>
-   <tr><td class="mono">10.18.1.210</td><td>Atendimento</td></tr>
-   <tr><td class="mono">10.18.1.218</td><td>Empresa Escola</td></tr>
-   <tr><td class="mono">10.18.1.219</td><td>Almoxarifado Empresa Escola</td></tr>
-   <tr><td class="mono">10.18.1.222</td><td>Supervisão Pedagógica</td></tr>
-   <tr><td class="mono">10.18.1.223</td><td>Biblioteca</td></tr>
-   <tr><td class="mono">10.18.1.224</td><td>Gerência Geral</td></tr>
-   <tr><td class="mono">10.18.1.226</td><td>Almoxarifado Educacional</td></tr>
-   <tr><td class="mono">10.18.1.227</td><td>Senac RioMar</td></tr></tbody></table>
-   <p class="dim">Acesso ao painel: digitar o IP no navegador.</p></div>
+   <table class="mn-tb"><thead><tr><th>IP</th><th>Local</th><th>Nome</th><th>Marca</th><th>MAC</th></tr></thead><tbody>
+   <tr><td class="mono"><a href="http://10.18.1.201" target="_blank" rel="noopener" title="Abrir painel da impressora">10.18.1.201</a></td><td>Faculdade</td><td class="mono">ET788C77A9FF2E</td><td>Lexmark</td><td class="mono">00:20:00:F6:4B:29</td></tr>
+   <tr><td class="mono"><a href="http://10.18.1.210" target="_blank" rel="noopener" title="Abrir painel da impressora">10.18.1.210</a></td><td>Atendimento</td><td class="mono">REF41959ADM1NB.corp.ce.senac.br</td><td>Lexmark</td><td class="mono">00:20:00:EE:24:A5</td></tr>
+   <tr><td class="mono"><a href="http://10.18.1.218" target="_blank" rel="noopener" title="Abrir painel da impressora">10.18.1.218</a></td><td>Empresa Escola</td><td class="mono">ET788C77C15509</td><td>Lexmark</td><td class="mono">78:8C:77:C1:55:09</td></tr>
+   <tr><td class="mono"><a href="http://10.18.1.219" target="_blank" rel="noopener" title="Abrir painel da impressora">10.18.1.219</a></td><td>Almoxarifado Empresa Escola</td><td class="mono">KMC54E52</td><td>Kyocera</td><td class="mono">00:17:C8:C5:4E:52</td></tr>
+   <tr><td class="mono"><a href="http://10.18.1.222" target="_blank" rel="noopener" title="Abrir painel da impressora">10.18.1.222</a></td><td>Supervisão Pedagógica</td><td class="mono">ALDSPE1T1</td><td>Lexmark</td><td class="mono">00:20:00:ED:FC:31</td></tr>
+   <tr><td class="mono"><a href="http://10.18.1.223" target="_blank" rel="noopener" title="Abrir painel da impressora">10.18.1.223</a></td><td>Biblioteca</td><td class="mono">ALDBIB1T1</td><td>Lexmark</td><td class="mono">00:20:00:EE:0C:87</td></tr>
+   <tr><td class="mono"><a href="http://10.18.1.224" target="_blank" rel="noopener" title="Abrir painel da impressora">10.18.1.224</a></td><td>Gerência Geral</td><td class="mono">ET788C77E57EA2</td><td>Lexmark</td><td class="mono">78:8C:77:E5:7E:A2</td></tr>
+   <tr><td class="mono"><a href="http://10.18.1.226" target="_blank" rel="noopener" title="Abrir painel da impressora">10.18.1.226</a></td><td>Almoxarifado Educacional</td><td class="mono">ET788C77C155F4</td><td>Lexmark</td><td class="mono">00:20:00:EE:61:15</td></tr>
+   <tr><td class="mono"><a href="http://10.18.1.227" target="_blank" rel="noopener" title="Abrir painel da impressora">10.18.1.227</a></td><td>Senac RioMar</td><td class="mono">ET788C77C1950B</td><td>Lexmark</td><td class="mono">78:8C:77:C1:95:0B</td></tr></tbody></table>
+   <p class="dim">Clique no IP para abrir o painel da impressora.</p></div>
   <div class="mn-card"><b>Matriz rápida de contatos</b>
    <table class="mn-tb"><thead><tr><th>Área</th><th>Contato</th></tr></thead><tbody>
    <tr><td>Redes (liberação MAC, rotas, portas)</td><td>Carlos Eduardo · Allan</td></tr>
@@ -2017,7 +2016,7 @@ function abrirRemoto(id){const a=state.acessos.find(x=>x.id===id);if(!a)return;
 
 
 /* ---- Mapeamento dos computadores da unidade (v27) ---- */
-const PCS_PLANILHA = [{"andar": "TERREO", "setor": "ALMOXARIFADO", "pat": "33711", "nome": "REF033711ADM1PC", "ip": "", "vnc": "", "anydesk": "", "so": "WIN11", "ram": "8GB", "disco": "SSD 704GB", "drivers": "", "update": "", "usuario": "Alexsandro da Silva", "setoruser": "ALMOXARIFADO", "mac": "D0:94:66:B2:99:E6", "obs": ""}, {"andar": "TERREO", "setor": "ALMOXARIFADO", "pat": "33760", "nome": "SENACREFERENCEALMOX", "ip": "10.18.1.157", "vnc": "10.18.1.157:5900", "anydesk": "1727320871", "so": "WIN10", "ram": "16GB", "disco": "SSD 699GB", "drivers": "", "update": "", "usuario": "Alexsandro da Silva", "setoruser": "ALMOXARIFADO", "mac": "D0:94:66:B2:35:CF", "obs": ""}, {"andar": "TERREO", "setor": "ALMOXARIFADO", "pat": "31352", "nome": "REF031352ADM1NB", "ip": "10.18.1.107", "vnc": "10.18.1.107:5900", "anydesk": "", "so": "WIN10", "ram": "8GB", "disco": "SSD 447GB", "drivers": "", "update": "", "usuario": "Alexsandro da Silva", "setoruser": "ALMOXARIFADO", "mac": "DC:53:60:12:F3:D1", "obs": ""}, {"andar": "TERREO", "setor": "ATENDIMENTO", "pat": "33769", "nome": "REF33769RCC1NB", "ip": "10.18.1.116", "vnc": "10.18.1.116:5900", "anydesk": "1900803312", "so": "", "ram": "", "disco": "", "drivers": "", "update": "", "usuario": "Gisele Hermes Monteiro Nunes", "setoruser": "ATENDIMENTO", "mac": "64:32:A8:87:31:5B", "obs": ""}, {"andar": "TERREO", "setor": "LIVRARIA", "pat": "33731", "nome": "REF033731LIVPC1", "ip": "10.18.1.74", "vnc": "10.18.1.74:5900", "anydesk": "1914344291", "so": "WIN10", "ram": "8GB", "disco": "SSD 477GB", "drivers": "", "update": "", "usuario": "Guilherme Mesquita do Amaral", "setoruser": "LIVRARIA", "mac": "D0:94:66:B2:9F:DC", "obs": ""}, {"andar": "TERREO", "setor": "ATENDIMENTO", "pat": "33770", "nome": "REF33770ADM1NB", "ip": "10.18.1.157", "vnc": "10.18.1.157:5900", "anydesk": "", "so": "", "ram": "", "disco": "", "drivers": "", "update": "", "usuario": "Jhonny Silva de Aquino", "setoruser": "ATENDIMENTO", "mac": "D0:94:66:B2:35:CF", "obs": ""}, {"andar": "TERREO", "setor": "FACULDADE", "pat": "45524", "nome": "ADM045524GEP1PC", "ip": "10.18.1.47", "vnc": "10.18.1.47:5900", "anydesk": "1653209569", "so": "WIN11", "ram": "16GB", "disco": "SSD 238GB", "drivers": "", "update": "", "usuario": "Joice Araújo", "setoruser": "FACULDADE", "mac": "C4:0F:08:C5:DD:C0", "obs": ""}, {"andar": "TERREO", "setor": "FACULDADE", "pat": "49134", "nome": "REF049134ADM1NB", "ip": "10.18.1.35", "vnc": "10.18.1.35:5900", "anydesk": "1530595824", "so": "WIN11", "ram": "16GB", "disco": "SSD 238GB", "drivers": "", "update": "", "usuario": "Josue dos Santos de Lima", "setoruser": "FACULDADE", "mac": "BC:D2:2C:8D:55:86", "obs": ""}, {"andar": "TERREO", "setor": "FACULDADE", "pat": "49043", "nome": "FAC049043ADM1NB", "ip": "10.18.1.90", "vnc": "10.18.1.90:5900", "anydesk": "220860852", "so": "WIN11", "ram": "16GB", "disco": "SSD 238GB", "drivers": "", "update": "", "usuario": "Luis Antonio Rabelo Cunha", "setoruser": "FACULDADE", "mac": "E4:4A:E0:28:3A:98", "obs": ""}, {"andar": "TERREO", "setor": "FACULDADE", "pat": "48956", "nome": "ALD048956DIR1PC", "ip": "10.18.1.76", "vnc": "10.18.1.76:5900", "anydesk": "1093898553", "so": "WIN11", "ram": "16GB", "disco": "SSD 238GB", "drivers": "", "update": "", "usuario": "Maria Aparecida da Silva Nunes", "setoruser": "FACULDADE", "mac": "", "obs": ""}, {"andar": "TERREO", "setor": "ATENDIMENTO", "pat": "33765", "nome": "REF33765RCC1NB", "ip": "10.18.1.188", "vnc": "10.18.1.188:5900", "anydesk": "1011796660", "so": "WIN11", "ram": "8GB", "disco": "SSD 238GB", "drivers": "", "update": "", "usuario": "Nagela Silva Abreu", "setoruser": "ATENDIMENTO", "mac": "64:32:A8:87:3D:DB", "obs": ""}, {"andar": "TERREO", "setor": "ESTACIONAMENTO", "pat": "33715", "nome": "REF033715ADM1PC", "ip": "10.18.1.204", "vnc": "10.18.1.204:5900", "anydesk": "1645659693", "so": "WIN11", "ram": "8GB", "disco": "SSD 699GB", "drivers": "", "update": "", "usuario": "PORTARIA", "setoruser": "ESTACIONAMENTO", "mac": "D0:94:66:B2:33:61", "obs": ""}, {"andar": "TERREO", "setor": "PORTARIA", "pat": "33707", "nome": "REF034956POR1PC", "ip": "10.18.1.33", "vnc": "10.18.1.33:5900", "anydesk": "1742300142", "so": "WIN11", "ram": "8GB", "disco": "SSD 699GB", "drivers": "", "update": "", "usuario": "PORTARIA", "setoruser": "PORTARIA", "mac": "D0:94:66:B2:9B:E8", "obs": ""}, {"andar": "TERREO", "setor": "ATENDIMENTO", "pat": "33912", "nome": "REF33912RCC1NB", "ip": "10.18.1.178", "vnc": "10.18.1.178:5900", "anydesk": "1851579272", "so": "WIN11", "ram": "16GB", "disco": "SSD 447GB", "drivers": "", "update": "", "usuario": "Rebeca Lorena Lima da Silva", "setoruser": "ATENDIMENTO", "mac": "C8:F7:50:4A:D2:76", "obs": ""}, {"andar": "TERREO", "setor": "FACULDADE", "pat": "48957", "nome": "ALD048957GER1PC", "ip": "10.18.1.91", "vnc": "10.18.1.91:5900", "anydesk": "284948927", "so": "WIN11", "ram": "16GB", "disco": "SSD 238GB", "drivers": "", "update": "", "usuario": "", "setoruser": "FACULDADE", "mac": "BC:D2:2C:8A:C9:15", "obs": ""}, {"andar": "1° ANDAR", "setor": "COORDENAÇÃO", "pat": "48958", "nome": "ALD048958SUP1PC", "ip": "10.18.1.38", "vnc": "10.18.1.38:5900", "anydesk": "1484468315", "so": "WIN11", "ram": "16GB", "disco": "SSD 238GB", "drivers": "", "update": "", "usuario": "Andreza Rezende Silvia Miranda", "setoruser": "COORDENAÇÃO", "mac": "BC:D2:2C:8C:FD:CA", "obs": ""}, {"andar": "1° ANDAR", "setor": "BIBLIOTECA", "pat": "33704", "nome": "REF033704BIB1PC", "ip": "10.18.1.220", "vnc": "10.18.1.220:5900", "anydesk": "1293591369", "so": "WIN11", "ram": "8GB", "disco": "SSD 699GB", "drivers": "", "update": "", "usuario": "Hevila Karine Diniz Azevedo", "setoruser": "BIBLIOTECA", "mac": "D0:94:66:B2:9B:C5", "obs": ""}, {"andar": "1° ANDAR", "setor": "BIBLIOTECA", "pat": "33749", "nome": "REF033749BIB1PC", "ip": "10.18.1.163", "vnc": "10.18.1.163:5900", "anydesk": "1863872728", "so": "WIN11", "ram": "8GB", "disco": "SSD 699GB", "drivers": "", "update": "", "usuario": "Isabel Cristina Inácio de souza", "setoruser": "BIBLIOTECA", "mac": "D0:94:66:B2:9B:DC", "obs": ""}, {"andar": "1° ANDAR", "setor": "BIBLIOTECA", "pat": "33697", "nome": "REF033697BIB1PC", "ip": "10.18.1.95", "vnc": "10.18.1.95:5900", "anydesk": "491104745", "so": "WIN11", "ram": "8GB", "disco": "SSD 699GB", "drivers": "", "update": "", "usuario": "Michelle Soares de Oliveira", "setoruser": "BIBLIOTECA", "mac": "D0:94:66:B2:9A:10", "obs": ""}, {"andar": "1° ANDAR", "setor": "GABINETE DOS PROFESSORES", "pat": "30470", "nome": "TRI30470FAC1PC", "ip": "10.18.1.156", "vnc": "10.18.1.156:5900", "anydesk": "1956567436", "so": "WIN10", "ram": "12GB", "disco": "SSD 1001GB", "drivers": "", "update": "", "usuario": "", "setoruser": "GABINETE DOS PROFESSORES", "mac": "5C:C9:D3:22:A1:B0", "obs": ""}, {"andar": "1° ANDAR", "setor": "GABINETE DOS PROFESSORES", "pat": "29856", "nome": "TRI29856FAC1PC", "ip": "", "vnc": "", "anydesk": "1956567436", "so": "WIN10", "ram": "12GB", "disco": "SSD 447GB", "drivers": "", "update": "", "usuario": "", "setoruser": "GABINETE DOS PROFESSORES", "mac": "6C:3B:E5:E8:50:92", "obs": "Sem acesso à rede"}, {"andar": "1° ANDAR", "setor": "SALA DOS PROFESSORES", "pat": "33720", "nome": "REF033720ADM1PC", "ip": "10.18.1.72", "vnc": "10.18.1.72:5900", "anydesk": "1449045457", "so": "WIN11", "ram": "8GB", "disco": "SSD 704GB", "drivers": "", "update": "", "usuario": "", "setoruser": "SALA DOS PROFESSORES", "mac": "D0:94:66:B1:DA:8E", "obs": ""}, {"andar": "2° ANDAR", "setor": "GERÊNCIA", "pat": "33726", "nome": "REF033726ADM1PC", "ip": "10.18.1.38", "vnc": "10.18.1.38:5900", "anydesk": "1746158965", "so": "WIN11", "ram": "32GB", "disco": "SSD 932GB", "drivers": "", "update": "", "usuario": "Alex Lobo Albano", "setoruser": "GERÊNCIA", "mac": "D0:94:66:B2:9B:76", "obs": ""}, {"andar": "2° ANDAR", "setor": "GERÊNCIA", "pat": "33702", "nome": "REF033702ADMPC", "ip": "10.18.1.44", "vnc": "10.18.1.44:5900", "anydesk": "1515041531", "so": "WIN11", "ram": "16GB", "disco": "SSD 699GB", "drivers": "", "update": "", "usuario": "Cristina Silva Souza", "setoruser": "GERÊNCIA", "mac": "D0:94:66:B2:99:6C", "obs": ""}, {"andar": "2° ANDAR", "setor": "GERÊNCIA", "pat": "33746", "nome": "TES33746REF", "ip": "10.18.1.138", "vnc": "10.18.1.138:5900", "anydesk": "1469440307", "so": "WIN10", "ram": "16GB", "disco": "SSD 699GB", "drivers": "", "update": "", "usuario": "Fabiola Gonsalves de Oliveira", "setoruser": "GERÊNCIA", "mac": "D0:94:66:B2:9B:00", "obs": ""}, {"andar": "2° ANDAR", "setor": "GERÊNCIA", "pat": "33729", "nome": "REF33729ADM1PC", "ip": "10.18.1.87", "vnc": "10.18.1.87:5900", "anydesk": "1517184532", "so": "WIN11", "ram": "16GB", "disco": "SSD 699GB", "drivers": "", "update": "", "usuario": "Kelmolly Cristina Silva Santos", "setoruser": "GERÊNCIA", "mac": "D0:94:66:B2:9C:FE", "obs": ""}, {"andar": "2° ANDAR", "setor": "SUPERVISÃO PEDAGÓGICA", "pat": "33710", "nome": "REF033710ADM1PC", "ip": "10.18.1.58", "vnc": "10.18.1.58:5900", "anydesk": "1024556027", "so": "WIN11", "ram": "8GB", "disco": "SSD 699GB", "drivers": "", "update": "", "usuario": "Luiza Paula Ferreira de Souza", "setoruser": "SUPERVISÃO PEDAGÓGICA", "mac": "D0:94:66:B2:34:03", "obs": ""}, {"andar": "2° ANDAR", "setor": "GERÊNCIA", "pat": "33727", "nome": "REF33727ADM1PC", "ip": "10.18.1.61", "vnc": "10.18.1.61:5900", "anydesk": "1154595421", "so": "WIN11", "ram": "32GB", "disco": "SSD 1.14TB", "drivers": "", "update": "", "usuario": "Paulo Márcio de Oliveira", "setoruser": "GERÊNCIA", "mac": "D0:94:66:B2:9B:40", "obs": ""}, {"andar": "2° ANDAR", "setor": "INSTRUTORIA", "pat": "33732", "nome": "REF033732ADM1PC", "ip": "10.18.1.113", "vnc": "10.18.1.113:5900", "anydesk": "1181388941", "so": "WIN11", "ram": "16GB", "disco": "SSD 704GB", "drivers": "", "update": "", "usuario": "PROFESSORES EM GERAL", "setoruser": "INSTRUTORIA", "mac": "D0:94:66:B2:35:35", "obs": ""}, {"andar": "2° ANDAR", "setor": "SUPERVISÃO PEDAGÓGICA", "pat": "33706", "nome": "REF033706SUP1PC", "ip": "10.18.1.45", "vnc": "10.18.1.45:5900", "anydesk": "1033627657", "so": "WIN11", "ram": "16GB", "disco": "SSD 699GB", "drivers": "", "update": "", "usuario": "Raissa Ferreira Lima", "setoruser": "SUPERVISÃO PEDAGÓGICA", "mac": "D0:94:66:B2:9A:99", "obs": ""}, {"andar": "2° ANDAR", "setor": "SUPERVISÃO PEDAGÓGICA", "pat": "33714", "nome": "REF033714SUP1PC", "ip": "10.18.1.86", "vnc": "10.18.1.86:5900", "anydesk": "1661245663", "so": "WIN11", "ram": "16GB", "disco": "SSD 699GB", "drivers": "", "update": "", "usuario": "Rivadavila Lima Ribeiro", "setoruser": "SUPERVISÃO PEDAGÓGICA", "mac": "D0:94:66:B2:99:DD", "obs": ""}, {"andar": "2° ANDAR", "setor": "SUPERVISÃO PEDAGÓGICA", "pat": "33723", "nome": "REF033723SUP1PC", "ip": "10.18.1.56", "vnc": "10.18.1.56:5900", "anydesk": "1735481352", "so": "WIN11", "ram": "16GB", "disco": "SSD 699GB", "drivers": "", "update": "", "usuario": "Simone Ferreira Farias", "setoruser": "SUPERVISÃO PEDAGÓGICA", "mac": "D0:94:66:B2:9B:A4", "obs": ""}, {"andar": "2° ANDAR", "setor": "GERÊNCIA", "pat": "34606", "nome": "REF34606FAC1PC", "ip": "10.18.1.119", "vnc": "10.18.1.119:5900", "anydesk": "217362959", "so": "WIN10", "ram": "8GB", "disco": "HDD 932GB", "drivers": "", "update": "", "usuario": "", "setoruser": "GERÊNCIA", "mac": "EC:2C:E2:7C:07:3E", "obs": ""}, {"andar": "2° ANDAR", "setor": "GERÊNCIA", "pat": "33734", "nome": "REF033734ADM1PC", "ip": "10.18.1.71", "vnc": "10.18.1.71:5900", "anydesk": "1368536370", "so": "WIN11", "ram": "16GB", "disco": "SSD 699GB", "drivers": "", "update": "", "usuario": "", "setoruser": "GERÊNCIA", "mac": "D0:94:66:B2:9C:CD", "obs": ""}, {"andar": "3° ANDAR", "setor": "ALMOXARIFADO", "pat": "33758", "nome": "REF033758ALM1PC", "ip": "10.18.1.89", "vnc": "10.18.1.89:5900", "anydesk": "556329960", "so": "WIN10", "ram": "16GB", "disco": "SSD 699GB", "drivers": "", "update": "", "usuario": "James Kleber Vicente Lima", "setoruser": "ALMOXARIFADO", "mac": "D0:94:66:B1:D8:C8", "obs": ""}, {"andar": "3° ANDAR", "setor": "ALMOXARIFADO", "pat": "33690", "nome": "ALM33690REF", "ip": "10.18.1.131", "vnc": "10.18.1.131:5900", "anydesk": "1945335984", "so": "WIN10", "ram": "16GB", "disco": "SSD 699GB", "drivers": "", "update": "", "usuario": "Jose Gustavo Rodrigues", "setoruser": "ALMOXARIFADO", "mac": "D0:94:66:B2:9D:11", "obs": ""}, {"andar": "3° ANDAR", "setor": "ALMOXARIFADO", "pat": "33717", "nome": "REF33717ALM1PC", "ip": "10.18.1.203", "vnc": "10.18.1.203:5900", "anydesk": "1479375677", "so": "WIN10", "ram": "16GB", "disco": "SSD 699GB", "drivers": "", "update": "", "usuario": "Leticia da Silva Gomes", "setoruser": "ALMOXARIFADO", "mac": "D0:94:66:B2:9B:C9", "obs": ""}, {"andar": "4° ANDAR", "setor": "EMPRESA ESCOLA", "pat": "48973", "nome": "COF048973ADM1PC", "ip": "10.18.1.73", "vnc": "10.18.1.73:5900", "anydesk": "1145858461", "so": "WIN11", "ram": "16GB", "disco": "SSD 238GB", "drivers": "", "update": "", "usuario": "Carla Beatriz Gomes Barbosa", "setoruser": "EMPRESA ESCOLA", "mac": "BC:D2:2C:8A:BF:E7", "obs": ""}, {"andar": "4° ANDAR", "setor": "EMPRESA ESCOLA", "pat": "33831", "nome": "REF33831COO1PC", "ip": "10.18.1.65", "vnc": "10.18.1.65:5900", "anydesk": "1299208280", "so": "WIN10", "ram": "12GB", "disco": "SSD 1.14TB", "drivers": "", "update": "", "usuario": "Francisco das Chagas Cunha Silva", "setoruser": "EMPRESA ESCOLA", "mac": "D0:94:66:B2:DD:09", "obs": ""}, {"andar": "4° ANDAR", "setor": "CAIXA MAYU", "pat": "33736", "nome": "REF33736CX1PC", "ip": "10.18.1.165", "vnc": "10.18.1.165:5900", "anydesk": "1517724737", "so": "WIN10", "ram": "8GB", "disco": "SSD 699GB", "drivers": "", "update": "", "usuario": "Glaudenia Alves Fontenele", "setoruser": "CAIXA MAYU", "mac": "D0:94:66:B2:21:BF", "obs": ""}, {"andar": "4° ANDAR", "setor": "Empresa Escola", "pat": "36991", "nome": "PAN036991SAD1PC", "ip": "10.18.1.56", "vnc": "10.18.1.56:5900", "anydesk": "", "so": "WIN11", "ram": "16GB", "disco": "SSD 238GB", "drivers": "", "update": "", "usuario": "Juliana Bissonho Soares", "setoruser": "Empresa Escola", "mac": "5C:CD:5B:03:90:BC", "obs": ""}, {"andar": "4° ANDAR", "setor": "EMPRESA ESCOLA", "pat": "33728", "nome": "REF33728SUP1PC", "ip": "10.18.1.128", "vnc": "10.18.1.128:5900", "anydesk": "644830341", "so": "WIN10", "ram": "8GB", "disco": "SSD 699GB", "drivers": "", "update": "", "usuario": "Lucas Alan Laureano Pinheiro", "setoruser": "EMPRESA ESCOLA", "mac": "D0:94:66:B2:9B:86", "obs": ""}, {"andar": "4° ANDAR", "setor": "EMPRESA ESCOLA", "pat": "33755", "nome": "REF033755REST1PC", "ip": "10.18.1.185", "vnc": "10.18.1.185:5900", "anydesk": "286181081", "so": "WIN10", "ram": "16GB", "disco": "SSD 699GB", "drivers": "", "update": "", "usuario": "Bruno Do Nascimento Lima", "setoruser": "EMPRESA ESCOLA", "mac": "D0:94:66:B2:9B:0C", "obs": ""}, {"andar": "4° ANDAR", "setor": "EMPRESA ESCOLA", "pat": "33751", "nome": "REF33751ADM1PC", "ip": "10.18.1.34", "vnc": "10.18.1.34:5900", "anydesk": "1995808903", "so": "WIN10", "ram": "8GB", "disco": "SSD 699GB", "drivers": "", "update": "", "usuario": "Semyramis Moreira dos Santos Macedo", "setoruser": "EMPRESA ESCOLA", "mac": "D0:94:66:B2:9A:60", "obs": ""}]; /* atualizado v113 — cadastro fornecido em 22/09/2026 */
+const PCS_PLANILHA = [{"andar":"TERREO","setor":"ALMOXARIFADO","pat":"33711","nome":"REF033711ADM1PC","ip":"","vnc":"","anydesk":"","so":"WIN11","ram":"8GB","disco":"SSD 704GB","drivers":"","update":"","usuario":"Alex Lobo Albano","setoruser":"ALMOXARIFADO","mac":"D0:94:66:B2:99:E6","obs":"","tipo":"Computador","ramal":"8039"},{"andar":"TERREO","setor":"ALMOXARIFADO","pat":"33760","nome":"SENACREFERENCEALMOX","ip":"10.18.1.157","vnc":"10.18.1.157:5900","anydesk":"1727320871","so":"WIN10","ram":"16GB","disco":"SSD 699GB","drivers":"","update":"","usuario":"Alexsandro da Silva","setoruser":"ALMOXARIFADO","mac":"D0:94:66:B2:35:CF","obs":"","tipo":"Computador","ramal":"8039"},{"andar":"TERREO","setor":"ALMOXARIFADO","pat":"31352","nome":"REF031352ADM1NB","ip":"10.18.1.107","vnc":"10.18.1.107:5900","anydesk":"","so":"WIN10","ram":"8GB","disco":"SSD 447GB","drivers":"","update":"","usuario":"Alexsandro da Silva","setoruser":"ALMOXARIFADO","mac":"DC:53:60:12:F3:D1","obs":"","tipo":"Computador","ramal":"8039"},{"andar":"TERREO","setor":"ATENDIMENTO","pat":"33769","nome":"REF33769RCC1NB","ip":"10.18.1.116","vnc":"10.18.1.116:5900","anydesk":"1900803312","so":"","ram":"","disco":"","drivers":"","update":"","usuario":"Gisele Hermes Monteiro Nunes","setoruser":"ATENDIMENTO","mac":"64:32:A8:87:31:5B","obs":"","tipo":"Computador","ramal":"8897"},{"andar":"TERREO","setor":"LIVRARIA","pat":"33731","nome":"REF033731LIVPC1","ip":"10.18.1.74","vnc":"10.18.1.74:5900","anydesk":"1914344291","so":"WIN10","ram":"8GB","disco":"SSD 477GB","drivers":"","update":"","usuario":"Guilherme Mesquita do Amaral","setoruser":"LIVRARIA","mac":"D0:94:66:B2:9F:DC","obs":"","tipo":"Computador"},{"andar":"TERREO","setor":"ATENDIMENTO","pat":"33770","nome":"REF33770ADM1NB","ip":"10.18.1.157","vnc":"10.18.1.157:5900","anydesk":"","so":"WIN11","ram":"16GB","disco":"SSD 699GB","drivers":"","update":"","usuario":"Jhonny Silva de Aquino","setoruser":"ATENDIMENTO","mac":"D0:94:66:B2:35:CF","obs":"","tipo":"Computador"},{"andar":"TERREO","setor":"FACULDADE","pat":"45524","nome":"ADM045524GEP1PC","ip":"10.18.1.47","vnc":"10.18.1.47:5900","anydesk":"1653209569","so":"WIN11","ram":"16GB","disco":"SSD 238GB","drivers":"","update":"","usuario":"Joice Araújo","setoruser":"FACULDADE","mac":"C4:0F:08:C5:DD:C0","obs":"","tipo":"Computador","ramal":"9165"},{"andar":"TERREO","setor":"FACULDADE","pat":"49134","nome":"REF049134ADM1NB","ip":"10.18.1.35","vnc":"10.18.1.35:5900","anydesk":"1530595824","so":"WIN11","ram":"16GB","disco":"SSD 238GB","drivers":"","update":"","usuario":"Josue dos Santos de Lima","setoruser":"FACULDADE","mac":"BC:D2:2C:8D:55:86","obs":"","tipo":"Computador","ramal":"8943"},{"andar":"TERREO","setor":"FACULDADE","pat":"49043","nome":"FAC049043ADM1NB","ip":"10.18.1.90","vnc":"10.18.1.90:5900","anydesk":"220860852","so":"WIN11","ram":"16GB","disco":"SSD 238GB","drivers":"","update":"","usuario":"Luis Antonio Rabelo Cunha","setoruser":"FACULDADE","mac":"E4:4A:E0:28:3A:98","obs":"","tipo":"Computador","ramal":"6596"},{"andar":"TERREO","setor":"FACULDADE","pat":"48956","nome":"ALD048956DIR1PC","ip":"10.18.1.76","vnc":"10.18.1.76:5900","anydesk":"1093898553","so":"WIN11","ram":"16GB","disco":"SSD 238GB","drivers":"","update":"","usuario":"Maria Aparecida da Silva Nunes","setoruser":"FACULDADE","mac":"","obs":"","tipo":"Computador"},{"andar":"TERREO","setor":"ATENDIMENTO","pat":"33765","nome":"REF33765RCC1NB","ip":"10.18.1.188","vnc":"10.18.1.188:5900","anydesk":"1011796660","so":"WIN11","ram":"8GB","disco":"SSD 238GB","drivers":"","update":"","usuario":"Nagela Silva Abreu","setoruser":"ATENDIMENTO","mac":"64:32:A8:87:3D:DB","obs":"","tipo":"Computador","ramal":"7999"},{"andar":"TERREO","setor":"ESTACIONAMENTO","pat":"33715","nome":"REF033715ADM1PC","ip":"10.18.1.204","vnc":"10.18.1.204:5900","anydesk":"1645659693","so":"WIN11","ram":"8GB","disco":"SSD 699GB","drivers":"","update":"","usuario":"PORTARIA","setoruser":"ESTACIONAMENTO","mac":"D0:94:66:B2:33:61","obs":"","tipo":"Computador"},{"andar":"TERREO","setor":"PORTARIA","pat":"33707","nome":"REF034956POR1PC","ip":"10.18.1.33","vnc":"10.18.1.33:5900","anydesk":"1742300142","so":"WIN11","ram":"8GB","disco":"SSD 699GB","drivers":"","update":"","usuario":"PORTARIA","setoruser":"PORTARIA","mac":"D0:94:66:B2:9B:E8","obs":"","tipo":"Computador"},{"andar":"TERREO","setor":"ATENDIMENTO","pat":"33912","nome":"REF33912RCC1NB","ip":"10.18.1.178","vnc":"10.18.1.178:5900","anydesk":"1851579272","so":"WIN11","ram":"16GB","disco":"SSD 447GB","drivers":"","update":"","usuario":"Rebeca Lorena Lima da Silva","setoruser":"ATENDIMENTO","mac":"C8:F7:50:4A:D2:76","obs":"","tipo":"Computador","ramal":"8535"},{"andar":"TERREO","setor":"FACULDADE","pat":"48957","nome":"ALD048957GER1PC","ip":"10.18.1.91","vnc":"10.18.1.91:5900","anydesk":"284948927","so":"WIN11","ram":"16GB","disco":"SSD 238GB","drivers":"","update":"","usuario":"Estagiária","setoruser":"FACULDADE","mac":"BC:D2:2C:8A:C9:15","obs":"","tipo":"Computador"},{"andar":"1° ANDAR","setor":"COORDENAÇÃO","pat":"48958","nome":"ALD048958SUP1PC","ip":"10.18.1.38","vnc":"10.18.1.38:5900","anydesk":"1484468315","so":"WIN11","ram":"16GB","disco":"SSD 238GB","drivers":"","update":"","usuario":"Andreza Rezende Silvia Miranda","setoruser":"COORDENAÇÃO","mac":"BC:D2:2C:8C:FD:CA","obs":"","tipo":"Computador"},{"andar":"1° ANDAR","setor":"BIBLIOTECA","pat":"33704","nome":"REF033704BIB1PC","ip":"10.18.1.220","vnc":"10.18.1.220:5900","anydesk":"1293591369","so":"WIN11","ram":"8GB","disco":"SSD 699GB","drivers":"","update":"","usuario":"Hevila Karine Diniz Azevedo","setoruser":"BIBLIOTECA","mac":"D0:94:66:B2:9B:C5","obs":"","tipo":"Computador"},{"andar":"1° ANDAR","setor":"BIBLIOTECA","pat":"33749","nome":"REF033749BIB1PC","ip":"10.18.1.163","vnc":"10.18.1.163:5900","anydesk":"1863872728","so":"WIN11","ram":"8GB","disco":"SSD 699GB","drivers":"","update":"","usuario":"Isabel Cristina Inácio de souza","setoruser":"BIBLIOTECA","mac":"D0:94:66:B2:9B:DC","obs":"","tipo":"Computador","ramal":"6767"},{"andar":"1° ANDAR","setor":"BIBLIOTECA","pat":"33697","nome":"REF033697BIB1PC","ip":"10.18.1.95","vnc":"10.18.1.95:5900","anydesk":"491104745","so":"WIN11","ram":"8GB","disco":"SSD 699GB","drivers":"","update":"","usuario":"Michelle Soares de Oliveira","setoruser":"BIBLIOTECA","mac":"D0:94:66:B2:9A:10","obs":"","tipo":"Computador","ramal":"8140"},{"andar":"1° ANDAR","setor":"GABINETE DOS PROFESSORES","pat":"30470","nome":"TRI30470FAC1PC","ip":"10.18.1.156","vnc":"10.18.1.156:5900","anydesk":"1956567436","so":"WIN10","ram":"12GB","disco":"SSD 1001GB","drivers":"","update":"","usuario":"","setoruser":"GABINETE DOS PROFESSORES","mac":"5C:C9:D3:22:A1:B0","obs":"","tipo":"Computador"},{"andar":"1° ANDAR","setor":"GABINETE DOS PROFESSORES","pat":"29856","nome":"TRI29856FAC1PC","ip":"","vnc":"","anydesk":"1956567436","so":"WIN10","ram":"12GB","disco":"SSD 447GB","drivers":"","update":"","usuario":"","setoruser":"GABINETE DOS PROFESSORES","mac":"6C:3B:E5:E8:50:92","obs":"Sem acesso à rede","tipo":"Computador"},{"andar":"1° ANDAR","setor":"SALA DOS PROFESSORES","pat":"33720","nome":"REF033720ADM1PC","ip":"10.18.1.72","vnc":"10.18.1.72:5900","anydesk":"1449045457","so":"WIN11","ram":"8GB","disco":"SSD 704GB","drivers":"","update":"","usuario":"","setoruser":"SALA DOS PROFESSORES","mac":"D0:94:66:B1:DA:8E","obs":"","tipo":"Computador"},{"andar":"2° ANDAR","setor":"GERÊNCIA","pat":"33726","nome":"REF033726ADM1PC","ip":"10.18.1.38","vnc":"10.18.1.38:5900","anydesk":"1746158965","so":"WIN11","ram":"32GB","disco":"SSD 932GB","drivers":"","update":"","usuario":"Alex Lobo Albano","setoruser":"GERÊNCIA","mac":"D0:94:66:B2:9B:76","obs":"","tipo":"Computador","ramal":"7412"},{"andar":"2° ANDAR","setor":"GERÊNCIA","pat":"33702","nome":"REF033702ADMPC","ip":"10.18.1.44","vnc":"10.18.1.44:5900","anydesk":"1515041531","so":"WIN11","ram":"16GB","disco":"SSD 699GB","drivers":"","update":"","usuario":"Cristina Silva Souza","setoruser":"GERÊNCIA","mac":"D0:94:66:B2:99:6C","obs":"","tipo":"Computador","ramal":"5903"},{"andar":"2° ANDAR","setor":"GERÊNCIA","pat":"33746","nome":"TES33746REF","ip":"10.18.1.138","vnc":"10.18.1.138:5900","anydesk":"1469440307","so":"WIN10","ram":"16GB","disco":"SSD 699GB","drivers":"","update":"","usuario":"Fabiola Gonsalves de Oliveira","setoruser":"GERÊNCIA","mac":"D0:94:66:B2:9B:00","obs":"","tipo":"Computador","ramal":"7855"},{"andar":"2° ANDAR","setor":"GERÊNCIA","pat":"33729","nome":"REF33729ADM1PC","ip":"10.18.1.87","vnc":"10.18.1.87:5900","anydesk":"1517184532","so":"WIN11","ram":"16GB","disco":"SSD 699GB","drivers":"","update":"","usuario":"Kelmolly Cristina Silva Santos","setoruser":"GERÊNCIA","mac":"D0:94:66:B2:9C:FE","obs":"","tipo":"Computador","ramal":"7662"},{"andar":"2° ANDAR","setor":"SUPERVISÃO PEDAGÓGICA","pat":"33710","nome":"REF033710ADM1PC","ip":"10.18.1.58","vnc":"10.18.1.58:5900","anydesk":"1024556027","so":"WIN11","ram":"8GB","disco":"SSD 699GB","drivers":"","update":"","usuario":"Luisa Paula Ferreira de Sousa","setoruser":"SUPERVISÃO PEDAGÓGICA","mac":"D0:94:66:B2:34:03","obs":"","tipo":"Computador","ramal":"7361"},{"andar":"2° ANDAR","setor":"GERÊNCIA","pat":"33727","nome":"REF33727ADM1PC","ip":"10.18.1.61","vnc":"10.18.1.61:5900","anydesk":"1154595421","so":"WIN11","ram":"32GB","disco":"SSD 1.14TB","drivers":"","update":"","usuario":"Paulo Márcio de Oliveira","setoruser":"GERÊNCIA","mac":"D0:94:66:B2:9B:40","obs":"","tipo":"Computador","ramal":"6070"},{"andar":"2° ANDAR","setor":"INSTRUTORIA","pat":"33732","nome":"REF033732ADM1PC","ip":"10.18.1.113","vnc":"10.18.1.113:5900","anydesk":"1181388941","so":"WIN11","ram":"16GB","disco":"SSD 704GB","drivers":"","update":"","usuario":"PROFESSORES EM GERAL","setoruser":"INSTRUTORIA","mac":"D0:94:66:B2:35:35","obs":"","tipo":"Computador"},{"andar":"2° ANDAR","setor":"SUPERVISÃO PEDAGÓGICA","pat":"33706","nome":"REF033706SUP1PC","ip":"10.18.1.45","vnc":"10.18.1.45:5900","anydesk":"1033627657","so":"WIN11","ram":"16GB","disco":"SSD 699GB","drivers":"","update":"","usuario":"Raissa Ferreira Lima","setoruser":"SUPERVISÃO PEDAGÓGICA","mac":"D0:94:66:B2:9A:99","obs":"","tipo":"Computador","ramal":"7673"},{"andar":"2° ANDAR","setor":"SUPERVISÃO PEDAGÓGICA","pat":"33714","nome":"REF033714SUP1PC","ip":"10.18.1.86","vnc":"10.18.1.86:5900","anydesk":"1661245663","so":"WIN11","ram":"16GB","disco":"SSD 699GB","drivers":"","update":"","usuario":"Rivadavila Lima Ribeiro","setoruser":"SUPERVISÃO PEDAGÓGICA","mac":"D0:94:66:B2:99:DD","obs":"","tipo":"Computador","ramal":"5901"},{"andar":"2° ANDAR","setor":"SUPERVISÃO PEDAGÓGICA","pat":"33723","nome":"REF033723SUP1PC","ip":"10.18.1.56","vnc":"10.18.1.56:5900","anydesk":"1735481352","so":"WIN11","ram":"16GB","disco":"SSD 699GB","drivers":"","update":"","usuario":"Simone Ferreira Farias","setoruser":"SUPERVISÃO PEDAGÓGICA","mac":"D0:94:66:B2:9B:A4","obs":"","tipo":"Computador","ramal":"5904"},{"andar":"2° ANDAR","setor":"GERÊNCIA","pat":"34606","nome":"REF34606FAC1PC","ip":"10.18.1.119","vnc":"10.18.1.119:5900","anydesk":"217362959","so":"WIN10","ram":"8GB","disco":"HDD 932GB","drivers":"","update":"","usuario":"Aprendizes","setoruser":"GERÊNCIA","mac":"EC:2C:E2:7C:07:3E","obs":"","tipo":"Computador"},{"andar":"2° ANDAR","setor":"GERÊNCIA","pat":"33734","nome":"REF033734ADM1PC","ip":"10.18.1.71","vnc":"10.18.1.71:5900","anydesk":"1368536370","so":"WIN11","ram":"16GB","disco":"SSD 699GB","drivers":"","update":"","usuario":"Bruno Do Nascimento Lima","setoruser":"GERÊNCIA","mac":"D0:94:66:B2:9C:CD","obs":"","tipo":"Computador","ramal":"8963"},{"andar":"3° ANDAR","setor":"ALMOXARIFADO","pat":"33758","nome":"REF033758ALM1PC","ip":"10.18.1.89","vnc":"10.18.1.89:5900","anydesk":"556329960","so":"WIN10","ram":"16GB","disco":"SSD 699GB","drivers":"","update":"","usuario":"James Kleber Vicente Lima","setoruser":"ALMOXARIFADO","mac":"D0:94:66:B1:D8:C8","obs":"","tipo":"Computador","ramal":"9122"},{"andar":"3° ANDAR","setor":"ALMOXARIFADO","pat":"33690","nome":"ALM33690REF","ip":"10.18.1.131","vnc":"10.18.1.131:5900","anydesk":"1945335984","so":"WIN10","ram":"16GB","disco":"SSD 699GB","drivers":"","update":"","usuario":"Jose Gustavo Rodrigues","setoruser":"ALMOXARIFADO","mac":"D0:94:66:B2:9D:11","obs":"","tipo":"Computador","ramal":"9017"},{"andar":"3° ANDAR","setor":"ALMOXARIFADO","pat":"33717","nome":"REF33717ALM1PC","ip":"10.18.1.203","vnc":"10.18.1.203:5900","anydesk":"1479375677","so":"WIN10","ram":"16GB","disco":"SSD 699GB","drivers":"","update":"","usuario":"Leticia da Silva Gomes","setoruser":"ALMOXARIFADO","mac":"D0:94:66:B2:9B:C9","obs":"","tipo":"Computador","ramal":"9133"},{"andar":"4° ANDAR","setor":"EMPRESA ESCOLA","pat":"48973","nome":"COF048973ADM1PC","ip":"10.18.1.73","vnc":"10.18.1.73:5900","anydesk":"1145858461","so":"WIN11","ram":"16GB","disco":"SSD 238GB","drivers":"","update":"","usuario":"Carla Beatriz Gomes Barbosa","setoruser":"EMPRESA ESCOLA","mac":"BC:D2:2C:8A:BF:E7","obs":"","tipo":"Computador","ramal":"8137"},{"andar":"4° ANDAR","setor":"EMPRESA ESCOLA","pat":"33831","nome":"REF33831COO1PC","ip":"10.18.1.65","vnc":"10.18.1.65:5900","anydesk":"1299208280","so":"WIN10","ram":"12GB","disco":"SSD 1.14TB","drivers":"","update":"","usuario":"Francisco das Chagas Cunha Silva","setoruser":"EMPRESA ESCOLA","mac":"D0:94:66:B2:DD:09","obs":"","tipo":"Computador","ramal":"9229"},{"andar":"4° ANDAR","setor":"CAIXA MAYU","pat":"33736","nome":"REF33736CX1PC","ip":"10.18.1.165","vnc":"10.18.1.165:5900","anydesk":"1517724737","so":"WIN10","ram":"8GB","disco":"SSD 699GB","drivers":"","update":"","usuario":"Glaudenia Alves Fontenele","setoruser":"CAIXA MAYU","mac":"D0:94:66:B2:21:BF","obs":"","tipo":"Computador","ramal":"8920"},{"andar":"4° ANDAR","setor":"Empresa Escola","pat":"36991","nome":"PAN036991SAD1PC","ip":"10.18.1.56","vnc":"10.18.1.56:5900","anydesk":"","so":"WIN11","ram":"16GB","disco":"SSD 238GB","drivers":"","update":"","usuario":"Juliana Bissonho Soares","setoruser":"Empresa Escola","mac":"5C:CD:5B:03:90:BC","obs":"","tipo":"Computador","ramal":"8875"},{"andar":"4° ANDAR","setor":"EMPRESA ESCOLA","pat":"33728","nome":"REF33728SUP1PC","ip":"10.18.1.128","vnc":"10.18.1.128:5900","anydesk":"644830341","so":"WIN10","ram":"8GB","disco":"SSD 699GB","drivers":"","update":"","usuario":"Lucas Alan Laureano Pinheiro","setoruser":"EMPRESA ESCOLA","mac":"D0:94:66:B2:9B:86","obs":"","tipo":"Computador","ramal":"8335"},{"andar":"4° ANDAR","setor":"EMPRESA ESCOLA","pat":"33755","nome":"REF033755REST1PC","ip":"10.18.1.185","vnc":"10.18.1.185:5900","anydesk":"286181081","so":"WIN10","ram":"16GB","disco":"SSD 699GB","drivers":"","update":"","usuario":"Bruno Do Nascimento Lima","setoruser":"EMPRESA ESCOLA","mac":"D0:94:66:B2:9B:0C","obs":"","tipo":"Computador","ramal":"8963"},{"andar":"4° ANDAR","setor":"EMPRESA ESCOLA","pat":"33751","nome":"REF33751ADM1PC","ip":"10.18.1.34","vnc":"10.18.1.34:5900","anydesk":"1995808903","so":"WIN10","ram":"8GB","disco":"SSD 699GB","drivers":"","update":"","usuario":"Semyramis Moreira dos Santos Macedo","setoruser":"EMPRESA ESCOLA","mac":"D0:94:66:B2:9A:60","obs":"","tipo":"Computador","ramal":"9978"},{"nome":"PAN41779GER1NB","tipo":"Notebook","pat":"41779","setor":"GERÊNCIA","andar":"2° ANDAR","ramal":"5900","usuario":"Raquel Cajé Torres Bezerra","mac":"CO-A5-E8-15-25-3E","so":"WIN11","ip":"","vnc":"","anydesk":"","obs":""},{"andar":"4° ANDAR","setor":"EMPRESA ESCOLA","pat":"49128","nome":"ALD049128ADM1NB","ip":"","vnc":"","anydesk":"","so":"WIN11","ram":"","disco":"","drivers":"","update":"","usuario":"Semyramis Moreira dos Santos Macedo","setoruser":"EMPRESA ESCOLA","mac":"BC:D2:2C:8D:54:9B","obs":"","tipo":"Notebook","ramal":"9978"},{"andar":"4° ANDAR","setor":"EMPRESA ESCOLA","pat":"49045","nome":"CAF049045EVE1NB","ip":"","vnc":"","anydesk":"","so":"WIN11","ram":"","disco":"","drivers":"","update":"","usuario":"Francisca Camila Ferreira Nobrega","setoruser":"EMPRESA ESCOLA","mac":"E4:4A:E0:2A:E3:6F","obs":"","tipo":"Notebook","ramal":"6539"},{"andar":"4° ANDAR","setor":"EMPRESA ESCOLA","pat":"49127","nome":"ALD049127ADM1NB","ip":"","vnc":"","anydesk":"","so":"WIN11","ram":"","disco":"","drivers":"","update":"","usuario":"Hosters Mayu","setoruser":"EMPRESA ESCOLA","mac":"BC:D2:2C:8D:55:A9","obs":"","tipo":"Notebook","ramal":""},{"andar":"4° ANDAR","setor":"EMPRESA ESCOLA","pat":"49048","nome":"ALD049048ADM1NB","ip":"","vnc":"","anydesk":"","so":"WIN11","ram":"","disco":"","drivers":"","update":"","usuario":"Raquel Holanda Lima","setoruser":"EMPRESA ESCOLA","mac":"E4:4A:E0:2A:A8:A5","obs":"","tipo":"Notebook","ramal":"7355"}]; /* atualizado v133 — cadastro fornecido em 01/10/2026 */
 const MP_ICO_ANY='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAjCAYAAADSQImyAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAfCSURBVFhHtZhbbBxnFYC/M7Ozl1nHtyROnMSFopDYrUjpBSkpUMKtLS88VCD1iZCKF54RiD7VQrQqIkIoQglIIFFFRYhWSDy0EhVSVAovCKUSsh2qRilByTqxY9exvd6dtXd+Hv7L/DO+1LlwVrNnzjn/f/5z+28jtfKQEvKgBFAgAkoB94QWQ1uBlW+TdmqtQv0foMdCWePdnxn8I2jL2kye0Uob4wTboD2rlDK00YWhJZcB7bgNoPbTvBT5VrUPRbkgeAHdQK5t3VKOl8kNxpNaNKS0pevBDrCZHKN4M/F2YCuDc455JSmmoQgEIpkBptQo8ny+j0F0FDx+ILrWQRAj0Hg9HQRCYBSIGSjXV7T+rK+Wi0cHfmb8mvVeHb+IbStLD5RCvnugn91RCF5Na+zRKAIUz+zu4eu7dlASXdPZwIZWBdqTW11hOayPY6JsHzAZ0E5msiLfCEWE/ijk9OgeTgz3M1av8M6tFiupzrN4DyIEIjy7t4+XDg7x9K4ebnS6TK10UCIuuvanDbI8kz0jBwhLQTxuzNKgFCLiMqBdtonU0cu1B3rDgDOjw3xpsA7Ax2sRD9QrnJ9v0uqmubYA39zTy8sHh6gGQkmEJwZibiRrTC0n62oeM8cUmtZyQRk7g6zuTGBtqE0HE2cv8vla7g0DfvXAMF8cjJ2BAE8MxPxybJi+UpBrHwg8OdhDFGRBqAbCSweHeHZPn17XTa077MbMIm91hlFYH7eKrKdF2IzfVwo4M7beeAv3VSMe3lHjzbllOqkOpVLwxtwSh+MKn4zLLpc2EzOdLpPNdpZ4F3qPYWkRPQe8oNsgZ49hajqrw8GoxOnRPXzZlM1mMFKNeHRHjT/PNek4rvDWfJP7a2UO1fNOfK4/5uZql4lmx1rjZUH3dTQQlsJ4XNi45jWpdM1lHAajkJ8d2sNXd25tPEbTSDXikR1V3ryZZWItVZxfWGGkEnG4XnEjRoF2YrbTZXI58ezZNAM943YgHXG71lqenfX6fWcUcurQEE/t7MlbugVYJx415bRqbFhT8M7CCgcqEaMFJz4/EHOj0+Xicsc3LssAms7NgWKdW4WWPxiF/PTQEF+7DeMtZE5UeWt+maSrM9FJFX+/1WJfJcw7IcLxgZhGssa/mx3vUJfH6yaxc9YSNvLl0h0bb0HMxD7SU+X8QouW2ScS60S1lHOiJMLxwZhGZ433Vjo6kHZ31mnI5oCtKYWuecwbQH9Jl83dGO/Dx2oRY3GZtxdarHRTBEhSxd9utRiplnJzomQyca3tZcKBEJZLPXojMxG3660WC32lgJ8f3svT98h4C/fXyozGZf7qZaKTKt7+sMUnatG6Jfb4oCkns2PbuZAroSLUw4BfjO7lyW2sNncC1onzH7Zod1MQYTVN+cv8CofrZQ7GZde2JMIXBr1MmFVJb3zO1wwL8MxQrzse/L/gs/0xXxmM3R6D6HI6dWWebmFVqQUBz+3vY1c51BYKBHpm+Kc+jRVwbnqBn3wwR1pcnu4RdBX88NIMr91YzN24RuOINz49QmjjaWCymXByqsFMZ83d1gLndhGj8dmr87z8n7l10bhbSJXi++/P8Nr1JRN9/TvSU+WPD41Q8c5KABPLCScnp5lJ0tx5bcs5gNkDLiy16Ch4vK+mb0B3CalSfO/9GV6/sURqahkUD++oce5T+xiIwlz7ieWE56amudZe83Zi9CoUhXW9jLrKNyuRXZFMRt5dbNMBjt6lE12l+MGlWV6fWTKm69Xksd4av35wL7vLpVz7ieWE71zUxuv9KdsHRIQwCvSFxgUCi03NGJSCdkIpjvbF+ip4m9BJFc9fmuEP1xfxbwmP9VY5OzbMcCVv/MVmwsnJBlfbazm+Bm1AWC7Vx0U75HY5HeDs3W4NCuHC0p050U4VL1ye5XfTS3ocpSP4md4aZ8aG2V8wfqqZcGJymumkmzsF64xltmUZcD4plLmR6cSYN3Mz6ip4d6nNqlIc26YTrVTx48s3OddYdBoBHumtcXZs7zrjJ5sJJyYaXE+6pq3+l8KpWFwGcmcf46EyGVGFugNShAuLbdYUHOurmYxtDK1U8eIHN3mlcSun/6GeKr95cJh9Gxh/0kQee0Awkc9op0pnQAAlynxT3BpsixT456LOxON98YZOtFPFi5dv8tvGQo4/Vi/z6pH9DBUm7GQz4eTENNcSv+b9yVkAMRnQnnn3gJznPm07CiAo0U50gWP9tdwwHaX4kYu8bq8zKPz+yAHuq0Zeaz1hvz05TSMxq40bdyO7MmyOEtlnF02YV3vy8/i5xkqv6aevzHHqypxbWVIFL1ya5ZVrt0y7rL1C8Y1/XeW/7VXTGt5b6fCtiQYNu9qss8NnaX2WrzNgkiQmxFtj7wuB6J4iwj8W2igUR/tjnr80w6vTizm5ay+QpPCn2WWe2tnD7GpXG590XYZz2Dw24lafpSWu7FYAYup/i4r7SAgE9lUiGsnqts5PvaUApWCpa9Mvt42lXh7KhrJ864KQlZENg2+YR9uoObBrgtfd8h1sps/DspHcvkP2bVS5P/tia9fjuYniyxWI/VZpvuPbb/eeHOUVtOvvqbeiAq01ZTXvepu29uMweSyQq10fF2rR2x2LPApyv5/G2oh1WCNjT1bzRqV7AP4Hu09/kX9KHpcAAAAASUVORK5CYII=';
 const MP_ICO_VNC='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAdCAYAAAC0T3x2AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAYoSURBVEhLhZZdbFxHFcd/M9f37od3HdtxvnBthaTQhqQClYJEMAlBKVLaKlUVpBTklwjVT63aElXiIZUwqBIVIiBFFVJLkMhD+hABEUXJQwwFUhxEQ5WoUJN1V8Ru/JGk3l17vbt3fWfm8HDX2bVxmiMdzZkzd85/zv/Ox1Hdz+QEBYpYVrf38iEt/YYd++OOarS6ZWhtUc2orXHWlLVW0mg/GWitiQ25A3rPRcQfqCZ1ghKHV7+FMmUUbtWnDbsl4mr6YqdGdAaXWA/KR6FAZBlI0EtF2mfOEnhX0RtKeKsyaBW1Or0WcUbjbmWJ1MOEm5+CtmwTSGHJTP6a9p4LJA4JrBOUjoN5ysPDQ6FQSqHRKBRaabRq2GiUUigU1ahKbS6kelqo2meIuveA0jGQDqfp/PhVst+dRfWrGKSx6KROktZpAhUQ6ABf+fjKJ1ABvm7YLX6FIl/Jc+0f48y/uYOw90XES8ebQUeLqO4CZEGJAgfYWMMoZKG+QKleolAvUKgXmF+ap2qqOOtQTqGcQotGi8YXn22pbaTWJdFt0yBLAOj4PxpETBPArFRjDLWoRrlaprhY5Gb5JhMLE4yXx5kL5zDWYI3FGENoQ6ar0ziJg0nrORIkdlgQK001ggsd0UxE5Z8VCmcLzP5ylplfzXD7/G1uvXeL3PUcN+ZvUFuqUY7K5Mt5nHP4zm+AxeKlvvjcD3T9NoH8hcROQQUxdRIJ5rah+FaRwu8KqEsK974jvBbi8o709TSL7y5SvFJkobaA63aUpUzGy9DhdTA7e5PSZYvNfhO8VPPAisRZYIizuBExc2IG9yfH4FcHeeSzj2Bqhu3927lvy30slhZ54mtP8PgDj1N6s8SVn1yhPFUm6ZIYY3DWIS0HLKauBcSWLeV3ynz0ykc8lHqI146/hq99pqemOfq9o+zbt4/dX9nN04ef5tLfLrFrxy6Gvz9MX6WP6RPTVD6sUK/VcaZJ2x0gACKQqlD6Y4nC6QKHHz3MiZ+doCPTwfnz5zl48CCVSoVz585x8uRJRkdHGRwcZOTCCPu/sZ/Xf/E6Aw8MMHVmitLVEi508cb6PyAHi1cXmT0zy4GBA7x09CXu334/E5MTaK0xxnDq1Cny+Ty1Wo2xsTG6uruIoohyuczOz+3khedeYGNiI1Nnpwgnwpgl4rtqxaWa2JwguSXJ2LUxrv/3OsYY0qk0zjpS6RR79+5l165dJBIJ2tvbSQQJRATf94miiLH/jDE9O41er9EdK+/rFT2/02fLt7cwaSZ5/ujznPnNGR7c8SDd3d2M58bp6+ujv7+frVu3cuTIEUZGRujt7SXdnuaNk2/w8o9eZmHzAp0HOtHpNYDu7A2B5KcCNn2nh5uJm/zwlWHe/vPbDA0NcfHiRUqlEocOHeLYsWPkcjkuX77Mk089yfGfH+fVn/6YhU3zdOzPIpn4TLaK6hrKiS79i2xlmI7HHLoT8CxuyVK4ME/4XsTn+79AT1cPo++MUqvVUErR07OegT0D/Dv3Adfmxkh/OUHXnk4yqSwpnaHw4Txzv09gth6HRNeqh08EtIPAoTsd3d9Ks/7ZFPkd7/PXuRHq2So1r0ro1yim5nhr8rfMfCnPxhczdB1Mo9dZlrwakasjsjKlZkaLw3Q8FqE3OkhaCCz4DvEtOIcJHRIK2Ma13ubQSY2X9ACNshqWNNTbaFtKUs8L83/IrM6o5SHTDnyLBBYJDCQsZB1tmx3+NsH/jI310+BtdJCxkDCIb5DAgm8xhCA2fglaawalfFTkI0bi+9yPJ8RZtdiBjYETy3a8KIKYbnwLnkWUIMYh4qNUjKQBXJDFVrqQokJCBZFqvEeqoYBpaZe18WZhmq0YBaHCFRXi9eFUW8xZ11BOcAZ/4jSp8Cztuw16g0MlDbQJeIJ4ElclSposCyAKRKHsMrBGKh7ulqby94Cl7mdhwwBKaVTnUE6Ui7BzH+B9/C5t1asE3hzas6DsyrLnbuKI/7OAEx9b78RmHkZt/jreum1xvREDGWx5EmoFMFW0GEBo0LtC7l1uKRAP/DRephcvvakFqDFreeKdAGv47ga0Yk0CCmmWyyJrV6qfRNbdxu7mpzH2Pz56GEBX+FriAAAAAElFTkSuQmCC';
 const MP_PATH_ANYDESK = 'C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\AnyDesk';
@@ -2084,7 +2083,7 @@ function mpLinhas(){
   const L=mpLista();
   if(!L.length)return '<tr><td colspan="6" class="dim">Nenhum computador encontrado.</td></tr>';
   return L.map(p=>`<tr>
-    <td><b>${esc(p.nome||'—')}</b><div class="dim mono">Patrimônio ${esc(p.pat||'—')}</div>${p.origem==='scan'?'<span class="tag t-warn">só varredura</span>':(p.rede?'<span class="tag t-ok">na rede</span>':'<span class="tag t-info">só planilha</span>')}${p.obs?`<div class="dim">⚠ ${esc(p.obs)}</div>`:''}</td>
+    <td><b>${esc(p.nome||'—')}</b><div class="dim mono">Patrimônio ${esc(p.pat||'—')}</div>${p.origem==='scan'?'<span class="tag t-warn">só varredura</span>':(p.rede?'<span class="tag t-ok">na rede</span>':'<span class="tag t-info">só planilha</span>')}</td>
     <td>${esc(p.setor||'—')}<div class="dim">${esc(p.andar||'')}</div>${p.usuario?`<div class="dim">👤 ${esc(p.usuario)}${p.setoruser?' · '+esc(p.setoruser):''}</div>`:''}</td>
     <td class="mono">${esc(mpIP(p.vnc)||'—')}${p.scan?' <span class="tag t-ok">varredura</span>':''}${p.ipant?`<div class="dim">IP anterior: ${esc(p.ipant)}</div>`:''}${p.iprede?`<div class="dim">Varredura: ${esc(p.iprede)}</div>`:''}${p.mac?`<div class="dim mono">${esc(p.mac)}${p.macant?` <span class="tag t-info">antes: ${esc(p.macant)}</span>`:''}</div>`:'<div class="dim">MAC não cadastrado</div>'}</td>
     <td class="mono">${esc(mpFmtAny(p.anydesk)||'—')}${p.anyant?`<div class="dim">antes: ${esc(mpFmtAny(p.anyant))}</div>`:''}</td>
@@ -2107,8 +2106,8 @@ function mpImportar(){
   save();toast(n+' acesso(s) enviados para Conexões Remotas');
 }
 function mpCSV(){
-  const cab=['Andar','Setor','Patrimonio','Nome','IP (VNC)','IP anterior','MAC','AnyDesk','SO','RAM','Armazenamento','Drivers','Windows Update','Usuario','Setor do usuario','Origem','Fonte','Observacao'];
-  const linhas=mpLista().map(p=>[p.andar,p.setor,p.pat,p.nome,mpIP(p.vnc),p.ipant,p.mac,p.anydesk,p.so,p.ram,p.disco,p.drivers,p.update,p.usuario,p.setoruser,(p.origem==='scan'?'varredura':'planilha+varredura'),(p.fonte||'planilha'),p.obs]
+  const cab=['Andar','Setor','Patrimonio','Nome','IP (VNC)','IP anterior','MAC','AnyDesk','SO','RAM','Armazenamento','Drivers','Windows Update','Usuario','Setor do usuario','Origem','Fonte'];
+  const linhas=mpLista().map(p=>[p.andar,p.setor,p.pat,p.nome,mpIP(p.vnc),p.ipant,p.mac,p.anydesk,p.so,p.ram,p.disco,p.drivers,p.update,p.usuario,p.setoruser,(p.origem==='scan'?'varredura':'planilha+varredura'),(p.fonte||'planilha')]
     .map(v=>'"'+String(v||'').replace(/"/g,'""')+'"').join(';'));
   dl(new Blob(['\ufeff'+cab.join(';')+'\n'+linhas.join('\n')],{type:'text/csv;charset=utf-8'}),'mapeamento-computadores.csv');
 }
@@ -2116,7 +2115,7 @@ function mpCSV(){
 /* ---- Monitoramento da rede da unidade (v48) — dados da varredura Advanced IP Scanner ---- */
 const REDE_FAIXA='10.18.1.1-254';
 const MP_PATH_SCANNER='C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Advanced IP Scanner v2';
-const REDE_DATA=[["0 TÉRREO", "ALDRCC1T1", "10.18.1.221", "00:20:00:EE:24:A5", "Lexmark MX532adwe", "ATENDIMENTO", ""], ["0 TÉRREO", "LIV33731REF", "10.18.1.74", "D0:94:66:B2:9F:DC", "Livraria", "Caixa", "194469902"], ["0 TÉRREO", "REF033694CAF1PC", "10.18.1.18", "D0:94:66:B2:33:4C", "Café", "Caixa", "1182931073"], ["0 TÉRREO", "REF033720ADM1PC", "10.18.1.133", "D0:94:66:B1:DA:8E", "Faculdade", "Josue", "1449045457"], ["0 TÉRREO", "REF034567FAC1PC", "10.18.1.147", "EC:2C:E2:7C:BF:16", "Faculdade", "Professor Luis", ""], ["0 TÉRREO", "TRI29856FAC1PC", "10.18.1.111", "6C:3B:E5:E8:50:92", "Faculdade", "SALA PROFESSORES", ""], ["0 TÉRREO", "REF34606FAC1PC", "10.18.1.115", "EC:2C:E2:7C:07:3E", "Faculdade", "SALA PROFESSORES", ""], ["0 TÉRREO", "REF34579FAC1PC", "10.18.1.112", "EC:2C:E2:7C:BA:4C", "Faculdade", "SALA PROFESSORES", ""], ["0 TÉRREO", "ADM045524GEP1PC", "10.18.1.174", "AC:V4:80:DF:A8:AD", "Faculdade", "GERENCIA (Giselle)", ""], ["0 TÉRREO", "REF034956POR1PC", "10.18.1.146", "D0:94:66:B2:9B:E8", "Portaria", "Portaria", "1742300142"], ["0 TÉRREO", "REF33715ADM1PC", "10.18.1.72", "D0:94:66:B2:33:61", "Estacionamento", "Estacionamento", "1715847444"], ["0 TÉRREO", "REF33765RCC1NB", "10.18.1.188", "64:32:A8:87:3D:DB", "Atendimento", "Nagela", "1159614982"], ["0 TÉRREO", "REF33770RCC1NB", "10.18.1.97", "64:32:A8:87:49:11", "Atendimento", "Bruno", "1228385015"], ["0 TÉRREO", "REF33912RCC1NB", "10.18.1.197", "9E:F5:09:E3:9C:E8", "Atendimento", "Rebeca", "1851579272"], ["0 TÉRREO", "REF33769RCC1NB", "10.18.1.116", "64:32:A8:87:31:5B", "Atendimento", "Gisele", "1900803312"], ["0 TÉRREO", "REF33770ADM1NB", "10.18.1.157", "D0:94:66:B2:35:CF", "Almoxarifado Edu", "PC1", ""], ["0 TÉRREO", "TES033755REF", "10.18.1.209", "D0:94:66:B2:9B:0C", "Tesouraria", "Cristina", "286181081"], ["0 TÉRREO", "TES33746REF", "10.18.1.138", "D0:94:66:B2:9B:00", "Tesouraria", "Ana Gabriela", "1469440307"], ["0 TÉRREO", "TRI30470FAC1PC", "10.18.1.156", "5C:C9:D3:22:A1:B0", "Faculdade", "SECRETÁRIA", "1956567436"], ["1 ANDAR", "REF031352ADM1NB", "10.18.100.39", "DC:53:60:12:F3:D1", "Almoxarifado Edu", "Notebook", ""], ["1 ANDAR", "REF033711ADM1PC", "10.18.1.95", "D0:94:66:B2:99:E6", "Almoxarifado Edu", "PC2", ""], ["1 ANDAR", "ALDBIB1T1", "10.18.1.223", "00:20:00:EE:0C:87", "Lexmark MX532adwe", "BIBLIOTECA", ""], ["1 ANDAR", "REF033697BIB1PC", "10.18.1.124", "D0:94:66:B2:9A:10", "Biblioteca", "Michele", "491104745"], ["1 ANDAR", "REF033704BIB1PC", "10.18.1.83", "5C:B2:6D:EB:20:12", "Biblioteca", "Hevila", "1293591369"], ["1 ANDAR", "REF033749BIB1PC", "10.18.1.236", "D0:94:66:B2:9B:DC", "Biblioteca", "Isabel", "1863872728"], ["2 ANDAR", "ALDSPE1T1", "10.18.1.222", "00:20:00:ED:FC:31", "Lexmark MX532adwe", "SUPERVISÃO", ""], ["2 ANDAR", "REF033702ADMPC", "10.18.1.100", "D0:94:66:B2:99:6C", "Gerencia", "Fabiola", ""], ["2 ANDAR", "REF033706SUP1PC", "10.18.1.70", "D0:94:66:B2:9A:99", "Supervisão", "Raissa", "1033627657"], ["2 ANDAR", "REF03371ADM1PC", "10.18.1.121", "D0:94:66:B2:34:03", "Supervisão", "Professores", ""], ["2 ANDAR", "REF033714SUP1PC", "10.18.1.130", "D0:94:66:B2:99:DD", "Supervisão", "Riva", "1661245663"], ["2 ANDAR", "REF033723SUP1PC", "10.18.1.169", "D0:94:66:B2:9B:A4", "Supervisão", "Simone", "1735481352"], ["2 ANDAR", "REF033726ADM1PC", "10.18.1.152", "D0:94:66:B2:9B:76", "Gerencia", "Ricardo", "1746158965"], ["2 ANDAR", "REF033732ADM1PC", "10.18.1.177", "D0:94:66:B1:E0:9F", "Supervisão", "Paula", "1504648597"], ["2 ANDAR", "REF33729ADM1PC", "10.18.1.87", "D0:94:66:B2:9C:FE", "Gerencia", "Kelmolly", ""], ["2 ANDAR", "REF033734ADM1PC", "10.18.1.143", "D0:94:66:B2:9C:CD", "Gerencia", "PC Aprendiz", "1368536370"], ["3 ANDAR", "ALM33690REF", "10.18.1.131", "D0:94:66:B2:9D:11", "Lexmark MX532adwe", "ALMOXARIFADO", "1945335984"], ["3 ANDAR", "REF033758ALM1PC", "10.18.1.168", "D0:94:66:B1:D8:C8", "Almoxarifado", "PC3", ""], ["3 ANDAR", "REF33717ALM1PC", "10.18.1.203", "D0:94:66:B2:9B:C9", "Almoxarifado", "PC2", ""], ["4 ANDAR", "REF33691CX1PC", "10.18.1.36", "D0:94:66:B2:34:B5", "Empresa Escola", "Caixa Eventos", "1267829145"], ["4 ANDAR", "REF33736CX1PC", "10.18.1.165", "D0:94:66:B2:21:BF", "Mayu", "Caixa Mayu", "1517724737"], ["4 ANDAR", "REF33728SUP1PC", "10.18.1.128", "D0:94:66:B2:9B:86", "Empresa Escola", "Lucas", ""], ["4 ANDAR", "REF33831COO1PC", "10.18.1.65", "D0:94:66:B2:DD:09", "Empresa Escola", "Bruno", ""], ["4 ANDAR", "REF33751ADM1PC", "10.18.1.199", "D0:94:66:B2:9A:60", "Empresa Escola", "Raquel", ""], ["4 ANDAR", "REF33695RCC1PC", "10.18.1.120", "D0:94:66:B2:9C:49", "Mayu", "Cozinha", ""], ["4 ANDAR", "PAN41779GER1NB", "10.18.1.117", "C0:A5:E8:15:25:3F", "GERENCIA", "Raquel", ""], ["4 ANDAR", "PAN036991SAD1PC", "10.18.1.56", "5C:CD:5B:03:90:BC", "Empresa Escola", "Juliana", ""], ["INFRA", "AR-COND", "10.18.1.17", "F8:DC:7A:B0:ED:74", "SISTEMA ARCONDICIONADO", "CSNET Lite", ""], ["INFRA", "AR-COND", "10.18.1.16", "F8:DC:7A:B0:E6:18", "SISTEMA ARCONDICIONADO", "CSNET Lite", ""], ["INFRA", "TEL-IP", "10.18.1.31", "00:0B:82:BE:0F:F0", "TELEFONE IP", "RECEPÇÃO", ""], ["INFRA", "TEL-IP", "10.18.1.91", "00:0B:82:BE:0F:FD", "TELEFONE IP", "ATENDIMENTO", ""], ["INFRA", "PRINTER", "10.18.1.201", "00:20:00:EE:1C:43", "Lexmark MX532", "FACULDADE", ""], ["INFRA", "PRINTER", "10.18.1.218", "78:8C:77:C1:55:09", "Lexmark MX532", "EMP. ESCOLA", ""], ["MÓVEL", "SAMSUNG-C1", "-", "48:51:69:0A:F3:EA", "Celular Garçom", "Corp 1", ""], ["MÓVEL", "SAMSUNG-C13", "-", "68:7D:6B:20:4D:11", "Celular Garçom", "Corp 13", ""], ["RIOMAR", "REF33751SAD1PC", "10.18.1.160", "64:32:A8:87:3F:52", "Riomar", "Riomar", ""], ["RIOMAR", "RIO033889CAS1PC", "10.18.1.238", "D0:94:66:B2:EC:49", "Riomar", "Riomar", ""], ["RIOMAR", "RMP33768ATD", "10.18.1.88", "64:32:A8:87:31:56", "Riomar", "Riomar", ""]];
+const REDE_DATA=[["0 TÉRREO", "ALDRCC1T1", "10.18.1.221", "00:20:00:EE:24:A5", "Lexmark MX532adwe", "ATENDIMENTO", ""], ["0 TÉRREO", "LIV33731REF", "10.18.1.74", "D0:94:66:B2:9F:DC", "Livraria", "Caixa", "194469902"], ["0 TÉRREO", "REF033694CAF1PC", "10.18.1.18", "D0:94:66:B2:33:4C", "Café", "Caixa", "1182931073"], ["0 TÉRREO", "REF033720ADM1PC", "10.18.1.133", "D0:94:66:B1:DA:8E", "Faculdade", "Josue", "1449045457"], ["0 TÉRREO", "REF034567FAC1PC", "10.18.1.147", "EC:2C:E2:7C:BF:16", "Faculdade", "Professor Luis", ""], ["0 TÉRREO", "TRI29856FAC1PC", "10.18.1.111", "6C:3B:E5:E8:50:92", "Faculdade", "SALA PROFESSORES", ""], ["0 TÉRREO", "REF34606FAC1PC", "10.18.1.115", "EC:2C:E2:7C:07:3E", "Faculdade", "SALA PROFESSORES", ""], ["0 TÉRREO", "REF34579FAC1PC", "10.18.1.112", "EC:2C:E2:7C:BA:4C", "Faculdade", "SALA PROFESSORES", ""], ["0 TÉRREO", "ADM045524GEP1PC", "10.18.1.174", "AC:V4:80:DF:A8:AD", "Faculdade", "GERENCIA (Giselle)", ""], ["0 TÉRREO", "REF034956POR1PC", "10.18.1.146", "D0:94:66:B2:9B:E8", "Portaria", "Portaria", "1742300142"], ["0 TÉRREO", "REF33715ADM1PC", "10.18.1.72", "D0:94:66:B2:33:61", "Estacionamento", "Estacionamento", "1715847444"], ["0 TÉRREO", "REF33765RCC1NB", "10.18.1.188", "64:32:A8:87:3D:DB", "Atendimento", "Nagela", "1159614982"], ["0 TÉRREO", "REF33770RCC1NB", "10.18.1.97", "64:32:A8:87:49:11", "Atendimento", "Bruno", "1228385015"], ["0 TÉRREO", "REF33912RCC1NB", "10.18.1.197", "9E:F5:09:E3:9C:E8", "Atendimento", "Rebeca", "1851579272"], ["0 TÉRREO", "REF33769RCC1NB", "10.18.1.116", "64:32:A8:87:31:5B", "Atendimento", "Gisele", "1900803312"], ["0 TÉRREO", "REF33770ADM1NB", "10.18.1.157", "D0:94:66:B2:35:CF", "Almoxarifado Edu", "PC1", ""], ["0 TÉRREO", "TES033755REF", "10.18.1.209", "D0:94:66:B2:9B:0C", "Tesouraria", "Cristina", "286181081"], ["0 TÉRREO", "TES33746REF", "10.18.1.138", "D0:94:66:B2:9B:00", "Tesouraria", "Ana Gabriela", "1469440307"], ["0 TÉRREO", "TRI30470FAC1PC", "10.18.1.156", "5C:C9:D3:22:A1:B0", "Faculdade", "SECRETÁRIA", "1956567436"], ["1 ANDAR", "REF031352ADM1NB", "10.18.100.39", "DC:53:60:12:F3:D1", "Almoxarifado Edu", "Notebook", ""], ["1 ANDAR", "REF033711ADM1PC", "10.18.1.95", "D0:94:66:B2:99:E6", "Almoxarifado Edu", "PC2", ""], ["1 ANDAR", "ALDBIB1T1", "10.18.1.223", "00:20:00:EE:0C:87", "Lexmark MX532adwe", "BIBLIOTECA", ""], ["1 ANDAR", "REF033697BIB1PC", "10.18.1.124", "D0:94:66:B2:9A:10", "Biblioteca", "Michele", "491104745"], ["1 ANDAR", "REF033704BIB1PC", "10.18.1.83", "5C:B2:6D:EB:20:12", "Biblioteca", "Hevila", "1293591369"], ["1 ANDAR", "REF033749BIB1PC", "10.18.1.236", "D0:94:66:B2:9B:DC", "Biblioteca", "Isabel", "1863872728"], ["2 ANDAR", "ALDSPE1T1", "10.18.1.222", "00:20:00:ED:FC:31", "Lexmark MX532adwe", "SUPERVISÃO", ""], ["2 ANDAR", "REF033702ADMPC", "10.18.1.100", "D0:94:66:B2:99:6C", "Gerencia", "Fabiola", ""], ["2 ANDAR", "REF033706SUP1PC", "10.18.1.70", "D0:94:66:B2:9A:99", "Supervisão", "Raissa", "1033627657"], ["2 ANDAR", "REF03371ADM1PC", "10.18.1.121", "D0:94:66:B2:34:03", "Supervisão", "Professores", ""], ["2 ANDAR", "REF033714SUP1PC", "10.18.1.130", "D0:94:66:B2:99:DD", "Supervisão", "Riva", "1661245663"], ["2 ANDAR", "REF033723SUP1PC", "10.18.1.169", "D0:94:66:B2:9B:A4", "Supervisão", "Simone", "1735481352"], ["2 ANDAR", "REF033726ADM1PC", "10.18.1.152", "D0:94:66:B2:9B:76", "Gerencia", "Ricardo", "1746158965"], ["2 ANDAR", "REF033732ADM1PC", "10.18.1.177", "D0:94:66:B1:E0:9F", "Supervisão", "Paula", "1504648597"], ["2 ANDAR", "REF33729ADM1PC", "10.18.1.87", "D0:94:66:B2:9C:FE", "Gerencia", "Kelmolly", ""], ["2 ANDAR", "REF033734ADM1PC", "10.18.1.143", "D0:94:66:B2:9C:CD", "Gerencia", "PC Aprendiz", "1368536370"], ["3 ANDAR", "ALM33690REF", "10.18.1.131", "D0:94:66:B2:9D:11", "Lexmark MX532adwe", "ALMOXARIFADO", "1945335984"], ["3 ANDAR", "REF033758ALM1PC", "10.18.1.168", "D0:94:66:B1:D8:C8", "Almoxarifado", "PC3", ""], ["3 ANDAR", "REF33717ALM1PC", "10.18.1.203", "D0:94:66:B2:9B:C9", "Almoxarifado", "PC2", ""], ["4 ANDAR", "REF33691CX1PC", "10.18.1.36", "D0:94:66:B2:34:B5", "Empresa Escola", "Caixa Eventos", "1267829145"], ["4 ANDAR", "REF33736CX1PC", "10.18.1.165", "D0:94:66:B2:21:BF", "Mayu", "Caixa Mayu", "1517724737"], ["4 ANDAR", "REF33728SUP1PC", "10.18.1.128", "D0:94:66:B2:9B:86", "Empresa Escola", "Lucas", ""], ["4 ANDAR", "REF33831COO1PC", "10.18.1.65", "D0:94:66:B2:DD:09", "Empresa Escola", "Bruno", ""], ["4 ANDAR", "REF33751ADM1PC", "10.18.1.199", "D0:94:66:B2:9A:60", "Empresa Escola", "Raquel", ""], ["4 ANDAR", "REF33695RCC1PC", "10.18.1.120", "D0:94:66:B2:9C:49", "Mayu", "Cozinha", ""], ["4 ANDAR", "PAN41779GER1NB", "10.18.1.117", "C0:A5:E8:15:25:3F", "GERENCIA", "Raquel", ""], ["4 ANDAR", "PAN036991SAD1PC", "10.18.1.56", "5C:CD:5B:03:90:BC", "Empresa Escola", "Juliana", ""], ["INFRA", "AR-COND", "10.18.1.17", "F8:DC:7A:B0:ED:74", "SISTEMA ARCONDICIONADO", "CSNET Lite", ""], ["INFRA", "AR-COND", "10.18.1.16", "F8:DC:7A:B0:E6:18", "SISTEMA ARCONDICIONADO", "CSNET Lite", ""], ["INFRA", "TEL-IP", "10.18.1.31", "00:0B:82:BE:0F:F0", "TELEFONE IP", "RECEPÇÃO", ""], ["INFRA", "TEL-IP", "10.18.1.91", "00:0B:82:BE:0F:FD", "TELEFONE IP", "ATENDIMENTO", ""], ["INFRA", "ET788C77A9FF2E", "10.18.1.201", "00:20:00:F6:4B:29", "Lexmark MX532", "FACULDADE", ""], ["INFRA", "ET788C77C15509", "10.18.1.218", "78:8C:77:C1:55:09", "Lexmark MX532", "EMP. ESCOLA", ""], ["MÓVEL", "SAMSUNG-C1", "-", "48:51:69:0A:F3:EA", "Celular Garçom", "Corp 1", ""], ["MÓVEL", "SAMSUNG-C13", "-", "68:7D:6B:20:4D:11", "Celular Garçom", "Corp 13", ""], ["RIOMAR", "REF33751SAD1PC", "10.18.1.160", "64:32:A8:87:3F:52", "Riomar", "Riomar", ""], ["RIOMAR", "RIO033889CAS1PC", "10.18.1.238", "D0:94:66:B2:EC:49", "Riomar", "Riomar", ""], ["RIOMAR", "RMP33768ATD", "10.18.1.88", "64:32:A8:87:31:56", "Riomar", "Riomar", ""]];
 
 /* ---- PLANILHA ÚNICA (v51): funde inventário (fonte principal) + varredura de rede (complemento) ---- */
 function mpNormMac(m){return String(m||'').toUpperCase().replace(/[^0-9A-F]/g,'')}
@@ -2154,7 +2153,7 @@ function mpAmalgamar(base,rede){
   return L;
 }
 const PCS_UNIDADE = mpAmalgamar(PCS_PLANILHA, REDE_DATA);
- const REDE_PERIF=[["Impressora · Lexmark", "http://10.18.1.201", "", "Faculdade — Ajustado IP da Faculdade"], ["Impressora · Lexmark", "http://10.18.1.218", "", "Empresa Escola — Impressora do setor Empresa Escola"], ["Impressora · Kyocera", "http://10.18.1.219", "", "Almoxarifado — Impressora Kyocera mapeada no Almoxarifado"], ["Impressora · Lexmark", "http://10.18.1.222", "", "Supervisão Pedagógica — Equipamento da Supervisão"], ["Impressora · Lexmark", "http://10.18.1.223", "", "Biblioteca — Terminal de impressão da Biblioteca"], ["Impressora · Lexmark", "http://10.18.1.224", "", "Gerência — Impressora da Gerência"], ["Impressora · Lexmark", "http://10.18.1.226", "", "Almoxarifado Educacional — Setor de Almoxarifado Educacional"], ["Impressora · Lexmark", "http://10.18.1.227", "", "Senac RioMar — Unidade externa / RioMar"], ["Ar Cond.", "10.18.1.17", "F8:DC:7A:B0:ED:74", "CSNET Lite (Sist. Ar Condicionado)"], ["Ar Cond.", "10.18.1.16", "F8:DC:7A:B0:E6:18", "CSNET Lite (Sist. Ar Condicionado)"], ["Telefone IP", "10.18.1.172", "00:0B:82:BE:0F:FF", "Grandstream (Gerência)"], ["Telefone IP", "10.18.1.175", "00:0B:82:BE:0F:F9", "Grandstream (Supervisão)"], ["Telefone IP", "10.18.1.99", "00:0B:82:B9:52:38", "Grandstream (Adm)"], ["Telefone IP", "10.18.1.31", "00:0B:82:BE:0F:F0", "Grandstream (Recepção)"], ["Telefone IP", "10.18.1.91", "00:0B:82:BE:0F:FD", "Grandstream (Atendimento)"]];
+ const REDE_PERIF=[["Impressora · Lexmark", "http://10.18.1.201", "00:20:00:F6:4B:29", "Faculdade — ET788C77A9FF2E"], ["Impressora · Lexmark", "http://10.18.1.210", "00:20:00:EE:24:A5", "Atendimento — REF41959ADM1NB.corp.ce.senac.br"], ["Impressora · Lexmark", "http://10.18.1.218", "78:8C:77:C1:55:09", "Empresa Escola — ET788C77C15509"], ["Impressora · Kyocera", "http://10.18.1.219", "00:17:C8:C5:4E:52", "Almoxarifado Empresa Escola — KMC54E52"], ["Impressora · Lexmark", "http://10.18.1.222", "00:20:00:ED:FC:31", "Supervisão Pedagógica — ALDSPE1T1"], ["Impressora · Lexmark", "http://10.18.1.223", "00:20:00:EE:0C:87", "Biblioteca — ALDBIB1T1"], ["Impressora · Lexmark", "http://10.18.1.224", "78:8C:77:E5:7E:A2", "Gerência Geral — ET788C77E57EA2"], ["Impressora · Lexmark", "http://10.18.1.226", "00:20:00:EE:61:15", "Almoxarifado Educacional — ET788C77C155F4"], ["Impressora · Lexmark", "http://10.18.1.227", "78:8C:77:C1:95:0B", "Senac RioMar — ET788C77C1950B"], ["Ar Cond.", "10.18.1.17", "F8:DC:7A:B0:ED:74", "CSNET Lite (Sist. Ar Condicionado)"], ["Ar Cond.", "10.18.1.16", "F8:DC:7A:B0:E6:18", "CSNET Lite (Sist. Ar Condicionado)"], ["Telefone IP", "10.18.1.172", "00:0B:82:BE:0F:FF", "Grandstream (Gerência)"], ["Telefone IP", "10.18.1.175", "00:0B:82:BE:0F:F9", "Grandstream (Supervisão)"], ["Telefone IP", "10.18.1.99", "00:0B:82:B9:52:38", "Grandstream (Adm)"], ["Telefone IP", "10.18.1.31", "00:0B:82:BE:0F:F0", "Grandstream (Recepção)"], ["Telefone IP", "10.18.1.91", "00:0B:82:BE:0F:FD", "Grandstream (Atendimento)"]];
 const RD={q:'',andar:''};
 function rdLista(){
   const q=RD.q.toLowerCase();
@@ -3161,7 +3160,7 @@ function winClose(){if(confirm('Sair do MODESK?'))logout()}
     document.body.append(b);
     setTimeout(() => b.remove(), 2400);
   }
-  function init() { normalizeLayout(); boot(); fxLayer() }
+  function init() { normalizeLayout(); boot() }
   if (document.readyState === 'loading') addEventListener('DOMContentLoaded', init); else init();
 })();
 
@@ -3707,7 +3706,7 @@ function popupFora(ev){
       +'document.getElementById("ok").onclick=function(){clearInterval(tm);window.close()};'
       +'document.getElementById("soneca").onclick=function(){try{window.opener.MODESK_ALERTAS.adiar("'+String(ev.id).replace(/"/g,'')+'",5)}catch(e){}clearInterval(tm);window.close()};'
       +'setTimeout(function(){try{window.focus();window.moveTo('+L+','+T+');window.resizeTo(340,340)}catch(e){}},60);'
-      +'<\/script>\n</body></html>');
+      +'<\/script></body></html>');
     w.document.close();
     try{w.focus()}catch(e){}
     return true;
@@ -8159,8 +8158,8 @@ aside{display:flex!important;flex-direction:column!important;overflow:hidden!imp
   'use strict';
   var MP_EDIT_KEY='mdk_mapeamento_edicoes_v60';
   var mpEditando=null;
-  var CAMPOS=['andar','setor','pat','nome','vnc','ipant','mac','macant','anydesk','anyant','so','ram','disco','drivers','update','usuario','setoruser','obs'];
-  var ROTULOS={andar:'Andar',setor:'Setor',pat:'Patrimônio',nome:'Nome do computador',vnc:'IP / VNC',ipant:'IP anterior',mac:'MAC',macant:'MAC anterior',anydesk:'AnyDesk',anyant:'AnyDesk anterior',so:'Sistema operacional',ram:'Memória RAM',disco:'Armazenamento',drivers:'Drivers',update:'Windows Update',usuario:'Usuário',setoruser:'Setor do usuário',obs:'Observações'};
+  var CAMPOS=['andar','setor','pat','nome','vnc','ipant','mac','macant','anydesk','anyant','so','ram','disco','drivers','update','usuario','setoruser'];
+  var ROTULOS={andar:'Andar',setor:'Setor',pat:'Patrimônio',nome:'Nome do computador',vnc:'IP / VNC',ipant:'IP anterior',mac:'MAC',macant:'MAC anterior',anydesk:'AnyDesk',anyant:'AnyDesk anterior',so:'Sistema operacional',ram:'Memória RAM',disco:'Memória Interna',drivers:'Drivers',update:'Windows Update',usuario:'Usuário',setoruser:'Setor do usuário'};
 
   function aplicarMenuOrganizado(){
     try{
@@ -8197,8 +8196,7 @@ aside{display:flex!important;flex-direction:column!important;overflow:hidden!imp
   }
   function attr(v){return esc(String(v==null?'':v)).replace(/"/g,'&quot;')}
   function campo(p,c){
-    var cls=(c==='obs'?'full':(['nome','setoruser'].indexOf(c)>=0?'wide':''));
-    if(c==='obs')return '<div class="'+cls+'"><label>'+ROTULOS[c]+'</label><textarea id="mpe-'+c+'">'+esc(p[c]||'')+'</textarea></div>';
+    var cls=(['nome','setoruser'].indexOf(c)>=0?'wide':'');
     return '<div class="'+cls+'"><label>'+ROTULOS[c]+'</label><input id="mpe-'+c+'" value="'+attr(p[c]||'')+'"></div>';
   }
   function editor(p){
@@ -8223,7 +8221,7 @@ aside{display:flex!important;flex-direction:column!important;overflow:hidden!imp
     var L=mpLista();
     if(!L.length)return '<tr><td colspan="7" class="dim">Nenhum computador encontrado.</td></tr>';
     return L.map(function(p){
-      var linha='<tr><td><b>'+esc(p.nome||'—')+'</b><div class="dim mono">Patrimônio '+esc(p.pat||'—')+'</div>'+(p.origem==='scan'?'<span class="tag t-warn">só varredura</span>':(p.rede?'<span class="tag t-ok">na rede</span>':'<span class="tag t-info">só planilha</span>'))+(p.obs?'<div class="dim">⚠ '+esc(p.obs)+'</div>':'')+'</td>'+
+      var linha='<tr><td><b>'+esc(p.nome||'—')+'</b><div class="dim mono">Patrimônio '+esc(p.pat||'—')+'</div>'+(p.origem==='scan'?'<span class="tag t-warn">só varredura</span>':(p.rede?'<span class="tag t-ok">na rede</span>':'<span class="tag t-info">só planilha</span>'))+'</td>'+
       '<td>'+esc(p.setor||'—')+'<div class="dim">'+esc(p.andar||'')+'</div>'+(p.usuario?'<div class="dim">👤 '+esc(p.usuario)+(p.setoruser?' · '+esc(p.setoruser):'')+'</div>':'')+'</td>'+
       '<td class="mono">'+esc(mpIP(p.vnc)||'—')+(p.scan?' <span class="tag t-ok">varredura</span>':'')+(p.ipant?'<div class="dim">IP anterior: '+esc(p.ipant)+'</div>':'')+(p.iprede?'<div class="dim">Varredura: '+esc(p.iprede)+'</div>':'')+(p.mac?'<div class="dim mono">'+esc(p.mac)+(p.macant?' <span class="tag t-info">antes: '+esc(p.macant)+'</span>':'')+'</div>':'<div class="dim">MAC não cadastrado</div>')+'</td>'+
       '<td class="mono">'+esc(mpFmtAny(p.anydesk)||'—')+(p.anyant?'<div class="dim">antes: '+esc(mpFmtAny(p.anyant))+'</div>':'')+'</td>'+
@@ -10369,5 +10367,542 @@ html.mdk-locked body > *:not(#login):not(script):not(style):not(link){display:no
   document.addEventListener('focusin',function(e){if(e.target&&e.target.getAttribute&&e.target.getAttribute('list')==='mdk-salas')dl()});
 })();
 </script>
+<script id="mdk-v131-eventos-agenda-lote">
+/* ===== MODESK v131 · Eventos em planilha, Agenda separada, Finalizar avisos, Lote com ";" ===== */
+(function(){
+  'use strict';
+  var SERV=['Audiovisual','TI','Acompanhamento','Sonorização','Montagem'];
+  function E(s){try{return esc(s)}catch(e){return String(s==null?'':s)}}
+  function F(d){try{return fmt(d)}catch(e){return d||'—'}}
+  function hoje(){return agendaISO(new Date())}
+  function ST(){window.state=window.state||{};['eventos','atividades','sends'].forEach(function(k){if(!Array.isArray(state[k]))state[k]=[]});state.avisosOk=state.avisosOk||{};return state}
+
+  /* ---------- EVENTOS: planilha de serviços ---------- */
+  var EVF={q:'',serv:'',aba:'aberto'};
+  function evOk(e){return e.status==='Executado'||e.status==='Concluído'}
+  window.evExecutado=evOk;
+  window.evSet=function(k,v){EVF[k]=v;render();if(k==='q'){var el=document.getElementById('ev-q');if(el){el.focus();el.setSelectionRange(el.value.length,el.value.length)}}};
+  window.evConcluir=function(id){var e=ST().eventos.find(function(x){return x.id===id});if(!e)return;
+    if(evOk(e)){e.status='Agendado';delete e.concluidoEm;toast('Serviço reaberto')}else{e.status='Executado';e.concluidoEm=new Date().toISOString();toast('Serviço concluído ✓')}save();render()};
+  window.evServToggle=function(id,s){var e=ST().eventos.find(function(x){return x.id===id});if(!e)return;e.servicos=e.servicos||[];var i=e.servicos.indexOf(s);if(i>=0)e.servicos.splice(i,1);else e.servicos.push(s);save();render()};
+  window.addEvento=function(){
+    var g=function(i){var el=document.getElementById(i);return el?String(el.value||'').trim():''};
+    var c=g('ev-c'),d=g('ev-d'),l=g('ev-l');
+    if(!c)return toast('Informe o nome do cliente');if(!d)return toast('Informe a data');if(!l)return toast('Informe a sala do SENAC Aldeota');
+    var sv=SERV.filter(function(s){var el=document.getElementById('ev-s-'+s);return el&&el.checked});
+    if(!sv.length)return toast('Marque ao menos um serviço prestado');
+    ST().eventos.push({id:u(),cliente:c,titulo:g('ev-t')||c,servicos:sv,local:l,data:d,hora:g('ev-h'),horaFim:g('ev-hf'),resp:g('ev-r'),info:g('ev-i'),status:'Agendado',anexo:null,origem:'eventos'});
+    save();toast('Evento salvo na planilha');render();
+  };
+  window.evLote=function(){
+    var t=(document.getElementById('ev-lote')||{}).value||'';var ls=t.split(/\r?\n/).filter(function(x){return x.trim()});if(!ls.length)return toast('Cole as linhas: Cliente;Evento;Serviços;Sala;Data;Hora início;Hora fim');
+    var n=0;ls.forEach(function(l){var c=l.split(l.indexOf('\t')>=0?'\t':';').map(function(x){return x.trim()});if(/^cliente$/i.test(c[0]))return;if(!c[0])return;
+      var dt=c[4]||'';var m=dt.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);if(m)dt=(m[3].length===2?'20'+m[3]:m[3])+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0');
+      var sv=SERV.filter(function(s){return (c[2]||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').indexOf(s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''))>=0});
+      ST().eventos.push({id:u(),cliente:c[0],titulo:c[1]||c[0],servicos:sv,local:c[3]||'',data:dt,hora:c[5]||'',horaFim:c[6]||'',resp:c[7]||'',info:c[8]||'',status:'Agendado',anexo:null,origem:'eventos'});n++});
+    save();toast(n+' evento(s) inseridos');render();
+  };
+  window.vEventos=function(){
+    var q=EVF.q.toLowerCase();
+    var L=ST().eventos.filter(function(e){return (!q||[e.cliente,e.titulo,e.local,e.info,e.resp,(e.servicos||[]).join(' '),e.data].join(' ').toLowerCase().indexOf(q)>=0)&&(!EVF.serv||(e.servicos||[]).indexOf(EVF.serv)>=0)});
+    var ab=L.filter(function(e){return !evOk(e)}).sort(function(a,b){return ((a.data||'')+(a.hora||'')).localeCompare((b.data||'')+(b.hora||''))});
+    var ok=L.filter(evOk).sort(function(a,b){return ((b.data||'')+(b.hora||'')).localeCompare((a.data||'')+(a.hora||''))});
+    var lista=EVF.aba==='ok'?ok:ab,H=hoje(),cont={};
+    SERV.forEach(function(s){cont[s]=ab.filter(function(e){return (e.servicos||[]).indexOf(s)>=0}).length});
+    var linhas=lista.map(function(e){var d=dias(e.data),done=evOk(e);
+      var chips=SERV.filter(function(s){return (e.servicos||[]).indexOf(s)>=0}).map(function(s){return '<button class="ev-service-chip" title="Remover serviço" onclick="evServToggle(\''+e.id+'\',\''+s+'\')">✓ '+s+'</button>'}).join('')||'<span class="dim">Sem serviço</span>';
+      var st=done?'<span class="tag t-ok">Concluído</span>':'<span class="tag '+(d<0?'t-err':d===0?'t-warn':'t-info')+'">'+(d<0?'Atrasado':d===0?'Hoje':'Em '+d+'d')+'</span>';
+      return '<tr class="ev-row '+(e.data===H&&!done?'is-today':'')+'"><td><b>'+E(e.cliente||'—')+'</b><small>'+E(e.titulo||'Sem título')+'</small></td><td><b class="mono">'+F(e.data)+'</b><small class="mono">'+E(e.hora||'—')+(e.horaFim?' – '+E(e.horaFim):'')+'</small><small>'+E(e.local||'Sala não informada')+'</small></td><td><div class="ev-services">'+chips+'</div></td><td><b>'+E(e.resp||'—')+'</b><small>'+E(e.info||'Sem observações')+'</small></td><td>'+st+'</td><td><div class="ev-actions"><button class="btn sm '+(done?'':'primary')+'" onclick="evConcluir(\''+e.id+'\')">'+(done?'↺ Reabrir':'✓ Concluir')+'</button><button class="btn sm ev-icon-btn" title="Ver detalhes" aria-label="Ver detalhes" onclick="verEvento(\''+e.id+'\')">👁</button><button class="btn sm ev-icon-btn" title="Excluir" aria-label="Excluir" onclick="del(\'eventos\',\''+e.id+'\')">🗑</button></div></td></tr>'}).join('');
+    var cb=SERV.map(function(s){return '<label class="ev-check"><input type="checkbox" id="ev-s-'+s+'"/>'+s+'</label>'}).join('');
+    var filtros=SERV.map(function(s){return '<button class="ev-filter '+(EVF.serv===s?'on':'')+'" onclick="evSet(\'serv\',\''+(EVF.serv===s?'':s)+'\')"><span>'+s+'</span><b>'+cont[s]+'</b></button>'}).join('');
+    return page('Eventos','Atendimentos organizados por cliente, agenda e serviços.',
+    '<div class="events-workspace">'+
+      '<div class="ev-overview"><div class="ev-count"><span>Em aberto</span><b>'+ab.length+'</b></div><div class="ev-count done"><span>Concluídos</span><b>'+ok.length+'</b></div><div class="ev-filter-list">'+filtros+'</div></div>'+
+      '<details class="card ev-create"><summary><span><b>＋ Novo evento</b><small>Cadastre um atendimento ou importe uma lista</small></span><span class="ev-summary-action">Abrir formulário</span></summary><div class="ev-form">'+
+        '<div><label>Cliente</label><input id="ev-c" placeholder="Nome do cliente"/></div><div><label>Evento</label><input id="ev-t" placeholder="Palestra, formatura…"/></div><div><label>Sala</label><input id="ev-l" list="mdk-salas" placeholder="Auditório, Sala 201…"/></div><div><label>Responsável</label><input id="ev-r"/></div>'+
+        '<div><label>Data</label><input id="ev-d" type="date"/></div><div><label>Início</label><input id="ev-h" type="time"/></div><div><label>Fim</label><input id="ev-hf" type="time"/></div><div><label>Observações</label><input id="ev-i"/></div><fieldset><legend>Serviços prestados</legend><div class="ev-checks">'+cb+'</div></fieldset><div class="ev-form-actions"><button class="btn primary" onclick="addEvento()">＋ Inserir</button><button class="btn sm" onclick="relAbrir(\'eventos\')">📄 Relatório</button></div>'+
+        '<details class="ev-bulk"><summary>Inserir vários de uma vez</summary><p class="dim">Uma linha por evento, com colunas separadas por <b>;</b>: Cliente; Evento; Serviços; Sala; Data; Início; Fim; Responsável; Observações.</p><textarea id="ev-lote" rows="4" placeholder="Sebrae;Palestra;Audiovisual Sonorização;Auditório;15/10/2026;08:00;12:00"></textarea><button class="btn sm primary" onclick="evLote()">⇪ Inserir lista</button></details></div></details>'+
+      '<div class="card ev-list"><div class="ev-list-head"><div class="ev-search"><label>Buscar</label><input id="ev-q" value="'+E(EVF.q)+'" placeholder="Cliente, sala ou serviço" oninput="evSet(\'q\',this.value)"/></div><div class="ev-tabs"><button class="btn '+(EVF.aba!=='ok'?'primary':'')+'" onclick="evSet(\'aba\',\'aberto\')">Em aberto <span class="badge">'+ab.length+'</span></button><button class="btn '+(EVF.aba==='ok'?'primary':'')+'" onclick="evSet(\'aba\',\'ok\')">Concluídos <span class="badge">'+ok.length+'</span></button>'+(EVF.serv?'<button class="btn sm" onclick="evSet(\'serv\',\'\')">✕ '+E(EVF.serv)+'</button>':'')+'</div></div>'+
+        '<div class="ev-table-wrap"><table class="ev-table"><thead><tr><th>Cliente / evento</th><th>Data / local</th><th>Serviços</th><th>Responsável / observação</th><th>Status</th><th>Ações</th></tr></thead><tbody>'+(linhas||'<tr><td colspan="6" class="agenda-empty">'+(EVF.aba==='ok'?'Nenhum serviço concluído.':'Nenhum serviço em aberto.')+'</td></tr>')+'</tbody></table></div></div></div>');
+  };
+
+  /* ---------- AVISOS com Finalizar ---------- */
+  window.alertas=function(){
+    var s=ST(),out=[],ok=s.avisosOk;
+    s.eventos.forEach(function(e){if(evOk(e)||!e.data)return;var d=dias(e.data),n=(e.cliente||e.titulo);
+      if(d<0)out.push({t:'err',m:'Evento sem conclusão: '+n+' ('+F(e.data)+')',ev:e.id});else if(d===0)out.push({t:'err',m:'HOJE: '+n+' às '+(e.hora||'--:--')+' · '+(e.local||''),ev:e.id});else if(d<=3)out.push({t:'w',m:'Em '+d+' dia(s): '+n+' — '+F(e.data)+' '+(e.hora||''),ev:e.id})});
+    s.atividades.forEach(function(a){if(a.feito||!a.prazo)return;try{if(avisoLigadoACompras(a))return}catch(x){}var st={};try{st=statusAtiv(a)}catch(x){}
+      if(st.late)out.push({t:'err',m:'ATIVIDADE '+(a.tipo||'')+': '+a.titulo+' — prazo '+F(a.prazo)+' '+(a.hora||''),at:a.id});else if(dias(a.prazo)<=2)out.push({t:'w',m:'Atividade em breve: '+a.titulo+' ('+F(a.prazo)+')',at:a.id})});
+    s.sends.forEach(function(x){if(x.status==='Aguardando retorno'&&dias(x.data)<-2&&!ok['send:'+x.id])out.push({t:'w',m:'SEND "'+x.assunto+'" sem retorno há '+Math.abs(dias(x.data))+' dias',k:'send:'+x.id})});
+    return out;
+  };
+  window.avisoFinalizar=function(tipo,id){var s=ST();
+    if(tipo==='at'){var a=s.atividades.find(function(x){return x.id===id});if(a){a.feito=true;a.feitoEm=new Date().toISOString()}}
+    else s.avisosOk[id]=new Date().toISOString();
+    save();toast('Finalizado — não aparecerá mais');render()};
+  function btnFim(x){if(x.ev)return '<button class="btn sm" onclick="tab=\'eventos\';render()">Ir para Eventos</button>';if(x.at)return '<button class="btn sm primary" onclick="avisoFinalizar(\'at\',\''+x.at+'\')">✓ Finalizei</button>';if(x.k)return '<button class="btn sm primary" onclick="avisoFinalizar(\'k\',\''+x.k+'\')">✓ Finalizei</button>';return ''}
+
+  /* ---------- AGENDA: atividades, lembretes e avisos (eventos só aparecem no calendário) ---------- */
+  window.agendaItens=function(){var it=[];
+    ST().eventos.forEach(function(e){if(e.data)it.push({id:e.id,data:e.data,hora:e.hora||'',titulo:(e.cliente||e.titulo)+(e.local?' · '+e.local:''),tipo:'evento',sub:(e.servicos||[]).join(', '),feito:evOk(e)})});
+    state.atividades.forEach(function(a){try{if(avisoLigadoACompras(a))return}catch(x){}if(a.prazo)it.push({id:a.id,data:a.prazo,hora:a.hora||'',titulo:a.titulo,tipo:a.tipo==='Pessoal'?'lembrete':'atividade',sub:a.desc||a.prioridade||'',feito:!!a.feito})});
+    return it.sort(function(a,b){return (a.data+a.hora).localeCompare(b.data+b.hora)})};
+  window.addAgendaItem=function(){var g=function(i){var el=document.getElementById(i);return el?String(el.value||'').trim():''};
+    var t=g('ag-t'),d=g('ag-d'),tp=g('ag-tp');if(!t||!d)return toast('Informe o título e a data');
+    ST().atividades.push({id:u(),titulo:t,prazo:d,hora:g('ag-h'),tipo:tp==='Lembrete'?'Pessoal':'Trabalho',prioridade:tp==='Lembrete'?'Alta':'Normal',repetir:'',aviso:30,desc:g('ag-desc'),arquivo:null,feito:false,criado:Date.now()});
+    agendaSelecionada=d;var x=new Date(d+'T12:00:00');agendaCursor=new Date(x.getFullYear(),x.getMonth(),1);save();toast(tp+' salvo');render()};
+  window.agFeito=function(id){var a=ST().atividades.find(function(x){return x.id===id});if(!a)return;a.feito=!a.feito;a.feitoEm=a.feito?new Date().toISOString():null;save();toast(a.feito?'Finalizado ✓':'Reaberto');render()};
+  window.vAgenda=function(){
+    var itens=agendaItens(),a=alertas(),H=hoje(),ano=agendaCursor.getFullYear(),mes=agendaCursor.getMonth(),p1=new Date(ano,mes,1),ini=new Date(ano,mes,1-p1.getDay());
+    var tm=new Intl.DateTimeFormat('pt-BR',{month:'long',year:'numeric'}).format(p1),dh='';
+    for(var i=0;i<42;i++){var d=new Date(ini);d.setDate(ini.getDate()+i);var iso=agendaISO(d),di=itens.filter(function(x){return x.data===iso&&!x.feito});
+      dh+='<button class="agenda-day '+(d.getMonth()===mes?'':'out')+' '+(iso===H?'today':'')+' '+(iso===agendaSelecionada?'selected':'')+'" onclick="agendaEscolher(\''+iso+'\')"><span class="dn">'+d.getDate()+'</span><span class="agenda-dots">'+di.slice(0,4).map(function(x){return '<i class="agenda-dot '+x.tipo+'" title="'+E(x.titulo)+'"></i>'}).join('')+'</span></button>'}
+    var ih=function(x){var ev=x.tipo==='evento';return '<div class="agenda-item '+x.tipo+' '+(x.feito?'feito':'')+'"><i class="bar"></i><div><b style="'+(x.feito?'text-decoration:line-through;opacity:.6':'')+'">'+E(x.titulo)+'</b><small>'+E(x.hora||'Dia inteiro')+' · '+(ev?'Evento':x.tipo==='lembrete'?'Lembrete':'Atividade')+(x.sub?' · '+E(x.sub):'')+'</small></div><div style="white-space:nowrap">'+
+      (ev?'<button class="btn sm" onclick="tab=\'eventos\';render()">Eventos →</button>':'<button class="btn sm '+(x.feito?'':'primary')+'" onclick="agFeito(\''+x.id+'\')">'+(x.feito?'↺':'✓ Finalizei')+'</button> <button class="btn sm" onclick="verAtiv(\''+x.id+'\')">Ver</button>')+'</div></div>'};
+    var esc_=itens.filter(function(x){return x.data===agendaSelecionada}),prox=itens.filter(function(x){return x.tipo!=='evento'&&!x.feito&&x.data>=H}).slice(0,10),atr=itens.filter(function(x){return x.tipo!=='evento'&&!x.feito&&x.data<H});
+    return page('Agenda & Avisos','Suas atividades, lembretes e avisos. Os eventos de clientes ficam na tela Eventos e aparecem aqui só como marcação no calendário.',
+    '<div class="card" style="margin-bottom:16px"><h3>Nova atividade ou lembrete</h3><div class="agenda-quick" style="margin-top:10px"><div class="wide"><label>Título</label><input id="ag-t" placeholder="O que precisa ser feito?"/></div><div><label>Tipo</label><select id="ag-tp"><option>Atividade</option><option>Lembrete</option></select></div><div><label>Data</label><input id="ag-d" type="date" value="'+agendaSelecionada+'"/></div><div><label>Hora</label><input id="ag-h" type="time"/></div><div class="wide"><label>Detalhes</label><input id="ag-desc"/></div><div style="align-self:end"><button class="btn primary" onclick="addAgendaItem()">＋ Adicionar</button></div></div><p class="dim" style="margin-top:8px">Para cadastrar um evento de cliente, use <a href="#" onclick="tab=\'eventos\';render();return false">Eventos</a>.</p></div>'+
+    '<div class="agenda-shell"><div class="card agenda-cal"><div class="agenda-toolbar"><button class="btn sm" onclick="agendaHoje()">Hoje</button><div class="agenda-nav"><button class="btn sm" onclick="agendaMudar(-1)">‹</button><strong class="agenda-month">'+tm+'</strong><button class="btn sm" onclick="agendaMudar(1)">›</button></div></div><div class="agenda-week"><span>Dom</span><span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span></div><div class="agenda-days">'+dh+'</div><div class="agenda-legend"><span><i class="evento"></i>Eventos</span><span><i class="atividade"></i>Atividades</span><span><i class="lembrete"></i>Lembretes</span></div></div>'+
+    '<div class="agenda-side"><div class="card"><h3>'+F(agendaSelecionada)+' <span class="badge">'+esc_.length+'</span></h3><div class="agenda-list">'+(esc_.length?esc_.map(ih).join(''):'<div class="agenda-empty">Nada marcado para esta data.</div>')+'</div></div>'+
+    '<div class="card"><h3>Próximas atividades</h3><div class="agenda-list">'+(prox.length?prox.map(ih).join(''):'<div class="agenda-empty">Nada pendente.</div>')+'</div></div>'+(atr.length?'<div class="card"><h3>Atrasadas <span class="badge">'+atr.length+'</span></h3><div class="agenda-list">'+atr.map(ih).join('')+'</div></div>':'')+'</div></div>'+
+    '<div class="card" style="margin-top:16px"><h3>Avisos ativos <span class="badge">'+a.length+'</span></h3><div style="margin-top:10px">'+(a.length?a.map(function(x){return '<div class="alertbar '+(x.t==='w'?'w':'')+'" style="display:flex;justify-content:space-between;align-items:center;gap:10px"><span>'+E(x.m)+'</span>'+btnFim(x)+'</div>'}).join(''):'<div class="alertbar o">Tudo em dia.</div>')+'</div></div>');
+  };
+
+  /* ---------- COMPUTADORES: lote colando lista com ";" ---------- */
+  var ORDEM=['nome','tipo','pat','setor','andar','ramal','usuario','mac','so','ip','anydesk','obs'];
+  var MAP={nome:['nome','computador','host','equipamento','maquina','máquina'],tipo:['tipo'],pat:['patrim','tombo'],setor:['setor'],andar:['andar','piso'],ramal:['ramal'],usuario:['usuario','usuário','respons'],ip:['ip'],anydesk:['anydesk','any'],mac:['mac'],so:['sistema','so'],obs:['obs']};
+  function col(h){h=String(h||'').toLowerCase().trim();for(var k in MAP)for(var j=0;j<MAP[k].length;j++){var a=MAP[k][j];if(a.length<=2?h===a:h.indexOf(a)>=0)return k}return null}
+  function nm(m){return String(m||'').toUpperCase().replace(/[^0-9A-F]/g,'')}
+  function fmtMac(m){var x=nm(m);return x.length===12?x.match(/../g).join(':'):String(m||'').toUpperCase().replace(/-/g,':')}
+  function listas(){var L=[];try{L.push(PCS_PLANILHA)}catch(e){}try{L.push(PCS_UNIDADE)}catch(e){}return L}
+  function aplicar(o){var hit=0;listas().forEach(function(arr){var p=arr.find(function(x){return String(x.nome).toUpperCase()===o.nome.toUpperCase()})||(o.mac&&arr.find(function(x){return nm(x.mac)===nm(o.mac)}));
+    if(p){Object.keys(o).forEach(function(k){if(o[k]!==''){p[k]=o[k];if(k==='ip')p.vnc=o[k]+':5900'}});hit=1}});return hit}
+  window.mpvLote=function(){
+    var el=document.getElementById('mpv-lote')||document.getElementById('mdk-lote131');var txt=(el&&el.value||'').trim();
+    if(!txt)return toast('Cole a lista — uma máquina por linha, colunas separadas por ;');
+    var ls=txt.split(/\r?\n/).filter(function(x){return x.trim()});
+    var sep=ls[0].indexOf(';')>=0?';':(ls[0].indexOf('\t')>=0?'\t':',');
+    var h=ls[0].split(sep).map(col),hd=h.indexOf('nome')>=0?h:null;if(hd)ls=ls.slice(1);else hd=ORDEM;
+    var s=ST();s.pcsLote=s.pcsLote||{};if(!Array.isArray(s.mapa))s.mapa=[];var at=0,nv=0;
+    ls.forEach(function(l){var c=l.split(sep),o={};hd.forEach(function(k,i){if(k)o[k]=String(c[i]==null?'':c[i]).trim()});if(!o.nome)return;
+      if(o.mac)o.mac=fmtMac(o.mac);var key=o.nome.toUpperCase();
+      if(aplicar(o)){var ov=s.pcsLote[key]||{};Object.keys(o).forEach(function(k){if(k!=='nome'&&o[k]!=='')ov[k]=o[k]});if(o.ip)ov.vnc=o.ip+':5900';s.pcsLote[key]=ov;at++;return}
+      var m=s.mapa.find(function(x){return String(x.nome).toUpperCase()===key});
+      if(m){Object.keys(o).forEach(function(k){if(o[k]!=='')m[k]=o[k]});at++}else{o.id=u();o.tipo=o.tipo||'Computador';o.origem='lote';s.mapa.push(o);nv++}});
+    if(el)el.value='';save();toast(at+' atualizados · '+nv+' novos (IP e AnyDesk mantidos quando vazios)');render();
+  };
+  function reaplicar(){try{var M=(state&&state.pcsLote)||{};Object.keys(M).forEach(function(k){aplicar(Object.assign({nome:k},M[k]))})}catch(e){}}
+  function cardLote(){if(typeof tab==='undefined'||(tab!=='mapa'&&tab!=='remoto'))return;var v=document.getElementById('view');if(!v||document.getElementById('mdk-lote131-card'))return;
+    var d=document.createElement('div');d.id='mdk-lote131-card';d.className='card';d.style.margin='0 0 16px';
+    d.innerHTML='<details><summary style="cursor:pointer;font-weight:700">⇪ Cadastrar computadores em lote (colar lista)</summary><p class="dim" style="margin:8px 0">Uma máquina por linha, colunas separadas por <b>;</b> nesta ordem: <span class="mono">Nome;Tipo;Patrimônio;Setor;Andar;Ramal;Usuário;MAC;Sistema;IP;AnyDesk;Obs</span>. Também aceita colar direto do Excel com cabeçalho. Máquinas existentes são atualizadas pelo nome ou MAC; campos vazios não apagam IP e AnyDesk já salvos.</p><textarea id="mdk-lote131" rows="6" style="width:100%;font-family:JetBrains Mono,monospace;font-size:11px" placeholder="REF033711ADM1PC;Computador;33711;ALMOXARIFADO;TERREO;8039;Alex Lobo Albano;D0:94:66:B2:99:E6;WIN11;10.18.1.50;123456789"></textarea><button class="btn primary" style="margin-top:8px" onclick="mpvLote()">⇪ Inserir lista</button></details>';
+    var s=v.querySelector('.sect')||v,h=s.querySelector('.hint');if(h&&h.nextSibling)s.insertBefore(d,h.nextSibling);else s.insertBefore(d,s.firstChild)}
+  function init(){var v=document.getElementById('view');if(v)new MutationObserver(cardLote).observe(v,{childList:true});cardLote()}
+  var n=0,t=setInterval(function(){if(window.state||++n>20){clearInterval(t);ST();reaplicar();try{render()}catch(e){}}},1500);
+  if(document.readyState!=='loading')init();else document.addEventListener('DOMContentLoaded',init);
+})();
+</script>
+
+<!-- ===== MODESK v133 · mapeamento atualizado e estabilidade visual ===== -->
+<style id="mdk-v133-estabilidade-visual">
+/* A camada de varredura seguia redesenhando a tela mesmo sem uso. */
+#jfx{display:none!important}
+#view,.sect,.mp-pane{contain:layout style}
+#view{overflow-anchor:none}
+#mp-tb tr{content-visibility:auto;contain-intrinsic-size:68px}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+<script id="mdk-v133-estabilidade-js">
+(function(){
+  'use strict';
+  /* Evita recriar toda a área ao receber exatamente o mesmo estado de outra aba. */
+  try{
+    if(typeof bc!=='undefined'&&bc){
+      bc.onmessage=function(e){
+        if(!e.data||e.data.t!=='sync'||!e.data.s)return;
+        var atual='',novo='';
+        try{atual=JSON.stringify(state);novo=JSON.stringify(e.data.s)}catch(x){}
+        if(atual&&atual===novo)return;
+        state=e.data.s;
+        if(typeof render==='function')render();
+      };
+    }
+  }catch(e){}
+  /* Mantém a posição da tabela ao ordenar ou trocar filtros. */
+  var ordenar=window.mpOrd,filtrarChip=window.mpChip;
+  function pos(){var x=document.querySelector('#mp-tb');var w=x&&x.closest('div');return w?{w:w,t:w.scrollTop,l:w.scrollLeft}:null}
+  function volta(p){if(!p)return;requestAnimationFrame(function(){p.w.scrollTop=p.t;p.w.scrollLeft=p.l})}
+  if(typeof ordenar==='function')window.mpOrd=function(k){var p=pos();ordenar(k);volta(p)};
+  if(typeof filtrarChip==='function')window.mpChip=function(k){var p=pos();filtrarChip(k);volta(p)};
+})();
+</script>
+
+
+<style id="modesk-v132-eventos-agenda-layout">
+/* v132 — Eventos e Agenda: leitura compacta, alinhamento estável e adaptação móvel. */
+main:has(.events-workspace),main:has(.agenda-shell){padding-top:12px!important}
+main:has(.events-workspace) .sect,main:has(.agenda-shell) .sect{width:100%;max-width:1480px;margin:0 auto}
+main:has(.events-workspace) .card:hover,main:has(.agenda-shell) .card:hover{transform:none!important}
+.events-workspace{display:grid;gap:10px;min-width:0}
+.ev-overview{display:grid;grid-template-columns:130px 130px minmax(0,1fr);gap:8px;align-items:stretch}
+.ev-count{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 11px;border:1px solid var(--line);border-left:3px solid var(--tech-cyan);border-radius:6px;background:rgba(255,255,255,.025)}
+.ev-count.done{border-left-color:#22c55e}.ev-count span{color:var(--dim);font-size:10px;font-weight:700;text-transform:uppercase}.ev-count b{font:800 21px/1 'JetBrains Mono',monospace}
+.ev-filter-list{display:grid;grid-template-columns:repeat(5,minmax(100px,1fr));gap:6px}
+.ev-filter{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:42px;padding:7px 9px;border:1px solid var(--line);border-radius:6px;background:rgba(255,255,255,.02);color:var(--fg);cursor:pointer;text-align:left}
+.ev-filter:hover,.ev-filter.on{border-color:var(--tech-cyan);background:rgba(86,217,255,.08)}.ev-filter span{overflow:hidden;font-size:10px;font-weight:700;text-overflow:ellipsis}.ev-filter b{font:800 15px 'JetBrains Mono',monospace;color:var(--tech-cyan)}
+.ev-create{padding:0!important;overflow:hidden}.ev-create>summary{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:11px 13px;cursor:pointer;list-style:none}.ev-create>summary::-webkit-details-marker{display:none}.ev-create>summary span:first-child{display:grid;gap:2px}.ev-create>summary b{font-size:13px}.ev-create>summary small{color:var(--dim);font-size:10px}.ev-summary-action{color:var(--tech-cyan);font-size:10px;font-weight:700}.ev-create[open] .ev-summary-action{font-size:0}.ev-create[open] .ev-summary-action:after{content:'Fechar';font-size:10px}
+.ev-form{display:grid;grid-template-columns:repeat(4,minmax(130px,1fr));gap:8px;padding:11px 13px 13px;border-top:1px solid var(--line)}.ev-form label,.ev-form legend{font-size:10px}.ev-form input{min-height:33px;padding:6px 8px}.ev-form fieldset{grid-column:1/4;margin:0;padding:0;border:0}.ev-checks{display:flex;min-height:33px;align-items:center;gap:6px;flex-wrap:wrap}.ev-check{display:inline-flex;align-items:center;gap:5px;padding:5px 7px;border:1px solid var(--line);border-radius:5px;background:rgba(255,255,255,.02);font-size:10px!important}.ev-check input{width:auto;min-height:0}.ev-form-actions{display:flex;justify-content:flex-end;align-items:end;gap:6px}.ev-bulk{grid-column:1/-1;padding-top:7px;border-top:1px solid var(--line)}.ev-bulk>summary{cursor:pointer;font-size:11px;font-weight:700}.ev-bulk p{margin:6px 0}.ev-bulk textarea{width:100%;margin-bottom:6px;font:10px 'JetBrains Mono',monospace}
+.ev-list{padding:11px!important}.ev-list-head{display:flex;align-items:end;justify-content:space-between;gap:10px}.ev-search{flex:1;max-width:520px}.ev-search input{min-height:34px;padding:6px 9px}.ev-tabs{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.ev-table-wrap{overflow-x:auto;margin-top:9px;border:1px solid var(--line);border-radius:5px}.ev-table{width:100%;min-width:900px;margin:0!important;border-collapse:collapse}.ev-table th{padding:7px 8px!important;font-size:9px!important;white-space:nowrap;background:rgba(255,255,255,.025)}.ev-table td{padding:7px 8px!important;vertical-align:middle;font-size:11px;border-bottom:1px solid var(--line)}.ev-table tr:last-child td{border-bottom:0}.ev-table tr:hover{transform:none!important}.ev-row.is-today{background:rgba(255,200,87,.07)}.ev-table td>b,.ev-table td>small{display:block}.ev-table td>small{max-width:250px;margin-top:2px;color:var(--dim);font-size:9.5px;line-height:1.25;overflow:hidden;text-overflow:ellipsis}.ev-services{display:flex;gap:3px;flex-wrap:wrap;max-width:290px}.ev-service-chip{padding:3px 5px;border:1px solid rgba(86,217,255,.24);border-radius:4px;background:rgba(86,217,255,.07);color:var(--fg);font-size:8.5px;cursor:pointer}.ev-actions{display:flex;align-items:center;justify-content:flex-end;gap:4px;white-space:nowrap}.ev-icon-btn{width:30px;padding:6px!important}
+/* Agenda mantém calendário e listas no mesmo eixo, com menos altura desperdiçada. */
+main:has(.agenda-shell)>.sect>.card:first-of-type{padding:10px 12px!important;margin-bottom:10px!important}.agenda-quick{grid-template-columns:minmax(180px,1.6fr) 105px 125px 95px minmax(160px,1fr) auto!important;gap:6px!important}.agenda-shell{grid-template-columns:minmax(500px,1.35fr) minmax(320px,.65fr)!important;gap:10px!important}.agenda-cal{padding:11px!important}.agenda-day{min-height:48px!important;padding:5px!important}.agenda-side{gap:8px!important}.agenda-side>.card{padding:10px!important}.agenda-item{padding:6px!important;gap:7px!important}.agenda-item b{font-size:11px!important}.agenda-item small{font-size:9.5px!important}.agenda-item .btn{min-height:29px;padding:5px 7px!important;font-size:9px}.agenda-list{max-height:280px;overflow:auto;padding-right:2px}.agenda-shell+.card{margin-top:10px!important;padding:10px 12px!important}
+@media(max-width:1180px){.ev-overview{grid-template-columns:110px 110px minmax(0,1fr)}.ev-filter-list{grid-template-columns:repeat(3,minmax(100px,1fr))}.agenda-shell{grid-template-columns:1fr!important}.agenda-side{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))}.agenda-side>.card:last-child:nth-child(3){grid-column:1/-1}.agenda-quick{grid-template-columns:repeat(3,minmax(0,1fr))!important}.agenda-quick .wide{grid-column:auto!important}}
+@media(max-width:760px){.ev-overview{grid-template-columns:1fr 1fr}.ev-filter-list{grid-column:1/-1;grid-template-columns:repeat(2,minmax(0,1fr))}.ev-filter:last-child{grid-column:1/-1}.ev-form{grid-template-columns:1fr 1fr}.ev-form fieldset,.ev-bulk{grid-column:1/-1}.ev-form-actions{grid-column:1/-1;justify-content:flex-start}.ev-list-head{align-items:stretch;flex-direction:column}.ev-search{max-width:none}.ev-tabs{justify-content:flex-start}.agenda-side{grid-template-columns:1fr}.agenda-side>.card:last-child:nth-child(3){grid-column:auto}.agenda-quick{grid-template-columns:1fr 1fr!important}.agenda-quick .wide{grid-column:1/-1!important}}
+@media(max-width:480px){.ev-form{grid-template-columns:1fr}.ev-form fieldset,.ev-form-actions,.ev-bulk{grid-column:1}.agenda-quick{grid-template-columns:1fr!important}.agenda-quick .wide{grid-column:auto!important}.agenda-toolbar{align-items:stretch;flex-direction:column}.agenda-nav{justify-content:space-between}.agenda-day{min-height:42px!important}.agenda-item{grid-template-columns:4px minmax(0,1fr)!important}.agenda-item>div:last-child{grid-column:2;white-space:normal!important}}
+</style>
+
+
+
+<!-- ===== MODESK v134 · Eventos e Lembretes separados · Mapeamento estável · Lote com ";" em popup ===== -->
+<style id="mdk-v134-css">
+#mdk-lote131-card{display:none!important}
+.lb-form{display:grid;grid-template-columns:minmax(180px,2fr) 140px 110px 140px 130px;gap:10px;align-items:end}
+.lb-form .full{grid-column:1/-1}
+.lb-acts{display:flex;gap:8px;justify-content:flex-end;grid-column:1/-1}
+.lb-cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:16px}
+.lb-item{display:grid;grid-template-columns:4px minmax(0,1fr);gap:10px;padding:10px;border:1px solid var(--line);border-radius:7px;margin-top:8px;background:rgba(255,255,255,.025)}
+.lb-item .bar{border-radius:4px;background:var(--acc3,#ff6b81)}
+.lb-item.late .bar{background:#ff3b4f}.lb-item.done{opacity:.55}.lb-item.done b{text-decoration:line-through}
+.lb-item b{display:block;font-size:13px}.lb-item small{display:block;color:var(--mut);margin-top:3px}
+.lb-item .row{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+@media(max-width:1000px){.lb-form{grid-template-columns:1fr 1fr}.lb-cols{grid-template-columns:1fr}}
+</style>
+<script id="mdk-v134-js">
+(function(){
+  'use strict';
+  function E(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+  function T(m){try{toast(m)}catch(e){}}
+  function SV(){try{save()}catch(e){}}
+  function ID(){try{return u()}catch(e){return 'id'+Date.now()+Math.random().toString(36).slice(2)}}
+  function ISO(d){var z=function(n){return String(n).padStart(2,'0')};return d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate())}
+  function FD(d){if(!d)return '—';var p=String(d).split('-');return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:d}
+  function S(){window.state=window.state||{};if(!Array.isArray(state.atividades))state.atividades=[];if(!Array.isArray(state.mapa))state.mapa=[];state.pcsLote=state.pcsLote||{};return state}
+
+  /* ================= NAVEGAÇÃO: Eventos e Lembretes como telas próprias ================= */
+  try{delete ALIAS_TELA.eventos;ALIAS_TELA.atividades='lembretes';ALIAS_TELA.lembrete='lembretes'}catch(e){}
+  function menu(){
+    try{
+      if(typeof MENU==='undefined')return false;
+      var tem=false;MENU.forEach(function(g){g.itens.forEach(function(i){if(i.k==='lembretes')tem=true})});
+      if(!tem){var g=MENU.find(function(g){return g.itens.some(function(i){return i.k==='eventos'})})||MENU[0];
+        var ix=g.itens.findIndex(function(i){return i.k==='eventos'});g.itens.splice(ix<0?g.itens.length:ix+1,0,{k:'lembretes',n:'Lembretes',i:'calendar'});
+        if(typeof buildMenu==='function')buildMenu()}
+      return !document.querySelector('.navbtn[data-k="lembretes"]')?(buildMenu(),true):true;
+    }catch(e){return false}
+  }
+  var mn=0,mt=setInterval(function(){menu();if(++mn>12)clearInterval(mt)},1600);
+
+  /* render(): telas novas sem depender do mapa interno da função original */
+  var renderOrig=window.render;
+  var TIT={lembretes:'Lembretes',eventos:'Eventos',mapa:'Acessos & Mapeamento da Unidade'};
+  window.render=function(){
+    if(tab==='atividades')tab='lembretes';
+    if(tab==='lembretes'){
+      document.querySelectorAll('.navbtn[data-k]').forEach(function(b){b.classList.toggle('active',b.dataset.k===tab)});
+      var t=document.getElementById('tb-title');if(t)t.textContent=TIT.lembretes;
+      document.getElementById('view').innerHTML='<div class="sect">'+vLembretes()+'</div>';
+      try{atualizarStatusbar()}catch(e){}return;
+    }
+    return renderOrig.apply(this,arguments);
+  };
+  try{render=window.render}catch(e){}
+
+  /* Agenda deixa de cadastrar lembretes (eles têm tela própria) */
+  var agItens=window.agendaItens;
+  if(typeof agItens==='function')window.agendaItens=function(){return agItens().filter(function(x){return x.tipo!=='lembrete'})};
+  var vAg=window.vAgenda;
+  if(typeof vAg==='function')window.vAgenda=function(){return vAg().replace('<option>Lembrete</option>','').replace('Nova atividade ou lembrete','Nova atividade').replace('Suas atividades, lembretes e avisos.','Suas atividades e avisos. Lembretes pessoais ficam na tela Lembretes.')};
+
+  /* ================= TELA LEMBRETES ================= */
+  function lembs(){return S().atividades.filter(function(a){return a.tipo==='Pessoal'})}
+  function quando(a){return (a.prazo||'')+'T'+(a.hora||'23:59')}
+  function atrasado(a){return !a.feito&&a.prazo&&new Date(quando(a))<new Date()}
+  function prox(d,r){var x=new Date(d+'T12:00:00');if(r==='Diário')x.setDate(x.getDate()+1);else if(r==='Semanal')x.setDate(x.getDate()+7);else if(r==='Mensal')x.setMonth(x.getMonth()+1);else return null;return ISO(x)}
+  window.lbAdd=function(){
+    var g=function(i){var e=document.getElementById(i);return e?String(e.value||'').trim():''};
+    var t=g('lb-t'),d=g('lb-d');if(!t)return T('Escreva o lembrete');if(!d)return T('Informe a data');
+    S().atividades.push({id:ID(),titulo:t,prazo:d,hora:g('lb-h'),tipo:'Pessoal',prioridade:'Alta',repetir:g('lb-r')==='Não repete'?'':g('lb-r'),aviso:Number(g('lb-a'))||0,desc:g('lb-o'),arquivo:null,feito:false,criado:Date.now(),origem:'lembretes'});
+    SV();T('Lembrete salvo');render();
+  };
+  window.lbFeito=function(id){var a=S().atividades.find(function(x){return x.id===id});if(!a)return;
+    if(!a.feito&&a.repetir){var n=prox(a.prazo,a.repetir);if(n){a.prazo=n;SV();T('Feito — próximo em '+FD(n));return render()}}
+    a.feito=!a.feito;a.feitoEm=a.feito?new Date().toISOString():null;SV();T(a.feito?'Lembrete concluído ✓':'Lembrete reaberto');render()};
+  window.lbAdiar=function(id){var a=S().atividades.find(function(x){return x.id===id});if(!a)return;var x=new Date((a.prazo||ISO(new Date()))+'T12:00:00');x.setDate(x.getDate()+1);a.prazo=ISO(x);a.feito=false;SV();T('Adiado para '+FD(a.prazo));render()};
+  window.lbDel=function(id){if(!confirm('Excluir este lembrete?'))return;var L=S().atividades,i=L.findIndex(function(x){return x.id===id});if(i>=0)L.splice(i,1);SV();render()};
+  function card(a){
+    return '<div class="lb-item '+(a.feito?'done':atrasado(a)?'late':'')+'"><i class="bar"></i><div><b>'+E(a.titulo)+'</b><small>'+FD(a.prazo)+' · '+E(a.hora||'Dia inteiro')+(a.repetir?' · repete '+E(a.repetir).toLowerCase():'')+(a.aviso?' · aviso '+a.aviso+' min antes':'')+'</small>'+(a.desc?'<small>'+E(a.desc)+'</small>':'')+
+      '<div class="row"><button class="btn sm '+(a.feito?'':'primary')+'" onclick="lbFeito(\''+a.id+'\')">'+(a.feito?'↺ Reabrir':'✓ Feito')+'</button>'+(a.feito?'':'<button class="btn sm" onclick="lbAdiar(\''+a.id+'\')">+1 dia</button>')+'<button class="btn sm" onclick="lbDel(\''+a.id+'\')">🗑</button></div></div></div>';
+  }
+  window.vLembretes=function(){
+    var L=lembs().slice().sort(function(a,b){return quando(a).localeCompare(quando(b))});
+    var at=L.filter(atrasado),pend=L.filter(function(a){return !a.feito&&!atrasado(a)}),ok=L.filter(function(a){return a.feito}).reverse().slice(0,20);
+    var col=function(t,arr,v){return '<div class="card"><h3>'+t+' <span class="badge">'+arr.length+'</span></h3>'+(arr.length?arr.map(card).join(''):'<div class="agenda-empty" style="margin-top:10px">'+v+'</div>')+'</div>'};
+    var h=(typeof page==='function')?page:function(a,b,c){return '<h2 class="page">'+a+'</h2><div class="hint">'+b+'</div>'+c};
+    return h('Lembretes','Lembretes pessoais com horário, aviso antecipado e repetição. Eventos de clientes ficam na tela Eventos.',
+      '<div class="card"><h3>Novo lembrete</h3><div class="lb-form" style="margin-top:10px">'+
+      '<div><label>Lembrar de</label><input id="lb-t" placeholder="Ex.: Trocar toner da biblioteca"/></div>'+
+      '<div><label>Data</label><input id="lb-d" type="date" value="'+ISO(new Date())+'"/></div>'+
+      '<div><label>Hora</label><input id="lb-h" type="time"/></div>'+
+      '<div><label>Repetir</label><select id="lb-r"><option>Não repete</option><option>Diário</option><option>Semanal</option><option>Mensal</option></select></div>'+
+      '<div><label>Avisar antes</label><select id="lb-a"><option value="0">Na hora</option><option value="15">15 min</option><option value="30" selected>30 min</option><option value="60">1 hora</option><option value="1440">1 dia</option></select></div>'+
+      '<div class="full"><label>Observação</label><input id="lb-o" placeholder="Opcional"/></div>'+
+      '<div class="lb-acts"><button class="btn primary" onclick="lbAdd()">＋ Salvar lembrete</button></div></div></div>'+
+      '<div class="lb-cols">'+col('Atrasados',at,'Nenhum atrasado.')+col('Pendentes',pend,'Nada pendente.')+col('Concluídos',ok,'Nenhum concluído ainda.')+'</div>');
+  };
+
+  /* ================= MAPEAMENTO: tela isolada e estável ================= */
+  var Q='',ORD='nome',DIR=1,host=null,root=null;
+  var CAMPOS=[['nome','Nome'],['tipo','Tipo'],['pat','Patrimônio'],['setor','Setor'],['andar','Andar'],['usuario','Usuário'],['ip','IP'],['mac','MAC'],['so','Sistema'],['disco','Memória Interna'],['ram','Memória RAM']];
+  var ALI={nome:['nome','computador','host','equipamento','maquina','máquina','hostname'],tipo:['tipo','categoria'],pat:['patrim','tombo'],setor:['setor','depart','local'],andar:['andar','piso','pavim'],usuario:['usuario','usuário','respons','colab'],ip:['ip','vnc'],mac:['mac'],anydesk:['anydesk','any'],so:['sistema','so','windows'],disco:['disco','armazenamento','memoria interna','memória interna','ssd','hd','capacidade'],ram:['ram','memoria','memória','memoria ram','memória ram']};
+  function colDe(h){h=String(h||'').toLowerCase().trim();for(var k in ALI)for(var j=0;j<ALI[k].length;j++){var a=ALI[k][j];if(a.length<=3?h===a:h.indexOf(a)>=0)return k}return null}
+  function nmac(m){return String(m||'').toUpperCase().replace(/[^0-9A-F]/g,'')}
+  function fmac(m){var x=nmac(m);return x.length===12?x.match(/../g).join(':'):String(m||'').trim()}
+  function ipDe(v){return String(v||'').replace(/:\d+$/,'').trim()}
+  function base(){var o=[];try{PCS_PLANILHA.forEach(function(r){o.push({ref:r,fixo:1,nome:r.nome||'',tipo:r.tipo||'Computador',pat:r.pat||'',setor:r.setor||'',andar:r.andar||'',usuario:r.usuario||'',ip:ipDe(r.ip||r.vnc),mac:r.mac||'',anydesk:String(r.anydesk||'').replace(/\s/g,''),so:r.so||'',disco:r.disco||'',ram:r.ram||''})})}catch(e){}
+    return o}
+  function impressoras(){var L=[];try{REDE_PERIF.forEach(function(r){if(!/impressora/i.test(r[0]||''))return;var d=String(r[3]||''),part=d.split(/\s+[—-]\s+/),local=part.shift()||'',nome=part.join(' — ')||local||'Impressora';L.push({ref:r,fixo:1,nome:nome,tipo:'Impressora',pat:'',setor:local,andar:'',usuario:'',ip:ipDe(r[1]).replace(/^https?:\/\//i,''),mac:r[2]||'',anydesk:'',so:'',disco:'',ram:''})})}catch(e){}
+  try{S().mapa.forEach(function(m){if(!/impressora/i.test(m.tipo||''))return;L.push({ref:m,fixo:0,id:m.id,nome:m.nome||'Impressora',tipo:'Impressora',pat:m.pat||'',setor:m.setor||'',andar:m.andar||'',usuario:m.usuario||'',ip:ipDe(m.ip||m.vnc),mac:m.mac||'',anydesk:m.anydesk||'',so:'',disco:'',ram:''})})}catch(e){}return L}
+  function todos(){var b=base(),nomes={};b.forEach(function(x){nomes[String(x.nome).toUpperCase()]=1});
+    S().mapa.forEach(function(m){if(m.origem==='mapeado'||/impressora/i.test(m.tipo||'')||nomes[String(m.nome).toUpperCase()])return;b.push({ref:m,fixo:0,id:m.id,nome:m.nome||'',tipo:m.tipo||'Equipamento',pat:m.pat||'',setor:m.setor||'',andar:m.andar||'',usuario:m.usuario||'',ip:ipDe(m.ip||m.vnc),mac:m.mac||'',anydesk:m.anydesk||'',so:m.so||'',disco:m.disco||'',ram:m.ram||''})});return b}
+  function filtrados(){var L=todos(),q=Q.toLowerCase();if(q)L=L.filter(function(p){return CAMPOS.map(function(c){return p[c[0]]}).join(' ').toLowerCase().indexOf(q)>=0});
+    return L.sort(function(a,b){return String(a[ORD]||'').localeCompare(String(b[ORD]||''),'pt-BR',{numeric:true})*DIR})}
+
+  var CSS=':host{display:block;font-family:inherit;color:#e6edf6}*{box-sizing:border-box}'+
+  '.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}'+
+  '.stats{display:flex;gap:10px;flex-wrap:wrap}.st{border:1px solid rgba(148,163,184,.22);border-radius:8px;padding:8px 14px;background:rgba(255,255,255,.03);min-width:120px}.st small{display:block;color:#8b98ab;font-size:11px}.st b{font-size:20px}'+
+  '.acts{display:flex;gap:8px;flex-wrap:wrap}'+
+  'button{font:inherit;font-size:13px;cursor:pointer;border-radius:7px;border:1px solid rgba(148,163,184,.3);background:rgba(255,255,255,.05);color:#e6edf6;padding:8px 14px}button:hover{border-color:#56d9ff}'+
+  'button.pri{background:#e30613;border-color:#e30613;color:#fff;font-weight:700}button.sm{padding:4px 9px;font-size:12px}'+
+  'input,textarea,select{font:inherit;font-size:13px;color:#e6edf6;background:#0b1422;border:1px solid rgba(148,163,184,.3);border-radius:7px;padding:8px 10px;width:100%}'+
+  '.search{max-width:380px;margin-bottom:10px}'+
+  '.wrap{border:1px solid rgba(148,163,184,.22);border-radius:10px;overflow:auto;max-height:70vh;background:#08111d}'+
+  'table{width:100%;min-width:1180px;border-collapse:collapse;table-layout:fixed;font-size:12.5px}'+
+  'th{position:sticky;top:0;background:#0f1b2c;text-align:left;padding:10px 8px;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:#9fb0c6;cursor:pointer;user-select:none;border-bottom:1px solid rgba(148,163,184,.25);white-space:nowrap}'+
+  'td{padding:8px;border-bottom:1px solid rgba(148,163,184,.1);vertical-align:top;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}'+
+  'tr:nth-child(even) td{background:rgba(255,255,255,.015)}tr:hover td{background:rgba(86,217,255,.06)}'+
+  '.mono{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:11.5px}.dim{color:#8b98ab}a{color:#56d9ff;text-decoration:none}'+
+  '.tag{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;background:rgba(86,217,255,.12);color:#9be7ff}.pcard{margin-top:14px;border:1px solid rgba(148,163,184,.22);border-radius:10px;padding:12px 14px;background:rgba(255,255,255,.02)}.pcard h3{margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:#9fb0c6}'+
+  'tr.ed td{background:rgba(86,217,255,.08)}tr.ed input{padding:5px 6px;font-size:12px}'+
+  '.ov{position:fixed;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;z-index:99999;padding:16px}'+
+  '.mod{width:min(1100px,100%);max-height:92vh;overflow:auto;background:#0d1726;border:1px solid rgba(86,217,255,.35);border-radius:12px;padding:20px;box-shadow:0 20px 60px rgba(0,0,0,.6)}'+
+  '.mod h3{margin:0 0 6px;font-size:18px}.mod p{margin:4px 0 10px;color:#9fb0c6;font-size:13px}.mod textarea{min-height:170px;font-family:"JetBrains Mono",monospace;font-size:12px;white-space:pre}'+
+  '.mfoot{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap}.prev{margin-top:12px;max-height:38vh}.prev table{min-width:900px}.new{color:#4ade80}.upd{color:#facc15}';
+
+  var W=[150,115,90,120,80,140,115,135,80,140,110,210];
+  function linha(p,i){
+    var vnc=p.ip?'<button class="sm" title="Copiar IP para usar no VNC" onclick="mk136Ip(\''+E(p.ip)+'\')"><img src="'+MP_ICO_VNC+'" alt="VNC" style="width:16px;height:16px;vertical-align:middle"/></button>':'';
+    var anyb=p.anydesk?'<button class="sm" title="Abrir conexão no AnyDesk" onclick="mk136Any(\''+E(p.anydesk)+'\')"><img src="'+MP_ICO_ANY+'" alt="AnyDesk" style="width:18px;height:14px;vertical-align:middle"/></button>':'';
+    return '<tr><td title="'+E(p.nome)+'"><b>'+E(p.nome||'—')+'</b></td><td>'+E(p.tipo||'—')+'</td><td class="mono">'+E(p.pat||'—')+'</td><td title="'+E(p.setor)+'">'+E(p.setor||'—')+'</td><td>'+E(p.andar||'—')+'</td><td title="'+E(p.usuario)+'">'+E(p.usuario||'—')+'</td><td class="mono">'+E(p.ip||'—')+'</td><td class="mono">'+E(p.mac||'—')+'</td><td>'+E(p.so||'—')+'</td><td>'+E(p.disco||'—')+'</td><td>'+E(p.ram||'—')+'</td>'+
+      '<td><div class="acts" style="gap:5px;flex-wrap:nowrap"><button class="sm" data-ed="'+i+'" title="Editar">✎ Editar</button>'+vnc+anyb+(p.fixo?'':'<button class="sm" data-del="'+i+'" title="Excluir">🗑</button>')+'</div></td></tr>';
+  }
+  var VIS=[];
+  function tbody(){VIS=filtrados();var tb=root.getElementById('tb');if(tb)tb.innerHTML=VIS.length?VIS.map(linha).join(''):'<tr><td colspan="12" class="dim" style="text-align:center;padding:24px">Nenhum item encontrado.</td></tr>';var c=root.getElementById('cnt');if(c)c.textContent=VIS.length}
+  function pintar(){
+    var L=todos(),set={};L.forEach(function(p){if(p.setor)set[p.setor]=1});
+    root.innerHTML='<style>'+CSS+'</style>'+
+    '<div class="top"><div class="stats"><div class="st"><small>Itens no mapeamento</small><b>'+L.length+'</b></div><div class="st"><small>Computadores</small><b>'+L.filter(function(p){return !/1NB/i.test(p.nome)}).length+'</b></div><div class="st"><small>Notebooks</small><b>'+L.filter(function(p){return /1NB/i.test(p.nome)}).length+'</b></div><div class="st"><small>Impressoras</small><b>'+impressoras().length+'</b></div><div class="st"><small>Com IP</small><b>'+L.filter(function(p){return p.ip}).length+'</b></div><div class="st"><small>Setores</small><b>'+Object.keys(set).length+'</b></div></div>'+
+    '<div class="acts"><button class="pri" id="b-lote">⇪ Inserir em lote</button><button id="b-exp">⬆ Exportar CSV</button></div></div>'+
+    '<input class="search" id="q" placeholder="Buscar por nome, setor, usuário, IP, MAC…" value="'+E(Q)+'"/>'+
+    '<div class="wrap"><table><colgroup>'+W.map(function(w){return '<col style="width:'+w+'px">'}).join('')+'</colgroup><thead><tr>'+CAMPOS.map(function(c){return '<th data-o="'+c[0]+'">'+c[1]+(ORD===c[0]?(DIR>0?' ▲':' ▼'):'')+'</th>'}).join('')+'<th>Ações <span class="dim">(<span id="cnt"></span>)</span></th></tr></thead><tbody id="tb"></tbody></table></div>'+
+    '<div class="pcard"><h3>🖨️ Impressoras da rede</h3><div class="wrap" style="max-height:44vh"><table style="min-width:780px"><colgroup><col style="width:240px"><col style="width:120px"><col style="width:160px"><col><col style="width:170px"></colgroup><thead><tr><th>Nome</th><th>IP</th><th>MAC</th><th>Setor / Local</th><th>Ações</th></tr></thead><tbody>'+
+    impressoras().map(function(p){return '<tr><td title="'+E(p.nome)+'"><b>'+E(p.nome)+'</b></td><td class="mono">'+E(p.ip||'—')+'</td><td class="mono dim">'+E(p.mac||'—')+'</td><td>'+E(p.setor||'—')+'</td><td><div class="acts" style="gap:5px"><button class="sm" title="Abrir painel da impressora" onclick="mpAbrirIP(\''+E(p.ip)+'\',\''+E(p.nome)+'\')">🌐 Painel</button><button class="sm" title="Copiar IP" onclick="mk136Ip(\''+E(p.ip)+'\')">⧉ Copiar</button></div></td></tr>'}).join('')+'</tbody></table></div></div>';
+    tbody();
+    root.getElementById('q').addEventListener('input',function(e){Q=e.target.value;clearTimeout(pintar.t);pintar.t=setTimeout(tbody,200)});
+    root.getElementById('b-lote').onclick=popup;root.getElementById('b-exp').onclick=exportar;
+    root.querySelectorAll('th[data-o]').forEach(function(th){th.onclick=function(){var k=th.dataset.o;if(ORD===k)DIR=-DIR;else{ORD=k;DIR=1}pintar()}});
+    root.getElementById('tb').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;
+      if(b.dataset.del!=null){var p=VIS[+b.dataset.del];if(p&&confirm('Remover '+p.nome+'?')){var M=S().mapa,ix=M.indexOf(p.ref);if(ix>=0)M.splice(ix,1);SV();pintar()}}
+      if(b.dataset.ed!=null)editar(+b.dataset.ed,b.closest('tr'))});
+  }
+  function gravar(p,o){
+    if(p.fixo){var r=p.ref,key=String(r.nome).toUpperCase(),ov=S().pcsLote[key]||{};
+      Object.keys(o).forEach(function(k){if(k==='nome'||k==='tipo')return;r[k]=o[k];ov[k]=o[k];if(k==='ip'){r.vnc=o[k]?o[k]+':5900':'';ov.vnc=r.vnc}});S().pcsLote[key]=ov}
+    else Object.keys(o).forEach(function(k){p.ref[k]=o[k]});
+  }
+  function editar(i,tr){var p=VIS[i];if(!p)return;
+    tr.className='ed';tr.innerHTML=CAMPOS.map(function(c){return '<td><input data-k="'+c[0]+'" value="'+E(p[c[0]])+'"'+(p.fixo&&(c[0]==='nome'||c[0]==='tipo')?' disabled':'')+'/></td>'}).join('')+'<td><button class="sm pri" data-ok>✓</button> <button class="sm" data-x>✕</button></td>';
+    tr.querySelector('[data-x]').onclick=function(e){e.stopPropagation();tbody()};
+    tr.querySelector('[data-ok]').onclick=function(e){e.stopPropagation();var o={};tr.querySelectorAll('input[data-k]').forEach(function(x){if(!x.disabled)o[x.dataset.k]=x.value.trim()});if(o.mac)o.mac=fmac(o.mac);gravar(p,o);SV();T('Item atualizado');pintar()};
+  }
+  function exportar(){
+    var L=filtrados(),l=[CAMPOS.map(function(c){return c[1]}).join(';')].concat(L.map(function(p){return CAMPOS.map(function(c){return String(p[c[0]]||'').replace(/;/g,',')}).join(';')}));
+    var a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+l.join('\n')],{type:'text/csv;charset=utf-8'}));a.download='mapeamento_unidade.csv';document.body.appendChild(a);a.click();a.remove();
+  }
+  /* ---- Lote: colar do Excel (Ctrl+C / Ctrl+V), colunas separadas por ; ---- */
+  function parse(txt){
+    var ls=String(txt||'').split(/\r?\n/).filter(function(x){return x.trim()});if(!ls.length)return [];
+    var sep=ls[0].indexOf(';')>=0?';':(ls[0].indexOf('\t')>=0?'\t':';');
+    var norm=function(x){return String(x||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim()};
+    var cel=ls[0].split(sep),hits=cel.filter(function(x){var n=norm(x);return CAMPOS.some(function(c){return norm(c[1])===n})||Object.keys(ALI).some(function(k){return ALI[k].some(function(a){return norm(a)===n})})}).length;
+    var hd=CAMPOS.map(function(c){return c[0]});
+    if(hits>=2){hd=cel.map(colDe);ls=ls.slice(1)}
+    return ls.map(function(l){var c=l.split(sep),o={};hd.forEach(function(k,i){if(k)o[k]=String(c[i]==null?'':c[i]).trim()});if(o.mac)o.mac=fmac(o.mac);if(o.ip)o.ip=ipDe(o.ip);return o}).filter(function(o){return o.nome});
+  }
+  function acha(o,L){var k=o.nome.toUpperCase();return L.find(function(p){return String(p.nome).toUpperCase()===k})||(o.mac&&nmac(o.mac).length===12&&L.find(function(p){return nmac(p.mac)===nmac(o.mac)}))}
+  function popup(){
+    var ph=document.createElement('div');ph.id='mk134-pop';document.body.appendChild(ph);var pr=ph.attachShadow({mode:'open'});
+    var ov=document.createElement('div');ov.className='ov';
+    ov.innerHTML='<div class="mod"><h3>Inserir itens em lote</h3><p>Copie as linhas na planilha (Ctrl+C) e cole aqui (Ctrl+V). Uma máquina por linha, colunas separadas por <b>;</b> (ou colado direto do Excel) nesta ordem:</p>'+
+      '<p class="mono" style="color:#9be7ff">'+CAMPOS.map(function(c){return c[1]}).join(';')+'</p><p>Se a primeira linha for um cabeçalho com esses nomes, a ordem das colunas é detectada sozinha. Itens com o mesmo nome ou MAC são atualizados; campos vazios não apagam o que já existe.</p>'+
+      '<textarea id="lt" placeholder="REF033711ADM1PC;Computador;33711;ALMOXARIFADO;TERREO;Alex Lobo;10.18.1.20;D0:94:66:B2:99:E6;123456789;WIN11;"></textarea>'+
+      '<div class="wrap prev" id="pv"></div>'+
+      '<div class="mfoot"><span class="dim" id="rs">Cole os dados para ver a prévia.</span><div class="acts"><button id="cx">Cancelar</button><button class="pri" id="ins">＋ Inserir</button></div></div></div>';
+    pr.innerHTML='<style>'+CSS+'</style>';pr.appendChild(ov);
+    var ta=ov.querySelector('#lt'),pv=ov.querySelector('#pv'),rs=ov.querySelector('#rs');ta.focus();
+    function prev(){var R=parse(ta.value),L=todos(),nv=0,up=0;
+      pv.innerHTML=R.length?'<table><thead><tr><th style="width:90px">Situação</th>'+CAMPOS.map(function(c){return '<th>'+c[1]+'</th>'}).join('')+'</tr></thead><tbody>'+R.map(function(o){var x=acha(o,L);x?up++:nv++;return '<tr><td class="'+(x?'upd':'new')+'">'+(x?'Atualiza':'Novo')+'</td>'+CAMPOS.map(function(c){return '<td>'+E(o[c[0]]||'')+'</td>'}).join('')+'</tr>'}).join('')+'</tbody></table>':'';
+      rs.textContent=R.length?R.length+' linha(s): '+nv+' novo(s), '+up+' atualização(ões)':'Cole os dados para ver a prévia.'}
+    ta.addEventListener('input',prev);ta.addEventListener('paste',function(){setTimeout(prev,0)});
+    var fechar=function(){ph.remove()};
+    ov.querySelector('#cx').onclick=fechar;ov.addEventListener('click',function(e){if(e.target===ov)fechar()});
+    ov.querySelector('#ins').onclick=function(){
+      var R=parse(ta.value);if(!R.length)return T('Cole ao menos uma linha com o Nome preenchido');
+      var nv=0,up=0;R.forEach(function(o){var x=acha(o,todos());
+        if(x){var c={};Object.keys(o).forEach(function(k){if(o[k]!=='')c[k]=o[k]});gravar(x,c);up++}
+        else{o.id=ID();o.tipo=o.tipo||'Computador';o.origem='lote';S().mapa.push(o);nv++}});
+      SV();fechar();Q='';pintar();T(nv+' novo(s) e '+up+' atualizado(s) no mapeamento');
+    };
+  }
+  function montar(){
+    var ph=document.getElementById('mk134-ph');if(!ph)return;
+    if(!host){host=document.createElement('div');host.id='mk134-host';root=host.attachShadow({mode:'open'});pintar()}
+    ph.replaceWith(host);
+  }
+  window.vMapa=function(){Promise.resolve().then(montar);var h=(typeof page==='function')?page:function(a,b,c){return c};
+    return h('Acessos & Mapeamento','Computadores em uma tabela e impressoras em lista separada. Use “Inserir em lote” para colar linhas da planilha.','<div id="mk134-ph"></div>')};
+  window.vRemoto=function(){return window.vMapa()};
+  try{vMapa=window.vMapa;vRemoto=window.vRemoto}catch(e){}
+
+  /* remove injeções antigas na tela de mapeamento (causa do pisca-pisca) */
+  function limpar(){if(typeof tab==='undefined'||(tab!=='mapa'&&tab!=='remoto'))return;var s=document.querySelector('#view .sect');if(!s||!s.querySelector('#mk134-host,#mk134-ph'))return;
+    Array.prototype.slice.call(s.children).forEach(function(c){if(!c.matches('h2.page,.hint,#mk134-host,#mk134-ph'))c.remove()})}
+  function obs(){var v=document.getElementById('view');if(v)new MutationObserver(limpar).observe(v,{childList:true,subtree:true})}
+  if(document.readyState!=='loading')obs();else document.addEventListener('DOMContentLoaded',obs);
+
+  /* download do HTML com o nome da versão */
+  var dl=window.baixarHTML;
+  if(typeof dl==='function')window.baixarHTML=function(){var c=document.createElement.bind(document);var orig=HTMLAnchorElement.prototype.click;HTMLAnchorElement.prototype.click=function(){if(this.download&&/\.html$/i.test(this.download))this.download='MODESK_PESSOAL_v141.html';HTMLAnchorElement.prototype.click=orig;return orig.call(this)};return dl.apply(this,arguments)};
+})();
+</script>
+
+<!-- ===== MODESK v140 · Agenda + Lembretes juntos · Eventos separado · Sirius duplo · PDF timbrado Senac · Botões AnyDesk/VNC ===== -->
+<style id="mdk-v136-css">
+.mk136-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 0 12px}
+.mk136-sep{margin:18px 0 8px;font-size:15px;letter-spacing:.04em}
+</style>
+<script id="mdk-v136-js">
+(function(){
+  'use strict';
+  function E(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+  function T(m){try{toast(m)}catch(e){}}
+  function SV(){try{save()}catch(e){try{localStorage.setItem('modesk.pessoal.v7',JSON.stringify(window.state))}catch(x){}}}
+  function ID(){try{return u()}catch(e){return 'id'+Date.now()+Math.random().toString(36).slice(2)}}
+  function ST(){window.state=window.state||{};['eventos','atividades'].forEach(function(k){if(!Array.isArray(state[k]))state[k]=[]});return state}
+  function FD(d){if(!d)return '—';var p=String(d).split('-');return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:d}
+
+  /* ---------- 1. Menu: Lembretes volta para dentro da Agenda ---------- */
+  try{ALIAS_TELA.atividades='agenda';ALIAS_TELA.lembrete='agenda';ALIAS_TELA.lembretes='agenda';delete ALIAS_TELA.eventos}catch(e){}
+  function menu(){try{if(typeof MENU==='undefined')return;var mud=false;
+    MENU.forEach(function(g){var i=g.itens.findIndex(function(x){return x.k==='lembretes'});if(i>=0){g.itens.splice(i,1);mud=true}
+      g.itens.forEach(function(x){if(x.k==='agenda'&&x.n!=='Agenda & Lembretes'){x.n='Agenda & Lembretes';mud=true}})});
+    if(mud&&typeof buildMenu==='function')buildMenu()}catch(e){}}
+  menu();var mn=0,mt=setInterval(function(){menu();if(++mn>14)clearInterval(mt)},1600);
+
+  /* ---------- 2. Agenda mostra atividades + lembretes (eventos ficam só na tela Eventos) ---------- */
+  window.agendaItens=function(){var it=[];
+    ST().atividades.forEach(function(a){try{if(avisoLigadoACompras(a))return}catch(x){}if(a.prazo)it.push({id:a.id,data:a.prazo,hora:a.hora||'',titulo:a.titulo,tipo:a.tipo==='Pessoal'?'lembrete':'atividade',sub:a.desc||a.prioridade||'',feito:!!a.feito})});
+    return it.sort(function(a,b){return (a.data+a.hora).localeCompare(b.data+b.hora)})};
+  try{agendaItens=window.agendaItens}catch(e){}
+  var vAgAnt=window.vAgenda;
+  window.vAgenda=function(){
+    var h=vAgAnt?vAgAnt():'';
+    h=h.replace(/<h2 class="page">[^<]*<\/h2>/,'<h2 class="page">Agenda &amp; Lembretes</h2>')
+       .replace(/Suas atividades e avisos\.[^<]*/,'Atividades, lembretes e avisos na mesma tela. Eventos de clientes ficam na tela Eventos.')
+       .replace(/<span><i class="evento"><\/i>Eventos<\/span>/,'');
+    var lb='';
+    try{var x=window.vLembretes?window.vLembretes():'';var i=x.indexOf('<div class="card"><h3>Novo lembrete');if(i>=0)lb=x.slice(i)}catch(e){}
+    return h+(lb?'<h3 class="mk136-sep">🔔 Lembretes</h3>'+lb:'');
+  };
+  try{vAgenda=window.vAgenda}catch(e){}
+
+  /* ---------- 3. render: redireciona lembretes → agenda e põe botão PDF em Eventos ---------- */
+  var rAnt=window.render;
+  window.render=function(){
+    try{if(tab==='lembretes'||tab==='atividades')tab='agenda'}catch(e){}
+    var r=rAnt.apply(this,arguments);
+    try{document.querySelectorAll('.navbtn[data-k="lembretes"]').forEach(function(b){b.remove()})}catch(e){}
+    try{if(tab==='eventos'){var s=document.querySelector('#view .sect')||document.getElementById('view');
+      if(s&&!s.querySelector('#mk136-evbar')){var d=document.createElement('div');d.id='mk136-evbar';d.className='mk136-bar';
+        d.innerHTML='<button class="btn primary" onclick="mk136EventosPDF()">📄 Exportar relatório PDF (papel timbrado Senac)</button><span class="dim">Período opcional:</span><input id="mk136-de" type="date"/><input id="mk136-ate" type="date"/>';
+        var h2=s.querySelector('h2.page');var hint=h2&&h2.nextElementSibling&&h2.nextElementSibling.classList.contains('hint')?h2.nextElementSibling:h2;
+        if(hint&&hint.parentNode)hint.parentNode.insertBefore(d,hint.nextSibling);else s.insertBefore(d,s.firstChild)}}}catch(e){}
+    return r;
+  };
+  try{render=window.render}catch(e){}
+
+  /* ---------- 4. Sirius: lembrete que é evento entra nos dois ---------- */
+  var RX_EV=/\b(evento|eventos|palestra|semin[aá]rio|workshop|reuni[aã]o|aula show|formatura|confer[eê]ncia|audit[oó]rio|terra[cç]o|cerim[oô]nia|apresenta[cç][aã]o|treinamento|cliente|coffee|mayu)\b/i;
+  function ehEvento(a){if(!a)return false;var t=String(a.tipo||'').toLowerCase();if(t==='evento')return true;if(t==='lembrete'&&!a.evento)return RX_EV.test([a.titulo,a.obs,a.local,a.sala].join(' '));return !!a.evento||!!a.local||!!a.sala||RX_EV.test([a.titulo,a.obs].join(' '))}
+  function siriusInserir(a){a=a||{};var st=ST(),tit=a.titulo||a.nome||'Lembrete Sirius',data=a.data||a.prazo||'',hora=a.hora||'';
+    var ja=st.atividades.some(function(x){return x.titulo===tit&&x.prazo===data&&x.hora===hora});
+    if(!ja)st.atividades.push({id:ID(),titulo:tit,prazo:data,hora:hora,tipo:'Pessoal',prioridade:'Alta',repetir:'',aviso:30,desc:a.obs||'criado pelo Sirius',arquivo:null,feito:false,criado:Date.now(),origem:'sirius'});
+    var ev=ehEvento(a);
+    if(ev){var je=st.eventos.some(function(x){return (x.titulo===tit||x.cliente===tit)&&x.data===data});
+      if(!je)st.eventos.push({id:ID(),cliente:a.cliente||tit,titulo:tit,servicos:[],local:a.local||a.sala||'',data:data,hora:hora,horaFim:a.horaFim||'',resp:a.resp||'',info:a.obs||'criado pelo Sirius',status:'Agendado',anexo:null,origem:'sirius'})}
+    SV();try{render()}catch(e){}
+    return ev?'inserido em Lembretes e em Eventos: '+tit+' '+FD(data)+' '+hora:'lembrete salvo na agenda: '+tit+' '+FD(data)+' '+hora;
+  }
+  function ligarSirius(){var A=window.SIRIUS_API;if(!A||A._v136)return !!A;A.agendar=siriusInserir;A.lembrete=siriusInserir;A.evento=function(a){a=a||{};a.evento=true;return siriusInserir(a)};A._v136=1;return true}
+  if(!ligarSirius()){var sn=0,stt=setInterval(function(){if(ligarSirius()||++sn>20)clearInterval(stt)},1600)}
+
+  /* ---------- 5. Relatório PDF de eventos em papel timbrado Senac ---------- */
+  var LOGO='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 64" width="190" height="55"><text x="0" y="50" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="54" fill="#004A8D" letter-spacing="-2">Senac</text><rect x="196" y="8" width="18" height="18" rx="3" fill="#F7941D"/></svg>';
+  window.mk136EventosPDF=function(){
+    var de=(document.getElementById('mk136-de')||{}).value||'',ate=(document.getElementById('mk136-ate')||{}).value||'';
+    var L=ST().eventos.filter(function(e){return (!de||(e.data||'')>=de)&&(!ate||(e.data||'')<=ate)}).sort(function(a,b){return ((a.data||'')+(a.hora||'')).localeCompare((b.data||'')+(b.hora||''))});
+    var ok=function(e){try{return evExecutado(e)}catch(x){return /execut|conclu/i.test(e.status||'')}};
+    var rows=L.map(function(e,i){return '<tr><td>'+(i+1)+'</td><td>'+FD(e.data)+'</td><td>'+E(e.hora||'—')+(e.horaFim?' – '+E(e.horaFim):'')+'</td><td><b>'+E(e.cliente||e.titulo||'—')+'</b>'+(e.titulo&&e.titulo!==e.cliente?'<br><small>'+E(e.titulo)+'</small>':'')+'</td><td>'+E(e.local||'—')+'</td><td>'+E((e.servicos||[]).join(', ')||'—')+'</td><td>'+E(e.resp||'—')+'</td><td>'+(ok(e)?'Executado':'Agendado')+'</td><td>'+E(e.info||'')+'</td></tr>'}).join('')||'<tr><td colspan="9" style="text-align:center;padding:20px">Nenhum evento no período.</td></tr>';
+    var ex=L.filter(ok).length,per=(de?FD(de):'início')+' a '+(ate?FD(ate):'hoje em diante');
+    var css='@page{size:A4 landscape;margin:0}*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}body{margin:0;font-family:Arial,Helvetica,sans-serif;color:#1a1a1a}'+
+      '.hd{position:fixed;top:0;left:0;right:0;height:30mm;padding:6mm 14mm;display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid #F7941D;background:#fff}'+
+      '.hd .inf{text-align:right;font-size:9pt;color:#004A8D;line-height:1.4}.hd .inf b{font-size:11pt}'+
+      '.ft{position:fixed;bottom:0;left:0;right:0;height:14mm;background:#004A8D;color:#fff;font-size:8pt;display:flex;align-items:center;justify-content:space-between;padding:0 14mm}'+
+      '.ft:before{content:"";position:absolute;top:-2.5mm;left:0;right:0;height:2.5mm;background:#F7941D}'+
+      '.wm{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-18deg);opacity:.05;z-index:-1}.wm svg{width:170mm;height:auto}'+
+      'table.pg{width:100%;border-collapse:collapse}thead.sp td{height:34mm}tfoot.sp td{height:20mm}.ct{padding:0 14mm}'+
+      'h1{font-size:15pt;color:#004A8D;margin:0 0 2mm}.meta{font-size:9pt;color:#555;margin-bottom:4mm}'+
+      '.res{display:flex;gap:4mm;margin-bottom:4mm}.res div{border:1px solid #cfdcec;border-left:4px solid #F7941D;padding:2mm 4mm;font-size:9pt}.res b{display:block;font-size:13pt;color:#004A8D}'+
+      'table.ev{width:100%;border-collapse:collapse;font-size:8.5pt}table.ev th{background:#004A8D;color:#fff;text-align:left;padding:2mm}table.ev td{padding:1.8mm 2mm;border-bottom:1px solid #dde5ef;vertical-align:top}table.ev tr:nth-child(even) td{background:rgba(0,74,141,.04)}table.ev tr{page-break-inside:avoid}'+
+      '.ass{margin-top:14mm;display:flex;gap:20mm;font-size:9pt}.ass div{flex:1;border-top:1px solid #333;text-align:center;padding-top:2mm}';
+    var html='<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8"><title>Relatório de Eventos - Senac</title><style>'+css+'</style></head><body>'+
+      '<div class="hd">'+LOGO+'<div class="inf"><b>Senac Ceará · Unidade Aldeota</b><br>Tecnologia da Informação<br>Relatório de Eventos</div></div>'+
+      '<div class="wm">'+LOGO+'</div>'+
+      '<div class="ft"><span>Serviço Nacional de Aprendizagem Comercial — Senac</span><span>Gerado pelo MODESK em '+new Date().toLocaleString('pt-BR')+'</span></div>'+
+      '<table class="pg"><thead class="sp"><tr><td></td></tr></thead><tfoot class="sp"><tr><td></td></tr></tfoot><tbody><tr><td><div class="ct">'+
+      '<h1>Relatório de Eventos</h1><div class="meta">Período: '+per+'</div>'+
+      '<div class="res"><div>Total<b>'+L.length+'</b></div><div>Executados<b>'+ex+'</b></div><div>Agendados<b>'+(L.length-ex)+'</b></div></div>'+
+      '<table class="ev"><thead><tr><th>#</th><th>Data</th><th>Horário</th><th>Cliente / Evento</th><th>Sala</th><th>Serviços</th><th>Responsável</th><th>Status</th><th>Observações</th></tr></thead><tbody>'+rows+'</tbody></table>'+
+      '<div class="ass"><div>Responsável TI</div><div>Coordenação / Eventos</div></div>'+
+      '</div></td></tr></tbody></table><script>onload=function(){setTimeout(function(){print()},400)}<\/script></body></html>';
+    var w=window.open('','_blank');if(!w)return T('Libere pop-ups para gerar o PDF');w.document.open();w.document.write(html);w.document.close();
+    T('Relatório aberto — escolha "Salvar como PDF" na impressão');
+  };
+
+  /* ---------- 6. Botões AnyDesk (abre conexão) e VNC (copia IP) ---------- */
+  window.mk136Any=function(id){id=String(id||'').replace(/\s/g,'');if(!id)return T('Sem ID AnyDesk');try{navigator.clipboard.writeText(id)}catch(e){}T('Abrindo AnyDesk '+id+'…');window.location.href='anydesk:'+id};
+  window.mk136Ip=function(ip){ip=String(ip||'').replace(/:\d+$/,'').trim();if(!ip)return T('Sem IP');
+    var f=function(){var t=document.createElement('textarea');t.value=ip;document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(e){}t.remove()};
+    try{navigator.clipboard.writeText(ip).then(function(){T('IP '+ip+' copiado')},function(){f();T('IP '+ip+' copiado')})}catch(e){f();T('IP '+ip+' copiado')}};
+})();
+</script>
+
 </body>
 </html>
