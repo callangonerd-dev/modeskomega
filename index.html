@@ -10,7 +10,7 @@
 <meta content="MODESK" name="apple-mobile-web-app-title"/>
 <meta content="#03060c" name="theme-color"/>
 <link href="/manifest.webmanifest" rel="manifest"/>
-<title>MODESK PESSOAL — v141 (Impressoras em lista separada)</title>
+<title>MODESK PESSOAL — v145 (Chamado de impressora via PWS)</title>
 <script id="mdk-v10-boot">
 
 (function(){
@@ -10666,9 +10666,25 @@ main:has(.agenda-shell)>.sect>.card:first-of-type{padding:10px 12px!important;ma
   function nmac(m){return String(m||'').toUpperCase().replace(/[^0-9A-F]/g,'')}
   function fmac(m){var x=nmac(m);return x.length===12?x.match(/../g).join(':'):String(m||'').trim()}
   function ipDe(v){return String(v||'').replace(/:\d+$/,'').trim()}
+  var PRINT_INFO={
+    '10.18.1.201':{modelo:'Lexmark CX532adwe',serie:'7531521039CWN',cor:'Colorida'},
+    '10.18.1.210':{modelo:'Lexmark MX532adwe',serie:'702044830BG53',cor:'Preto e branco'},
+    '10.18.1.218':{modelo:'Lexmark MX532adwe',serie:'702044930BNVL',cor:'Preto e branco'},
+    '10.18.1.219':{modelo:'Kyocera ECOSYS M3655idn',serie:'R4P1889148',cor:'Preto e branco'},
+    '10.18.1.222':{modelo:'Lexmark MX532adwe',serie:'702044930BNP',cor:'Preto e branco'},
+    '10.18.1.223':{modelo:'Lexmark MX532adwe',serie:'702044930BNW8',cor:'Preto e branco'},
+    '10.18.1.224':{modelo:'Lexmark CX532adwe',serie:'753154403C7DV',cor:'Colorida'},
+    '10.18.1.226':{modelo:'Lexmark MX532adwe',serie:'702044930BNXF',cor:'Preto e branco'},
+    '10.18.1.227':{modelo:'Lexmark MX532adwe',serie:'702044930BNFW',cor:'Preto e branco'}
+  };
+  function equipIcon(p){var nb=/notebook|1NB/i.test((p.tipo||'')+' '+(p.nome||'')),pr=/impressora/i.test(p.tipo||'');
+    if(pr)return '<span class="eqico printer" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6z"/></svg></span>';
+    if(nb)return '<span class="eqico laptop" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H4zM2 19h20"/></svg></span>';
+    return '<span class="eqico desktop" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="13" rx="1"/><path d="M8 21h8m-4-5v5"/></svg></span>'}
   function base(){var o=[];try{PCS_PLANILHA.forEach(function(r){o.push({ref:r,fixo:1,nome:r.nome||'',tipo:r.tipo||'Computador',pat:r.pat||'',setor:r.setor||'',andar:r.andar||'',usuario:r.usuario||'',ip:ipDe(r.ip||r.vnc),mac:r.mac||'',anydesk:String(r.anydesk||'').replace(/\s/g,''),so:r.so||'',disco:r.disco||'',ram:r.ram||''})})}catch(e){}
     return o}
-  function impressoras(){var L=[];try{REDE_PERIF.forEach(function(r){if(!/impressora/i.test(r[0]||''))return;var d=String(r[3]||''),part=d.split(/\s+[—-]\s+/),local=part.shift()||'',nome=part.join(' — ')||local||'Impressora';L.push({ref:r,fixo:1,nome:nome,tipo:'Impressora',pat:'',setor:local,andar:'',usuario:'',ip:ipDe(r[1]).replace(/^https?:\/\//i,''),mac:r[2]||'',anydesk:'',so:'',disco:'',ram:''})})}catch(e){}
+
+  function impressoras(){var L=[];try{REDE_PERIF.forEach(function(r){if(!/impressora/i.test(r[0]||''))return;var d=String(r[3]||''),part=d.split(/\s+[—-]\s+/),local=part.shift()||'',nome=part.join(' — ')||local||'Impressora',ip=ipDe(r[1]).replace(/^https?:\/\//i,''),inf=PRINT_INFO[ip]||{};L.push({ref:r,fixo:1,nome:nome,tipo:'Impressora',pat:'',setor:local,andar:'',usuario:'',ip:ip,mac:r[2]||'',anydesk:'',so:'',disco:'',ram:'',modelo:inf.modelo||r[0]||'',serie:inf.serie||'',cor:inf.cor||''})})}catch(e){}
   try{S().mapa.forEach(function(m){if(!/impressora/i.test(m.tipo||''))return;L.push({ref:m,fixo:0,id:m.id,nome:m.nome||'Impressora',tipo:'Impressora',pat:m.pat||'',setor:m.setor||'',andar:m.andar||'',usuario:m.usuario||'',ip:ipDe(m.ip||m.vnc),mac:m.mac||'',anydesk:m.anydesk||'',so:'',disco:'',ram:''})})}catch(e){}return L}
   function todos(){var b=base(),nomes={};b.forEach(function(x){nomes[String(x.nome).toUpperCase()]=1});
     S().mapa.forEach(function(m){if(m.origem==='mapeado'||/impressora/i.test(m.tipo||'')||nomes[String(m.nome).toUpperCase()])return;b.push({ref:m,fixo:0,id:m.id,nome:m.nome||'',tipo:m.tipo||'Equipamento',pat:m.pat||'',setor:m.setor||'',andar:m.andar||'',usuario:m.usuario||'',ip:ipDe(m.ip||m.vnc),mac:m.mac||'',anydesk:m.anydesk||'',so:m.so||'',disco:m.disco||'',ram:m.ram||''})});return b}
@@ -10694,13 +10710,14 @@ main:has(.agenda-shell)>.sect>.card:first-of-type{padding:10px 12px!important;ma
   '.ov{position:fixed;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;z-index:99999;padding:16px}'+
   '.mod{width:min(1100px,100%);max-height:92vh;overflow:auto;background:#0d1726;border:1px solid rgba(86,217,255,.35);border-radius:12px;padding:20px;box-shadow:0 20px 60px rgba(0,0,0,.6)}'+
   '.mod h3{margin:0 0 6px;font-size:18px}.mod p{margin:4px 0 10px;color:#9fb0c6;font-size:13px}.mod textarea{min-height:170px;font-family:"JetBrains Mono",monospace;font-size:12px;white-space:pre}'+
-  '.mfoot{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap}.prev{margin-top:12px;max-height:38vh}.prev table{min-width:900px}.new{color:#4ade80}.upd{color:#facc15}';
+  '.mfoot{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap}.prev{margin-top:12px;max-height:38vh}.prev table{min-width:900px}.new{color:#4ade80}.upd{color:#facc15}'+
+  '.eqname{display:inline-flex;align-items:center;gap:8px;min-width:0}.eqico{display:inline-grid;place-items:center;width:25px;height:25px;flex:0 0 25px;border:1px solid rgba(86,217,255,.35);border-radius:6px;background:rgba(86,217,255,.10);color:#56d9ff;transition:transform .28s cubic-bezier(.2,.8,.2,1),background .28s,color .28s,box-shadow .28s}.eqico svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.eqico.printer{color:#4ade80;border-color:rgba(74,222,128,.35);background:rgba(74,222,128,.09)}tr:hover .eqico{transform:translateY(-2px) rotate(-5deg) scale(1.1);background:rgba(86,217,255,.2);box-shadow:0 0 14px rgba(86,217,255,.28)}tr:hover .eqico.printer{background:rgba(74,222,128,.18);box-shadow:0 0 14px rgba(74,222,128,.28)}@media(prefers-reduced-motion:reduce){.eqico{transition:none}tr:hover .eqico{transform:none}}';
 
   var W=[150,115,90,120,80,140,115,135,80,140,110,210];
   function linha(p,i){
     var vnc=p.ip?'<button class="sm" title="Copiar IP para usar no VNC" onclick="mk136Ip(\''+E(p.ip)+'\')"><img src="'+MP_ICO_VNC+'" alt="VNC" style="width:16px;height:16px;vertical-align:middle"/></button>':'';
     var anyb=p.anydesk?'<button class="sm" title="Abrir conexão no AnyDesk" onclick="mk136Any(\''+E(p.anydesk)+'\')"><img src="'+MP_ICO_ANY+'" alt="AnyDesk" style="width:18px;height:14px;vertical-align:middle"/></button>':'';
-    return '<tr><td title="'+E(p.nome)+'"><b>'+E(p.nome||'—')+'</b></td><td>'+E(p.tipo||'—')+'</td><td class="mono">'+E(p.pat||'—')+'</td><td title="'+E(p.setor)+'">'+E(p.setor||'—')+'</td><td>'+E(p.andar||'—')+'</td><td title="'+E(p.usuario)+'">'+E(p.usuario||'—')+'</td><td class="mono">'+E(p.ip||'—')+'</td><td class="mono">'+E(p.mac||'—')+'</td><td>'+E(p.so||'—')+'</td><td>'+E(p.disco||'—')+'</td><td>'+E(p.ram||'—')+'</td>'+
+    return '<tr><td title="'+E(p.nome)+'"><span class="eqname">'+equipIcon(p)+'<b>'+E(p.nome||'—')+'</b></span></td><td>'+E(p.tipo||'—')+'</td><td class="mono">'+E(p.pat||'—')+'</td><td title="'+E(p.setor)+'">'+E(p.setor||'—')+'</td><td>'+E(p.andar||'—')+'</td><td title="'+E(p.usuario)+'">'+E(p.usuario||'—')+'</td><td class="mono">'+E(p.ip||'—')+'</td><td class="mono">'+E(p.mac||'—')+'</td><td>'+E(p.so||'—')+'</td><td>'+E(p.disco||'—')+'</td><td>'+E(p.ram||'—')+'</td>'+
       '<td><div class="acts" style="gap:5px;flex-wrap:nowrap"><button class="sm" data-ed="'+i+'" title="Editar">✎ Editar</button>'+vnc+anyb+(p.fixo?'':'<button class="sm" data-del="'+i+'" title="Excluir">🗑</button>')+'</div></td></tr>';
   }
   var VIS=[];
@@ -10712,8 +10729,8 @@ main:has(.agenda-shell)>.sect>.card:first-of-type{padding:10px 12px!important;ma
     '<div class="acts"><button class="pri" id="b-lote">⇪ Inserir em lote</button><button id="b-exp">⬆ Exportar CSV</button></div></div>'+
     '<input class="search" id="q" placeholder="Buscar por nome, setor, usuário, IP, MAC…" value="'+E(Q)+'"/>'+
     '<div class="wrap"><table><colgroup>'+W.map(function(w){return '<col style="width:'+w+'px">'}).join('')+'</colgroup><thead><tr>'+CAMPOS.map(function(c){return '<th data-o="'+c[0]+'">'+c[1]+(ORD===c[0]?(DIR>0?' ▲':' ▼'):'')+'</th>'}).join('')+'<th>Ações <span class="dim">(<span id="cnt"></span>)</span></th></tr></thead><tbody id="tb"></tbody></table></div>'+
-    '<div class="pcard"><h3>🖨️ Impressoras da rede</h3><div class="wrap" style="max-height:44vh"><table style="min-width:780px"><colgroup><col style="width:240px"><col style="width:120px"><col style="width:160px"><col><col style="width:170px"></colgroup><thead><tr><th>Nome</th><th>IP</th><th>MAC</th><th>Setor / Local</th><th>Ações</th></tr></thead><tbody>'+
-    impressoras().map(function(p){return '<tr><td title="'+E(p.nome)+'"><b>'+E(p.nome)+'</b></td><td class="mono">'+E(p.ip||'—')+'</td><td class="mono dim">'+E(p.mac||'—')+'</td><td>'+E(p.setor||'—')+'</td><td><div class="acts" style="gap:5px"><button class="sm" title="Abrir painel da impressora" onclick="mpAbrirIP(\''+E(p.ip)+'\',\''+E(p.nome)+'\')">🌐 Painel</button><button class="sm" title="Copiar IP" onclick="mk136Ip(\''+E(p.ip)+'\')">⧉ Copiar</button></div></td></tr>'}).join('')+'</tbody></table></div></div>';
+    '<div class="pcard"><h3><span class="eqname">'+equipIcon({tipo:'Impressora'})+'Impressoras da rede</h3><div style="display:flex;justify-content:flex-end;align-items:center;gap:10px;margin:0 4px 10px;flex-wrap:wrap"><a class="btn sm" id="b-pws" href="https://psfx.com.br/pws/index.php/pws" target="_self" title="Abrir o PWS — Portal Web de Serviços — para abrir chamado de impressora" style="display:inline-flex;align-items:center;gap:7px;padding:8px 16px;border-radius:999px;border:1px solid rgba(255,90,104,.5);background:linear-gradient(135deg,#ff4d5e,#c20312);color:#fff;font-weight:800;font-size:12.5px;letter-spacing:.03em;text-decoration:none;box-shadow:0 4px 14px rgba(227,6,19,.30);transition:transform .16s,box-shadow .16s" onmouseover="this.style.transform=\'translateY(-1px)\';this.style.boxShadow=\'0 6px 18px rgba(227,6,19,.45)\'" onmouseout="this.style.transform=\'\';this.style.boxShadow=\'0 4px 14px rgba(227,6,19,.30)\'">🖨️ Abrir chamado no PWS</a></div><div class="wrap" style="max-height:44vh"><table style="min-width:1180px"><colgroup><col style="width:210px"><col style="width:120px"><col style="width:170px"><col style="width:210px"><col style="width:160px"><col style="width:115px"><col><col style="width:170px"></colgroup><thead><tr><th>Nome</th><th>IP</th><th>MAC</th><th>Modelo</th><th>Nº de série</th><th>Tipo</th><th>Setor / Local</th><th>Ações</th></tr></thead><tbody>'+
+    impressoras().map(function(p){return '<tr><td title="'+E(p.nome)+'"><span class="eqname">'+equipIcon(p)+'<b>'+E(p.nome)+'</b></span></td><td class="mono">'+E(p.ip||'—')+'</td><td class="mono dim">'+E(p.mac||'—')+'</td><td>'+E(p.modelo||'—')+'</td><td class="mono">'+E(p.serie||'—')+'</td><td><span class="tag">'+E(p.cor||'—')+'</span></td><td>'+E(p.setor||'—')+'</td><td><div class="acts" style="gap:5px"><button class="sm" title="Abrir painel da impressora" onclick="mpAbrirIP(\''+E(p.ip)+'\',\''+E(p.nome)+'\')">🌐 Painel</button><button class="sm" title="Copiar IP" onclick="mk136Ip(\''+E(p.ip)+'\')">⧉ Copiar</button></div></td></tr>'}).join('')+'</tbody></table></div></div>';
     tbody();
     root.getElementById('q').addEventListener('input',function(e){Q=e.target.value;clearTimeout(pintar.t);pintar.t=setTimeout(tbody,200)});
     root.getElementById('b-lote').onclick=popup;root.getElementById('b-exp').onclick=exportar;
@@ -10827,9 +10844,8 @@ main:has(.agenda-shell)>.sect>.card:first-of-type{padding:10px 12px!important;ma
     h=h.replace(/<h2 class="page">[^<]*<\/h2>/,'<h2 class="page">Agenda &amp; Lembretes</h2>')
        .replace(/Suas atividades e avisos\.[^<]*/,'Atividades, lembretes e avisos na mesma tela. Eventos de clientes ficam na tela Eventos.')
        .replace(/<span><i class="evento"><\/i>Eventos<\/span>/,'');
-    var lb='';
-    try{var x=window.vLembretes?window.vLembretes():'';var i=x.indexOf('<div class="card"><h3>Novo lembrete');if(i>=0)lb=x.slice(i)}catch(e){}
-    return h+(lb?'<h3 class="mk136-sep">🔔 Lembretes</h3>'+lb:'');
+    /* O cadastro principal no topo já inclui Lembrete; não duplicar outro formulário abaixo. */
+    return h;
   };
   try{vAgenda=window.vAgenda}catch(e){}
 
