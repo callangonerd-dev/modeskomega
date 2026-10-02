@@ -2756,7 +2756,7 @@ function ativarNotificacoes(){/* notificações de compras removidas */}
 let deadlineAtivas=[],avisadas={};
 function checarDeadlines(){
   deadlineAtivas=state.atividades.filter(a=>!a.feito&&!avisoLigadoACompras(a)&&statusAtiv(a).late);
-  const evHoje=state.eventos.filter(e=>!avisoLigadoACompras(e)&&dias(e.data)<=0);
+  const evHoje=state.eventos.filter(e=>!avisoLigadoACompras(e)&&dias(e.data)===0);
   const bar=$('deadline-bar');
   if(bar){
     if(deadlineAtivas.length||evHoje.length){
@@ -5174,7 +5174,7 @@ console.log('[MODESK v80] brilho por cor · telas sem rolagem · menu arrastáve
       if(F.cat&&p.catRi!==F.cat&&p.catRc!==F.cat)return false;
       if(F.proj&&(p.proj||'')!==F.proj)return false;
       if(!q)return true;
-      return [p.ri,p.rc,p.forn,p.contato,p.proj,p.catRi,p.catRc,p.obs,p.status].join(' ').toLowerCase().indexOf(q)>=0;
+      return [p.desc,p.item,p.codItem,p.ri,p.rc,p.forn,p.contato,p.proj,p.catRi,p.catRc,p.obs,p.status].join(' ').toLowerCase().indexOf(q)>=0;
     });
     if(F.ord==='deadline')arr.sort(function(a,b){return (a.deadline||'9999').localeCompare(b.deadline||'9999')});
     else if(F.ord==='data')arr.sort(function(a,b){return (b.data||'').localeCompare(a.data||'')});
@@ -5222,7 +5222,7 @@ console.log('[MODESK v80] brilho por cor · telas sem rolagem · menu arrastáve
       if(d!==null&&ativo)al='<div style="margin-top:3px"><span class="tag '+(d<0?'t-err blink':d<=5?'t-warn':'t-ok')+'">'+
         (d<0?'atrasado '+Math.abs(d)+'d — cobrar':d===0?'entrega hoje — cobrar':'faltam '+d+'d')+'</span></div>';
       return '<tr class="'+(ativo&&d!==null&&d<0?'late':'')+(st==='Entrega confirmada'?' done':'')+'">'+
-        '<td>'+inp(p,'ri','sem req. interna')+'</td>'+
+        '<td><div style="font-size:12px;font-weight:700;margin-bottom:3px;max-width:260px;white-space:normal">'+esc((p.desc||p.item||'item sem nome'))+'</div>'+inp(p,'ri','sem req. interna')+'</td>'+
         '<td>'+selCel(p,'catRi',listaRI(),'—')+'</td>'+
         '<td>'+docCel(p,'ri')+'</td>'+
         '<td>'+inp(p,'rc','nº req. compra')+'</td>'+
@@ -5659,7 +5659,7 @@ console.log('[MODESK v80] brilho por cor · telas sem rolagem · menu arrastáve
     var st=stInfo(p.status),arq=!!p.arquivadoEm;
     var hist=(p.hist||[]).slice().reverse();
     d.innerHTML='<div class="dh"><div><div class="dim" style="font-size:10.5px;letter-spacing:.1em;text-transform:uppercase">Status do pedido</div>'+
-      '<h3 style="margin:4px 0 0;display:flex;align-items:center;gap:7px"><span style="display:inline-flex;width:18px;height:18px">'+ico(st.g)+'</span>'+esc(p.ri||p.rc||'sem numero')+'</h3>'+
+      '<h3 style="margin:4px 0 0;display:flex;align-items:center;gap:7px"><span style="display:inline-flex;width:18px;height:18px">'+ico(st.g)+'</span>'+esc((p.desc||p.item||'item sem nome'))+'</h3><div class="dim" style="font-size:12px">'+esc(p.ri||p.rc||'sem numero')+'</div>'+
       '<div class="dim" style="font-size:12px">'+esc(p.forn||'sem fornecedor')+(p.deadline?' \u00B7 entrega '+fmt(p.deadline):'')+'</div></div>'+
       '<button class="btn sm" onclick="cp11Fechar()">\u2715</button></div>'+
       '<div class="db">'+
@@ -5717,7 +5717,7 @@ console.log('[MODESK v80] brilho por cor · telas sem rolagem · menu arrastáve
       if(F.cat&&p.catRi!==F.cat&&p.catRc!==F.cat)return false;
       if(F.proj&&(p.proj||'')!==F.proj)return false;
       if(!q)return true;
-      return [p.ri,p.rc,p.forn,p.contato,p.proj,p.catRi,p.catRc,p.obs,p.status,p.statusTxt].join(' ').toLowerCase().indexOf(q)>=0;
+      return [p.desc,p.item,p.codItem,p.ri,p.rc,p.forn,p.contato,p.proj,p.catRi,p.catRc,p.obs,p.status,p.statusTxt].join(' ').toLowerCase().indexOf(q)>=0;
     });
     if(F.ord==='deadline')out.sort(function(a,b){return (a.deadline||'9999').localeCompare(b.deadline||'9999')});
     else if(F.ord==='data')out.sort(function(a,b){return (b.data||'').localeCompare(a.data||'')});
@@ -5764,7 +5764,7 @@ console.log('[MODESK v80] brilho por cor · telas sem rolagem · menu arrastáve
       return '<div class="cp11-card '+cls+'">'+
         '<div class="cp16-controls"><div><i>Requisição interna</i><strong>'+esc(p.ri||'—')+'</strong><span>'+esc(p.catRi||'Sem categoria interna')+'</span></div><div><i>Requisição de compra</i><strong>'+esc(p.rc||'—')+'</strong><span>'+esc(p.catRc||'Sem categoria de compra')+'</span></div></div>'+
         '<h4><span class="cp11-num">'+esc(p.proj||'Sem projeto')+'</span><span style="margin-left:auto">'+botaoStatus(p)+'</span></h4>'+
-        '<div class="dim cp16-supplier" style="font-size:12.4px"><i>Fornecedor</i><b>'+esc(p.forn||'não informado')+'</b></div>'+(p.desc?'<div class="dim" style="font-size:12px"><i>Item  </i><b>'+esc(p.desc)+'</b>'+(p.qtd?' &middot; '+esc(p.qtd):'')+(p.mxm?' &middot; MXM '+esc(p.mxm):'')+'</div>':'')+
+        '<div class="dim cp16-supplier" style="font-size:12.4px"><i>Fornecedor</i><b>'+esc(p.forn||'não informado')+'</b></div>'+'<div class="cp149-nome" style="font-size:14px;font-weight:700;margin:4px 0;line-height:1.3">'+esc((p.desc||p.item||'item sem nome'))+(p.qtd?' <span class="dim" style="font-weight:400">&middot; '+esc(p.qtd)+'</span>':'')+(p.mxm?' <span class="dim" style="font-weight:400">&middot; MXM '+esc(p.mxm)+'</span>':'')+'</div>'+
         '<div class="cp11-meta">'+
           '<div><i>Pedido</i>'+(p.data?fmt(p.data):'\u2014')+'</div>'+
           '<div><i>Entrega</i>'+(p.deadline?fmt(p.deadline):'\u2014')+'</div>'+
@@ -5775,7 +5775,7 @@ console.log('[MODESK v80] brilho por cor · telas sem rolagem · menu arrastáve
         (p.statusTxt?'<div class="dim" style="font-size:11.4px;display:flex;gap:5px;align-items:flex-start">'+ico('prancheta','')+'<span>'+esc(p.statusTxt)+'</span></div>':'')+
         '<div class="cp11-acts" style="justify-content:space-between;align-items:center">'+
           '<div class="cp11-docs" style="flex:1">'+anexoCel(p,'ri')+anexoCel(p,'rc')+'</div>'+
-          '<div style="display:flex;gap:5px">'+acoes(p)+'</div>'+
+          '<div style="display:flex;gap:5px;align-items:center"><button class="btn sm primary" title="Confirmar entrega e arquivar" onclick="cp150Entregue(\''+p.id+'\')">'+ico('check')+' Entregue</button>'+acoes(p)+'</div>'+
         '</div></div>';
     }).join('')+'</div>';
   }
@@ -5794,7 +5794,7 @@ console.log('[MODESK v80] brilho por cor · telas sem rolagem · menu arrastáve
     return arr.map(function(p){
       var st=p.status||'',d=p.deadline?dias(p.deadline):null,ativo=st!=='Entrega confirmada'&&st!=='Cancelado';
       return '<tr class="'+(ativo&&d!==null&&d<0?'late':'')+(st==='Entrega confirmada'?' done':'')+'">'+
-        '<td>'+inp(p,'ri','sem req. interna')+'</td>'+
+        '<td><div style="font-size:12px;font-weight:700;margin-bottom:3px;max-width:260px;white-space:normal">'+esc((p.desc||p.item||'item sem nome'))+'</div>'+inp(p,'ri','sem req. interna')+'</td>'+
         '<td>'+selCel(p,'catRi',RI(),'\u2014')+'</td>'+
         '<td>'+inp(p,'rc','n\u00BA req. compra')+'</td>'+
         '<td>'+selCel(p,'catRc',RC(),'\u2014')+'</td>'+
@@ -5895,9 +5895,9 @@ console.log('[MODESK v80] brilho por cor · telas sem rolagem · menu arrastáve
   /* ---------- pedidos realizados por periodo ---------- */
   window.cp11CSVArq=function(per){
     var c=C(),arr=c.arquivados.filter(function(p){return !per||periodo(p)===per});
-    var cab=['Req. interna','Req. compra','Categoria','Projeto','Fornecedor','Contato','Data','Prazo','Entregue em','Arquivado em','Atualizacao'];
+    var cab=['Item','Req. interna','Req. compra','Categoria','Projeto','Fornecedor','Contato','Data','Prazo','Entregue em','Arquivado em','Atualizacao'];
     var lin=[cab.join(';')];
-    arr.forEach(function(p){lin.push([p.ri||'',p.rc||'',p.catRc||p.catRi||'',p.proj||'',p.forn||'',p.contato||'',p.data||'',p.deadline||'',p.recebidoEm||'',p.arquivadoEm||'',(p.statusTxt||'').replace(/[;\n]/g,' ')].join(';'))});
+    arr.forEach(function(p){lin.push([String(p.desc||p.item||'').replace(/[;\n]/g,' '),p.ri||'',p.rc||'',p.catRc||p.catRi||'',p.proj||'',p.forn||'',p.contato||'',p.data||'',p.deadline||'',p.recebidoEm||'',p.arquivadoEm||'',(p.statusTxt||'').replace(/[;\n]/g,' ')].join(';'))});
     var b=new Blob(['\ufeff'+lin.join('\n')],{type:'text/csv;charset=utf-8'});
     var a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='pedidos-realizados-'+(per||'todos')+'.csv'; a.click();
     toast('Planilha de pedidos realizados exportada');
@@ -5908,7 +5908,7 @@ console.log('[MODESK v80] brilho por cor · telas sem rolagem · menu arrastáve
   function paneArquivo(){
     var c=C(),arr=c.arquivados.slice(),g={},ordem=[];
     var q=(F.q||'').toLowerCase();
-    if(q)arr=arr.filter(function(p){return [p.ri,p.rc,p.forn,p.proj,p.statusTxt].join(' ').toLowerCase().indexOf(q)>=0});
+    if(q)arr=arr.filter(function(p){return [p.desc,p.item,p.ri,p.rc,p.forn,p.proj,p.statusTxt].join(' ').toLowerCase().indexOf(q)>=0});
     arr.sort(function(a,b){return periodo(b).localeCompare(periodo(a))});
     arr.forEach(function(p){var k=periodo(p);if(!g[k]){g[k]=[];ordem.push(k)}g[k].push(p)});
     if(!arr.length)return '<div class="card"><h3>Pedidos realizados</h3><div class="cp11-empty">Nenhum pedido arquivado ainda. Confirme a entrega e use o botao <b>Arquivar</b> na gaveta de status.</div></div>';
@@ -5919,7 +5919,7 @@ console.log('[MODESK v80] brilho por cor · telas sem rolagem · menu arrastáve
       '<div style="margin-top:14px">'+ordem.map(function(k){var L=g[k];
         return '<details class="cp11-per" open><summary><span style="display:inline-flex;align-items:center;gap:7px">'+ico('arquivo')+rotulo(k)+'</span><span class="dim">'+L.length+' pedido(s) \u00B7 <a href="javascript:cp11CSVArq(\''+k+'\')">CSV</a></span></summary>'+
         '<div class="in"><div class="cp11-wrap" style="max-height:none"><table><thead><tr><th>Req. interna</th><th>Req. compra</th><th>Categoria</th><th>Projeto</th><th>Fornecedor</th><th>Entregue em</th><th>PDFs</th><th></th></tr></thead><tbody>'+
-        L.map(function(p){return '<tr><td class="mono">'+esc(p.ri||'\u2014')+'</td><td class="mono">'+esc(p.rc||'\u2014')+'</td><td>'+esc(p.catRc||p.catRi||'\u2014')+'</td><td>'+esc(p.proj||'\u2014')+'</td><td>'+esc(p.forn||'\u2014')+'</td>'+
+        L.map(function(p){return '<tr><td class="mono">'+esc(p.ri||'\u2014')+'</td><td class="mono">'+esc(p.rc||'\u2014')+'</td><td>'+esc(p.catRc||p.catRi||'\u2014')+'</td><td>'+esc(p.proj||'\u2014')+'</td><td>'+esc(p.forn||'\u2014')+'<div class="dim" style="font-size:11.5px">'+esc((p.desc||p.item||'item sem nome'))+'</div></td>'+
           '<td><span style="display:inline-flex;align-items:center;gap:6px;color:#38f2b5">'+ico('check')+(p.recebidoEm?fmt(p.recebidoEm):'\u2014')+'</span></td>'+
           '<td><div style="display:flex;gap:5px;flex-wrap:wrap">'+anexoCel(p,'ri')+anexoCel(p,'rc')+'</div></td>'+
           '<td style="white-space:nowrap"><button class="btn sm" onclick="cp11Gaveta(\''+p.id+'\')">detalhes</button></td></tr>'}).join('')+
@@ -10430,7 +10430,7 @@ html.mdk-locked body > *:not(#login):not(script):not(style):not(link){display:no
   window.alertas=function(){
     var s=ST(),out=[],ok=s.avisosOk;
     s.eventos.forEach(function(e){if(evOk(e)||!e.data)return;var d=dias(e.data),n=(e.cliente||e.titulo);
-      if(d<0)out.push({t:'err',m:'Evento sem conclusão: '+n+' ('+F(e.data)+')',ev:e.id});else if(d===0)out.push({t:'err',m:'HOJE: '+n+' às '+(e.hora||'--:--')+' · '+(e.local||''),ev:e.id});else if(d<=3)out.push({t:'w',m:'Em '+d+' dia(s): '+n+' — '+F(e.data)+' '+(e.hora||''),ev:e.id})});
+      if(d<0)return;if(d===0)out.push({t:'err',m:'HOJE: '+n+' às '+(e.hora||'--:--')+' · '+(e.local||''),ev:e.id});else if(d<=3)out.push({t:'w',m:'Em '+d+' dia(s): '+n+' — '+F(e.data)+' '+(e.hora||''),ev:e.id})});
     s.atividades.forEach(function(a){if(a.feito||!a.prazo)return;try{if(avisoLigadoACompras(a))return}catch(x){}var st={};try{st=statusAtiv(a)}catch(x){}
       if(st.late)out.push({t:'err',m:'ATIVIDADE '+(a.tipo||'')+': '+a.titulo+' — prazo '+F(a.prazo)+' '+(a.hora||''),at:a.id});else if(dias(a.prazo)<=2)out.push({t:'w',m:'Atividade em breve: '+a.titulo+' ('+F(a.prazo)+')',at:a.id})});
     s.sends.forEach(function(x){if(x.status==='Aguardando retorno'&&dias(x.data)<-2&&!ok['send:'+x.id])out.push({t:'w',m:'SEND "'+x.assunto+'" sem retorno há '+Math.abs(dias(x.data))+' dias',k:'send:'+x.id})});
@@ -11006,5 +11006,165 @@ main:has(.agenda-shell)>.sect>.card:first-of-type{padding:10px 12px!important;ma
 })();
 </script>
 
+<script id="mdk-v149-compras-dedup">
+/* ===== MODESK v149 · COMPRAS: nome do item visivel, sem duplicados, arquivados nao voltam =====
+   - todo pedido passa a exibir o nome do item (desc/item)
+   - itens iguais na essencia (mesmo item + fornecedor + ata/contrato) sao unidos em um so
+   - pedidos ja arquivados/entregues ficam registrados em uma lista permanente (baixados)
+     e nunca mais reaparecem na planilha, mesmo apos recarga, sincronizacao ou nova carga
+========================================================================= */
+(function(){
+  function N(x){return String(x==null?'':x).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]/g,'')}
+  function nome(p){return p.desc||p.item||''}
+  function ataNum(p){var m=String(p.ata||p.ri||'').match(/\d+[\/\-.]?\d*/);return m?m[0].replace(/\D/g,''):''}
+  function essencia(p){var n=N(nome(p));if(!n)return '';return n+'|'+N(p.forn)+'|'+ataNum(p)}
+  function chaves(p){var k=[];if(p.id)k.push('id:'+p.id);if(p.chaveAta)k.push('ata:'+p.chaveAta);if(p.chaveCP36)k.push('cp36:'+p.chaveCP36);var e=essencia(p);if(e)k.push('ess:'+e);return k}
+  function feito(p){return p.status==='Entrega confirmada'||!!p.arquivadoEm}
+  function pontos(p){var n=0;for(var k in p){if(p[k]!==''&&p[k]!=null)n++}if(feito(p))n+=100;if(p.docs&&Object.keys(p.docs).length)n+=20;return n}
+  var ultimo='';
+  function limpar(){
+    if(!window.comprasDados)return false;
+    var c=window.comprasDados();if(!c)return false;
+    c.pedidos=c.pedidos||[];c.arquivados=c.arquivados||[];c.baixados=c.baixados||[];
+    /* impede que as cargas antigas rodem de novo */
+    c.atas2026v28=1;c.controlePedidos36v2=1;
+    var B={};c.baixados.forEach(function(k){B[k]=1});
+    [c.pedidos,c.arquivados].forEach(function(L){L.forEach(function(p){if(!p.desc&&p.item)p.desc=p.item;if(!p.item&&p.desc)p.item=p.desc})});
+    /* arquivados: unir duplicados e registrar como baixados */
+    var vistoA={},arq=[];
+    c.arquivados.forEach(function(p){var e=essencia(p)||('id:'+p.id);
+      if(vistoA[e]){var o=vistoA[e];for(var k in p)if(o[k]===''||o[k]==null)o[k]=p[k];return}
+      vistoA[e]=p;arq.push(p);chaves(p).forEach(function(k){B[k]=1})});
+    c.arquivados=arq;
+    /* pedidos ativos: remover os ja baixados e unir duplicados */
+    var visto={},out=[];
+    c.pedidos.forEach(function(p){
+      if(chaves(p).some(function(k){return B[k]}))return;
+      var e=essencia(p);
+      if(e&&visto[e]){var o=visto[e];
+        var bom=pontos(p)>pontos(o)?p:o,ruim=bom===p?o:p;
+        for(var k in ruim)if(bom[k]===''||bom[k]==null)bom[k]=ruim[k];
+        bom.docs=Object.assign({},ruim.docs||{},bom.docs||{});bom.paths=Object.assign({},ruim.paths||{},bom.paths||{});
+        if(bom===p){out[out.indexOf(o)]=p;visto[e]=p}
+        return}
+      if(e)visto[e]=p;out.push(p)});
+    c.pedidos=out;
+    c.baixados=Object.keys(B);
+    var assin=c.pedidos.length+'/'+c.arquivados.length+'/'+c.baixados.length;
+    if(assin!==ultimo){ultimo=assin;try{save(true)}catch(e){}try{if(window.tab==='pedidos')render()}catch(e){}}
+    return true;
+  }
+  window.mdkComprasLimpar=limpar;
+  /* ao arquivar, grava a baixa permanente na hora */
+  function blindarArq(){var o=window.cp11Arquivar;if(typeof o!=='function'||o.__v149)return;
+    var f=function(id){var c=window.comprasDados(),p=(c.pedidos||[]).find(function(x){return x.id===id});var r=o.apply(this,arguments);
+      if(p&&p.arquivadoEm){c.baixados=c.baixados||[];chaves(p).forEach(function(k){if(c.baixados.indexOf(k)<0)c.baixados.push(k)});try{save(true)}catch(e){}}
+      limpar();return r};f.__v149=1;window.cp11Arquivar=f}
+  function blindarDes(){var o=window.cp11Desarquivar;if(typeof o!=='function'||o.__v149)return;
+    var f=function(id){var c=window.comprasDados(),p=(c.arquivados||[]).find(function(x){return x.id===id});
+      if(p){var ks=chaves(p);c.baixados=(c.baixados||[]).filter(function(k){return ks.indexOf(k)<0})}
+      return o.apply(this,arguments)};f.__v149=1;window.cp11Desarquivar=f}
+  function ciclo(){try{blindarArq();blindarDes();limpar()}catch(e){}}
+  setTimeout(ciclo,1200);setTimeout(ciclo,3500);
+  setInterval(ciclo,4000); /* mantem limpo apos sincronizacoes */
+  console.log('[MODESK v149] compras: nomes visiveis, duplicados unidos, arquivados nao retornam');
+})();
+</script>
+
+<script id="mdk-v150-entregue">
+/* v150 · botao "Entregue" no card: confirma a entrega e arquiva na hora */
+window.cp150Entregue=function(id){
+  var c=window.comprasDados&&window.comprasDados(); if(!c)return;
+  var p=(c.pedidos||[]).find(function(x){return x.id===id}); if(!p)return;
+  var nm=p.desc||p.item||p.ri||p.rc||'item';
+  if(!confirm('Confirmar a entrega de "'+nm+'" e mover para Pedidos realizados?'))return;
+  var d=new Date(),h=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  p.status='Entrega confirmada'; p.recebidoEm=p.recebidoEm||h;
+  if(typeof window.cp11Arquivar==='function'){window.cp11Arquivar(id)}
+  else{p.arquivadoEm=h;c.pedidos=c.pedidos.filter(function(x){return x.id!==id});c.arquivados=c.arquivados||[];c.arquivados.unshift(p);try{save(true)}catch(e){}}
+  try{window.mdkComprasLimpar&&window.mdkComprasLimpar()}catch(e){}
+  try{render()}catch(e){}
+  try{toast('"'+nm+'" entregue e arquivado em Pedidos realizados')}catch(e){}
+};
+</script>
+<style id="sr-anx-css">
+#sr-anx{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 6px}
+#sr-anx .sr-clip{width:32px;height:32px;border-radius:10px;border:1px solid rgba(34,211,238,.5);background:rgba(34,211,238,.12);color:#67e8f9;cursor:pointer;font-size:15px}
+#sr-anx .sr-chip{font-size:11px;background:rgba(15,23,42,.85);border:1px solid rgba(148,163,184,.3);color:#e2e8f0;border-radius:9px;padding:3px 8px;display:inline-flex;gap:6px;align-items:center;max-width:220px}
+#sr-anx .sr-chip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#sr-anx .sr-chip b{cursor:pointer;color:#f87171}
+#sr-anx small{font-size:10px;color:#94a3b8}
+#sirius-panel.sr-drop{outline:2px dashed #22d3ee;outline-offset:-6px}
+</style>
+<script>
+/* ===== MODESK v152 · Sirius lê arquivos (upload, Ctrl+V ou arrastar) ===== */
+(function(){
+  var MAX=15000,anexos=[];
+  function sc(src,glob){return new Promise(function(ok,no){if(window[glob])return ok(window[glob]);var s=document.createElement('script');s.src=src;s.onload=function(){ok(window[glob])};s.onerror=function(){no(new Error('offline'))};document.head.appendChild(s)})}
+  function T(m){try{toast(m)}catch(e){}}
+  async function lerPDF(f){
+    var lib=await sc('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js','pdfjsLib');
+    lib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    var pdf=await lib.getDocument({data:await f.arrayBuffer()}).promise,out=[];
+    for(var i=1;i<=Math.min(pdf.numPages,40);i++){var c=await (await pdf.getPage(i)).getTextContent();out.push(c.items.map(function(x){return x.str}).join(' '))}
+    return out.join('\n');
+  }
+  async function lerDOCX(f){var m=await sc('https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js','mammoth');return (await m.extractRawText({arrayBuffer:await f.arrayBuffer()})).value}
+  async function lerXLSX(f){var X=typeof carregarSheetJS==='function'?await carregarSheetJS():await sc('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js','XLSX');
+    var wb=X.read(await f.arrayBuffer(),{type:'array'});return wb.SheetNames.map(function(n){return '## Aba '+n+'\n'+X.utils.sheet_to_csv(wb.Sheets[n],{FS:';'})}).join('\n')}
+  async function lerIMG(f){var Tz=await sc('https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js','Tesseract');var r=await Tz.recognize(f,'por');return r.data.text}
+  async function ler(f){
+    var n=(f.name||'').toLowerCase(),t=f.type||'';
+    if(t==='application/pdf'||/\.pdf$/.test(n))return lerPDF(f);
+    if(/\.docx$/.test(n))return lerDOCX(f);
+    if(/\.(xlsx|xls|ods)$/.test(n))return lerXLSX(f);
+    if(t.indexOf('image/')===0)return lerIMG(f);
+    if(t.indexOf('text')===0||/\.(txt|csv|md|json|xml|html?|log|tsv|ini|js|css|sql)$/.test(n)||!t)return f.text();
+    throw new Error('tipo');
+  }
+  function pintar(){
+    var b=document.getElementById('sr-anx');if(!b)return;
+    b.innerHTML='<button class="sr-clip" type="button" title="Anexar arquivo (PDF, Word, Excel, CSV, texto, imagem) — ou cole com Ctrl+V / arraste">📎</button>'+
+      anexos.map(function(a,i){return '<span class="sr-chip" title="'+a.nome.replace(/"/g,'')+'"><span>'+(a.lendo?'⏳ ':'📄 ')+a.nome.replace(/</g,'&lt;')+'</span>'+(a.lendo?'':'<b data-i="'+i+'">✕</b>')+'</span>'}).join('')+
+      (anexos.length?'':'<small>Anexe ou cole um arquivo para o Sirius ler</small>');
+    b.querySelector('.sr-clip').onclick=function(){document.getElementById('sr-anx-f').click()};
+    b.querySelectorAll('b[data-i]').forEach(function(x){x.onclick=function(){anexos.splice(+x.dataset.i,1);pintar()}});
+  }
+  async function add(files){
+    for(var i=0;i<files.length;i++){var f=files[i];if(!f)continue;
+      var a={nome:f.name||('colado_'+(f.type||'arquivo').replace(/\W+/g,'.')),lendo:true,txt:''};anexos.push(a);pintar();
+      try{if(f.type.indexOf('image/')===0)T('Lendo texto da imagem…');a.txt=String(await ler(f)||'').trim();
+        if(!a.txt){T('Não achei texto em '+a.nome);anexos.splice(anexos.indexOf(a),1)}else{if(a.txt.length>MAX){a.txt=a.txt.slice(0,MAX)+'\n[…arquivo cortado por ser muito grande]'}T('Arquivo pronto: '+a.nome)}}
+      catch(e){anexos.splice(anexos.indexOf(a),1);T(e.message==='tipo'?'Tipo de arquivo não suportado: '+a.nome:'Não consegui ler '+a.nome+' (a primeira leitura de PDF, Word, Excel ou imagem precisa de internet)')}
+      a.lendo=false;pintar();
+    }
+  }
+  function juntar(t){
+    if(!anexos.length)return;
+    if(anexos.some(function(a){return a.lendo})){T('Aguarde terminar a leitura do arquivo');return false}
+    var pre=anexos.map(function(a){return '[ARQUIVO: '+a.nome+']\n'+a.txt+'\n[FIM DO ARQUIVO]'}).join('\n\n');
+    t.value=pre+'\n\n'+(t.value.trim()||'Leia o(s) arquivo(s) acima e resuma as informações principais.');
+    anexos=[];pintar();
+  }
+  function init(){
+    var t=document.getElementById('sirius-txt'),foot=document.getElementById('sr-foot'),send=document.getElementById('sr-send'),pan=document.getElementById('sirius-panel');
+    if(!t||!foot||!send)return setTimeout(init,800);
+    if(document.getElementById('sr-anx'))return;
+    var bar=document.createElement('div');bar.id='sr-anx';var inRow=foot.querySelector('.sr-in');foot.insertBefore(bar,inRow);
+    var fi=document.createElement('input');fi.type='file';fi.id='sr-anx-f';fi.multiple=true;fi.style.display='none';
+    fi.accept='.pdf,.docx,.xlsx,.xls,.ods,.csv,.txt,.md,.json,.xml,.html,.log,.tsv,image/*';
+    fi.onchange=function(){add(Array.from(fi.files));fi.value=''};foot.appendChild(fi);
+    pintar();
+    send.addEventListener('click',function(e){if(juntar(t)===false){e.stopImmediatePropagation();e.preventDefault()}},true);
+    t.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey&&juntar(t)===false){e.stopImmediatePropagation();e.preventDefault()}},true);
+    t.addEventListener('paste',function(e){var it=(e.clipboardData||{}).files||[];if(it.length){e.preventDefault();e.stopPropagation();add(Array.from(it))}});
+    var alvo=pan||foot;
+    alvo.addEventListener('dragover',function(e){if(e.dataTransfer&&Array.from(e.dataTransfer.types||[]).indexOf('Files')>=0){e.preventDefault();alvo.classList.add('sr-drop')}});
+    alvo.addEventListener('dragleave',function(){alvo.classList.remove('sr-drop')});
+    alvo.addEventListener('drop',function(e){alvo.classList.remove('sr-drop');if(e.dataTransfer&&e.dataTransfer.files.length){e.preventDefault();add(Array.from(e.dataTransfer.files))}});
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();
+</script>
 </body>
 </html>
