@@ -10,7 +10,7 @@
 <meta content="MODESK" name="apple-mobile-web-app-title"/>
 <meta content="#03060c" name="theme-color"/>
 <link href="/manifest.webmanifest" rel="manifest"/>
-<title>MODESK PESSOAL — v145 (Chamado de impressora via PWS)</title>
+<title>MODESK PESSOAL — v147 (PWS abre no app proprio)</title>
 <script id="mdk-v10-boot">
 
 (function(){
@@ -8358,7 +8358,7 @@ aside{display:flex!important;flex-direction:column!important;overflow:hidden!imp
 </script>
 <!-- ===== MODESK · MANUAL OPERACIONAL & GUIA DE TRANSIÇÃO ===== -->
 <script id="mdk-compras-atas-2026-v28">
-/* ===== MODESK v28 · CARGA OFICIAL DAS ATAS/OS 2026 NO AMBIENTE DE COMPRAS =====
+/* ===== MODESK v28 · CARGA OFICIAL DAS ATAS 2026 NO AMBIENTE DE COMPRAS =====
    - preenche fornecedor, item, valor unitario, unidade, pedido MXM, data do pedido,
      e-mail do fornecedor e status/observacoes
    - cria o deadline de entrega (30 dias corridos a partir da data do pedido)
@@ -8380,7 +8380,7 @@ aside{display:flex!important;flex-direction:column!important;overflow:hidden!imp
     if(!window.state||!window.comprasDados)return false;
     var c=window.comprasDados(); if(!c)return false;
     c.pedidos=c.pedidos||[]; c.projetos=c.projetos||[];
-    if(c.projetos.indexOf('Atas / OS 2026')<0)c.projetos.push('Atas / OS 2026');
+    if(c.projetos.indexOf('Atas 2026')<0)c.projetos.push('Atas 2026');
     if(c[VER])return true;
 
     var s=window.state; s.atividades=s.atividades||[];
@@ -8398,12 +8398,12 @@ aside{display:flex!important;flex-direction:column!important;overflow:hidden!imp
         c.pedidos.push(p);
       }
       p.chaveAta=k;
-      p.ri='Ata/OS '+ata;
+      p.ri='Ata '+ata;
       p.catRi='Ata de registro';
       p.rc=mxm||'';
       p.catRc='COMP01';
       p.num=mxm||('Ata '+ata);
-      p.proj='Atas / OS 2026';
+      p.proj='Atas 2026';
       p.forn=forn;
       p.contato=mail||'';
       p.item=desc; p.valorUnit=val; p.un=un; p.mxm=mxm; p.ata=ata; p.email=mail||'';
@@ -8415,7 +8415,7 @@ aside{display:flex!important;flex-direction:column!important;overflow:hidden!imp
 
       /* ---- deadline na agenda (gera o alerta) ---- */
       if(deadline&&status!=='Entrega confirmada'){
-        var tit='Entrega Ata/OS '+ata+' — '+forn;
+        var tit='Entrega Ata '+ata+' — '+forn;
         var ja=s.atividades.some(function(a){return a.titulo===tit&&a.prazo===deadline});
         if(!ja){
           s.atividades.push({id:uid(),titulo:tit,prazo:deadline,hora:'09:00',tipo:'Trabalho',
@@ -10729,7 +10729,7 @@ main:has(.agenda-shell)>.sect>.card:first-of-type{padding:10px 12px!important;ma
     '<div class="acts"><button class="pri" id="b-lote">⇪ Inserir em lote</button><button id="b-exp">⬆ Exportar CSV</button></div></div>'+
     '<input class="search" id="q" placeholder="Buscar por nome, setor, usuário, IP, MAC…" value="'+E(Q)+'"/>'+
     '<div class="wrap"><table><colgroup>'+W.map(function(w){return '<col style="width:'+w+'px">'}).join('')+'</colgroup><thead><tr>'+CAMPOS.map(function(c){return '<th data-o="'+c[0]+'">'+c[1]+(ORD===c[0]?(DIR>0?' ▲':' ▼'):'')+'</th>'}).join('')+'<th>Ações <span class="dim">(<span id="cnt"></span>)</span></th></tr></thead><tbody id="tb"></tbody></table></div>'+
-    '<div class="pcard"><h3><span class="eqname">'+equipIcon({tipo:'Impressora'})+'Impressoras da rede</h3><div style="display:flex;justify-content:flex-end;align-items:center;gap:10px;margin:0 4px 10px;flex-wrap:wrap"><a class="btn sm" id="b-pws" href="https://psfx.com.br/pws/index.php/pws" target="_self" title="Abrir o PWS — Portal Web de Serviços — para abrir chamado de impressora" style="display:inline-flex;align-items:center;gap:7px;padding:8px 16px;border-radius:999px;border:1px solid rgba(255,90,104,.5);background:linear-gradient(135deg,#ff4d5e,#c20312);color:#fff;font-weight:800;font-size:12.5px;letter-spacing:.03em;text-decoration:none;box-shadow:0 4px 14px rgba(227,6,19,.30);transition:transform .16s,box-shadow .16s" onmouseover="this.style.transform=\'translateY(-1px)\';this.style.boxShadow=\'0 6px 18px rgba(227,6,19,.45)\'" onmouseout="this.style.transform=\'\';this.style.boxShadow=\'0 4px 14px rgba(227,6,19,.30)\'">🖨️ Abrir chamado no PWS</a></div><div class="wrap" style="max-height:44vh"><table style="min-width:1180px"><colgroup><col style="width:210px"><col style="width:120px"><col style="width:170px"><col style="width:210px"><col style="width:160px"><col style="width:115px"><col><col style="width:170px"></colgroup><thead><tr><th>Nome</th><th>IP</th><th>MAC</th><th>Modelo</th><th>Nº de série</th><th>Tipo</th><th>Setor / Local</th><th>Ações</th></tr></thead><tbody>'+
+    '<div class="pcard"><h3><span class="eqname">'+equipIcon({tipo:'Impressora'})+'Impressoras da rede</h3><div style="display:flex;justify-content:flex-end;align-items:center;gap:10px;margin:0 4px 10px;flex-wrap:wrap"><a class="btn sm" id="b-pws" href="https://psfx.com.br/pws/index.php/pws" target="_blank" rel="noopener noreferrer" title="Abrir o PWS — Portal Web de Serviços — para abrir chamado de impressora" style="display:inline-flex;align-items:center;gap:7px;padding:8px 16px;border-radius:999px;border:1px solid rgba(255,90,104,.5);background:linear-gradient(135deg,#ff4d5e,#c20312);color:#fff;font-weight:800;font-size:12.5px;letter-spacing:.03em;text-decoration:none;box-shadow:0 4px 14px rgba(227,6,19,.30);transition:transform .16s,box-shadow .16s" onmouseover="this.style.transform=\'translateY(-1px)\';this.style.boxShadow=\'0 6px 18px rgba(227,6,19,.45)\'" onmouseout="this.style.transform=\'\';this.style.boxShadow=\'0 4px 14px rgba(227,6,19,.30)\'">🖨️ Abrir chamado no PWS</a></div><div class="wrap" style="max-height:44vh"><table style="min-width:1180px"><colgroup><col style="width:210px"><col style="width:120px"><col style="width:170px"><col style="width:210px"><col style="width:160px"><col style="width:115px"><col><col style="width:170px"></colgroup><thead><tr><th>Nome</th><th>IP</th><th>MAC</th><th>Modelo</th><th>Nº de série</th><th>Tipo</th><th>Setor / Local</th><th>Ações</th></tr></thead><tbody>'+
     impressoras().map(function(p){return '<tr><td title="'+E(p.nome)+'"><span class="eqname">'+equipIcon(p)+'<b>'+E(p.nome)+'</b></span></td><td class="mono">'+E(p.ip||'—')+'</td><td class="mono dim">'+E(p.mac||'—')+'</td><td>'+E(p.modelo||'—')+'</td><td class="mono">'+E(p.serie||'—')+'</td><td><span class="tag">'+E(p.cor||'—')+'</span></td><td>'+E(p.setor||'—')+'</td><td><div class="acts" style="gap:5px"><button class="sm" title="Abrir painel da impressora" onclick="mpAbrirIP(\''+E(p.ip)+'\',\''+E(p.nome)+'\')">🌐 Painel</button><button class="sm" title="Copiar IP" onclick="mk136Ip(\''+E(p.ip)+'\')">⧉ Copiar</button></div></td></tr>'}).join('')+'</tbody></table></div></div>';
     tbody();
     root.getElementById('q').addEventListener('input',function(e){Q=e.target.value;clearTimeout(pintar.t);pintar.t=setTimeout(tbody,200)});
@@ -10917,6 +10917,92 @@ main:has(.agenda-shell)>.sect>.card:first-of-type{padding:10px 12px!important;ma
   window.mk136Ip=function(ip){ip=String(ip||'').replace(/:\d+$/,'').trim();if(!ip)return T('Sem IP');
     var f=function(){var t=document.createElement('textarea');t.value=ip;document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(e){}t.remove()};
     try{navigator.clipboard.writeText(ip).then(function(){T('IP '+ip+' copiado')},function(){f();T('IP '+ip+' copiado')})}catch(e){f();T('IP '+ip+' copiado')}};
+})();
+</script>
+
+<script id="mdk-v146-compras-regra">
+/* ===== MODESK v146 · REGRA OBRIGATORIA DE COMPRAS =====
+   Todo item de compra precisa de:
+   - Nº de requisicao interna EST01, ou
+   - Nº de requisicao de compra EST02 / EST04 / COMP01 / COMP02 / COMP04, ou
+   - Contrato / ATA: numero do contrato/ATA e/ou numero do pedido de compra.
+   Nunca OS. Compras nao geram eventos/avisos na agenda e eventos nao viram compras.
+========================================================================= */
+(function(){
+  var CAT_RI=['EST01'], CAT_RC=['EST02','EST04','COMP01','COMP02','COMP04'];
+  var CAT_CT=['Contrato','Ata de registro'];
+  var RE_OS=/(^|[^a-z0-9])o\.?\s?s\.?(?=[^a-z]|$)|ordem\s+de\s+servi[cç]o/i;
+  function N(s){return String(s==null?'':s).trim()}
+  function ehContrato(c){return /contrato|\bata\b|ata de registro/i.test(N(c))}
+  function catOk(c,lista){c=N(c).toUpperCase().replace(/\s+PT$/,'');return lista.indexOf(c)>=0}
+  function motivo(p){
+    var ri=N(p.ri),rc=N(p.rc),cri=N(p.catRi||(!p.catRc?p.cat:'')),crc=N(p.catRc||p.cat);
+    var campos=[ri,rc,N(p.num),cri,crc].join(' | ');
+    if(RE_OS.test(campos))return 'OS nao e documento de compra. Use EST01, EST02/EST04/COMP01/COMP02/COMP04 ou Contrato/ATA + pedido.';
+    if(ri&&catOk(cri,CAT_RI))return '';
+    if(rc&&catOk(crc,CAT_RC))return '';
+    if((ri||rc)&&(ehContrato(cri)||ehContrato(crc)))return '';
+    if(!ri&&!rc)return 'Informe o numero da requisicao interna (EST01), da requisicao de compra (EST02/EST04/COMP01/COMP02/COMP04) ou do contrato/ATA e pedido de compra.';
+    return 'Categoria invalida. Interna: EST01. Compra: EST02, EST04, COMP01, COMP02, COMP04. Contrato/ATA: numero do contrato/ATA e/ou do pedido.';
+  }
+  window.mdkCompraMotivo=motivo;
+  function aviso(m){try{toast(m)}catch(e){alert(m)}}
+  function val(id){var e=document.getElementById(id);return e?N(e.value):''}
+
+  function blindar(nome,ids){
+    var orig=window[nome]; if(typeof orig!=='function'||orig.__v146)return;
+    var f=function(){
+      var p={ri:val(ids[0]),catRi:val(ids[1]),rc:val(ids[2]),catRc:val(ids[3])};
+      if(!p.catRi&&!p.catRc&&ids[4])p.cat=val(ids[4]);
+      var m=motivo(p); if(m)return aviso('Lancamento bloqueado: '+m);
+      return orig.apply(this,arguments);
+    };
+    f.__v146=1; window[nome]=f;
+  }
+  function aplicarForms(){
+    blindar('cp11Add',['cp11-ri','cp11-cri','cp11-rc','cp11-crc']);
+    blindar('cp10Add',['cp-p-ri','cp-p-cri','cp-p-rc','cp-p-crc']);
+    blindar('cpAddPedidoC',['cp-p-ri','cp-p-cri','cp-p-rc','cp-p-crc','cp-p-cat']);
+  }
+
+  function ligadoCompra(x){
+    if(!x)return false;
+    if(x.fonte==='Compras'||x.fonte==='ImportCSV')return true;
+    var t=[x.titulo,x.desc,x.info].filter(Boolean).join(' ');
+    return /^entrega\s+(ata|item|extra|pedido|compra)|cobrar\s+entrega|deadline de entrega|pedido mxm|requisi[cç][aã]o de compra|pedido de compra/i.test(t);
+  }
+
+  function sanear(){
+    if(!window.state||!window.comprasDados)return false;
+    var c=window.comprasDados(); if(!c)return false;
+    c.pedidos=c.pedidos||[]; c.semDocumento=c.semDocumento||[];
+    /* categorias oficiais */
+    c.catsRI=['EST01','Contrato','Ata de registro'];
+    c.catsRC=['EST02','EST04','COMP01','COMP02','COMP04','Contrato','Ata de registro'];
+    c.cats=['EST01','EST02','EST04','COMP01','COMP02','COMP04','Contrato','Ata de registro'];
+    if(c.projetos)c.projetos=c.projetos.map(function(x){return String(x).replace(/\s*\/\s*OS\b/gi,'')}).filter(function(x,i,a){return a.indexOf(x)===i});
+    var bloq=0;
+    c.pedidos=c.pedidos.filter(function(p){
+      if(!p)return false;
+      ['ri','rc','num','proj','obs'].forEach(function(k){if(p[k])p[k]=String(p[k]).replace(/Ata\s*\/\s*OS\s*/gi,'Ata ').replace(/\s*\/\s*OS\b/gi,'')});
+      if(/^ata\s+outros$/i.test(N(p.ri))){p.ri='';if(p.rc&&!p.catRc)p.catRc='COMP01'}
+      if(N(p.ri)&&!N(p.catRi)&&/^ata\b|contrato/i.test(N(p.ri)))p.catRi='Ata de registro';
+      if(motivo(p)){p.bloqueioMotivo=motivo(p);c.semDocumento.push(p);bloq++;return false}
+      return true;
+    });
+    var s=window.state,a0=(s.atividades||[]).length,e0=(s.eventos||[]).length;
+    s.atividades=(s.atividades||[]).filter(function(x){return !ligadoCompra(x)});
+    s.eventos=(s.eventos||[]).filter(function(x){return !ligadoCompra(x)});
+    var mud=bloq||a0!==s.atividades.length||e0!==s.eventos.length;
+    if(mud){try{save(true)}catch(e){} try{render()}catch(e){}}
+    if(bloq)aviso(bloq+' item(ns) de compra sem requisicao/contrato/pedido foram retirados da planilha (guardados em "sem documento").');
+    return true;
+  }
+  window.mdkComprasSemDocumento=function(){var c=window.comprasDados&&window.comprasDados();return c?(c.semDocumento||[]):[]};
+
+  var n=0,t=setInterval(function(){try{aplicarForms();sanear();if(++n>20)clearInterval(t)}catch(e){}},1500);
+  setTimeout(function(){try{aplicarForms();sanear()}catch(e){}},1600);
+  console.log('[MODESK v146] regra de compras: EST01 / EST02-EST04-COMP01-COMP02-COMP04 / Contrato-ATA + pedido. OS bloqueada.');
 })();
 </script>
 
