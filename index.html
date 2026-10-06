@@ -8464,22 +8464,18 @@ aside{display:flex!important;flex-direction:column!important;overflow:hidden!imp
 
 <script id="mdk-v91-unidade">
 /* ============================================================================
-   UNIDADE TOTAL — o MODESK passa a ser um so, em todos os aparelhos.
-   Tudo o que fica salvo no navegador (dados e ajustes do site) sobe para a nuvem e desce em qualquer outro aparelho.
-   Nuvem unica: Firebase Firestore (API Key + Project ID em Configuracoes).
-   Sem servico alternativo: os dados entre aparelhos passam somente pelo Firebase.
+   UNIDADE TOTAL — Sincronização via Firestore REST com suporte a Auth Token
 ============================================================================ */
 (function(){
 'use strict';
 
-var DOC='marciooliveira';               /* mesmo documento do site (modesk_pessoal/marciooliveira) */
+var DOC='marciooliveira';
 var COL='modesk_pessoal';
-var TSK='mdk.sync.ts';                  /* marcas de tempo por chave */
-var LIMITE=700000;                      /* nao sobe valor gigante (>700 KB) */
+var TSK='mdk.sync.ts';
+var LIMITE=700000;
 
 var sujos={}, enviadoEm={}, pendente=false, enviando=false, agendado=null, aplicando=false, ultimoAviso=0;
 
-/* ---------- quais chaves fazem parte da unidade ---------- */
 function pode(k){
   if(!k||k===TSK)return false;
   if(k==='modesk.sess'||k==='modesk.trusted'||k==='modesk.pessoal.v7')return false;
@@ -8488,9 +8484,7 @@ function pode(k){
 function marcas(){try{return JSON.parse(localStorage.getItem(TSK)||'{}')||{}}catch(e){return {}}}
 function gravarMarcas(o){try{localStorage.setItem(TSK,JSON.stringify(o))}catch(e){}}
 
-/* ---------- avisa no rodape ---------- */
 function bolha(txt,fixo){
-  /* v117: sincronização continua ativa, sem a bolha MDK-Sync no rodapé. */
   var b=document.getElementById('mdk-sync');if(b)b.remove();
   var tb=document.getElementById('tb-sync');if(tb)tb.textContent=txt;
   if(typeof setSyncStatus==='function'){
@@ -8500,7 +8494,6 @@ function bolha(txt,fixo){
   }
 }
 
-/* ---------- Firebase Firestore (REST, sem depender do SDK) ---------- */
 function fb(){
   try{
     var c=(window.state&&window.state.fb)||{};
@@ -8508,28 +8501,53 @@ function fb(){
   }catch(e){}
   return null;
 }
+
 function fsUrl(c){
   return 'https://firestore.googleapis.com/v1/projects/'+encodeURIComponent(c.pid)+
          '/databases/(default)/documents/'+COL+'/'+DOC;
 }
+
+/* Helper para obter os cabeçalhos incluindo o Token do Firebase Auth */
+async function mdkAuthHeaders(extraHeaders){
+  var headers = extraHeaders || {};
+  try {
+    if (window.firebase && firebase.auth && firebase.auth().currentUser) {
+      var token = await firebase.auth().currentUser.getIdToken();
+      headers['Authorization'] = 'Bearer ' + token;
+    }
+  } catch(e) {
+    console.warn('Não foi possível obter o token do Firebase Auth:', e);
+  }
+  return headers;
+}
+
 async function fsBaixar(c){
-  var r=await fetch(fsUrl(c)+'?key='+encodeURIComponent(c.key),{headers:await mdkAuthHeaders()});
+  var headers = await mdkAuthHeaders();
+  var r = await fetch(fsUrl(c)+'?key='+encodeURIComponent(c.key), { headers: headers });
   if(r.status===404)return {};
   if(!r.ok)throw new Error('firestore '+r.status);
   var j=await r.json();
   var s=((j.fields||{}).ajustes||{}).stringValue||'{}';
   try{return JSON.parse(s)||{}}catch(e){return {}}
 }
+
 async function fsSubir(c,payload){
   var u=fsUrl(c)+'?key='+encodeURIComponent(c.key)+
         '&updateMask.fieldPaths=ajustes&updateMask.fieldPaths=em';
-  var r=await fetch(u,{method:'PATCH',headers:await mdkAuthHeaders({'Content-Type':'application/json'}),
-    body:JSON.stringify({fields:{ajustes:{stringValue:JSON.stringify(payload)},
-      em:{integerValue:String(Date.now())}}})});
+  var headers = await mdkAuthHeaders({'Content-Type':'application/json'});
+  var r=await fetch(u,{
+    method:'PATCH',
+    headers: headers,
+    body:JSON.stringify({
+      fields:{
+        ajustes:{stringValue:JSON.stringify(payload)},
+        em:{integerValue:String(Date.now())}
+      }
+    })
+  });
   if(!r.ok)throw new Error('firestore '+r.status);
 }
 
-/* ---------- camada unica de nuvem: somente Firebase ---------- */
 function exigirFirebase(){
   var c=fb();
   if(!c)throw new Error('firebase nao configurado');
@@ -8539,7 +8557,6 @@ function ondeEstou(){return fb()?'Firebase':'Firebase não configurado'}
 async function baixar(){return await fsBaixar(exigirFirebase())}
 async function subir(p){return await fsSubir(exigirFirebase(),p)}
 
-/* ---------- aplica o que veio de outro aparelho ---------- */
 var _set=localStorage.setItem.bind(localStorage);
 function aplicar(remoto){
   var meus=marcas(), mudou=[];
@@ -8561,6 +8578,7 @@ function aplicar(remoto){
   refletir(mudou);
   return mudou;
 }
+
 function refletir(chaves){
   chaves.forEach(function(k){
     try{
@@ -8577,7 +8595,6 @@ function refletir(chaves){
   if(Date.now()-ultimoAviso>4000){ultimoAviso=Date.now();bolha('atualizado de outro aparelho')}
 }
 
-/* ---------- semeadura: marca os dados que ja existiam neste aparelho ---------- */
 function semear(){
   var meus=marcas(), agora=Date.now(), mudou=false, k, i;
   try{
@@ -8591,24 +8608,23 @@ function semear(){
   return meus;
 }
 
-/* ---------- envia o que mudou aqui ---------- */
 function agenda(ms){clearTimeout(agendado);agendado=setTimeout(enviar,ms||900)}
+
 async function enviar(){
   if(enviando){pendente=true;return}
   enviando=true;pendente=false;
-  /* lote: fotografa o que esta sujo AGORA; o que mudar durante o envio fica para a proxima rodada */
   var lote={}, kk;
   for(kk in sujos)if(Object.prototype.hasOwnProperty.call(sujos,kk))lote[kk]=sujos[kk];
   try{
     var remoto=await baixar();
-    aplicar(remoto);
+    aplicando(remoto);
     var meus=marcas(), payload={}, enviados=[], grandes=0;
     Object.keys(remoto||{}).forEach(function(k){payload[k]=remoto[k]});
     Object.keys(lote).forEach(function(k){
       if(!pode(k)){enviados.push(k);return}
       var v=null; try{v=localStorage.getItem(k)}catch(x){}
       if(v==null){enviados.push(k);return}
-      if(v.length>LIMITE){grandes++;enviados.push(k);return}   /* item grande demais: fica so no aparelho */
+      if(v.length>LIMITE){grandes++;enviados.push(k);return}
       var t=(typeof meus[k]==='number')?meus[k]:(lote[k]||Date.now());
       var atual=payload[k];
       var difere=!atual||atual.v!==v;
@@ -8616,7 +8632,6 @@ async function enviar(){
       enviados.push(k);
     });
     await subir(payload);
-    /* limpa somente o que foi realmente enviado e nao mudou no meio do caminho */
     enviados.forEach(function(k){
       enviadoEm[k]=Date.now();
       if(sujos[k]===lote[k])delete sujos[k];
@@ -8630,12 +8645,12 @@ async function enviar(){
   }
   enviando=false;
 }
+
 async function puxar(){
   if(enviando||document.hidden)return;
   try{ aplicar(await baixar()); }catch(e){}
 }
 
-/* ---------- qualquer modulo que salvar entra na unidade ---------- */
 localStorage.setItem=function(k,v){
   _set(k,v);
   if(aplicando||!pode(k))return;
@@ -8644,7 +8659,6 @@ localStorage.setItem=function(k,v){
   sujos[k]=agora; agenda();
 };
 
-/* ---------- ritmo ---------- */
 function iniciar(){
   bolha(ondeEstou()+' · sincronizando…');
   semear();
@@ -8660,11 +8674,12 @@ function iniciar(){
   document.addEventListener('visibilitychange',function(){if(!document.hidden)puxar()});
   addEventListener('beforeunload',function(){ if(Object.keys(sujos).length)try{enviar()}catch(e){} });
 }
+
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){setTimeout(iniciar,900)});
 else setTimeout(iniciar,900);
+
 window.mdkSincronizar=function(){semear();agenda(50);return 'sincronizando com '+ondeEstou()};
 window.mdkSemear=semear;
-
 
 })();
 </script>
