@@ -10,7 +10,7 @@
 <meta content="MODESK" name="apple-mobile-web-app-title"/>
 <meta content="#03060c" name="theme-color"/>
 <link href="/manifest.webmanifest" rel="manifest"/>
-<title>MODESK PESSOAL — v148 (Computadores x notebooks atualizados)</title>
+<title>MODESK PESSOAL — v151 (nuvem protegida)</title>
 <script id="mdk-v10-boot">
 
 (function(){
@@ -80,6 +80,16 @@
 <link href='data:application/manifest+json,{"name":"MODESK PESSOAL","short_name":"MODESK","start_url":".","display":"standalone","background_color":"#050a12","theme_color":"#e50914","icons":[{"src":"data:image/svg%2Bxml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 512 512%22%3E%3Crect width=%22512%22 height=%22512%22 rx=%2296%22 fill=%22%23e50914%22/%3E%3Ctext x=%2250%25%22 y=%2265%25%22 font-size=%22300%22 font-family=%22sans-serif%22 font-weight=%22bold%22 fill=%22white%22 text-anchor=%22middle%22%3EM%3C/text%3E%3C/svg%3E","sizes":"512x512","type":"image/svg+xml","purpose":"any"}]}' rel="manifest"/>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+<script>
+/* v151: acesso ao Firestore somente com login do Firebase (conta do dono) */
+var MDK_FB_EMAIL='marciooliveira@modeskpro.app';
+function mdkFbApp(){try{var c=(window.state&&state.fb)||{};if(!c.apiKey||!c.projectId)return null;
+  return firebase.apps.length?firebase.app():firebase.initializeApp({apiKey:c.apiKey,projectId:c.projectId,authDomain:c.authDomain||c.projectId+'.firebaseapp.com',appId:c.appId});}catch(e){return null}}
+function mdkFbUser(){try{return mdkFbApp()&&firebase.auth().currentUser}catch(e){return null}}
+async function mdkToken(){var u=mdkFbUser();if(!u)throw new Error('sem login firebase');return await u.getIdToken()}
+async function mdkAuthHeaders(h){h=h||{};h.Authorization='Bearer '+await mdkToken();return h}
+</script>
 <style>
 :root{
   --bg0:#050a12; --bg1:#060d17; --bg2:#0c131e; --bg3:#111924; --bg4:#131c30;
@@ -1190,9 +1200,14 @@ function doLogin(){
   const usr=$('lg-user').value.trim().toLowerCase(), pw=$('lg-pass').value;
   if(usr!==GESTOR){return $('lg-err').textContent='Plataforma pessoal: somente '+GESTOR+'.'}
   if(pw!==state.senha){return $('lg-err').textContent='Senha incorreta.'}
-  sessionStorage.setItem('modesk.sess','1'); if($('lg-remember').checked)localStorage.setItem('modesk.trusted','1'); start();
+  $('lg-err').textContent='Entrando…';
+  if(!mdkFbApp()){$('lg-err').textContent='Firebase não configurado.';return}
+  firebase.auth().signInWithEmailAndPassword(MDK_FB_EMAIL,pw).then(function(){
+    $('lg-err').textContent='';
+    sessionStorage.setItem('modesk.sess','1'); if($('lg-remember').checked)localStorage.setItem('modesk.trusted','1'); start();
+  }).catch(function(e){$('lg-err').textContent='Falha no login da nuvem: '+(e&&e.code||e)});
 }
-function logout(){sessionStorage.removeItem('modesk.sess');localStorage.removeItem('modesk.trusted');location.reload()}
+function logout(){try{firebase.auth().signOut()}catch(e){}sessionStorage.removeItem('modesk.sess');localStorage.removeItem('modesk.trusted');location.reload()}
 function start(){$('login').classList.add('hidden');$('app').classList.remove('hidden');detectOS();buildMenu();render();connectCloud();fsAutoConectar();
   setInterval(()=>{($('tb-clock')||{}).textContent=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})},1000);}
 $('lg-pass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
@@ -1225,21 +1240,24 @@ function connectCloud(){
   try{
     const app=firebase.apps.length?firebase.app():firebase.initializeApp({apiKey:c.apiKey,projectId:c.projectId,authDomain:c.authDomain||c.projectId+'.firebaseapp.com',appId:c.appId});
     db=firebase.firestore(app);
+    firebase.auth().onAuthStateChanged(function(usr){
+      if(!usr){unsub&&unsub();unsub=null;setSyncStatus('regras');return}
     unsub&&unsub();
     unsub=db.collection('modesk_pessoal').doc(GESTOR).onSnapshot(d=>{
       const data=d.data(); if(!data?.payload)return;
       const remote=limparComprasV121(JSON.parse(data.payload));
       if(JSON.stringify(remote)!==JSON.stringify(state)){
         state=Object.assign(structuredClone(DEF),remote);localStorage.setItem(LS,JSON.stringify(state));render();setSyncStatus('online');
-        if(remote._comprasLimpoV121===1)db.collection('modesk_pessoal').doc(GESTOR).set({payload:JSON.stringify(state),at:Date.now()});
+        if(remote._comprasLimpoV121===1)db.collection('modesk_pessoal').doc(GESTOR).set({payload:JSON.stringify(state),at:Date.now()},{merge:true});
       }
+    });
     });
     ($('tb-sync')||{}).textContent='nuvem · tempo real ativo';
     setSyncStatus('online');
     toast('Tempo real conectado');
   }catch(e){setSyncStatus('erro');toast('Falha na nuvem: '+e.message)}
 }
-function pushCloud(){if(!db)return;setSyncStatus('sync');db.collection('modesk_pessoal').doc(GESTOR).set({payload:JSON.stringify(state),at:Date.now()}).then(()=>setSyncStatus('online')).catch(()=>setSyncStatus('erro'))}
+function pushCloud(){if(!db)return;setSyncStatus('sync');db.collection('modesk_pessoal').doc(GESTOR).set({payload:JSON.stringify(state),at:Date.now()},{merge:true}).then(()=>setSyncStatus('online')).catch(()=>setSyncStatus('erro'))}
 function setSyncStatus(status){
   const label=$('side-sync-label'),badge=$('side-sync-state'),bar=$('statusbar');
   const cfg={online:['Sincronizado em todos os aparelhos','NUVEM'],sync:['Salvando alterações…','SYNC'],regras:['Nuvem sem permissão (regras)','REGRAS'],erro:['Sem conexão com a nuvem','ERRO'],local:['Dados salvos neste aparelho','LOCAL']}[status]||['Verificando sincronização…','...'];
@@ -1277,7 +1295,7 @@ function testarFirestore(avisar){
   if(typeof navigator!=='undefined'&&navigator.onLine===false){setSyncStatus('erro');if(avisar)toast('Aparelho sem internet');return}
   setSyncStatus('sync');
   const url='https://firestore.googleapis.com/v1/projects/'+encodeURIComponent(c.projectId)+'/databases/(default)/documents/modesk_pessoal?pageSize=1&key='+encodeURIComponent(c.apiKey);
-  fetch(url,{cache:'no-store'}).then(r=>{
+  mdkAuthHeaders().then(h=>fetch(url,{cache:'no-store',headers:h})).then(r=>{
     if(r.ok||r.status===404){setSyncStatus('online');if(avisar)toast('Firestore online')}
     else if(r.status===401||r.status===403){setSyncStatus('regras');if(avisar)toast('Firestore online, mas as regras bloqueiam o acesso')}
     else{setSyncStatus('erro');if(avisar)toast('Firestore recusou a conexão ('+r.status+')')}
@@ -8454,8 +8472,8 @@ aside{display:flex!important;flex-direction:column!important;overflow:hidden!imp
 (function(){
 'use strict';
 
-var DOC='moises';                       /* mesma conta em todos os aparelhos */
-var COL='modesk_unidade';
+var DOC='marciooliveira';               /* mesmo documento do site (modesk_pessoal/marciooliveira) */
+var COL='modesk_pessoal';
 var TSK='mdk.sync.ts';                  /* marcas de tempo por chave */
 var LIMITE=700000;                      /* nao sobe valor gigante (>700 KB) */
 
@@ -8464,7 +8482,7 @@ var sujos={}, enviadoEm={}, pendente=false, enviando=false, agendado=null, aplic
 /* ---------- quais chaves fazem parte da unidade ---------- */
 function pode(k){
   if(!k||k===TSK)return false;
-  if(k==='modesk.sess'||k==='modesk.trusted')return false;
+  if(k==='modesk.sess'||k==='modesk.trusted'||k==='modesk.pessoal.v7')return false;
   return /^(modesk|sb_aba)/i.test(k) && !/jarvis/i.test(k);
 }
 function marcas(){try{return JSON.parse(localStorage.getItem(TSK)||'{}')||{}}catch(e){return {}}}
@@ -8495,18 +8513,18 @@ function fsUrl(c){
          '/databases/(default)/documents/'+COL+'/'+DOC;
 }
 async function fsBaixar(c){
-  var r=await fetch(fsUrl(c)+'?key='+encodeURIComponent(c.key));
+  var r=await fetch(fsUrl(c)+'?key='+encodeURIComponent(c.key),{headers:await mdkAuthHeaders()});
   if(r.status===404)return {};
   if(!r.ok)throw new Error('firestore '+r.status);
   var j=await r.json();
-  var s=((j.fields||{}).payload||{}).stringValue||'{}';
+  var s=((j.fields||{}).ajustes||{}).stringValue||'{}';
   try{return JSON.parse(s)||{}}catch(e){return {}}
 }
 async function fsSubir(c,payload){
   var u=fsUrl(c)+'?key='+encodeURIComponent(c.key)+
-        '&updateMask.fieldPaths=payload&updateMask.fieldPaths=em';
-  var r=await fetch(u,{method:'PATCH',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({fields:{payload:{stringValue:JSON.stringify(payload)},
+        '&updateMask.fieldPaths=ajustes&updateMask.fieldPaths=em';
+  var r=await fetch(u,{method:'PATCH',headers:await mdkAuthHeaders({'Content-Type':'application/json'}),
+    body:JSON.stringify({fields:{ajustes:{stringValue:JSON.stringify(payload)},
       em:{integerValue:String(Date.now())}}})});
   if(!r.ok)throw new Error('firestore '+r.status);
 }
@@ -8526,8 +8544,9 @@ var _set=localStorage.setItem.bind(localStorage);
 function aplicar(remoto){
   var meus=marcas(), mudou=[];
   Object.keys(remoto||{}).forEach(function(k){
-    if(!pode(k)||sujos[k])return;
+    if(!pode(k))return;
     var e=remoto[k]; if(!e||typeof e.t!=='number'||typeof e.v!=='string')return;
+    if(sujos[k]){ if(sujos[k]>=e.t)return; delete sujos[k]; }
     var local=null; try{local=localStorage.getItem(k)}catch(x){}
     if(local===e.v){ if((meus[k]||0)<e.t){meus[k]=e.t;gravarMarcas(meus)} return; }
     if((meus[k]||0)>=e.t)return;
@@ -8565,8 +8584,7 @@ function semear(){
     for(i=0;i<localStorage.length;i++){
       k=localStorage.key(i);
       if(!pode(k))continue;
-      if(typeof meus[k]!=='number'){ meus[k]=agora; sujos[k]=agora; mudou=true; }
-      else if(sujos[k]===undefined&&(meus[k]||0)>(enviadoEm[k]||0)) sujos[k]=meus[k];
+      if(typeof meus[k]!=='number'){ meus[k]=0; mudou=true; }
     }
   }catch(e){}
   if(mudou)gravarMarcas(meus);
@@ -8630,7 +8648,12 @@ localStorage.setItem=function(k,v){
 function iniciar(){
   bolha(ondeEstou()+' · sincronizando…');
   semear();
-  puxar().then(function(){return enviar()});
+  baixar().then(function(r){
+    r=r||{}; aplicar(r);
+    var m=marcas(),ag=Date.now(),k,i;
+    for(i=0;i<localStorage.length;i++){k=localStorage.key(i);if(pode(k)&&!r[k]){m[k]=m[k]||ag;sujos[k]=m[k];}}
+    gravarMarcas(m);
+  }).catch(function(){}).then(function(){return enviar()});
   setInterval(puxar,5000);
   addEventListener('focus',puxar);
   addEventListener('online',function(){agenda(400)});
