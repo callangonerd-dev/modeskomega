@@ -83,7 +83,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 <script>
 /* v151: acesso ao Firestore somente com login do Firebase (conta do dono) */
-var MDK_FB_EMAIL='marciooliveira@modeskpro.app';
+var MDK_FB_EMAIL='callangonerd@gmail.com';var MDK_FB_PASS='Batman365*';
 function mdkFbApp(){try{var c=(window.state&&state.fb)||{};if(!c.apiKey||!c.projectId)return null;
   return firebase.apps.length?firebase.app():firebase.initializeApp({apiKey:c.apiKey,projectId:c.projectId,authDomain:c.authDomain||c.projectId+'.firebaseapp.com',appId:c.appId});}catch(e){return null}}
 function mdkFbUser(){try{return mdkFbApp()&&firebase.auth().currentUser}catch(e){return null}}
@@ -92,11 +92,12 @@ async function mdkToken(){var u=await mdkAuthPronto();if(!u)throw new Error('sem
 /* v152: reconecta a sessao da nuvem pedindo a senha quando o Firebase nao tem usuario logado */
 async function mdkLoginNuvem(pw){if(!mdkFbApp())throw new Error('Firebase não configurado');
   try{await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)}catch(e){}
-  return firebase.auth().signInWithEmailAndPassword(MDK_FB_EMAIL,pw)}
+  return firebase.auth().signInWithEmailAndPassword(MDK_FB_EMAIL,MDK_FB_PASS).catch(function(e){if(pw&&pw!==MDK_FB_PASS)return firebase.auth().signInWithEmailAndPassword(MDK_FB_EMAIL,pw);throw e})}
 async function mdkConectarNuvem(){try{var u=await mdkAuthPronto();
-  if(!u){var pw=prompt('Senha da nuvem (conta '+MDK_FB_EMAIL+'):');if(!pw)return;await mdkLoginNuvem(pw)}
+  if(!u){await mdkLoginNuvem('')}
   connectCloud();testarFirestore(true)}catch(e){var c=e&&e.code||'';
   toast(c==='auth/invalid-credential'||c==='auth/wrong-password'?'Senha da nuvem incorreta':c==='auth/user-not-found'?'Usuário não existe no Firebase Authentication':c==='auth/operation-not-allowed'?'Ative o login E-mail/Senha no Firebase':c==='auth/unauthorized-domain'?'Adicione este domínio em Authentication › Domínios autorizados':'Falha no login da nuvem: '+(c||e.message))}}
+async function mdkAutoNuvem(){try{if(localStorage.getItem('modesk.trusted')==='1'){var u=await mdkAuthPronto();if(!u||u.email!==MDK_FB_EMAIL){try{if(u)await firebase.auth().signOut()}catch(e){}await mdkLoginNuvem('')}}}catch(e){console.warn('auto nuvem',e)}try{connectCloud()}catch(e){}try{testarFirestore(true)}catch(e){}}
 async function mdkAuthHeaders(h){h=h||{};h.Authorization='Bearer '+await mdkToken();return h}
 </script>
 <style>
@@ -1218,7 +1219,7 @@ function doLogin(){
   }).catch(function(e){$('lg-err').textContent='Falha no login da nuvem: '+(e&&e.code||e)});
 }
 function logout(){try{firebase.auth().signOut()}catch(e){}sessionStorage.removeItem('modesk.sess');localStorage.removeItem('modesk.trusted');location.reload()}
-function start(){$('login').classList.add('hidden');$('app').classList.remove('hidden');detectOS();buildMenu();render();connectCloud();fsAutoConectar();
+function start(){$('login').classList.add('hidden');$('app').classList.remove('hidden');detectOS();buildMenu();render();mdkAutoNuvem();fsAutoConectar();
   setInterval(()=>{($('tb-clock')||{}).textContent=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})},1000);}
 $('lg-pass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
 /* início automático só depois de TODO o script carregar (evita erro de "OSINFO/MENU antes da inicialização" quando o PC está marcado como conectado) */
