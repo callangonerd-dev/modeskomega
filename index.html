@@ -10,7 +10,7 @@
 <meta content="MODESK" name="apple-mobile-web-app-title"/>
 <meta content="#03060c" name="theme-color"/>
 <link href="/manifest.webmanifest" rel="manifest"/>
-<title>MODESK PESSOAL — v151 (nuvem protegida)</title>
+<title>MODESK PESSOAL — v152 (nuvem protegida)</title>
 <script id="mdk-v10-boot">
 
 (function(){
@@ -87,7 +87,16 @@ var MDK_FB_EMAIL='marciooliveira@modeskpro.app';
 function mdkFbApp(){try{var c=(window.state&&state.fb)||{};if(!c.apiKey||!c.projectId)return null;
   return firebase.apps.length?firebase.app():firebase.initializeApp({apiKey:c.apiKey,projectId:c.projectId,authDomain:c.authDomain||c.projectId+'.firebaseapp.com',appId:c.appId});}catch(e){return null}}
 function mdkFbUser(){try{return mdkFbApp()&&firebase.auth().currentUser}catch(e){return null}}
-async function mdkToken(){var u=mdkFbUser();if(!u)throw new Error('sem login firebase');return await u.getIdToken()}
+function mdkAuthPronto(){return new Promise(function(res){try{if(!mdkFbApp())return res(null);var a=firebase.auth();if(a.currentUser)return res(a.currentUser);var off=a.onAuthStateChanged(function(u){off();res(u)})}catch(e){res(null)}})}
+async function mdkToken(){var u=await mdkAuthPronto();if(!u)throw new Error('sem login firebase');return await u.getIdToken()}
+/* v152: reconecta a sessao da nuvem pedindo a senha quando o Firebase nao tem usuario logado */
+async function mdkLoginNuvem(pw){if(!mdkFbApp())throw new Error('Firebase não configurado');
+  try{await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)}catch(e){}
+  return firebase.auth().signInWithEmailAndPassword(MDK_FB_EMAIL,pw)}
+async function mdkConectarNuvem(){try{var u=await mdkAuthPronto();
+  if(!u){var pw=prompt('Senha da nuvem (conta '+MDK_FB_EMAIL+'):');if(!pw)return;await mdkLoginNuvem(pw)}
+  connectCloud();testarFirestore(true)}catch(e){var c=e&&e.code||'';
+  toast(c==='auth/invalid-credential'||c==='auth/wrong-password'?'Senha da nuvem incorreta':c==='auth/user-not-found'?'Usuário não existe no Firebase Authentication':c==='auth/operation-not-allowed'?'Ative o login E-mail/Senha no Firebase':c==='auth/unauthorized-domain'?'Adicione este domínio em Authentication › Domínios autorizados':'Falha no login da nuvem: '+(c||e.message))}}
 async function mdkAuthHeaders(h){h=h||{};h.Authorization='Bearer '+await mdkToken();return h}
 </script>
 <style>
@@ -1202,7 +1211,7 @@ function doLogin(){
   if(pw!==state.senha){return $('lg-err').textContent='Senha incorreta.'}
   $('lg-err').textContent='Entrando…';
   if(!mdkFbApp()){$('lg-err').textContent='Firebase não configurado.';return}
-  firebase.auth().signInWithEmailAndPassword(MDK_FB_EMAIL,pw).then(function(){
+  mdkLoginNuvem(pw).then(function(){
     $('lg-err').textContent='';
     sessionStorage.setItem('modesk.sess','1'); if($('lg-remember').checked)localStorage.setItem('modesk.trusted','1'); start();
   }).catch(function(e){$('lg-err').textContent='Falha no login da nuvem: '+(e&&e.code||e)});
@@ -1241,7 +1250,7 @@ function connectCloud(){
     const app=firebase.apps.length?firebase.app():firebase.initializeApp({apiKey:c.apiKey,projectId:c.projectId,authDomain:c.authDomain||c.projectId+'.firebaseapp.com',appId:c.appId});
     db=firebase.firestore(app);
     firebase.auth().onAuthStateChanged(function(usr){
-      if(!usr){unsub&&unsub();unsub=null;setSyncStatus('regras');return}
+      if(!usr){unsub&&unsub();unsub=null;setSyncStatus('login');return}
     unsub&&unsub();
     unsub=db.collection('modesk_pessoal').doc(GESTOR).onSnapshot(d=>{
       const data=d.data(); if(!data?.payload)return;
@@ -1250,17 +1259,17 @@ function connectCloud(){
         state=Object.assign(structuredClone(DEF),remote);localStorage.setItem(LS,JSON.stringify(state));render();setSyncStatus('online');
         if(remote._comprasLimpoV121===1)db.collection('modesk_pessoal').doc(GESTOR).set({payload:JSON.stringify(state),at:Date.now()},{merge:true});
       }
-    });
-    });
+      setSyncStatus('online');
+    },function(err){setSyncStatus(err&&err.code==='permission-denied'?'regras':'erro')});
     ($('tb-sync')||{}).textContent='nuvem · tempo real ativo';
     setSyncStatus('online');
-    toast('Tempo real conectado');
+    });
   }catch(e){setSyncStatus('erro');toast('Falha na nuvem: '+e.message)}
 }
 function pushCloud(){if(!db)return;setSyncStatus('sync');db.collection('modesk_pessoal').doc(GESTOR).set({payload:JSON.stringify(state),at:Date.now()},{merge:true}).then(()=>setSyncStatus('online')).catch(()=>setSyncStatus('erro'))}
 function setSyncStatus(status){
   const label=$('side-sync-label'),badge=$('side-sync-state'),bar=$('statusbar');
-  const cfg={online:['Sincronizado em todos os aparelhos','NUVEM'],sync:['Salvando alterações…','SYNC'],regras:['Nuvem sem permissão (regras)','REGRAS'],erro:['Sem conexão com a nuvem','ERRO'],local:['Dados salvos neste aparelho','LOCAL']}[status]||['Verificando sincronização…','...'];
+  const cfg={online:['Sincronizado em todos os aparelhos','NUVEM'],sync:['Salvando alterações…','SYNC'],regras:['Nuvem sem permissão (regras)','REGRAS'],login:['Entre na nuvem (clique em Conectar)','LOGIN'],erro:['Sem conexão com a nuvem','ERRO'],local:['Dados salvos neste aparelho','LOCAL']}[status]||['Verificando sincronização…','...'];
   if(label)label.textContent=cfg[0];if(badge)badge.textContent=cfg[1];
   if(bar){const s=bar.querySelector('.sb-i:nth-of-type(3)');if(s)s.textContent=cfg[0]}
   window.SYNC_STATUS=status||'check';
@@ -1275,6 +1284,7 @@ const SINAL={
   erro:['off','Offline','Sem resposta do Firestore — trabalhando só neste aparelho'],
   local:['off','Offline','Nuvem não configurada — dados apenas neste aparelho'],
   check:['sync','Verificando','Testando a conexão com o Firestore'],
+  login:['off','Login necessário','Sessão da nuvem expirada — clique em Conectar e digite a senha'],
   regras:['sync','Sem permissão','Firestore respondeu, mas as regras de segurança bloqueiam o acesso']
 };
 function pintarSinalNuvem(){
@@ -1295,7 +1305,8 @@ function testarFirestore(avisar){
   if(typeof navigator!=='undefined'&&navigator.onLine===false){setSyncStatus('erro');if(avisar)toast('Aparelho sem internet');return}
   setSyncStatus('sync');
   const url='https://firestore.googleapis.com/v1/projects/'+encodeURIComponent(c.projectId)+'/databases/(default)/documents/modesk_pessoal?pageSize=1&key='+encodeURIComponent(c.apiKey);
-  mdkAuthHeaders().then(h=>fetch(url,{cache:'no-store',headers:h})).then(r=>{
+  mdkAuthPronto().then(u=>{if(!u){setSyncStatus('login');if(avisar)toast('Faça login na nuvem: clique em Conectar');return null}
+    return mdkAuthHeaders().then(h=>fetch(url,{cache:'no-store',headers:h}))}).then(r=>{if(!r)return;
     if(r.ok||r.status===404){setSyncStatus('online');if(avisar)toast('Firestore online')}
     else if(r.status===401||r.status===403){setSyncStatus('regras');if(avisar)toast('Firestore online, mas as regras bloqueiam o acesso')}
     else{setSyncStatus('erro');if(avisar)toast('Firestore recusou a conexão ('+r.status+')')}
@@ -2453,7 +2464,7 @@ function vConfig(){
 }
 setTimeout(()=>{try{pintarSinalNuvem();testarFirestore(false)}catch(e){}try{pintarDrive(window.DRIVE_STATUS);pintarUso();testarDrive(false)}catch(e){}},1200);
 function trocarSenha(){const v=$('cf-s').value;if(v.length<4)return toast('Mínimo 4 caracteres');state.senha=v;save();toast('Senha atualizada')}
-function salvarFb(){state.fb={apiKey:$('cf-k').value.trim(),projectId:$('cf-p').value.trim(),authDomain:$('cf-a').value.trim(),appId:$('cf-i').value.trim()};save(true);connectCloud();render()}
+function salvarFb(){state.fb={apiKey:$('cf-k').value.trim(),projectId:$('cf-p').value.trim(),authDomain:$('cf-a').value.trim(),appId:$('cf-i').value.trim()};save(true);try{firebase.apps.forEach(a=>a.delete())}catch(e){}render();mdkConectarNuvem()}
 function nomeBackup(){const d=new Date(),p=n=>String(n).padStart(2,'0');
   return 'modesk-pessoal-backup-'+d.getFullYear()+p(d.getMonth()+1)+p(d.getDate())+'-'+p(d.getHours())+p(d.getMinutes())+'.json'}
 function exportJSON(){try{dl(new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),nomeBackup());toast('Backup gerado — verifique seus Downloads')}catch(e){toast('Não foi possível gerar o backup')}}
