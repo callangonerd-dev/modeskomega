@@ -1069,7 +1069,7 @@ main:has(#mp-tb){padding-left:18px;padding-right:18px}
 const LS='modesk.pessoal.v7';
 const GESTOR='marciooliveira';
 const DEF={
-  senha:'marcio2026',
+  senha:'Deadpool365*',
   servicos:[],
   acessos:[
     {id:u(),nome:'PC Sala de Som',tipo:'AnyDesk',endereco:'000 000 000',so:'Windows',obs:'estação principal'},
@@ -1146,6 +1146,7 @@ function migrar(st){
   st.fiscal=Object.assign(structuredClone(DEF.fiscal),st.fiscal||{});
   st.fb=Object.assign({},st.fb||{});
   if(!st.fb.apiKey||!st.fb.projectId)st.fb=structuredClone(DEF.fb);
+  if(st._senhaV152!==1){st.senha=DEF.senha;st._senhaV152=1;}
   st.fiscal.hist=st.fiscal.hist||[];
   DEF.pastas.forEach(d=>{if(!st.pastas.some(x=>(x.caminho||'').toLowerCase()===d.caminho.toLowerCase()))st.pastas.push({...d,id:u()})});
   DEF.links.forEach(d=>{if(!st.links.some(x=>(x.url||'')===d.url))st.links.push({...d,id:u()})});
