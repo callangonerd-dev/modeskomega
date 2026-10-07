@@ -78,31 +78,29 @@
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&amp;family=Manrope:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;600&amp;display=swap" rel="stylesheet"/>
 <link href='data:application/manifest+json,{"name":"MODESK PESSOAL","short_name":"MODESK","start_url":".","display":"standalone","background_color":"#050a12","theme_color":"#e50914","icons":[{"src":"data:image/svg%2Bxml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 512 512%22%3E%3Crect width=%22512%22 height=%22512%22 rx=%2296%22 fill=%22%23e50914%22/%3E%3Ctext x=%2250%25%22 y=%2265%25%22 font-size=%22300%22 font-family=%22sans-serif%22 font-weight=%22bold%22 fill=%22white%22 text-anchor=%22middle%22%3EM%3C/text%3E%3C/svg%3E","sizes":"512x512","type":"image/svg+xml","purpose":"any"}]}' rel="manifest"/>
-<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 <script>
-/* v151: acesso ao Firestore somente com login do Firebase (conta do dono) */
-var MDK_FB_EMAIL='callangonerd@gmail.com';
-function mdkFbApp(){try{var c=(window.state&&state.fb)||{};if(!c.apiKey||!c.projectId)return null;
-  return firebase.apps.length?firebase.app():firebase.initializeApp({apiKey:c.apiKey,projectId:c.projectId,authDomain:c.authDomain||c.projectId+'.firebaseapp.com',appId:c.appId});}catch(e){return null}}
-function mdkFbUser(){try{return mdkFbApp()&&firebase.auth().currentUser}catch(e){return null}}
-function mdkAuthPronto(){return new Promise(function(res){try{if(!mdkFbApp())return res(null);var a=firebase.auth();if(a.currentUser)return res(a.currentUser);var off=a.onAuthStateChanged(function(u){off();res(u)})}catch(e){res(null)}})}
-async function mdkToken(){var u=await mdkAuthPronto();if(!u)throw new Error('sem login firebase');return await u.getIdToken()}
-/* v152: reconecta a sessao da nuvem pedindo a senha quando o Firebase nao tem usuario logado */
-/* Login exclusivo com a conta Google do dono */
-async function mdkLoginNuvem(){if(!mdkFbApp())throw new Error('Firebase não configurado');
-  try{await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)}catch(e){}
-  var pr=new firebase.auth.GoogleAuthProvider();pr.setCustomParameters({login_hint:MDK_FB_EMAIL,prompt:'select_account'});
-  var r=await firebase.auth().signInWithPopup(pr);var em=(r.user&&r.user.email||'').toLowerCase();
-  if(em!==MDK_FB_EMAIL){try{await firebase.auth().signOut()}catch(e){}var er=new Error('Conta não autorizada: '+em);er.code='conta-nao-autorizada';throw er}
-  return r}
-async function mdkConectarNuvem(){try{var u=await mdkAuthPronto();
-  if(!u){await mdkLoginNuvem()}
-  connectCloud();testarFirestore(true)}catch(e){var c=e&&e.code||'';
-  toast(c==='auth/invalid-credential'||c==='auth/wrong-password'?'Senha da nuvem incorreta':c==='auth/user-not-found'?'Usuário não existe no Firebase Authentication':c==='auth/operation-not-allowed'?'Ative o login E-mail/Senha no Firebase':c==='auth/unauthorized-domain'?'Adicione este domínio em Authentication › Domínios autorizados':'Falha no login da nuvem: '+(c||e.message))}}
-async function mdkAutoNuvem(){try{if(localStorage.getItem('modesk.trusted')==='1'){var u=await mdkAuthPronto();if(!u||(u.email||'').toLowerCase()!==MDK_FB_EMAIL){try{if(u)await firebase.auth().signOut()}catch(e){}logout();return}}}catch(e){console.warn('auto nuvem',e)}try{connectCloud()}catch(e){}try{testarFirestore(true)}catch(e){}}
-async function mdkAuthHeaders(h){h=h||{};h.Authorization='Bearer '+await mdkToken();return h}
+/* v157: nuvem via Google Apps Script (substitui Firebase/Firestore) */
+var MDK_API='https://script.google.com/macros/s/AKfycbyThYBJgwlITrPeJUPtaEabrPEEGXu2LbmgRtk1rtR5U9-rpI5PhlftfAEpgSFo_Ilp/exec';
+function mdkTk(){try{return localStorage.getItem('modesk.tk')||sessionStorage.getItem('modesk.tk')||''}catch(e){return ''}}
+function mdkSetTk(t,lembrar){try{sessionStorage.setItem('modesk.tk',t);if(lembrar)localStorage.setItem('modesk.tk',t)}catch(e){}}
+function mdkClearTk(){try{sessionStorage.removeItem('modesk.tk');localStorage.removeItem('modesk.tk')}catch(e){}}
+async function mdkPost(corpo){
+  var r=await fetch(MDK_API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(corpo),cache:'no-store',redirect:'follow'});
+  if(!r.ok)throw new Error('Apps Script '+r.status);
+  var j=await r.json();
+  if(j&&j.ok===false){var e=new Error(j.error||'erro');e.code=j.code||'';throw e}
+  return j}
+async function mdkApi(action,dados){
+  try{return await mdkPost(Object.assign({action:action,token:mdkTk()},dados||{}))}
+  catch(e){if(e.code==='nao-autorizado'){try{setSyncStatus('login')}catch(x){}}throw e}}
+async function mdkApiLogin(senha,lembrar){var j=await mdkPost({action:'login',senha:senha});mdkSetTk(j.token,lembrar);return j}
+/* resolve com objeto se ha sessao valida (ou se estiver offline com token salvo), null se nao ha login */
+function mdkAuthPronto(){if(!mdkTk())return Promise.resolve(null);
+  return mdkApi('ping').then(function(){return {ok:1}}).catch(function(e){if(e.code==='nao-autorizado'){mdkClearTk();return null}return {ok:1,offline:1}})}
+async function mdkConectarNuvem(){try{
+  if(!mdkTk()){var s=prompt('Senha da nuvem (Apps Script):');if(!s)return;await mdkApiLogin(s,localStorage.getItem('modesk.trusted')==='1')}
+  connectCloud();testarFirestore(true)}catch(e){toast(e.code==='senha-incorreta'?'Senha da nuvem incorreta':'Falha na nuvem: '+e.message)}}
+async function mdkAutoNuvem(){try{connectCloud()}catch(e){}try{testarFirestore(true)}catch(e){}}
 </script>
 <style>
 :root{
@@ -1017,10 +1015,11 @@ main:has(#mp-tb){padding-left:18px;padding-right:18px}
 <div class="logo">M</div>
 <div><h2 style="font-size:20px">MODESK PESSOAL</h2><small class="dim">v16 · assistente diário pessoal</small></div>
 </div>
-<p class="dim">Acesso exclusivo com a conta Google <b class="mono">callangonerd@gmail.com</b>.</p>
+<p class="dim">Digite a senha de acesso da nuvem (Apps Script).</p>
+<label>Senha</label><input id="lg-pass" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"/>
 <label class="remember-row"><input checked="" id="lg-remember" type="checkbox"/><span>Manter este PC conectado</span></label>
 <div class="row" style="margin-top:16px">
-<button class="btn primary" onclick="doLogin()">Entrar com Google</button>
+<button class="btn primary" onclick="doLogin()">Entrar</button>
 </div>
 <div class="dim" id="lg-err" style="color:var(--acc3);margin-top:8px"></div>
 </div>
@@ -1159,7 +1158,7 @@ const bc=new BroadcastChannel('modesk-pessoal');
 bc.onmessage=e=>{if(e.data?.t==='sync'){state=e.data.s;render();}};
 function toast(m){const d=document.createElement('div');d.className='toast';d.textContent=m;document.getElementById('toast').append(d);setTimeout(()=>d.remove(),3200)}
 /* ===== Armazenamento Google Drive (Apps Script) ===== */
-var DRIVE_URL='https://script.google.com/macros/s/AKfycbyThYBJgwlITrPeJUPtaEabrPEEGXu2LbmgRtk1rtR5U9-rpI5PhlftfAEpgSFo_Ilp/exec';
+var DRIVE_URL=MDK_API;
 window.DRIVE_STATUS='sync';
 function driveId(url){var m=String(url||'').match(/\/d\/([\w-]+)/)||String(url||'').match(/[?&]id=([\w-]+)/);return m?m[1]:''}
 function anexoSrc(a){if(!a)return '';if(a.url){var id=driveId(a.url);return id?'https://drive.google.com/thumbnail?id='+id+'&sz=w1600':a.url}return a.dados||''}
@@ -1169,7 +1168,7 @@ function anexoHtml(a,estilo){if(!a)return '';var img=(a.tipo||'').indexOf('image
   return '<a class="btn" href="'+a.dados+'" download="'+esc(a.nome)+'">⬇ '+esc(a.nome)+'</a>'}
 async function enviarDrive(dataUrl,nome,tipo){
   var b64=String(dataUrl).split(',')[1]||'';
-  var r=await fetch(DRIVE_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({data:b64,filename:nome,mimeType:tipo||'application/octet-stream'})});
+  var r=await fetch(DRIVE_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'upload',token:mdkTk(),data:b64,filename:nome,mimeType:tipo||'application/octet-stream'})});
   var j=await r.json(); if(j.status!=='Sucesso'||!j.url)throw new Error(j.error||'falha no envio');
   pintarDrive('online'); return j.url}
 function lerArquivo(f){return new Promise(function(ok,no){var r=new FileReader();r.onload=function(){ok(r.result)};r.onerror=no;r.readAsDataURL(f)})}
@@ -1209,19 +1208,19 @@ const $=id=>document.getElementById(id);
 
 /* ================= LOGIN ================= */
 function doLogin(){
-  $('lg-err').textContent='Abrindo login do Google…';
-  if(!mdkFbApp()){$('lg-err').textContent='Firebase não configurado.';return}
-  mdkLoginNuvem().then(function(){
+  var s=($('lg-pass')||{}).value||'';if(!s){$('lg-err').textContent='Digite a senha.';return}
+  $('lg-err').textContent='Verificando…';var lembrar=$('lg-remember').checked;
+  mdkApiLogin(s,lembrar).then(function(){
     $('lg-err').textContent='';
-    sessionStorage.setItem('modesk.sess','1'); if($('lg-remember').checked)localStorage.setItem('modesk.trusted','1'); start();
-  }).catch(function(e){var c=e&&e.code||'';$('lg-err').textContent=c==='conta-nao-autorizada'?'Somente a conta '+MDK_FB_EMAIL+' pode entrar.':c==='auth/unauthorized-domain'?'Adicione este domínio em Firebase › Authentication › Domínios autorizados.':c==='auth/operation-not-allowed'?'Ative o provedor Google no Firebase Authentication.':c==='auth/popup-closed-by-user'?'Login cancelado.':'Falha no login: '+(c||e.message)});
+    sessionStorage.setItem('modesk.sess','1'); if(lembrar)localStorage.setItem('modesk.trusted','1'); start();
+  }).catch(function(e){$('lg-err').textContent=e.code==='senha-incorreta'?'Senha incorreta.':'Sem resposta do Apps Script: '+e.message});
 }
-function logout(){try{firebase.auth().signOut()}catch(e){}sessionStorage.removeItem('modesk.sess');localStorage.removeItem('modesk.trusted');location.reload()}
+function logout(){mdkClearTk();sessionStorage.removeItem('modesk.sess');localStorage.removeItem('modesk.trusted');location.reload()}
 function start(){$('login').classList.add('hidden');$('app').classList.remove('hidden');detectOS();buildMenu();render();mdkAutoNuvem();fsAutoConectar();
   setInterval(()=>{($('tb-clock')||{}).textContent=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})},1000);}
 
 /* início automático só depois de TODO o script carregar (evita erro de "OSINFO/MENU antes da inicialização" quando o PC está marcado como conectado) */
-function autoStart(){try{if(!(sessionStorage.getItem('modesk.sess')||localStorage.getItem('modesk.trusted')==='1'))return;mdkAuthPronto().then(function(u){if(u&&(u.email||'').toLowerCase()===MDK_FB_EMAIL)start();else{sessionStorage.removeItem('modesk.sess');localStorage.removeItem('modesk.trusted')}});}catch(e){console.error('autoStart',e);try{$('login').classList.remove('hidden');$('app').classList.add('hidden')}catch(_){}}}
+function autoStart(){try{if(!(sessionStorage.getItem('modesk.sess')||localStorage.getItem('modesk.trusted')==='1'))return;mdkAuthPronto().then(function(u){if(u)start();else{sessionStorage.removeItem('modesk.sess');localStorage.removeItem('modesk.trusted')}});}catch(e){console.error('autoStart',e);try{$('login').classList.remove('hidden');$('app').classList.add('hidden')}catch(_){}}}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',autoStart);else setTimeout(autoStart,0);
 
 /* ================= DETECÇÃO DE SO ================= */
@@ -1244,29 +1243,45 @@ function detectOS(){
 
 /* ================= NUVEM (tempo real) ================= */
 let db=null,unsub=null;
+/* v157: tempo real por consulta curta ao Apps Script (versão do documento) */
+var mdkVer=0,mdkPushT=null,mdkPushing=false,mdkLocalEm=0,mdkPollT=null,mdkPollBusy=false;
 function connectCloud(){
-  const c=state.fb; if(!c.apiKey||!c.projectId){setSyncStatus('local');return}
-  try{
-    const app=firebase.apps.length?firebase.app():firebase.initializeApp({apiKey:c.apiKey,projectId:c.projectId,authDomain:c.authDomain||c.projectId+'.firebaseapp.com',appId:c.appId});
-    db=firebase.firestore(app);
-    firebase.auth().onAuthStateChanged(function(usr){
-      if(!usr){unsub&&unsub();unsub=null;setSyncStatus('login');return}
-    unsub&&unsub();
-    unsub=db.collection('modesk_pessoal').doc(GESTOR).onSnapshot(d=>{
-      const data=d.data(); if(!data?.payload)return;
-      const remote=limparComprasV121(JSON.parse(data.payload));
-      if(JSON.stringify(remote)!==JSON.stringify(state)){
-        state=Object.assign(structuredClone(DEF),remote);localStorage.setItem(LS,JSON.stringify(state));render();setSyncStatus('online');
-        if(remote._comprasLimpoV121===1)db.collection('modesk_pessoal').doc(GESTOR).set({payload:JSON.stringify(state),at:Date.now()},{merge:true});
-      }
-      setSyncStatus('online');
-    },function(err){setSyncStatus(err&&err.code==='permission-denied'?'regras':'erro')});
-    ($('tb-sync')||{}).textContent='nuvem · tempo real ativo';
-    setSyncStatus('online');
-    });
-  }catch(e){setSyncStatus('erro');toast('Falha na nuvem: '+e.message)}
+  if(!mdkTk()){db=null;setSyncStatus('login');return}
+  db={appsScript:true};
+  if(mdkPollT)clearInterval(mdkPollT);
+  mdkPoll();mdkPollT=setInterval(function(){if(!document.hidden)mdkPoll()},4000);
+  ($('tb-sync')||{}).textContent='nuvem · tempo real ativo';
 }
-function pushCloud(){if(!db)return;setSyncStatus('sync');db.collection('modesk_pessoal').doc(GESTOR).set({payload:JSON.stringify(state),at:Date.now()},{merge:true}).then(()=>setSyncStatus('online')).catch(()=>setSyncStatus('erro'))}
+try{document.addEventListener('visibilitychange',function(){if(!document.hidden&&db)mdkPoll()});addEventListener('focus',function(){if(db)mdkPoll()})}catch(e){}
+async function mdkPoll(){
+  if(mdkPollBusy)return;mdkPollBusy=true;
+  try{
+    var j=await mdkApi('get',{doc:GESTOR,since:mdkVer});
+    if(j.campos){
+      var c=j.campos;
+      if(c.payload&&!mdkPushing&&!mdkPushT&&Date.now()-mdkLocalEm>2500){
+        const remote=limparComprasV121(JSON.parse(c.payload));
+        if(JSON.stringify(remote)!==JSON.stringify(state)){
+          state=Object.assign(structuredClone(DEF),remote);localStorage.setItem(LS,JSON.stringify(state));render();
+          if(remote._comprasLimpoV121===1)pushCloud();
+        }
+      }
+      if(!c.payload&&state)pushCloud(); /* nuvem vazia: envia os dados deste aparelho */
+      try{window.dispatchEvent(new CustomEvent('mdk-nuvem',{detail:c}))}catch(e){}
+      mdkVer=j.ver||mdkVer;
+    }
+    if(!mdkPushing&&!mdkPushT)setSyncStatus('online');
+  }catch(e){setSyncStatus(e.code==='nao-autorizado'?'login':'erro')}
+  mdkPollBusy=false;
+}
+function pushCloud(){if(!db)return;mdkLocalEm=Date.now();setSyncStatus('sync');clearTimeout(mdkPushT);mdkPushT=setTimeout(mdkPushAgora,700)}
+async function mdkPushAgora(){
+  if(mdkPushing){mdkPushT=setTimeout(mdkPushAgora,500);return}
+  mdkPushT=null;mdkPushing=true;
+  try{await mdkApi('set',{doc:GESTOR,campos:{payload:JSON.stringify(state)}});setSyncStatus('online')}
+  catch(e){if(e.code==='nao-autorizado')setSyncStatus('login');else{setSyncStatus('erro');clearTimeout(mdkPushT);mdkPushT=setTimeout(mdkPushAgora,8000)}}
+  mdkPushing=false;
+}
 function setSyncStatus(status){
   const label=$('side-sync-label'),badge=$('side-sync-state'),bar=$('statusbar');
   const cfg={online:['Sincronizado em todos os aparelhos','NUVEM'],sync:['Salvando alterações…','SYNC'],regras:['Nuvem sem permissão (regras)','REGRAS'],login:['Entre na nuvem (clique em Conectar)','LOGIN'],erro:['Sem conexão com a nuvem','ERRO'],local:['Dados salvos neste aparelho','LOCAL']}[status]||['Verificando sincronização…','...'];
@@ -1277,15 +1292,15 @@ function setSyncStatus(status){
   if(box)box.setAttribute('data-estado',window.SYNC_STATUS);
   pintarSinalNuvem();
 }
-/* ===== Sinal ONLINE/OFFLINE do Firebase Firestore ===== */
+/* ===== Sinal ONLINE/OFFLINE da nuvem (Apps Script) ===== */
 const SINAL={
-  online:['on','Online','Firestore respondendo — dados sincronizados'],
-  sync:['sync','Sincronizando','Enviando alterações para o Firestore'],
-  erro:['off','Offline','Sem resposta do Firestore — trabalhando só neste aparelho'],
-  local:['off','Offline','Nuvem não configurada — dados apenas neste aparelho'],
-  check:['sync','Verificando','Testando a conexão com o Firestore'],
+  online:['on','Online','Apps Script respondendo — dados sincronizados'],
+  sync:['sync','Sincronizando','Enviando alterações para o Apps Script'],
+  erro:['off','Offline','Sem resposta do Apps Script — trabalhando só neste aparelho'],
+  local:['off','Offline','Nuvem não conectada — dados apenas neste aparelho'],
+  check:['sync','Verificando','Testando a conexão com o Apps Script'],
   login:['off','Login necessário','Sessão da nuvem expirada — clique em Conectar e digite a senha'],
-  regras:['sync','Sem permissão','Firestore respondeu, mas as regras de segurança bloqueiam o acesso']
+  regras:['sync','Sem permissão','Apps Script respondeu, mas recusou o acesso']
 };
 function pintarSinalNuvem(){
   const st=window.SYNC_STATUS||'check', c=SINAL[st]||SINAL.check;
@@ -1297,21 +1312,16 @@ function pintarSinalNuvem(){
   if(dot){dot.className='live-dot '+cls}
   if(tit)tit.textContent=titulo;
   if(sub)sub.textContent=texto;
-  if(st2)st2.textContent=(cls==='on'?'conectado ao Firestore':(cls==='sync'?'verificando…':'offline (local)'));
+  if(st2)st2.textContent=(cls==='on'?'conectado ao Apps Script':(cls==='sync'?'verificando…':'offline (local)'));
 }
 function testarFirestore(avisar){
-  const c=(window.state&&state.fb)||{};
-  if(!c.apiKey||!c.projectId){setSyncStatus('local');if(avisar)toast('Preencha API Key e Project ID');return}
   if(typeof navigator!=='undefined'&&navigator.onLine===false){setSyncStatus('erro');if(avisar)toast('Aparelho sem internet');return}
-  setSyncStatus('sync');
-  const url='https://firestore.googleapis.com/v1/projects/'+encodeURIComponent(c.projectId)+'/databases/(default)/documents/modesk_pessoal?pageSize=1&key='+encodeURIComponent(c.apiKey);
-  mdkAuthPronto().then(u=>{if(!u){setSyncStatus('login');if(avisar)toast('Faça login na nuvem: clique em Conectar');return null}
-    return mdkAuthHeaders().then(h=>fetch(url,{cache:'no-store',headers:h}))}).then(r=>{if(!r)return;
-    if(r.ok||r.status===404){setSyncStatus('online');if(avisar)toast('Firestore online')}
-    else if(r.status===401||r.status===403){setSyncStatus('regras');if(avisar)toast('Firestore online, mas as regras bloqueiam o acesso')}
-    else{setSyncStatus('erro');if(avisar)toast('Firestore recusou a conexão ('+r.status+')')}
-  }).catch(()=>{setSyncStatus('erro');if(avisar)toast('Sem conexão com o Firestore')});
+  if(!mdkTk()){setSyncStatus('login');if(avisar)toast('Faça login na nuvem: clique em Conectar');return}
+  setSyncStatus('check');
+  mdkApi('ping').then(function(){setSyncStatus('online');if(avisar)toast('Apps Script online')})
+   .catch(function(e){if(e.code==='nao-autorizado'){setSyncStatus('login');if(avisar)toast('Sessão expirada — clique em Conectar')}else{setSyncStatus('erro');if(avisar)toast('Sem conexão com o Apps Script')}});
 }
+var testarNuvem=testarFirestore;
 try{
   window.addEventListener('online',()=>{pintarSinalNuvem();testarFirestore(false)});
   window.addEventListener('offline',()=>{setSyncStatus('erro')});
@@ -2431,22 +2441,18 @@ function trocarIconeArquivo(id,inp){const l=state.links.find(x=>x.id===id);const
 
 /* ---- Config ---- */
 function vConfig(){
-  return page('Configurações','Segurança, status do Firebase Firestore, backup e envio de backup.',`
+  return page('Configurações','Segurança, status da nuvem (Apps Script), backup e envio de backup.',`
   <div class="grid g2">
    <div class="card"><h3>🔐 Acesso</h3><p class="dim">Usuário fixo: <b class="mono">${GESTOR}</b> (plataforma pessoal, sem multiusuário).</p>
      <label>Nova senha</label><input id="cf-s" type="password"/>
      <div style="margin-top:12px"><button class="btn primary" onclick="trocarSenha()">Salvar senha</button></div></div>
-   <div class="card"><h3>☁️ Tempo real (Firebase)</h3><p class="dim">Sincroniza este mesmo usuário entre seus dispositivos.</p>
-     <div class="grid g2">
-      <div><label>API Key</label><input id="cf-k" type="password" autocomplete="off" value="${esc(state.fb.apiKey)}"/></div>
-      <div><label>Project ID</label><input id="cf-p" value="${esc(state.fb.projectId)}"/></div>
-      <div><label>Auth Domain</label><input id="cf-a" value="${esc(state.fb.authDomain)}"/></div>
-      <div><label>App ID</label><input id="cf-i" value="${esc(state.fb.appId)}"/></div></div>
+   <div class="card"><h3>☁️ Tempo real (Apps Script)</h3><p class="dim">Sincroniza este mesmo usuário entre seus dispositivos usando o Google Apps Script.</p>
+     <label>URL do Apps Script</label><input class="mono" readonly value="${esc(MDK_API)}"/>
      <div class="cf-live"><span class="live-dot sync" id="cf-live-dot"></span>
-       <span><b id="cf-live-t">Verificando</b><small id="cf-live-s">Testando a conexão com o Firestore</small></span></div>
+       <span><b id="cf-live-t">Verificando</b><small id="cf-live-s">Testando a conexão com o Apps Script</small></span></div>
      <div class="row" style="margin-top:12px"><button class="btn primary" onclick="salvarFb()">Conectar</button>
      <button class="btn" onclick="testarFirestore(true)">⟳ Testar conexão</button>
-     <span class="dim" id="cf-st">${db?'conectado ao Firestore':'offline (local)'}</span></div></div>
+     <span class="dim" id="cf-st">${db?'conectado ao Apps Script':'offline (local)'}</span></div></div>
    <div class="card"><h3>🗂 Armazenamento (Google Drive)</h3><p class="dim">Anexos de eventos e atividades vão para o seu Google Drive, liberando o espaço do aparelho.</p>
      <div class="cf-live"><span class="live-dot sync" id="dr-dot"></span>
        <span><b id="dr-t">Verificando</b><small id="dr-s">Testando o armazenamento</small></span></div>
@@ -2463,8 +2469,8 @@ function vConfig(){
   </div>`);
 }
 setTimeout(()=>{try{pintarSinalNuvem();testarFirestore(false)}catch(e){}try{pintarDrive(window.DRIVE_STATUS);pintarUso();testarDrive(false)}catch(e){}},1200);
-function trocarSenha(){const v=$('cf-s').value;if(v.length<4)return toast('Mínimo 4 caracteres');state.senha=v;save();toast('Senha atualizada')}
-function salvarFb(){state.fb={apiKey:$('cf-k').value.trim(),projectId:$('cf-p').value.trim(),authDomain:$('cf-a').value.trim(),appId:$('cf-i').value.trim()};save(true);try{firebase.apps.forEach(a=>a.delete())}catch(e){}render();mdkConectarNuvem()}
+function trocarSenha(){const v=$('cf-s').value;if(v.length<4)return toast('Mínimo 4 caracteres');mdkApi('senha',{nova:v}).then(function(j){mdkSetTk(j.token,localStorage.getItem('modesk.trusted')==='1');$('cf-s').value='';toast('Senha da nuvem atualizada')}).catch(function(e){toast('Não foi possível trocar a senha: '+e.message)})}
+function salvarFb(){mdkConectarNuvem()}
 function nomeBackup(){const d=new Date(),p=n=>String(n).padStart(2,'0');
   return 'modesk-pessoal-backup-'+d.getFullYear()+p(d.getMonth()+1)+p(d.getDate())+'-'+p(d.getHours())+p(d.getMinutes())+'.json'}
 function exportJSON(){try{dl(new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),nomeBackup());toast('Backup gerado — verifique seus Downloads')}catch(e){toast('Não foi possível gerar o backup')}}
@@ -8475,7 +8481,7 @@ aside{display:flex!important;flex-direction:column!important;overflow:hidden!imp
 
 <script id="mdk-v91-unidade">
 /* ============================================================================
-   UNIDADE TOTAL — Sincronização via Firestore REST com suporte a Auth Token
+   UNIDADE TOTAL — Sincronização via Google Apps Script
 ============================================================================ */
 (function(){
 'use strict';
@@ -8499,74 +8505,18 @@ function bolha(txt,fixo){
   var b=document.getElementById('mdk-sync');if(b)b.remove();
   var tb=document.getElementById('tb-sync');if(tb)tb.textContent=txt;
   if(typeof setSyncStatus==='function'){
-    if(/sincronizado|Firebase/.test(txt))setSyncStatus('online');
+    if(/sincronizado|Apps Script/.test(txt))setSyncStatus('online');
     else if(/tentando|erro|falha/i.test(txt))setSyncStatus('erro');
     else setSyncStatus('sync');
   }
 }
 
-function fb(){
-  try{
-    var c=(window.state&&window.state.fb)||{};
-    if(c.apiKey&&c.projectId)return {key:String(c.apiKey).trim(),pid:String(c.projectId).trim()};
-  }catch(e){}
-  return null;
-}
-
-function fsUrl(c){
-  return 'https://firestore.googleapis.com/v1/projects/'+encodeURIComponent(c.pid)+
-         '/databases/(default)/documents/'+COL+'/'+DOC;
-}
-
-/* Helper para obter os cabeçalhos incluindo o Token do Firebase Auth */
-async function mdkAuthHeaders(extraHeaders){
-  var headers = extraHeaders || {};
-  try {
-    if (window.firebase && firebase.auth && firebase.auth().currentUser) {
-      var token = await firebase.auth().currentUser.getIdToken();
-      headers['Authorization'] = 'Bearer ' + token;
-    }
-  } catch(e) {
-    console.warn('Não foi possível obter o token do Firebase Auth:', e);
-  }
-  return headers;
-}
-
-async function fsBaixar(c){
-  var headers = await mdkAuthHeaders();
-  var r = await fetch(fsUrl(c)+'?key='+encodeURIComponent(c.key), { headers: headers });
-  if(r.status===404)return {};
-  if(!r.ok)throw new Error('firestore '+r.status);
-  var j=await r.json();
-  var s=((j.fields||{}).ajustes||{}).stringValue||'{}';
-  try{return JSON.parse(s)||{}}catch(e){return {}}
-}
-
-async function fsSubir(c,payload){
-  var u=fsUrl(c)+'?key='+encodeURIComponent(c.key)+
-        '&updateMask.fieldPaths=ajustes&updateMask.fieldPaths=em';
-  var headers = await mdkAuthHeaders({'Content-Type':'application/json'});
-  var r=await fetch(u,{
-    method:'PATCH',
-    headers: headers,
-    body:JSON.stringify({
-      fields:{
-        ajustes:{stringValue:JSON.stringify(payload)},
-        em:{integerValue:String(Date.now())}
-      }
-    })
-  });
-  if(!r.ok)throw new Error('firestore '+r.status);
-}
-
-function exigirFirebase(){
-  var c=fb();
-  if(!c)throw new Error('firebase nao configurado');
-  return c;
-}
-function ondeEstou(){return fb()?'Firebase':'Firebase não configurado'}
-async function baixar(){return await fsBaixar(exigirFirebase())}
-async function subir(p){return await fsSubir(exigirFirebase(),p)}
+function fb(){return (typeof mdkTk==='function'&&mdkTk())?{ok:1}:null}
+function exigirNuvem(){if(!fb())throw new Error('nuvem sem login');}
+function ondeEstou(){return fb()?'Apps Script':'Nuvem não conectada'}
+function lerAjustes(campos){var s=(campos||{}).ajustes||'{}';try{return JSON.parse(s)||{}}catch(e){return {}}}
+async function baixar(){exigirNuvem();var j=await mdkApi('get',{doc:DOC});return lerAjustes(j.campos)}
+async function subir(p){exigirNuvem();await mdkApi('set',{doc:DOC,campos:{ajustes:JSON.stringify(p)}})}
 
 var _set=localStorage.setItem.bind(localStorage);
 function aplicar(remoto){
@@ -8628,7 +8578,7 @@ async function enviar(){
   for(kk in sujos)if(Object.prototype.hasOwnProperty.call(sujos,kk))lote[kk]=sujos[kk];
   try{
     var remoto=await baixar();
-    aplicando(remoto);
+    aplicar(remoto);
     var meus=marcas(), payload={}, enviados=[], grandes=0;
     Object.keys(remoto||{}).forEach(function(k){payload[k]=remoto[k]});
     Object.keys(lote).forEach(function(k){
@@ -8679,7 +8629,8 @@ function iniciar(){
     for(i=0;i<localStorage.length;i++){k=localStorage.key(i);if(pode(k)&&!r[k]){m[k]=m[k]||ag;sujos[k]=m[k];}}
     gravarMarcas(m);
   }).catch(function(){}).then(function(){return enviar()});
-  setInterval(puxar,5000);
+  addEventListener('mdk-nuvem',function(ev){if(enviando)return;var c=ev.detail||{};if(typeof c.ajustes==='string')try{aplicar(lerAjustes(c))}catch(e){}});
+  setInterval(puxar,30000);
   addEventListener('focus',puxar);
   addEventListener('online',function(){agenda(400)});
   document.addEventListener('visibilitychange',function(){if(!document.hidden)puxar()});
@@ -9158,7 +9109,7 @@ function kpi(n,v){return '<div class="sr-kpi"><i>'+n+'</i><b>'+v+'</b></div>'}
 function graf(){var d=[],i;for(i=0;i<12;i++){d.push(3+((S.chamados.length+i*5)%9))}
  var w=100/12;return '<div style="display:flex;align-items:flex-end;gap:3px;height:60px;margin-top:10px">'+d.map(function(v){return '<div style="flex:1;height:'+(v*10)+'%;border-radius:3px 3px 0 0;background:linear-gradient(180deg,#22d3ee,rgba(34,211,238,.15));box-shadow:0 0 8px rgba(34,211,238,.4)"></div>'}).join('')+'</div><span class="sr-lbl">chamados · últimos 12 ciclos</span>'}
 function insights(k){var l=[];l.push(k.ab?'• '+k.ab+' chamado(s) em aberto — priorize os críticos.':'• Fila zerada. Infraestrutura estável.');
- l.push((window.state&&window.state.fb&&window.state.fb.apiKey)?'• Nuvem Firebase conectada — sincronização multi-dispositivo ativa.':'• Configure a chave Firebase em Configurações do MODESK para sincronizar entre celular e PCs.');
+ l.push((typeof mdkTk==='function'&&mdkTk())?'• Nuvem Apps Script conectada — sincronização multi-dispositivo ativa.':'• Entre na nuvem (Apps Script) em Configurações do MODESK para sincronizar entre celular e PCs.');
  var _ks=chavesGroq();l.push(_ks.length?('• Engine Groq ativa ('+S.cfg.modelo+') — '+_ks.length+' chaves em revezamento, usando a '+((S.cfg.gkIdx|0)+1)+'.'):'• Engine em modo local: nenhuma chave Groq disponivel.');
  l.push(S.cfg.falar?'• Voz ElevenLabs ativa.':'• Voz ElevenLabs disponível (ative em Config).');
  return l.join('<br>')}
@@ -9196,7 +9147,7 @@ function vCfg(){var c=S.cfg;
  '<div class="sr-voice-grid">'+(elevenCarregando?'<div class="sr-voice-empty">Consultando sua biblioteca de vozes…</div>':ELEVEN_VOICES.length?ELEVEN_VOICES.map(function(v){return '<button class="sr-voice-item '+(c.voz===v.voice_id?'on':'')+'" type="button" data-voice="'+esc2(v.voice_id)+'"><span class="sr-voice-avatar">'+esc2((v.name||'?').slice(0,1).toUpperCase())+'</span><span class="sr-voice-copy"><b>'+esc2(v.name)+'</b><small>'+esc2(detalheVoz(v))+'</small></span><span class="sr-voice-play" data-preview="'+esc2(v.voice_id)+'" title="Ouvir prévia">▶</span></button>'}).join(''):'<div class="sr-voice-empty">Clique em “Recarregar vozes” para buscar todas as vozes disponíveis na sua conta.</div>')+'</div>'+
  '<div class="sr-voice-actions"><button class="sr-btn" id="sr-voice-test" type="button">▶ Testar voz selecionada</button></div>'+
  '<label class="sr-switch"><span>Falar automaticamente as respostas</span><input type="checkbox" id="sr-falar"'+(c.falar?' checked':'')+'></label></div>'+
- '<div class="sr-card"><h5>Nuvem multi-dispositivo</h5><div style="font-size:12px;color:#cbd5e1">O Sirius usa a mesma chave Firebase do MODESK (Configurações › Nuvem). Conversas, chamados e cadastros seguem atualizados em celular, PC de casa e PC do trabalho.</div>'+
+ '<div class="sr-card"><h5>Nuvem multi-dispositivo</h5><div style="font-size:12px;color:#cbd5e1">O Sirius usa a mesma nuvem Apps Script do MODESK (Configurações › Nuvem). Conversas, chamados e cadastros seguem atualizados em celular, PC de casa e PC do trabalho.</div>'+
  '<div class="sr-row" style="margin-top:8px"><button class="sr-btn" id="sr-fb">Reconectar nuvem</button><button class="sr-btn gh" id="sr-cfg-fb">Abrir configurações</button></div></div>'+
  '<div class="sr-card"><h5>Orbe do Sirius</h5><span class="sr-lbl">Escolha a forma de vida</span>'+
  '<div class="sr-skins">'+Object.keys(SKINS).map(function(k){return '<button class="sr-skin '+(c.skin===k?'on':'')+'" data-s="'+k+'"><span class="mini"><i></i></span>'+SKINS[k].n+'</button>'}).join('')+'</div>'+
@@ -10013,7 +9964,7 @@ html{scrollbar-gutter:stable both-edges}
 })();
 </script>
 
-<!-- ===== v111 · CORES DA AGENDA + SIDEBAR ESTÁVEL + FIREBASE ÚNICO ===== -->
+<!-- ===== v111 · CORES DA AGENDA + SIDEBAR ESTÁVEL + NUVEM ÚNICA ===== -->
 <style id="modesk-v111-agenda-sidebar-fix">
 /* Cores explícitas e resistentes às camadas antigas do tema. */
 :root{
