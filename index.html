@@ -11724,5 +11724,60 @@ buildMenu();reconcile();
 .ev-act2 .ev-ib.is-del:hover{border-color:rgba(239,68,68,.6);color:#f87171;background:rgba(239,68,68,.1)}
 .ev-table th:last-child,.ev-table td:last-child{width:130px}
 </style>
+
+<!-- MODESK: ajustes manuais; aparência original preservada por padrão -->
+<style id="mdk-manual-reading-css">
+#mdk-reading-toggle{width:100%;margin:8px 0;display:flex;align-items:center;gap:8px;min-height:36px;font:600 12px Manrope,system-ui;color:var(--fg);background:var(--bg2);border:1px solid var(--line2);border-radius:6px;padding:8px 10px;cursor:pointer;text-align:left}
+#mdk-reading-toggle svg{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-width:1.8}
+#mdk-manual-panel{--reading-panel:oklch(.18 .02 255);--reading-text:oklch(.94 .008 255);--reading-muted:oklch(.76 .018 255);--reading-line:oklch(.36 .02 255);--reading-accent:oklch(.68 .21 24);position:fixed;z-index:100000;width:min(290px,calc(100vw - 24px));max-height:calc(100dvh - 24px);overflow:auto;inset:auto;margin:0;padding:16px;border:1px solid var(--reading-line);border-radius:7px;background:var(--reading-panel);color:var(--reading-text);font:13px/1.5 Manrope,system-ui;box-shadow:0 12px 35px oklch(0 0 0 / .35)}
+#mdk-manual-panel::backdrop{background:transparent}
+#mdk-manual-panel .reading-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+#mdk-manual-panel h3{font:600 14px Sora,system-ui;letter-spacing:0;margin:0;color:var(--reading-text)}
+#mdk-manual-panel label{display:block;text-transform:none;letter-spacing:0;color:var(--reading-muted);font-size:12px;margin:12px 0 5px}
+#mdk-manual-panel select{width:100%;min-height:36px;background:var(--reading-panel);color:var(--reading-text);border:1px solid var(--reading-line);border-radius:5px;padding:6px 8px;font:13px Manrope,system-ui}
+#mdk-manual-panel button{display:grid;place-items:center;min-width:32px;min-height:32px;border:1px solid var(--reading-line);border-radius:5px;background:var(--reading-panel);color:var(--reading-text);padding:5px 8px;cursor:pointer;font:600 13px Manrope,system-ui}
+#mdk-manual-panel .reading-size{display:grid;grid-template-columns:36px 1fr 36px;align-items:center;gap:8px}
+#mdk-manual-panel output{text-align:center;font-variant-numeric:tabular-nums}
+#mdk-manual-panel input[type=range]{width:100%;padding:0;margin:7px 0 0;accent-color:var(--reading-accent);height:22px}
+#mdk-manual-panel .reading-reset{width:100%;margin-top:14px;font-weight:500;font-size:12px}
+#mdk-manual-panel button:disabled{opacity:.4;cursor:default}
+#mdk-manual-panel :focus-visible,#mdk-reading-toggle:focus-visible{outline:2px solid var(--reading-accent);outline-offset:3px}
+body[data-mdk-manual-theme=light]{--bg0:oklch(.96 .005 255);--bg1:oklch(.98 .003 255);--bg2:oklch(.99 .002 255);--bg3:oklch(.94 .006 255);--bg4:oklch(.92 .008 255);--fg:oklch(.23 .018 255);--mut:oklch(.42 .018 255);--dim:oklch(.46 .02 255);--line:oklch(.80 .01 255);--line2:oklch(.72 .01 255);--glass:var(--bg2)}
+body[data-mdk-manual-theme=light]{background:var(--bg0)!important}
+body[data-mdk-manual-theme=light] :is(#app>aside,main,.card,.syscard,.pastacard,.v20-glass,.card-login,input,textarea,select){background:var(--bg2)!important;color:var(--fg)!important;border-color:var(--line2)!important}
+body[data-mdk-manual-theme=light] #mdk-manual-panel{--reading-panel:oklch(.99 .002 255);--reading-text:oklch(.23 .018 255);--reading-muted:oklch(.42 .018 255);--reading-line:oklch(.72 .01 255)}
+</style>
+<div id="mdk-manual-panel" popover="auto" role="dialog" aria-labelledby="mdk-manual-title">
+<div class="reading-head"><h3 id="mdk-manual-title">Fonte e contraste</h3><button type="button" id="mdk-manual-close" aria-label="Fechar ajustes" title="Fechar">✕</button></div>
+<label for="mdk-manual-section">Seção</label><select id="mdk-manual-section"></select>
+<label for="mdk-manual-font">Fonte</label><div class="reading-size"><button type="button" id="mdk-manual-minus" aria-label="Diminuir fonte" title="Diminuir fonte">A−</button><output id="mdk-manual-font" aria-live="polite">100%</output><button type="button" id="mdk-manual-plus" aria-label="Aumentar fonte" title="Aumentar fonte">A+</button></div>
+<label for="mdk-manual-contrast">Contraste do texto <output id="mdk-manual-contrast-value">Original</output></label><input type="range" id="mdk-manual-contrast" min="0" max="100" step="10" value="0"/>
+<label for="mdk-manual-theme">Tema</label><select id="mdk-manual-theme"><option value="original">Original do site</option><option value="light">Claro</option></select>
+<button type="button" class="reading-reset" id="mdk-manual-reset">Restaurar esta seção</button>
+</div>
+<script id="mdk-manual-reading-js">
+(function(){
+'use strict';
+var key='modesk.manual-reading.v2',prefs={theme:'original',sections:{}},records=new WeakMap(),view=document.getElementById('view'),panel=document.getElementById('mdk-manual-panel'),choose=document.getElementById('mdk-manual-section'),anchor;
+try{var p=JSON.parse(localStorage.getItem(key)||'null');if(p&&typeof p==='object'){prefs.theme=p.theme==='light'?'light':'original';prefs.sections=p.sections&&typeof p.sections==='object'?p.sections:{}}}catch(e){}
+function current(){return typeof tab==='string'?tab:'dashboard'}
+function setting(k){var p=prefs.sections[k]||{};return {font:Math.max(80,Math.min(160,Number(p.font)||100)),contrast:Math.max(0,Math.min(100,Number(p.contrast)||0))}}
+function persist(){try{localStorage.setItem(key,JSON.stringify(prefs))}catch(e){}}
+function remember(el){var r=records.get(el);if(r)return r;var computed=getComputedStyle(el);r={font:parseFloat(computed.fontSize),color:computed.color,style:{}};['font-size','color','-webkit-text-fill-color'].forEach(function(k){r.style[k]={value:el.style.getPropertyValue(k),priority:el.style.getPropertyPriority(k)}});records.set(el,r);return r}
+function restore(el,r,k){var s=r.style[k];if(s.value)el.style.setProperty(k,s.value,s.priority);else el.style.removeProperty(k)}
+function apply(){if(!view)return;var s=setting(current()),light=prefs.theme==='light';view.querySelectorAll('*').forEach(function(el){if(el.closest('svg,canvas,iframe')||el.matches('style,script'))return;var text=Array.from(el.childNodes).some(function(n){return n.nodeType===3&&n.textContent.trim()});if(!text&&!el.matches('input,textarea,select'))return;var r=records.get(el);if(s.font===100&&s.contrast===0&&!light&&!r)return;r=r||remember(el);if(s.font!==100&&Number.isFinite(r.font))el.style.setProperty('font-size',(r.font*s.font/100).toFixed(2)+'px','important');else restore(el,r,'font-size');if(s.contrast||light){var rgb=r.color.match(/[\d.]+/g);if(rgb&&rgb.length>=3){var target=light?20:255,t=s.contrast/100;if(light){var lum=Number(rgb[0])*.2126+Number(rgb[1])*.7152+Number(rgb[2])*.0722;if(lum>140)t=Math.max(t,.80)}var c=rgb.slice(0,3).map(function(v){return Math.round(Number(v)+(target-Number(v))*t)});el.style.setProperty('color','rgb('+c.join(',')+')','important');el.style.setProperty('-webkit-text-fill-color','currentColor','important')}}else{restore(el,r,'color');restore(el,r,'-webkit-text-fill-color')}})}
+function theme(){if(prefs.theme==='original')document.body.removeAttribute('data-mdk-manual-theme');else document.body.dataset.mdkManualTheme=prefs.theme;document.getElementById('mdk-manual-theme').value=prefs.theme;apply()}
+function sync(){var s=setting(choose.value);document.getElementById('mdk-manual-font').textContent=s.font+'%';document.getElementById('mdk-manual-contrast').value=s.contrast;document.getElementById('mdk-manual-contrast-value').textContent=s.contrast?'+'+s.contrast+'%':'Original';document.getElementById('mdk-manual-minus').disabled=s.font<=80;document.getElementById('mdk-manual-plus').disabled=s.font>=160}
+function options(){var map=new Map();if(typeof MENU!=='undefined')MENU.forEach(function(g){g.itens.forEach(function(x){var k=typeof ALIAS_TELA!=='undefined'?(ALIAS_TELA[x.k]||x.k):x.k;if(!map.has(k))map.set(k,x.n)})});choose.replaceChildren();map.forEach(function(n,k){var o=document.createElement('option');o.value=k;o.textContent=n;choose.appendChild(o)});choose.value=current();if(!choose.value)choose.selectedIndex=0}
+function position(){if(!anchor)return;var r=anchor.getBoundingClientRect(),w=panel.offsetWidth,h=panel.offsetHeight;var x=r.right+8;if(x+w>innerWidth-12)x=Math.max(12,r.left-w-8);panel.style.left=Math.max(12,Math.min(x,innerWidth-w-12))+'px';panel.style.top=Math.max(12,Math.min(r.top,innerHeight-h-12))+'px'}
+function open(e){anchor=e.currentTarget;options();sync();panel.showPopover();position()}
+var aside=document.querySelector('#app>aside');if(aside){var b=document.createElement('button');b.id='mdk-reading-toggle';b.type='button';b.setAttribute('aria-haspopup','dialog');b.setAttribute('aria-expanded','false');b.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 19 6-14 6 14M5 14h8M16 10h6M19 7v12"/></svg><span>Fonte e contraste</span>';b.onclick=open;aside.insertBefore(b,aside.querySelector('.side-command'))}
+panel.addEventListener('toggle',function(e){var b=document.getElementById('mdk-reading-toggle');if(b)b.setAttribute('aria-expanded',String(e.newState==='open'))});document.getElementById('mdk-manual-close').onclick=function(){panel.hidePopover()};choose.onchange=sync;
+function edit(prop,v){var s=setting(choose.value);s[prop]=v;prefs.sections[choose.value]=s;persist();sync();apply()}
+document.getElementById('mdk-manual-minus').onclick=function(){edit('font',Math.max(80,setting(choose.value).font-10))};document.getElementById('mdk-manual-plus').onclick=function(){edit('font',Math.min(160,setting(choose.value).font+10))};document.getElementById('mdk-manual-contrast').oninput=function(){edit('contrast',Number(this.value))};document.getElementById('mdk-manual-theme').onchange=function(){prefs.theme=this.value;persist();theme()};document.getElementById('mdk-manual-reset').onclick=function(){delete prefs.sections[choose.value];persist();sync();apply()};
+var pending=false;if(view)new MutationObserver(function(){if(pending)return;pending=true;requestAnimationFrame(function(){pending=false;apply()})}).observe(view,{childList:true,subtree:true});window.addEventListener('resize',function(){if(panel.matches(':popover-open'))position()});options();sync();theme();
+})();
+</script>
+
 </body>
 </html>
