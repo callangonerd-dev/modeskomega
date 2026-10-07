@@ -10,7 +10,7 @@
 <meta content="MODESK" name="apple-mobile-web-app-title"/>
 <meta content="#03060c" name="theme-color"/>
 <link href="/manifest.webmanifest" rel="manifest"/>
-<title>MODESK PESSOAL — v172 (novo pedido expansível)</title>
+<title>MODESK PESSOAL — Acessos & Mapeamento</title>
 
 <script id="mdk-v158-excel-core">
 (function(){
@@ -195,6 +195,19 @@ main{padding:22px 26px 70px;max-width:1400px}
 .fs-csc span{display:block;font-size:11px;letter-spacing:.12em;color:#7dd3fc}
 .fs-csc b{display:block;font-size:20px;word-break:break-all;margin:4px 0 2px}
 .fs-csc small{color:#94a3b8}
+.fs2-top{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:14px;align-items:start}
+.fs2-kv{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}
+.fs2-kv>div{min-width:0;padding:10px 11px;border:1px solid rgba(148,163,184,.16);background:rgba(255,255,255,.035);border-radius:8px}
+.fs2-kv span{display:block;color:var(--dim);font-size:10px;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px}
+.fs2-kv b{display:block;font-size:12.5px;line-height:1.35;overflow-wrap:anywhere}
+.fs2-acts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:12px}.fs2-acts .btn{justify-content:center;min-width:0;padding:10px 8px}
+.fs2-form{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:4px 14px;margin-top:8px}
+.fs2-form .fs-f{min-width:0;grid-column:auto!important}.fs2-form .fs-full{grid-column:1/-1!important}.fs2-form .fs-s2{grid-column:span 2!important}@media(max-width:1080px){.fs2-form .fs-s2{grid-column:1/-1!important}}
+.fs2-h{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+.fs-empty{margin-bottom:14px;border-color:rgba(86,217,255,.34)!important}.fs-empty .btn{margin-top:8px}
+.fs-head h3{margin:0}
+@media(max-width:1080px){.fs2-top{grid-template-columns:1fr}.fs2-form,.fs2-h{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+@media(max-width:620px){.fs2-kv,.fs2-acts,.fs2-form,.fs2-h{grid-template-columns:1fr!important}}
 .fs-ol{margin:8px 0 0 18px;line-height:1.65}
 .fs-ol li{margin-bottom:6px}
 .fs-panel{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(290px,.95fr);gap:12px;align-items:stretch}
@@ -1027,7 +1040,7 @@ main:has(#mp-tb){padding-left:18px;padding-right:18px}
   #app>main{grid-column:2 !important}
 }
 </style>
-</head>
+<style>main:has(#mk134-host) .sect{max-width:none!important;width:100%;min-width:0}main:has(#mk134-host){min-width:0} main:has(#mk134-host) h2.page{margin-bottom:6px}</style></head>
 <body>
 <!-- #winbar removido (v12.3) — navegação já existe na barra lateral -->
 <div id="deadline-bar" onclick="go('agenda')"></div>
@@ -1093,7 +1106,7 @@ main:has(#mp-tb){padding-left:18px;padding-right:18px}
 const LS='modesk.pessoal.v7';
 const GESTOR='marciooliveira';
 const DEF={
-  senha:'Deadpool365*',
+  senha:'',
   servicos:[],
   acessos:[],
   pastas:[
@@ -1118,19 +1131,10 @@ const DEF={
   compras:{lista:[],internas:[],reqs:[],pedidos:[],docs:{},tipos:['COMP01','COMP01 PT','Compra direta','Contrato']},
   fb:(window.MDKV?MDKV.j(['==Qf','iE2M1YjY','hVTYxEjM','wYmYmRWO','1IzN3MjO','iV2d6UzN','zcjN3UzM','1AjN0oTM','iojIklEc','wFmIsISb','vNmLwBXY','lNXYiVmc','pZmLvJHc','rNXZk9Wb','iojIulWY','t9GRoRXd','hJCLi8mc','wt2clR2b','tJiOiQWS','0NWZq9mc','wJCLiEFb','3kDVPlkc','3EVe0l1Q','2kGaHJEM','ycWNMZFM','L1GRv9UM','El3UhpXS','BJiOikXZ','LlGchJye']):null)||{apiKey:'',projectId:'',authDomain:'',appId:''},  /* remontado em execucao */
   fiscal:{
-    /* dados fiscais fragmentados — remontados por MDKV.v() na exibicao */
-    orgao:MDKV.v(['hOsc','hV2Qg8GZ','g8GZhR3c','FBybkByb','uJXZ292R','g0CIhRmb','lpXYGBSY','kBSYpJXY','0VmcjV2U']),
-    cnpj:MDKV.v(['==AN','0MDO0YzM']),
-    razao:MDKV.v(['=MUQ','OV0Ug0CI','MFUSDJVR','N90Qg0UR','HFkWJRkT','FJFUBBSR','EBCTB50T','JNUQOByT','DlkVSV0U']),
-    aba:MDKV.v(['l1yQ','G5EIDN1Q']),
-    idToken:MDKV.v(['==QM']),
-    ativacao:MDKV.v(['==AMwoDM','wASNyAjM','vcDMvQTM']),
-    telefone:MDKV.v(['=ADM','yITL5AjM','zASK1gDK']),
-    portal:MDKV.v(['yJmL','292ZuU2Y','uoXYmV2c','uc3d39yL','6MHc0RHa']),
-    ipServidor:MDKV.v(['==AOx4SM','ugTMuATM']),
-    apk:MDKV.v(['n5WayFGa','z1DczV3P','st2Zs91Z','zh2RPJET','JhHdvhFa','G1iMyc1R','R52Y2A1d','TNVMvMnc','lRGbvZ2L','lZXayR2L','t92YuUGb','n92bn5SZ','2lmck9yL','6MHc0RHa']),
+    /* v171: sem cadastros pre-definidos — dados inseridos via upload de backup */
+    orgao:'',cnpj:'',razao:'',aba:'',idToken:'',ativacao:'',telefone:'',portal:'',ipServidor:'',apk:'',
     csc:'',
-    obs:'Dados oficiais para cadastro e atualização periódica dos caixas (NFC-e).',
+    obs:'',
     hist:[]
   }
 };
@@ -1169,6 +1173,7 @@ function migrar(st){
   if(!st.fb.apiKey||!st.fb.projectId)st.fb=structuredClone(DEF.fb);
   if(st._senhaV152!==1){st.senha=DEF.senha;st._senhaV152=1;}
   st.fiscal.hist=st.fiscal.hist||[];
+  if(st._fiscalLimpoV171!==1){['orgao','cnpj','razao','aba','idToken','csc','ativacao','telefone','portal','ipServidor','apk','obs'].forEach(k=>st.fiscal[k]='');st._fiscalLimpoV171=1;}
   DEF.pastas.forEach(d=>{if(!st.pastas.some(x=>(x.caminho||'').toLowerCase()===d.caminho.toLowerCase()))st.pastas.push({...d,id:u()})});
   DEF.links.forEach(d=>{if(!st.links.some(x=>(x.url||'')===d.url))st.links.push({...d,id:u()})});
   return st}
@@ -2551,87 +2556,72 @@ const FS_CAMPOS=[
   ['apk','Link do APK (app dos celulares)','full']
 ];
 function vFiscal(){
-  const f=state.fiscal||{};
-  const campos=FS_CAMPOS.map(c=>{
-    const cls=c[2]==='full'?'full':(['orgao','razao','portal','apk'].includes(c[0])?'wide':'');
-    return `<div class="${cls}"><label>${c[1]}</label><input id="fs-${c[0]}" value="${esc(f[c[0]]||'')}"/></div>`
-  }).join('');
+  const f=state.fiscal||{}, V=k=>esc(f[k]||'')||'<span class="dim">—</span>';
+  const vazio=!FS_CAMPOS.some(c=>(f[c[0]]||'').trim());
+  const SP={orgao:'fs-s2',razao:'fs-s2',portal:'fs-s2',csc:'fs-full',apk:'fs-full'};
+  const ORD=['orgao','cnpj','razao','aba','idToken','ativacao','telefone','csc','portal','ipServidor','apk'];
+  const campos=ORD.map(k=>FS_CAMPOS.find(c=>c[0]===k)).map(c=>`<div class="fs-f ${SP[c[0]]||''}"><label for="fs-${c[0]}">${c[1]}</label><input id="fs-${c[0]}" value="${esc(f[c[0]]||'')}"/></div>`).join('');
   const hist=(f.hist||[]).slice().reverse().map(h=>`<tr><td class="mono">${esc(h.data)}</td><td>${esc(h.caixa)}</td><td>${esc(h.quem)}</td><td>${esc(h.oque)}</td>
-     <td><button class="btn sm" onclick="fiscalDelHist('${h.id}')">Excluir</button></td></tr>`).join('')
+     <td style="text-align:right"><button class="btn sm" onclick="fiscalDelHist('${h.id}')">Excluir</button></td></tr>`).join('')
      ||'<tr><td colspan="5" class="dim">Nenhuma atualização registrada ainda.</td></tr>';
-  return page('Fiscal & Caixas — CSC NFC-e','Espaço próprio e compacto para manter os dados fiscais dos caixas, instalar o app nos celulares e acessar o tutorial quando precisar.',`
-  <div class="fs-panel">
+  const ult=(f.hist&&f.hist.length)?esc(f.hist[f.hist.length-1].data+' · '+f.hist[f.hist.length-1].caixa):'Sem registro';
+  return page('Fiscal & Caixas — CSC NFC-e','Dados fiscais dos caixas e do app TOTVS Chef. Os cadastros são inseridos por upload de backup, nos mesmos moldes de Acessos & Mapeamento.',`
+  <div class="mk165-bar fs-bkbar"><button onclick="fiscalBackup()">💾 Backup / Inserir backup</button><span class="dim">${vazio?'Nenhum dado cadastrado — envie o arquivo de backup (JSON, Excel, CSV ou PDF do MODESK).':'Dados carregados. Gere um backup após cada atualização.'}</span></div>
+  ${vazio?`<div class="card fs-empty"><h3>🧾 Nenhum cadastro fiscal</h3><p class="dim">Este bloco não possui dados pré-definidos. Clique em <b>Backup / Inserir backup</b> e envie o arquivo, ou preencha os dados manualmente mais abaixo.</p><button class="btn primary" onclick="fiscalBackup()">⇪ Inserir backup</button></div>`:''}
+  <div class="fs2-top">
     <div class="card fs-hero">
-      <div class="fs-head">
-        <div><h3>🧾 CSC NFC-e dos caixas</h3><p class="dim">Dados oficiais para cadastrar, revisar e atualizar os caixas sem procurar dentro do tutorial.</p></div>
-        <span class="fs-pill">Fiscal ativo</span>
-      </div>
+      <div class="fs-head"><h3>🧾 CSC NFC-e dos caixas</h3><span class="fs-pill">${vazio?'Sem dados':'Fiscal ativo'}</span></div>
       <div class="fs-csc"><span>CÓDIGO CSC ATIVO</span><b class="mono">${esc(f.csc||'—')}</b>
         <small>Id Token ${esc(f.idToken||'—')} · ativação ${esc(f.ativacao||'—')}</small></div>
-      <div class="fs-summary">
-        <div class="fs-mini"><span>Órgão</span><b>${esc(f.orgao||'—')}</b></div>
-        <div class="fs-mini"><span>CNPJ base</span><b class="mono">${esc(f.cnpj||'—')}</b></div>
-        <div class="fs-mini"><span>Servidor Chef</span><b class="mono">${esc(f.ipServidor||'—')}</b></div>
+      <div class="fs2-kv">
+        <div><span>Órgão</span><b>${V('orgao')}</b></div>
+        <div><span>CNPJ base</span><b class="mono">${V('cnpj')}</b></div>
+        <div><span>Razão social</span><b>${V('razao')}</b></div>
+        <div><span>Servidor Chef</span><b class="mono">${V('ipServidor')}</b></div>
+        <div><span>Atendimento</span><b>${V('telefone')}</b></div>
+        <div><span>Última rotina</span><b>${ult}</b></div>
       </div>
-      <div class="fs-actions">
+      <div class="fs2-acts">
         <button class="btn primary" onclick="fiscalCopiar()">📋 Copiar CSC</button>
         <button class="btn" onclick="fiscalAbrirPortal()">🌐 SEFAZ</button>
         <button class="btn" onclick="fiscalAbrirApk()">⬇ App Chef</button>
-        <button class="btn" onclick="document.getElementById('fs-edicao').scrollIntoView({behavior:'smooth',block:'start'})">✎ Editar dados</button>
+        <button class="btn" onclick="document.getElementById('fs-edicao').scrollIntoView({behavior:'smooth',block:'start'})">✎ Editar</button>
       </div>
     </div>
-
     <div class="card">
-      <h3>✅ Fluxo objetivo de atualização</h3>
+      <h3>✅ Fluxo de atualização</h3>
       <div class="fs-checklist">
-        <div class="fs-check"><span>1</span><div><b>Conferir na SEFAZ</b><small>Abrir a aba CSC NFC-e e validar se o código salvo ainda é o vigente.</small></div></div>
-        <div class="fs-check"><span>2</span><div><b>Atualizar todos os caixas</b><small>Lançar Id Token e CSC em Empresa Escola, Educacional e Livraria.</small></div></div>
-        <div class="fs-check"><span>3</span><div><b>Testar emissão NFC-e</b><small>Fazer uma venda de teste e confirmar autorização antes de encerrar.</small></div></div>
-        <div class="fs-check"><span>4</span><div><b>Registrar histórico</b><small>Salvar data, caixa, responsável e o que foi feito para próxima conferência.</small></div></div>
+        <div class="fs-check"><span>1</span><div><b>Conferir na SEFAZ</b><small>Validar se o CSC salvo ainda é o vigente.</small></div></div>
+        <div class="fs-check"><span>2</span><div><b>Atualizar todos os caixas</b><small>Lançar Id Token e CSC em cada caixa.</small></div></div>
+        <div class="fs-check"><span>3</span><div><b>Testar emissão NFC-e</b><small>Venda de teste e confirmação da autorização.</small></div></div>
+        <div class="fs-check"><span>4</span><div><b>Registrar e gerar backup</b><small>Salvar no histórico e baixar o backup atualizado.</small></div></div>
       </div>
-      <div class="fs-link-tutorial">
-        <div><b>Precisa do passo a passo completo?</b><small>Abre o slide do Manual ou o Mapa do Site & Tutorial.</small></div>
-        <div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn sm" onclick="go('manual')">Manual</button><button class="btn sm" onclick="go('entrega')">Tutorial</button></div>
-      </div>
+      <h3 style="margin-top:14px">📱 App TOTVS Chef</h3>
+      <ol class="fs-ol"><li>Instalar o APK pelo link cadastrado.</li><li>Configurar o IP do servidor <span class="mono">${esc(f.ipServidor||'—')}</span>.</li><li>Selecionar Oferta Plano Master e "Lembrar usuário".</li><li>Testar pedido antes de entregar o celular.</li></ol>
+      <div class="row" style="gap:8px;flex-wrap:wrap;margin-top:10px"><button class="btn sm" onclick="go('manual')">Manual</button><button class="btn sm" onclick="go('entrega')">Tutorial</button></div>
     </div>
   </div>
-
-  <div class="fs-quick">
-    <div class="card"><h3>🏢 Dados fiscais</h3><p>${esc(f.razao||'—')}</p></div>
-    <div class="card"><h3>☎ Atendimento</h3><p>${esc(f.telefone||'—')}</p></div>
-    <div class="card"><h3>🕒 Última rotina</h3><p>${(f.hist&&f.hist.length)?esc(f.hist[f.hist.length-1].data+' · '+f.hist[f.hist.length-1].caixa):'Sem registro no histórico.'}</p></div>
-  </div>
-
   <div id="fs-edicao" class="card" style="margin-top:14px"><h3>✎ Dados editáveis</h3>
-    <p class="dim">Mantenha aqui as informações necessárias para configuração dos caixas e celulares.</p>
-    <div class="grid fs-form-compact" style="margin-top:12px">${campos}</div>
-    <div class="row" style="margin-top:12px;gap:8px;flex-wrap:wrap">
+    <div class="fs2-form">${campos}</div>
+    <div class="row" style="margin-top:14px;gap:8px;flex-wrap:wrap">
       <button class="btn primary" onclick="fiscalSalvar()">💾 Salvar dados</button>
+      <button class="btn" onclick="fiscalBackup()">⇪ Backup / Inserir backup</button>
+      <button class="btn" onclick="fiscalLimpar()">🗑 Limpar cadastro</button>
     </div>
   </div>
-
-  <div style="margin-top:14px">
-    <div class="card"><h3>📱 Checklist do app TOTVS Chef</h3>
-      <ol class="fs-ol">
-        <li>Baixar e instalar o APK pelo link oficial.</li>
-        <li>Configurar ambiente com IP do servidor <span class="mono">${esc(f.ipServidor||'')}</span>.</li>
-        <li>Selecionar Oferta Plano Master e marcar "Lembrar usuário".</li>
-        <li>Testar pedido antes de entregar o celular.</li>
-      </ol>
-    </div>
-  </div>
-
   <div class="card" style="margin-top:14px"><h3>🕒 Histórico de atualizações</h3>
-    <div class="grid g2">
-      <div><label>Data</label><input id="fs-h-data" placeholder="14/07/2025"/></div>
-      <div><label>Caixa / equipamento</label><input id="fs-h-caixa" placeholder="Caixa Educacional"/></div>
-      <div><label>Responsável</label><input id="fs-h-quem"/></div>
-      <div><label>O que foi feito</label><input id="fs-h-oque" placeholder="CSC atualizado e venda de teste OK"/></div>
+    <div class="fs2-form fs2-h">
+      <div class="fs-f"><label>Data</label><input id="fs-h-data" placeholder="dd/mm/aaaa"/></div>
+      <div class="fs-f"><label>Caixa / equipamento</label><input id="fs-h-caixa"/></div>
+      <div class="fs-f"><label>Responsável</label><input id="fs-h-quem"/></div>
+      <div class="fs-f"><label>O que foi feito</label><input id="fs-h-oque"/></div>
     </div>
     <div class="row" style="margin-top:12px"><button class="btn primary" onclick="fiscalAddHist()">+ Registrar atualização</button></div>
     <div style="overflow:auto;margin-top:12px"><table class="tb"><thead><tr><th>Data</th><th>Caixa</th><th>Responsável</th><th>Ação</th><th></th></tr></thead><tbody>${hist}</tbody></table></div>
   </div>`);
 }
+function fiscalLimpar(){if(!confirm('Apagar todos os dados fiscais cadastrados? (o histórico é mantido)'))return;
+  FS_CAMPOS.forEach(c=>state.fiscal[c[0]]='');save();toast('Cadastro fiscal limpo')}
 function fiscalSalvar(){
   const f=Object.assign({},state.fiscal);
   FS_CAMPOS.forEach(c=>{const el=$('fs-'+c[0]);if(el)f[c[0]]=el.value.trim()});
@@ -3675,7 +3665,7 @@ function quando(data,hora){
 }
 function compromissos(){
   var out=[],St=S();
-  (St.eventos||[]).forEach(function(e){var ms=quando(e.data,e.hora);if(ms)out.push({id:'e:'+(e.id||e.titulo+e.data+e.hora),titulo:e.titulo||'Evento',ms:ms,local:e.local||'',info:e.info||'',fonte:'Agenda MODESK'})});
+  (St.eventos||[]).forEach(function(e){if(e.status==='Executado'||e.status==='Concluído')return;var ms=quando(e.data,e.hora);if(ms)out.push({id:'e:'+(e.id||e.titulo+e.data+e.hora),titulo:e.titulo||'Evento',ms:ms,local:e.local||'',info:e.info||'',fonte:'Agenda MODESK'})});
   (St.atividades||[]).forEach(function(a){if(a.feito)return;var ms=quando(a.prazo,a.hora);if(ms&&a.hora)out.push({id:'a:'+(a.id||a.titulo+a.prazo),titulo:a.titulo||'Atividade',ms:ms,local:'',info:(a.prioridade||'')+' '+(a.obs||''),fonte:'Atividades'})});
   return out.sort(function(a,b){return a.ms-b.ms});
 }
@@ -3793,6 +3783,7 @@ function faixaInterna(ev){
 /* alertas que nao conseguiram abrir fora do site esperam o proximo clique */
 var pendentes=[];
 function tentarPendentes(){
+  pendentes=pendentes.filter(function(ev){var s=S();if(ev.id.indexOf('e:')===0)return (s.eventos||[]).some(function(e){return 'e:'+e.id===ev.id&&e.status!=='Executado'&&e.status!=='Concluído'});if(ev.id.indexOf('a:')===0)return (s.atividades||[]).some(function(a){return 'a:'+a.id===ev.id&&!a.feito});return true});
   if(!pendentes.length)return;
   var ev=pendentes.shift();
   alertaPiP(ev).then(function(ok){if(!ok&&!popupFora(ev))faixaInterna(ev)});
@@ -10252,7 +10243,7 @@ html.mdk-locked body > *:not(#login):not(script):not(style):not(link){display:no
     var linhas=lista.map(function(e){var d=dias(e.data),done=evOk(e);
       var chips=SERV.filter(function(s){return (e.servicos||[]).indexOf(s)>=0}).map(function(s){return '<span class="ev-service-chip">'+s+'</span>'}).join('')||'<span class="dim">Sem serviço</span>';
       var st=done?'<span class="tag t-ok">Concluído</span>':'<span class="tag '+(d<0?'t-err':d===0?'t-warn':'t-info')+'">'+(d<0?'Atrasado':d===0?'Hoje':'Em '+d+'d')+'</span>';
-      return '<tr class="ev-row '+(e.data===H&&!done?'is-today':'')+'"><td><b>'+E(e.cliente||'—')+'</b><small>'+E(e.titulo||'Sem título')+'</small></td><td><b class="mono">'+F(e.data)+'</b><small class="mono">'+E(e.hora||'—')+(e.horaFim?' – '+E(e.horaFim):'')+'</small><small>'+E(e.local||'Sala não informada')+'</small></td><td><div class="ev-services">'+chips+'</div></td><td><b>'+E(e.resp||'—')+'</b><small>'+E(e.info||'Sem observações')+'</small></td><td>'+st+'</td><td><div class="ev-actions"><button class="btn sm '+(done?'':'primary')+'" title="'+(done?'Reabrir evento':'Concluir evento')+'" aria-label="'+(done?'Reabrir evento':'Concluir evento')+'" onclick="evConcluir(\''+e.id+'\')">'+(done?'↺':'✓')+'</button><button class="btn sm ev-icon-btn" title="Ver detalhes" aria-label="Ver detalhes" onclick="verEvento(\''+e.id+'\')">👁</button><button class="btn sm ev-icon-btn" title="Excluir" aria-label="Excluir" onclick="del(\'eventos\',\''+e.id+'\')">🗑</button></div></td></tr>'}).join('');
+      return '<tr class="ev-row '+(e.data===H&&!done?'is-today':'')+'"><td><b>'+E(e.cliente||'—')+'</b><small>'+E(e.titulo||'Sem título')+'</small></td><td><b class="mono">'+F(e.data)+'</b><small class="mono">'+E(e.hora||'—')+(e.horaFim?' – '+E(e.horaFim):'')+'</small><small>'+E(e.local||'Sala não informada')+'</small></td><td><div class="ev-services">'+chips+'</div></td><td><b>'+E(e.resp||'—')+'</b><small>'+E(e.info||'Sem observações')+'</small></td><td>'+st+'</td><td><div class="ev-actions ev-act2"><button class="ev-ib '+(done?'':'is-ok')+'" title="'+(done?'Reabrir evento':'Concluir evento')+'" aria-label="'+(done?'Reabrir evento':'Concluir evento')+'" onclick="evConcluir(\''+e.id+'\')">'+(done?'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>':'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>')+'</button><button class="ev-ib" title="Ver detalhes" aria-label="Ver detalhes" onclick="verEvento(\''+e.id+'\')"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="ev-ib is-del" title="Excluir" aria-label="Excluir" onclick="del(\'eventos\',\''+e.id+'\')"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg></button></div></td></tr>'}).join('');
     var cb=SERV.map(function(s){return '<label class="ev-check"><input type="checkbox" id="ev-s-'+s+'"/>'+s+'</label>'}).join('');
     return page('Eventos','',
     '<div class="events-workspace">'+
@@ -10552,17 +10543,32 @@ main:has(.agenda-shell)>.sect>.card:first-of-type{padding:10px 12px!important;ma
   '.mfoot{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap}.prev{margin-top:12px;max-height:38vh}.prev table{min-width:900px}.new{color:#4ade80}.upd{color:#facc15}'+
   '.eqname{display:inline-flex;align-items:center;gap:8px;min-width:0}.eqico{display:inline-grid;place-items:center;width:25px;height:25px;flex:0 0 25px;border:1px solid rgba(86,217,255,.35);border-radius:6px;background:rgba(86,217,255,.10);color:#56d9ff;transition:transform .28s cubic-bezier(.2,.8,.2,1),background .28s,color .28s,box-shadow .28s}.eqico svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.eqico.printer{color:#4ade80;border-color:rgba(74,222,128,.35);background:rgba(74,222,128,.09)}tr:hover .eqico{transform:translateY(-2px) rotate(-5deg) scale(1.1);background:rgba(86,217,255,.2);box-shadow:0 0 14px rgba(86,217,255,.28)}tr:hover .eqico.printer{background:rgba(74,222,128,.18);box-shadow:0 0 14px rgba(74,222,128,.28)}@media(prefers-reduced-motion:reduce){.eqico{transition:none}tr:hover .eqico{transform:none}}';
 
-  CSS+=':host{min-width:0;max-width:100%}.wrap{width:100%;max-width:100%;overflow-x:hidden;overflow-y:auto;border-radius:7px}'+
-    '.wrap table{width:100%!important;max-width:100%;min-width:0!important;table-layout:fixed;font-size:12px}'+
-    '.wrap th,.wrap td{white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere;word-break:normal;padding:8px 5px;letter-spacing:0}'+
-    '.pcard col{width:auto!important}.wrap th{font-size:10px}.wrap td,.wrap td b{user-select:text;-webkit-user-select:text;cursor:text}.wrap .mono{font-size:11px}'+
-    '.eqname{display:flex;align-items:flex-start;gap:5px}.eqname b{min-width:0;overflow-wrap:anywhere}.eqico{width:20px;height:20px;flex-basis:20px}'+
-    '.wrap .acts{display:flex;flex-wrap:wrap!important;gap:4px!important}.wrap button.sm{width:28px;min-height:28px;padding:3px}'+
-    '.wrap td input{min-width:0;padding:4px 2px}.item-details{margin-top:14px;border:1px solid rgba(148,163,184,.3);padding:14px;border-radius:7px}'+
-    '.item-details textarea{min-height:250px;white-space:pre-wrap;overflow-wrap:anywhere;resize:vertical}.item-details .acts{margin:10px 0}'+
-    '@media(max-width:1100px){.wrap colgroup{display:none}.wrap thead{display:none}.wrap table,.wrap tbody{display:block}.wrap tr{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-bottom:1px solid rgba(148,163,184,.3);padding:8px}.wrap td{display:block;border:0;font-size:12px;min-width:0}.wrap td:before{content:attr(data-label);display:block;color:#9fb0c6;font-size:10px;margin-bottom:3px}.wrap tr.ed input{width:100%}}'+
-    '@media(max-width:600px){.wrap tr{grid-template-columns:repeat(2,minmax(0,1fr))}.stats .st{min-width:0;padding:6px 10px}.st b{font-size:17px}}';
-  var W=[13,7,6,8,6,11,8,11,5,7,5,8,5];
+  CSS+=`:host{min-width:0;max-width:100%;--mapping-gap:12px;--mapping-row:48px;--mapping-border:var(--line,oklch(.7 0 0 / .22))}
+    .top{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--mapping-gap);margin-bottom:var(--mapping-gap)}
+    .stats{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;min-width:0}
+    .st{min-width:0;padding:10px 12px;border-radius:7px}.st small{line-height:1.4;min-height:16px}.st b{display:block;line-height:1.4}
+    .top>.acts{gap:8px;justify-content:flex-end}.top button{min-height:36px}
+    .search{width:100%;max-width:440px;margin:0 0 var(--mapping-gap)}
+    .wrap{width:100%;max-width:100%;overflow:auto;border-radius:7px;scrollbar-gutter:stable;max-height:65vh}
+    .wrap table{width:100%;min-width:1280px;table-layout:fixed;font-size:12px}
+    .wrap th{padding:10px 8px;white-space:normal;line-height:1.4;letter-spacing:0;font-size:10px}
+    .wrap td{height:var(--mapping-row);padding:8px;vertical-align:middle;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.45;letter-spacing:0;user-select:text}
+    .wrap td:nth-child(1),.wrap td:nth-child(4),.wrap td:nth-child(6){white-space:normal;overflow-wrap:break-word}
+    .eqname{display:flex;align-items:center;gap:6px;min-width:0}.eqname b{min-width:0;overflow-wrap:break-word}
+    .eqico{width:20px;height:20px;flex-basis:20px}.wrap .mono{font-size:11px}
+    .wrap .acts{display:flex;flex-wrap:nowrap!important;align-items:center;gap:3px!important}
+    .wrap button.sm{display:inline-flex;align-items:center;justify-content:center;flex:0 0 24px;width:24px;min-height:28px;height:28px;padding:3px;font-size:12px}
+    .wrap td:last-child{overflow:visible}.wrap tr.ed input{min-width:0;padding:5px 4px}
+    .pcard{margin-top:20px;border:0;border-top:1px solid var(--mapping-border);border-radius:0;padding:18px 0 0;background:transparent}
+    .pcard .wrap table{min-width:1100px}.pcard .wrap button.sm{width:auto;flex:0 0 auto;padding:5px 8px}
+    .item-details{margin-top:14px;border:1px solid var(--mapping-border);padding:14px;border-radius:7px}
+    .item-details textarea{min-height:250px;white-space:pre-wrap;overflow-wrap:anywhere;resize:vertical}.item-details .acts{margin:10px 0}
+    @media(min-width:1700px){.top{grid-template-columns:minmax(0,1fr) auto;align-items:center}}
+    @media(max-width:760px){.stats{grid-template-columns:repeat(3,minmax(0,1fr))}.top>.acts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.top button{padding:8px;min-width:0}.search{max-width:none}
+    .wrap table{min-width:0}.wrap colgroup,.wrap thead{display:none}.wrap table,.wrap tbody{display:block}.wrap tr{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 12px;border-bottom:1px solid var(--mapping-border);padding:12px}
+    .wrap td{display:block;height:auto;min-width:0;border:0;padding:0;white-space:normal;overflow-wrap:anywhere}.wrap td:before{content:attr(data-label);display:block;color:var(--mut);font-size:10px;margin-bottom:3px}.wrap td:first-child,.wrap td:last-child{grid-column:1/-1}.wrap .acts{gap:6px!important}.wrap button.sm{width:32px;height:32px;flex-basis:32px}.pcard .wrap table{min-width:0}}
+    @media(max-width:420px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.st{padding:8px 10px}.st b{font-size:18px}}`;
+  var W=[14,6,6,8,6,11,8,11,4,7,5,8,12];
   function linha(p,i){
     var vnc=p.ip?'<button class="sm" title="Copiar IP para usar no VNC" onclick="mk136Ip(\''+E(p.ip)+'\')"><img src="'+MP_ICO_VNC+'" alt="VNC" style="width:16px;height:16px;vertical-align:middle"/></button>':'';
     var anyb=p.anydesk?'<button class="sm" title="Abrir conexão no AnyDesk" onclick="mk136Any(\''+E(p.anydesk)+'\')"><img src="'+MP_ICO_ANY+'" alt="AnyDesk" style="width:18px;height:14px;vertical-align:middle"/></button>':'';
@@ -11247,6 +11253,30 @@ window.cp150Entregue=function(id){
     SV();try{render()}catch(e){}
     T('Backup de itens inserido: '+nv+' novo(s), '+up+' atualizado(s)');return true;
   }
+  /* ===== v171 · Backup / upload de backup do Fiscal & Caixas (mesmos moldes) ===== */
+  var FC=[['orgao','Órgão'],['cnpj','CPF / CNPJ Base'],['razao','Razão Social'],['aba','Aba do portal'],['idToken','Id Token'],['csc','Código CSC'],['ativacao','Data de ativação'],['telefone','Telefone'],['portal','Portal SEFAZ'],['ipServidor','IP servidor TOTVS Chef'],['apk','Link do APK']];
+  var fNorm=fazNorm(FC,{codigocsc:'csc',token:'idToken',idtoken:'idToken',ip:'ipServidor',ipdoservidortotvschef:'ipServidor',servidor:'ipServidor',linkdoapkappdoscelulares:'apk',portal:'portal',telefonedeatendimento:'telefone',abaselecionadanoportal:'aba',cnpj:'cnpj',razaosocial:'razao'});
+  function fObj(){return (window.state&&window.state.fiscal)||{}}
+  function fLinhas(){var f=fObj(),o={};FC.forEach(function(c){o[c[1]]=String(f[c[0]]==null?'':f[c[0]])});return FC.some(function(c){return f[c[0]]})?[o]:[]}
+  function fAplicar(R,j){
+    if(j&&!Array.isArray(j)&&!j.itens){if(j.fiscal&&typeof j.fiscal==='object')j=j.fiscal;R=[j]}
+    var o=(R||[]).map(fNorm).filter(function(x){return Object.keys(x).some(function(k){return x[k]})})[0];
+    if(!o){T('Nenhum dado fiscal reconhecido no backup');return false}
+    var s=window.state;s.fiscal=s.fiscal||{hist:[]};
+    if(j&&Array.isArray(j.hist))s.fiscal.hist=j.hist;
+    FC.forEach(function(c){if(o[c[0]]!=null&&o[c[0]]!=='')s.fiscal[c[0]]=o[c[0]]});
+    SV();try{render()}catch(e){}T('Backup fiscal inserido');return true;
+  }
+  window.fiscalBackup=function(){abrir({
+    id:'mk171-fbk',titulo:'Backup — Fiscal & Caixas (CSC NFC-e)',cols:FC,extra:{},
+    desc:'Abaixo estão os dados fiscais cadastrados.',
+    total:function(){return fLinhas().length},
+    texto:function(){return textoDe(FC,fLinhas())},
+    json:function(){return Promise.resolve(baixar(new Blob([JSON.stringify({modesk:'backup-fiscal',versao:171,data:new Date().toISOString(),colunas:FC.map(function(c){return c[1]}),itens:fLinhas(),hist:fObj().hist||[]},null,2)],{type:'application/json'}),'backup_fiscal_'+DATA()+'.json'))},
+    xlsx:function(){return SHEET().then(function(X){var ws=X.utils.json_to_sheet(fLinhas(),{header:FC.map(function(c){return c[1]})}),wb=X.utils.book_new();X.utils.book_append_sheet(wb,ws,'Fiscal');X.writeFile(wb,'backup_fiscal_'+DATA()+'.xlsx')})},
+    pdf:function(){return PDF(fLinhas(),FC.map(function(c){return c[1]}),'MODESK — Backup Fiscal & Caixas','backup_fiscal_'+DATA()+'.pdf')},
+    aplicar:fAplicar
+  })};
   window.mk165Itens=function(){abrir({
     id:'mk165-ibk',titulo:'Backup dos itens da sala de som',cols:IC,extra:{},
     desc:'Abaixo estão os '+iLista().length+' itens do inventário, com todos os campos (a foto do item não entra no backup).',
@@ -11636,6 +11666,63 @@ var panel='<section class="card" style="margin-top:14px"><h3>Assinatura digital 
 @media(max-width:900px){#cpv11 .cp171-new-drawer .cp11-fg{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:480px){#cpv11 .cp171-new-drawer .cp11-fg{grid-template-columns:minmax(0,1fr)}#cpv11 .cp171-new-drawer .cp11-fg .wide{grid-column:1}#cpv11 .cp171-new-head,#cpv11 .cp171-new-drawer .in{padding:16px}}
 @media(prefers-reduced-motion:reduce){#cpv11 .cp171-new-drawer{transition:none}}
+</style>
+<style id="mdk-unified-events-css">
+.ev-unified{display:grid;gap:16px;min-width:0}.ev-unified .card{box-shadow:none;border-radius:6px}.ev-unified-section{min-width:0;border-top:1px solid var(--line);padding-top:14px}.ev-unified-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px}.ev-unified-head h3{font-size:17px}.ev-unified .agenda-shell{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr)!important}.ev-unified .agenda-cal{min-width:0}.ev-unified .agenda-day.done .agenda-dot{background:var(--ok);box-shadow:none}.ev-unified .agenda-item b,.ev-unified .agenda-item small{overflow-wrap:anywhere}.ev-unified .agenda-item small{font-size:11px}.ev-unified .agenda-item{grid-template-columns:4px minmax(0,1fr) auto}.ev-unified .agenda-item .ev-actions{flex-wrap:wrap}.ev-unified .agenda-item.feito{opacity:1}.ev-unified .agenda-item.feito b{color:var(--mut)}.ev-unified .agenda-quick{grid-template-columns:minmax(0,1.5fr) 110px 135px 100px minmax(0,1fr) auto}.ev-unified label{margin-top:0}.ev-unified .alertbar{display:flex;align-items:center;justify-content:space-between;gap:12px}.ev-unified .alertbar span{min-width:0;overflow-wrap:anywhere}.ev-unified .ev-list{background:transparent;border:0;padding:0!important}.ev-unified .ev-create{background:transparent;border:1px solid var(--line)}.ev-unified .agenda-legend .event-color{background:var(--info)}.ev-unified .agenda-legend .reminder-color{background:var(--acc3)}.ev-unified .agenda-legend .done-color{background:var(--ok)}
+@media(max-width:1050px){.ev-unified .agenda-quick{grid-template-columns:1fr 1fr}.ev-unified .agenda-quick .wide{grid-column:1/-1}}
+@media(max-width:750px){.ev-unified .agenda-shell{grid-template-columns:minmax(0,1fr)!important}.ev-unified .agenda-item{grid-template-columns:4px minmax(0,1fr) auto}.ev-unified .agenda-quick{grid-template-columns:minmax(0,1fr)}.ev-unified .agenda-quick .wide{grid-column:auto}}
+</style>
+<script id="mdk-unified-events-js">
+(function(){
+'use strict';
+function S(){return window.state}
+function done(e){return !!e&&(e.status==='Executado'||e.status==='Concluído')}
+function linked(a){return a.evId||a.eventoId||''}
+function reconcile(){var s=S();if(!s)return;(s.atividades||[]).forEach(function(a){var id=linked(a);if(!id)return;var e=(s.eventos||[]).find(function(x){return x.id===id});if(!e)return;a.evId=e.id;a.feito=done(e);a.feitoEm=a.feito?(e.concluidoEm||a.feitoEm||null):null})}
+var saveOld=window.save;
+window.save=function(){reconcile();return saveOld.apply(this,arguments)};save=window.save;
+var busy={};
+window.evConcluir=async function(id){var e=(S().eventos||[]).find(function(x){return x.id===id});if(!e||busy[id])return;busy[id]=true;var was=done(e);
+try{var ok=await mdkConfirm(was?'Reabrir evento':'Confirmar execução e finalização',was?'Reabrir "'+(e.titulo||e.cliente)+'" e seus lembretes vinculados?':'Confirmar que "'+(e.titulo||e.cliente)+'" foi executado e finalizado?',was?'Reabrir':'Executei e finalizei');if(!ok)return;
+if(!(S().eventos||[]).includes(e)||done(e)!==was)return;
+e.status=was?'Agendado':'Executado';if(was)delete e.concluidoEm;else e.concluidoEm=new Date().toISOString();e.statusPlanilha=was?'Agendado':'Concluído';
+S().avisosOk=S().avisosOk||{};if(was)delete S().avisosOk['evento:'+id];else S().avisosOk['evento:'+id]=e.concluidoEm;
+save();try{checarDeadlines()}catch(x){}toast(was?'Evento e lembretes reabertos':'Evento finalizado na planilha, agenda e lembretes');
+}finally{delete busy[id]}};
+window.evMarcar=window.evConcluir;evMarcar=window.evConcluir;
+['agFeito','lbFeito','toggleAtiv'].forEach(function(k){var old=window[k];window[k]=function(id){var a=(S().atividades||[]).find(function(x){return x.id===id});if(a&&linked(a))return evConcluir(linked(a));return old&&old.apply(this,arguments)}});
+agFeito=window.agFeito;toggleAtiv=window.toggleAtiv;
+var avisoOld=window.avisoFinalizar;
+window.avisoFinalizar=function(tipo,id){if(tipo==='ev'||tipo==='evento')return evConcluir(id);var a=tipo==='at'&&(S().atividades||[]).find(function(x){return x.id===id});if(a&&linked(a))return evConcluir(linked(a));return avisoOld.apply(this,arguments)};
+window.agendaItens=function(){var s=S(),it=[];(s.eventos||[]).forEach(function(e){if(e.data&&!avisoLigadoACompras(e))it.push({id:e.id,data:e.data,hora:e.hora||'',titulo:e.titulo||e.cliente||'Evento',tipo:'evento',sub:[e.cliente,e.local].filter(Boolean).join(' · '),feito:done(e)})});(s.atividades||[]).forEach(function(a){if(a.prazo&&!avisoLigadoACompras(a))it.push({id:a.id,evId:linked(a),data:a.prazo,hora:a.hora||'',titulo:a.titulo,tipo:a.tipo==='Pessoal'||linked(a)?'lembrete':'atividade',sub:a.desc||'',feito:!!a.feito})});return it.sort(function(a,b){return (a.data+a.hora).localeCompare(b.data+b.hora)})};agendaItens=window.agendaItens;
+var alertsOld=window.alertas;
+window.alertas=function(){return alertsOld().filter(function(x){if(!x.at)return true;var a=(S().atividades||[]).find(function(y){return y.id===x.at});return !a||!linked(a)})};alertas=window.alertas;
+function item(x){var action=x.tipo==='evento'?'evConcluir':x.evId?'evConcluir':'agFeito',id=x.evId||x.id;return '<div class="agenda-item '+x.tipo+(x.feito?' feito':'')+'"><i class="bar"></i><div><b>'+esc(x.titulo)+'</b><small>'+fmt(x.data)+' · '+esc(x.hora||'Dia inteiro')+' · '+(x.feito?'Concluído':x.tipo==='evento'?'Evento':x.tipo==='lembrete'?'Lembrete':'Atividade')+'</small><small>'+esc(x.sub)+'</small></div><div class="ev-actions"><button class="btn sm" title="Ver detalhes" aria-label="Ver detalhes" onclick="'+(x.tipo==='evento'?'verEvento':'verAtiv')+'(\''+esc(x.id)+'\')">👁</button><button class="btn sm '+(x.feito?'':'primary')+'" title="'+(x.feito?'Reabrir':'Finalizar')+'" aria-label="'+(x.feito?'Reabrir':'Finalizar')+'" onclick="'+action+'(\''+esc(id)+'\')">'+(x.feito?'↺':'✓')+'</button></div></div>'}
+function agenda(){var items=agendaItens(),H=agendaISO(new Date()),y=agendaCursor.getFullYear(),m=agendaCursor.getMonth(),first=new Date(y,m,1),start=new Date(y,m,1-first.getDay()),days='';
+for(var i=0;i<42;i++){var d=new Date(start);d.setDate(start.getDate()+i);var iso=agendaISO(d),di=items.filter(function(x){return x.data===iso&&!x.evId});days+='<button class="agenda-day '+(d.getMonth()===m?'':'out')+' '+(iso===H?'today':'')+' '+(iso===agendaSelecionada?'selected':'')+' '+(di.length&&di.every(function(x){return x.feito})?'done':'')+'" aria-label="'+fmt(iso)+'" onclick="agendaEscolher(\''+iso+'\')"><span class="dn">'+d.getDate()+'</span><span class="agenda-dots">'+di.slice(0,4).map(function(x){return '<i class="agenda-dot '+x.tipo+'" title="'+esc(x.titulo)+(x.feito?' — Concluído':'')+'"></i>'}).join('')+(di.length>4?'<em class="agenda-more">+'+(di.length-4)+'</em>':'')+'</span></button>'}
+var selected=items.filter(function(x){return x.data===agendaSelecionada&&!x.evId}),reminders=items.filter(function(x){return x.tipo!=='evento'&&!x.feito}).slice(0,12),alerts=alertas();
+return '<section class="ev-unified-section"><div class="ev-unified-head"><h3>Agenda e lembretes</h3><span class="tag">'+items.filter(function(x){return x.tipo!=='evento'&&!x.feito}).length+' lembretes / atividades pendentes</span></div><div class="agenda-shell"><div class="agenda-cal"><div class="agenda-toolbar"><button class="btn sm" onclick="agendaHoje()">Hoje</button><div class="agenda-nav"><button class="btn sm" title="Mês anterior" onclick="agendaMudar(-1)">‹</button><strong class="agenda-month">'+new Intl.DateTimeFormat('pt-BR',{month:'long',year:'numeric'}).format(first)+'</strong><button class="btn sm" title="Próximo mês" onclick="agendaMudar(1)">›</button></div></div><div class="agenda-week">'+['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'].map(function(x){return '<span>'+x+'</span>'}).join('')+'</div><div class="agenda-days">'+days+'</div><div class="agenda-legend"><span><i class="event-color"></i>Eventos</span><span><i class="reminder-color"></i>Lembretes</span><span><i class="done-color"></i>Concluídos</span></div></div><div class="agenda-side"><div><h3>'+fmt(agendaSelecionada)+'</h3><div class="agenda-list">'+(selected.map(item).join('')||'<div class="agenda-empty">Nada marcado para esta data.</div>')+'</div></div><div><h3>Lembretes pendentes</h3><div class="agenda-list">'+(reminders.map(item).join('')||'<div class="agenda-empty">Nenhum lembrete pendente.</div>')+'</div></div></div></div></section>'+
+'<details class="ev-unified-section"><summary>＋ Nova atividade ou lembrete</summary><div class="agenda-quick"><div class="wide"><label>Título</label><input id="ag-t"/></div><div><label>Tipo</label><select id="ag-tp"><option>Atividade</option><option>Lembrete</option></select></div><div><label>Data</label><input id="ag-d" type="date" value="'+agendaSelecionada+'"/></div><div><label>Hora</label><input id="ag-h" type="time"/></div><div><label>Detalhes</label><input id="ag-desc"/></div><button class="btn primary" onclick="addAgendaItem()">＋ Adicionar</button></div></details>'+
+'<section class="ev-unified-section"><h3>Avisos ativos <span class="badge">'+alerts.length+'</span></h3>'+ (alerts.map(function(x){return '<div class="alertbar '+(x.t==='w'?'w':'')+'"><span>'+esc(x.m)+'</span><button class="btn sm primary" onclick="avisoFinalizar(\''+(x.ev?'ev':x.at?'at':'k')+'\',\''+esc(x.ev||x.at||x.k)+'\')">✓ Finalizei</button></div>'}).join('')||'<div class="agenda-empty">Tudo em dia.</div>')+'</section>'}
+var eventsOld=window.vEventos;
+window.vEventos=function(){var h=eventsOld().replace('<h2 class="page">Eventos</h2>','<h2 class="page">Eventos, Agenda &amp; Lembretes</h2>');return '<div class="ev-unified">'+h+agenda()+'</div>'};vEventos=window.vEventos;
+ALIAS_TELA.agenda='eventos';ALIAS_TELA.atividades='eventos';ALIAS_TELA.lembrete='eventos';ALIAS_TELA.lembretes='eventos';delete ALIAS_TELA.eventos;
+var menuOld=window.buildMenu;
+window.buildMenu=function(){MENU.forEach(function(g){g.itens=g.itens.filter(function(x){return x.k!=='agenda'&&x.k!=='lembretes'});g.itens.forEach(function(x){if(x.k==='eventos')x.n='Eventos, Agenda & Lembretes'})});return menuOld.apply(this,arguments)};buildMenu=window.buildMenu;
+var renderOld=window.render;
+window.render=function(){if(['agenda','atividades','lembrete','lembretes'].indexOf(tab)>=0)tab='eventos';reconcile();var result=renderOld.apply(this,arguments);if(tab==='eventos'){$('tb-title').textContent='Eventos, Agenda & Lembretes'}return result};render=window.render;
+buildMenu();reconcile();
+})();
+</script>
+<style id="mdk-v172-evicons">
+.ev-table td .ev-actions.ev-act2{display:flex!important;gap:6px!important;justify-content:flex-start!important;align-items:center;flex-wrap:nowrap}
+.ev-act2 .ev-ib{all:unset;box-sizing:border-box;width:32px;height:32px;display:grid;place-items:center;cursor:pointer;border-radius:8px;border:1px solid rgba(148,163,184,.22);background:rgba(255,255,255,.04);color:#c3cedd;transition:.15s}
+.ev-act2 .ev-ib:hover{border-color:rgba(86,217,255,.6);color:#e6f7ff;background:rgba(86,217,255,.1)}
+.ev-act2 .ev-ib:focus-visible{outline:2px solid #56d9ff;outline-offset:2px}
+.ev-act2 .ev-ib.is-ok{border-color:rgba(34,197,94,.45);color:#4ade80;background:rgba(34,197,94,.1)}
+.ev-act2 .ev-ib.is-ok:hover{background:rgba(34,197,94,.2);color:#86efac}
+.ev-act2 .ev-ib.is-del:hover{border-color:rgba(239,68,68,.6);color:#f87171;background:rgba(239,68,68,.1)}
+.ev-table th:last-child,.ev-table td:last-child{width:130px}
 </style>
 </body>
 </html>
