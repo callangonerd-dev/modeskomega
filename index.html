@@ -2872,9 +2872,15 @@ async function fsAdicionarPasta(){
     if(!EXP.roots.some(r=>r.nome===h.name))EXP.roots.push({h,nome:h.name,livre:true});
     fsRegistrarLocal(h);
     await fsSalvarRaizes();
-    EXP.root=h;EXP.dir=h;EXP.path=[h];EXP.filtro='';
+    EXP.mob=false;EXP.root=h;EXP.dir=h;EXP.path=[h];EXP.filtro='';
     await expLer();toast('Pasta conectada: '+h.name);
-  }catch(e){}
+  }catch(e){
+    if(e&&e.name==='AbortError')return;
+    /* navegador bloqueou o seletor (ex.: site aberto dentro de outra página) — usa o seletor de pasta comum */
+    var inp=document.getElementById('mdk21-dir');
+    if(inp){toast('Abrindo seletor de pasta alternativo…');inp.click()}
+    else toast('Não foi possível abrir a pasta: '+((e&&e.message)||'erro'));
+  }
 }
 async function fsRemoverRaiz(nome){
   EXP.roots=EXP.roots.filter(r=>r.nome!==nome);
@@ -2885,7 +2891,7 @@ async function fsRemoverRaiz(nome){
 async function fsAbrirRaiz(nome){
   const r=EXP.roots.find(x=>x.nome===nome);if(!r)return;
   if(!r.livre){const p=await r.h.requestPermission({mode:'readwrite'});if(p!=='granted')return toast('Permissão negada');r.livre=true}
-  EXP.root=r.h;EXP.dir=r.h;EXP.path=[r.h];EXP.filtro='';expLer();
+  EXP.mob=false;EXP.root=r.h;EXP.dir=r.h;EXP.path=[r.h];EXP.filtro='';expLer();
 }
 function abrirCaminho(c){try{navigator.clipboard&&navigator.clipboard.writeText(c)}catch(e){}
   toast('Caminho copiado: '+c);go('arquivos')}
@@ -6780,7 +6786,7 @@ body{padding-bottom:var(--sa-b)}
   main{padding-bottom:110px}
 }
 </style>
-<input directory="" id="mdk21-dir" multiple="" style="display:none" type="file" webkitdirectory=""/>
+<input data-up90="off" directory="" id="mdk21-dir" multiple="" style="display:none" type="file" webkitdirectory=""/>
 <script id="mdk-v21-js">
 (function(){
   'use strict';
@@ -6855,6 +6861,15 @@ body{padding-bottom:var(--sa-b)}
     if(inp)inp.click(); else T('Este navegador nao permite abrir pastas');
   };
   window.fsCarregarPastaCelular=function(){ if(inp)inp.click() };
+  /* caminho salvo: abre a pasta conectada com o mesmo nome ou pede para conectar */
+  window.fsAbrirSalvo=function(nome){
+    var n=String(nome||'').toLowerCase();
+    var r=((window.EXP&&EXP.roots)||[]).find(function(x){return String(x.nome||'').toLowerCase()===n});
+    if(r)return fsAbrirRaiz(r.nome);
+    if(MOB.files.length&&MOB.nome.toLowerCase()===n){MOB.path=[];return mobLer()}
+    T('Pasta "'+nome+'" não está conectada — selecione-a para liberar o acesso');
+    window.fsAdicionarPasta();
+  };
 
   /* navegacao compativel com os dois modos */
   var oAbrir=window.expAbrir,oVoltar=window.expVoltar,oIr=window.expIr,oRaiz=window.expRaiz,oLer=window.expLer;
@@ -6885,14 +6900,15 @@ body{padding-bottom:var(--sa-b)}
             '<span>'+(r.livre?'📂':'🔒')+'</span><b>'+E(r.nome)+'</b>'+
             '<button class="btn sm" onclick="event.stopPropagation();fsRemoverRaiz(\''+E(r.nome)+'\')">✕</button></div>';
         }).join('')||'<div class="dim" style="font-size:12px">Nenhuma pasta conectada ainda.</div>')
-      : (MOB.files.length
+      : '';
+    if(MOB.files.length||!temFSA)locais=(temFSA&&roots.length?locais:'')+(MOB.files.length
           ? '<div class="fs21-row" onclick="fsAbrirRaizMob()"><span>📂</span><b>'+E(MOB.nome)+'</b>'+
             '<span class="dim" style="margin-left:auto;font-size:11px">'+MOB.files.length+' arq.</span></div>'
           : '<div class="dim" style="font-size:12px">Toque em “Abrir pasta” para carregar uma pasta do celular.</div>');
 
     var salvos=((window.state&&state.pastas)||[]).map(function(p){
-      return '<div class="fs21-row" title="'+E(p.caminho||p.nome)+'"><span>📁</span><b>'+E(p.nome)+'</b>'+
-        '<button class="btn sm" onclick="del(\'pastas\',\''+p.id+'\')">🗑</button></div>';
+      return '<div class="fs21-row" onclick="fsAbrirSalvo(\''+E(p.nome).replace(/'/g,"\\'")+'\')" title="'+E(p.caminho||p.nome)+'"><span>📁</span><b>'+E(p.nome)+'</b>'+
+        '<button class="btn sm" onclick="event.stopPropagation();del(\'pastas\',\''+p.id+'\')">🗑</button></div>';
     }).join('')||'<div class="dim" style="font-size:12px">Nenhum caminho salvo.</div>';
 
     var servicos=((window.state&&state.servicos)||[]).map(function(s){
@@ -11729,7 +11745,7 @@ buildMenu();reconcile();
 <style id="mdk-manual-reading-css">
 #mdk-reading-toggle{width:100%;margin:8px 0;display:flex;align-items:center;gap:8px;min-height:36px;font:600 12px Manrope,system-ui;color:var(--fg);background:var(--bg2);border:1px solid var(--line2);border-radius:6px;padding:8px 10px;cursor:pointer;text-align:left}
 #mdk-reading-toggle svg{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-width:1.8}
-#mdk-manual-panel{--reading-panel:oklch(.18 .02 255);--reading-text:oklch(.94 .008 255);--reading-muted:oklch(.76 .018 255);--reading-line:oklch(.36 .02 255);--reading-accent:oklch(.68 .21 24);position:fixed;z-index:100000;width:min(290px,calc(100vw - 24px));max-height:calc(100dvh - 24px);overflow:auto;inset:auto;margin:0;padding:16px;border:1px solid var(--reading-line);border-radius:7px;background:var(--reading-panel);color:var(--reading-text);font:13px/1.5 Manrope,system-ui;box-shadow:0 12px 35px oklch(0 0 0 / .35)}
+#mdk-manual-panel{--reading-panel:oklch(.18 .02 255);--reading-text:oklch(.94 .008 255);--reading-muted:oklch(.76 .018 255);--reading-line:oklch(.36 .02 255);--reading-accent:oklch(.68 .21 24);position:fixed;z-index:100000;width:min(350px,calc(100vw - 24px));max-height:calc(100dvh - 24px);overflow:auto;inset:auto;margin:0;padding:16px;border:1px solid var(--reading-line);border-radius:7px;background:var(--reading-panel);color:var(--reading-text);font:13px/1.5 Manrope,system-ui;box-shadow:0 12px 35px oklch(0 0 0 / .35)}
 #mdk-manual-panel::backdrop{background:transparent}
 #mdk-manual-panel .reading-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
 #mdk-manual-panel h3{font:600 14px Sora,system-ui;letter-spacing:0;margin:0;color:var(--reading-text)}
@@ -11747,37 +11763,106 @@ body[data-mdk-manual-theme=light]{background:var(--bg0)!important}
 body[data-mdk-manual-theme=light] :is(#app>aside,main,.card,.syscard,.pastacard,.v20-glass,.card-login,input,textarea,select){background:var(--bg2)!important;color:var(--fg)!important;border-color:var(--line2)!important}
 body[data-mdk-manual-theme=light] #mdk-manual-panel{--reading-panel:oklch(.99 .002 255);--reading-text:oklch(.23 .018 255);--reading-muted:oklch(.42 .018 255);--reading-line:oklch(.72 .01 255)}
 </style>
+<style id="mdk-reading-expanded-css">
+#mdk-manual-panel{--reading-panel:var(--bg2);--reading-text:var(--fg);--reading-muted:var(--mut);--reading-line:var(--line2);--reading-accent:var(--acc2);--reading-soft:var(--bg3);--reading-ring:var(--info);letter-spacing:0}
+#mdk-manual-panel:popover-open{display:block!important;visibility:visible!important;opacity:1!important}
+#mdk-reading-toggle{justify-content:flex-start}#mdk-reading-toggle:hover{border-color:var(--acc2)}
+#mdk-manual-panel .reading-head{margin-bottom:0;padding-bottom:12px;border-bottom:1px solid var(--reading-line)}
+#mdk-manual-panel .reading-head>div{display:flex;align-items:center;gap:9px}#mdk-manual-panel .reading-head svg{width:20px;height:20px;stroke:var(--reading-accent);fill:none;stroke-width:1.8}
+#mdk-manual-panel fieldset{margin:14px 0 0;padding:12px 0 0;border:0;border-top:1px solid var(--reading-line);min-width:0}
+#mdk-manual-panel legend{padding:0 8px 0 0;font:600 11px Sora,system-ui;color:var(--reading-muted);letter-spacing:0;text-transform:none}
+#mdk-manual-panel .reading-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}#mdk-manual-panel .reading-grid>div{min-width:0}
+#mdk-manual-panel button:hover{border-color:var(--reading-accent);background:var(--reading-soft)}
+#mdk-manual-panel .reading-check{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:38px;margin:4px 0;color:var(--reading-text);cursor:pointer}
+#mdk-manual-panel .reading-check input{width:17px;height:17px;min-height:17px;margin:0;accent-color:var(--reading-accent);flex:none}
+#mdk-manual-panel .reading-reset{display:flex;justify-content:center;gap:7px;min-height:36px}
+#mdk-manual-panel .reading-footer{display:grid;grid-template-columns:1fr 1fr;gap:8px;border-top:1px solid var(--reading-line);margin-top:14px;padding-top:12px}#mdk-manual-panel .reading-footer button{margin:0;white-space:normal}
+#mdk-manual-panel .reading-status{display:block;min-height:18px;margin-top:9px;text-align:center;font-size:11px;color:var(--reading-muted)}
+#view[data-mdk-links] a{text-decoration:underline!important;text-underline-offset:3px;text-decoration-thickness:2px}
+#view[data-mdk-cursor],#view[data-mdk-cursor] *{cursor:crosshair!important}#view[data-mdk-cursor] :is(a,button,input,select,textarea){cursor:pointer!important}
+body[data-mdk-reduced-motion] *,body[data-mdk-reduced-motion] *::before,body[data-mdk-reduced-motion] *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+#mdk-reading-guide{position:fixed;left:0;right:0;height:38px;pointer-events:none;z-index:99999;background:color-mix(in oklab,var(--info) 10%,transparent);border-block:1px solid var(--info);display:none}
+#mdk-reading-guide.active{display:block}
+@media(pointer:coarse){#mdk-manual-panel .reading-pointer-option{display:none}}
+@media(prefers-reduced-motion:reduce){#mdk-manual-panel,#mdk-reading-toggle{animation:none;transition:none}}
+
+/* Compact reading controls, using the existing MODESK palette. */
+#mdk-reading-toggle{min-height:32px;padding:5px 9px;gap:8px;margin:6px 0;background:var(--bg3);border-radius:5px;font-size:11px}
+#mdk-reading-toggle .reading-trigger-icon{font:600 15px Sora,system-ui;color:var(--acc2);line-height:1}
+#mdk-reading-toggle .reading-trigger-arrow{margin-left:auto;width:14px;height:14px;color:var(--mut);transition:transform .15s}
+#mdk-reading-toggle[aria-expanded=true]{border-color:var(--acc2)}
+#mdk-reading-toggle[aria-expanded=true] .reading-trigger-arrow{transform:rotate(90deg)}
+#mdk-manual-panel{width:min(320px,calc(100vw - 24px));padding:12px;font-size:12px;line-height:1.35;border-radius:6px}
+#mdk-manual-panel .reading-head{padding-bottom:9px;gap:6px}
+#mdk-manual-panel h3{font-size:13px}
+#mdk-manual-panel .reading-head>div{gap:7px}
+#mdk-manual-panel .reading-head svg{width:17px;height:17px}
+#mdk-manual-panel label{font-size:11px;margin:0;color:var(--reading-muted);font-weight:500}
+#mdk-manual-panel select{min-height:32px;height:32px;padding:4px 7px;font-size:12px;min-width:0;text-overflow:ellipsis}
+#mdk-manual-panel button{min-height:30px;min-width:30px;padding:4px 7px;font-size:12px}
+#mdk-manual-panel #mdk-manual-close{width:30px;height:30px;border:0;background:transparent}
+#mdk-manual-panel .reading-row{display:grid;grid-template-columns:92px minmax(0,1fr);align-items:center;gap:8px;margin-top:8px}
+#mdk-manual-panel .reading-size{grid-template-columns:30px 1fr 30px;gap:4px;border:1px solid var(--reading-line);border-radius:5px;overflow:hidden}
+#mdk-manual-panel .reading-size button{border:0;border-radius:0;background:var(--reading-soft)}
+#mdk-manual-panel .reading-size output{font-size:12px;font-weight:600}
+#mdk-manual-panel fieldset{margin-top:12px;padding-top:4px}
+#mdk-manual-panel legend{font-size:10px}
+#mdk-manual-panel .reading-grid{gap:8px;margin-top:8px}
+#mdk-manual-panel .reading-grid label{margin-bottom:4px}
+#mdk-manual-panel .reading-contrast{margin-top:8px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+#mdk-manual-panel .reading-contrast output{font-size:11px;color:var(--reading-muted)}
+#mdk-manual-panel input[type=range]{height:18px;margin:4px 0 0}
+#mdk-manual-panel .reading-check{min-height:30px;margin:2px 0;font-size:11px;color:var(--reading-text)}
+#mdk-manual-panel .reading-check input{appearance:none;width:26px;height:16px;min-height:16px;border:1px solid var(--reading-line);border-radius:9px;background:var(--reading-soft);position:relative;cursor:pointer}
+#mdk-manual-panel .reading-check input::before{content:'';position:absolute;width:10px;height:10px;top:2px;left:2px;border-radius:50%;background:var(--reading-muted)}
+#mdk-manual-panel .reading-check input:checked{background:var(--reading-accent);border-color:var(--reading-accent)}
+#mdk-manual-panel .reading-check input:checked::before{left:12px;background:var(--reading-text)}
+#mdk-manual-panel .reading-footer{margin-top:9px;padding-top:9px;gap:6px}
+#mdk-manual-panel .reading-reset{min-height:30px;font-size:11px}
+#mdk-manual-panel .reading-status{min-height:0;margin-top:0;font-size:10px}
+#mdk-manual-panel .reading-status:not(:empty){margin-top:6px}
+@media(prefers-reduced-motion:reduce){#mdk-reading-toggle .reading-trigger-arrow{transition:none}}
+</style>
 <div id="mdk-manual-panel" popover="auto" role="dialog" aria-labelledby="mdk-manual-title">
-<div class="reading-head"><h3 id="mdk-manual-title">Fonte e contraste</h3><button type="button" id="mdk-manual-close" aria-label="Fechar ajustes" title="Fechar">✕</button></div>
-<label for="mdk-manual-section">Seção</label><select id="mdk-manual-section"></select>
-<label for="mdk-manual-font">Fonte</label><div class="reading-size"><button type="button" id="mdk-manual-minus" aria-label="Diminuir fonte" title="Diminuir fonte">A−</button><output id="mdk-manual-font" aria-live="polite">100%</output><button type="button" id="mdk-manual-plus" aria-label="Aumentar fonte" title="Aumentar fonte">A+</button></div>
-<label for="mdk-manual-contrast">Contraste do texto <output id="mdk-manual-contrast-value">Original</output></label><input type="range" id="mdk-manual-contrast" min="0" max="100" step="10" value="0"/>
-<label for="mdk-manual-theme">Tema</label><select id="mdk-manual-theme"><option value="original">Original do site</option><option value="light">Claro</option></select>
-<button type="button" class="reading-reset" id="mdk-manual-reset">Restaurar esta seção</button>
-</div>
+<div class="reading-head"><div><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="4" r="2"/><path d="M4 9h16M12 6v8m0 0-5 7m5-7 5 7"/></svg><h3 id="mdk-manual-title">Leitura e acessibilidade</h3></div><button type="button" id="mdk-manual-close" aria-label="Fechar ajustes" title="Fechar">✕</button></div>
+<div class="reading-row"><label for="mdk-manual-section">Seção</label><select id="mdk-manual-section"></select></div>
+<fieldset><legend>Texto</legend>
+<div class="reading-row"><label id="mdk-font-label">Tamanho</label><div class="reading-size" role="group" aria-labelledby="mdk-font-label"><button type="button" id="mdk-manual-minus" aria-label="Diminuir fonte" title="Diminuir fonte">A−</button><output id="mdk-manual-font" aria-live="polite">100%</output><button type="button" id="mdk-manual-plus" aria-label="Aumentar fonte" title="Aumentar fonte">A+</button></div></div>
+<div class="reading-row"><label for="mdk-manual-family">Fonte</label><select id="mdk-manual-family"><option value="original">Original do site</option><option value="system">Sistema — sem serifa</option><option value="arial">Arial</option><option value="mono">Monoespaçada</option></select></div>
+<div class="reading-grid"><div><label for="mdk-manual-line">Entrelinhas</label><select id="mdk-manual-line"><option value="0">Original</option><option value="1.6">Confortável</option><option value="1.9">Ampla</option></select></div><div><label for="mdk-manual-spacing">Espaço entre letras</label><select id="mdk-manual-spacing"><option value="0">Original</option><option value="0.04">Leve</option><option value="0.08">Amplo</option></select></div></div></fieldset>
+<fieldset><legend>Aparência</legend><div class="reading-contrast"><label for="mdk-manual-contrast">Contraste do texto</label><output id="mdk-manual-contrast-value">Original</output></div><input type="range" id="mdk-manual-contrast" min="0" max="100" step="10" value="0"/>
+<div class="reading-row"><label for="mdk-manual-theme">Tema</label><select id="mdk-manual-theme"><option value="original">Original do site</option><option value="light">Claro</option></select></div><label class="reading-check" for="mdk-manual-links">Destacar links<input id="mdk-manual-links" type="checkbox"/></label></fieldset>
+<fieldset><legend>Conforto e navegação</legend><label class="reading-check" for="mdk-manual-motion">Reduzir animações do site<input id="mdk-manual-motion" type="checkbox"/></label><label class="reading-check reading-pointer-option" for="mdk-manual-guide">Régua de leitura<input id="mdk-manual-guide" type="checkbox"/></label><label class="reading-check reading-pointer-option" for="mdk-manual-cursor">Cursor de precisão<input id="mdk-manual-cursor" type="checkbox"/></label></fieldset>
+<div class="reading-footer"><button type="button" class="reading-reset" id="mdk-manual-reset">↺ Esta seção</button><button type="button" class="reading-reset" id="mdk-manual-reset-all">↺ Todos os ajustes</button></div><output class="reading-status" id="mdk-reading-status" aria-live="polite"></output>
+</div><div id="mdk-reading-guide" aria-hidden="true"></div>
 <script id="mdk-manual-reading-js">
 (function(){
 'use strict';
-var key='modesk.manual-reading.v2',prefs={theme:'original',sections:{}},records=new WeakMap(),view=document.getElementById('view'),panel=document.getElementById('mdk-manual-panel'),choose=document.getElementById('mdk-manual-section'),anchor;
-try{var p=JSON.parse(localStorage.getItem(key)||'null');if(p&&typeof p==='object'){prefs.theme=p.theme==='light'?'light':'original';prefs.sections=p.sections&&typeof p.sections==='object'?p.sections:{}}}catch(e){}
+var key='modesk.manual-reading.v2',prefs={theme:'original',motion:false,sections:{}},records=new WeakMap(),view=document.getElementById('view'),panel=document.getElementById('mdk-manual-panel'),choose=document.getElementById('mdk-manual-section'),anchor;
+try{var p=JSON.parse(localStorage.getItem(key)||'null');if(p&&typeof p==='object'){prefs.theme=p.theme==='light'?'light':'original';prefs.motion=p.motion===true;prefs.sections=p.sections&&typeof p.sections==='object'?p.sections:{}}}catch(e){}
 function current(){return typeof tab==='string'?tab:'dashboard'}
-function setting(k){var p=prefs.sections[k]||{};return {font:Math.max(80,Math.min(160,Number(p.font)||100)),contrast:Math.max(0,Math.min(100,Number(p.contrast)||0))}}
+function setting(k){var p=prefs.sections[k]||{};return {font:Math.max(80,Math.min(160,Number(p.font)||100)),contrast:Math.max(0,Math.min(100,Number(p.contrast)||0)),family:['system','arial','mono'].includes(p.family)?p.family:'original',line:[1.6,1.9].includes(Number(p.line))?Number(p.line):0,spacing:[0.04,0.08].includes(Number(p.spacing))?Number(p.spacing):0,links:p.links===true,guide:p.guide===true,cursor:p.cursor===true}}
 function persist(){try{localStorage.setItem(key,JSON.stringify(prefs))}catch(e){}}
-function remember(el){var r=records.get(el);if(r)return r;var computed=getComputedStyle(el);r={font:parseFloat(computed.fontSize),color:computed.color,style:{}};['font-size','color','-webkit-text-fill-color'].forEach(function(k){r.style[k]={value:el.style.getPropertyValue(k),priority:el.style.getPropertyPriority(k)}});records.set(el,r);return r}
+function remember(el){var r=records.get(el);if(r)return r;var computed=getComputedStyle(el);r={font:parseFloat(computed.fontSize),color:computed.color,style:{}};['font-size','font-family','line-height','letter-spacing','color','-webkit-text-fill-color'].forEach(function(k){r.style[k]={value:el.style.getPropertyValue(k),priority:el.style.getPropertyPriority(k)}});records.set(el,r);return r}
 function restore(el,r,k){var s=r.style[k];if(s.value)el.style.setProperty(k,s.value,s.priority);else el.style.removeProperty(k)}
-function apply(){if(!view)return;var s=setting(current()),light=prefs.theme==='light';view.querySelectorAll('*').forEach(function(el){if(el.closest('svg,canvas,iframe')||el.matches('style,script'))return;var text=Array.from(el.childNodes).some(function(n){return n.nodeType===3&&n.textContent.trim()});if(!text&&!el.matches('input,textarea,select'))return;var r=records.get(el);if(s.font===100&&s.contrast===0&&!light&&!r)return;r=r||remember(el);if(s.font!==100&&Number.isFinite(r.font))el.style.setProperty('font-size',(r.font*s.font/100).toFixed(2)+'px','important');else restore(el,r,'font-size');if(s.contrast||light){var rgb=r.color.match(/[\d.]+/g);if(rgb&&rgb.length>=3){var target=light?20:255,t=s.contrast/100;if(light){var lum=Number(rgb[0])*.2126+Number(rgb[1])*.7152+Number(rgb[2])*.0722;if(lum>140)t=Math.max(t,.80)}var c=rgb.slice(0,3).map(function(v){return Math.round(Number(v)+(target-Number(v))*t)});el.style.setProperty('color','rgb('+c.join(',')+')','important');el.style.setProperty('-webkit-text-fill-color','currentColor','important')}}else{restore(el,r,'color');restore(el,r,'-webkit-text-fill-color')}})}
-function theme(){if(prefs.theme==='original')document.body.removeAttribute('data-mdk-manual-theme');else document.body.dataset.mdkManualTheme=prefs.theme;document.getElementById('mdk-manual-theme').value=prefs.theme;apply()}
-function sync(){var s=setting(choose.value);document.getElementById('mdk-manual-font').textContent=s.font+'%';document.getElementById('mdk-manual-contrast').value=s.contrast;document.getElementById('mdk-manual-contrast-value').textContent=s.contrast?'+'+s.contrast+'%':'Original';document.getElementById('mdk-manual-minus').disabled=s.font<=80;document.getElementById('mdk-manual-plus').disabled=s.font>=160}
-function options(){var map=new Map();if(typeof MENU!=='undefined')MENU.forEach(function(g){g.itens.forEach(function(x){var k=typeof ALIAS_TELA!=='undefined'?(ALIAS_TELA[x.k]||x.k):x.k;if(!map.has(k))map.set(k,x.n)})});choose.replaceChildren();map.forEach(function(n,k){var o=document.createElement('option');o.value=k;o.textContent=n;choose.appendChild(o)});choose.value=current();if(!choose.value)choose.selectedIndex=0}
+function apply(){if(!view)return;var s=setting(current());['links','cursor'].forEach(function(k){view.toggleAttribute('data-mdk-'+k,s[k])});document.getElementById('mdk-reading-guide').classList.toggle('active',s.guide);var light=prefs.theme==='light';view.querySelectorAll('*').forEach(function(el){if(el.closest('svg,canvas,iframe')||el.matches('style,script'))return;var text=Array.from(el.childNodes).some(function(n){return n.nodeType===3&&n.textContent.trim()});if(!text&&!el.matches('input,textarea,select'))return;var r=records.get(el);if(s.font===100&&s.contrast===0&&s.family==='original'&&!s.line&&!s.spacing&&!light&&!r)return;r=r||remember(el);var families={system:'system-ui, sans-serif',arial:'Arial, sans-serif',mono:'JetBrains Mono, monospace'};[['font-family',families[s.family]],['line-height',s.line],['letter-spacing',s.spacing?s.spacing+'em':null]].forEach(function(x){if(x[1])el.style.setProperty(x[0],String(x[1]),'important');else restore(el,r,x[0])});if(s.font!==100&&Number.isFinite(r.font))el.style.setProperty('font-size',(r.font*s.font/100).toFixed(2)+'px','important');else restore(el,r,'font-size');if(s.contrast||light){var rgb=r.color.match(/[\d.]+/g);if(rgb&&rgb.length>=3){var target=light?20:255,t=s.contrast/100;if(light){var lum=Number(rgb[0])*.2126+Number(rgb[1])*.7152+Number(rgb[2])*.0722;if(lum>140)t=Math.max(t,.80)}var c=rgb.slice(0,3).map(function(v){return Math.round(Number(v)+(target-Number(v))*t)});el.style.setProperty('color','rgb('+c.join(',')+')','important');el.style.setProperty('-webkit-text-fill-color','currentColor','important')}}else{restore(el,r,'color');restore(el,r,'-webkit-text-fill-color')}})}
+function theme(){document.body.toggleAttribute('data-mdk-reduced-motion',prefs.motion);document.getElementById('mdk-manual-motion').checked=prefs.motion;if(prefs.theme==='original')document.body.removeAttribute('data-mdk-manual-theme');else document.body.dataset.mdkManualTheme=prefs.theme;document.getElementById('mdk-manual-theme').value=prefs.theme;apply()}
+function sync(){var s=setting(choose.value);['family','line','spacing'].forEach(function(k){document.getElementById('mdk-manual-'+k).value=s[k]});['links','guide','cursor'].forEach(function(k){document.getElementById('mdk-manual-'+k).checked=s[k]});document.getElementById('mdk-manual-font').textContent=s.font+'%';document.getElementById('mdk-manual-contrast').value=s.contrast;document.getElementById('mdk-manual-contrast-value').textContent=s.contrast?'+'+s.contrast+'%':'Original';document.getElementById('mdk-manual-minus').disabled=s.font<=80;document.getElementById('mdk-manual-plus').disabled=s.font>=160}
+function options(){var map=new Map();if(typeof MENU!=='undefined')MENU.forEach(function(g){g.itens.forEach(function(x){var k=typeof ALIAS_TELA!=='undefined'?(ALIAS_TELA[x.k]||x.k):x.k;if(!map.has(k))map.set(k,x.n)})});choose.replaceChildren();map.forEach(function(n,k){var o=document.createElement('option');o.value=k;o.textContent=n;choose.appendChild(o)});choose.value=current();if(!choose.value){var o=document.createElement('option');o.value=current();o.textContent='Seção atual';choose.appendChild(o);choose.value=current()}}
 function position(){if(!anchor)return;var r=anchor.getBoundingClientRect(),w=panel.offsetWidth,h=panel.offsetHeight;var x=r.right+8;if(x+w>innerWidth-12)x=Math.max(12,r.left-w-8);panel.style.left=Math.max(12,Math.min(x,innerWidth-w-12))+'px';panel.style.top=Math.max(12,Math.min(r.top,innerHeight-h-12))+'px'}
-function open(e){anchor=e.currentTarget;options();sync();panel.showPopover();position()}
-var aside=document.querySelector('#app>aside');if(aside){var b=document.createElement('button');b.id='mdk-reading-toggle';b.type='button';b.setAttribute('aria-haspopup','dialog');b.setAttribute('aria-expanded','false');b.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 19 6-14 6 14M5 14h8M16 10h6M19 7v12"/></svg><span>Fonte e contraste</span>';b.onclick=open;aside.insertBefore(b,aside.querySelector('.side-command'))}
-panel.addEventListener('toggle',function(e){var b=document.getElementById('mdk-reading-toggle');if(b)b.setAttribute('aria-expanded',String(e.newState==='open'))});document.getElementById('mdk-manual-close').onclick=function(){panel.hidePopover()};choose.onchange=sync;
-function edit(prop,v){var s=setting(choose.value);s[prop]=v;prefs.sections[choose.value]=s;persist();sync();apply()}
+function open(e){anchor=e.currentTarget;options();sync();panel.showPopover();position();document.getElementById('mdk-manual-section').focus()}
+var aside=document.querySelector('#app>aside');if(aside){var b=document.createElement('button');b.id='mdk-reading-toggle';b.type='button';b.setAttribute('aria-haspopup','dialog');b.setAttribute('aria-expanded','false');b.setAttribute('aria-label','Leitura e acessibilidade');b.setAttribute('title','Leitura e acessibilidade');b.setAttribute('aria-controls','mdk-manual-panel');b.innerHTML='<span class="reading-trigger-icon" aria-hidden="true">Aa</span><span>Leitura</span><svg class="reading-trigger-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg>';b.onclick=open;aside.insertBefore(b,aside.querySelector('.side-command'))}
+panel.addEventListener('toggle',function(e){var b=document.getElementById('mdk-reading-toggle');if(b)b.setAttribute('aria-expanded',String(e.newState==='open'))});document.getElementById('mdk-manual-close').onclick=function(){panel.hidePopover();if(anchor)anchor.focus()};choose.onchange=sync;
+function edit(prop,v){var s=setting(choose.value);s[prop]=v;prefs.sections[choose.value]=s;persist();sync();apply();document.getElementById('mdk-reading-status').textContent=choose.value===current()?'Ajustes aplicados':'Ajustes salvos para esta seção'}
 document.getElementById('mdk-manual-minus').onclick=function(){edit('font',Math.max(80,setting(choose.value).font-10))};document.getElementById('mdk-manual-plus').onclick=function(){edit('font',Math.min(160,setting(choose.value).font+10))};document.getElementById('mdk-manual-contrast').oninput=function(){edit('contrast',Number(this.value))};document.getElementById('mdk-manual-theme').onchange=function(){prefs.theme=this.value;persist();theme()};document.getElementById('mdk-manual-reset').onclick=function(){delete prefs.sections[choose.value];persist();sync();apply()};
+['family','line','spacing'].forEach(function(k){document.getElementById('mdk-manual-'+k).onchange=function(){edit(k,k==='family'?this.value:Number(this.value))}});
+['links','guide','cursor'].forEach(function(k){document.getElementById('mdk-manual-'+k).onchange=function(){edit(k,this.checked)}});
+document.getElementById('mdk-manual-motion').onchange=function(){prefs.motion=this.checked;persist();theme()};
+document.getElementById('mdk-manual-reset-all').onclick=function(){prefs={theme:'original',motion:false,sections:{}};persist();sync();theme();document.getElementById('mdk-reading-status').textContent='Aparência original restaurada'};
+document.addEventListener('pointermove',function(e){var guide=document.getElementById('mdk-reading-guide');if(!guide.classList.contains('active'))return;guide.style.top=Math.max(0,e.clientY-19)+'px';guide.style.visibility=panel.matches(':popover-open')&&panel.contains(e.target)?'hidden':'visible'}, {passive:true});
+window.addEventListener('scroll',function(){if(panel.matches(':popover-open'))position()}, {passive:true});
 var pending=false;if(view)new MutationObserver(function(){if(pending)return;pending=true;requestAnimationFrame(function(){pending=false;apply()})}).observe(view,{childList:true,subtree:true});window.addEventListener('resize',function(){if(panel.matches(':popover-open'))position()});options();sync();theme();
 })();
 </script>
-
 </body>
 </html>
