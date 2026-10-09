@@ -2117,10 +2117,11 @@ function mpFiltrar(){MP.q=($('mp-q')||{}).value||'';MP.setor=($('mp-set')||{}).v
 function mpPintar(){const el=$('mp-tb');if(el)el.innerHTML=mpLinhas()}
 function mpCopiar(t,m){navigator.clipboard.writeText(t);toast(m||'Copiado')}
 function mpAnydeskBat(id){var bat='@echo off\r\nrem Abre o AnyDesk local ja conectando no ID\r\nstart "" "D:\\MODESK MASTER\\Programas\\Anydesk\\AnyDesk.exe" '+id+'\r\n';var b=new Blob([bat],{type:'application/octet-stream'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='anydesk_'+id+'.bat';document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(a.href)},4000)}
-function mpAnydesk(id){id=String(id||'').replace(/\s/g,'');if(!id)return toast('Sem ID AnyDesk');try{navigator.clipboard.writeText(id)}catch(e){}toast('Abrindo AnyDesk '+mpFmtAny(id)+'…');window.location.href='anydesk:'+id;setTimeout(function(){if(confirm('Se o AnyDesk nao abriu, baixe o atalho que abre o AnyDesk de D:\\MODESK MASTER\\Programas\\Anydesk ja conectando no ID '+mpFmtAny(id)+'.\n\nBaixar o atalho .bat agora?'))mpAnydeskBat(id)},2500)}
+function mpAnydesk(id){id=String(id||'').replace(/\s/g,'');if(id){try{navigator.clipboard.writeText(id)}catch(e){}}toast('Abrindo AnyDesk (D:\\MODESK MASTER\\Programas\\Anydesk)'+(id?' — ID '+mpFmtAny(id)+' copiado':''));var a=document.createElement('a');a.href='file:///D:/MODESK%20MASTER/Programas/Anydesk/AnyDesk.exe';a.target='_blank';a.rel='noopener';document.body.appendChild(a);a.click();a.remove();setTimeout(function(){if(id&&confirm('Se o navegador bloqueou a abertura do AnyDesk pelo caminho D:\\MODESK MASTER\\Programas\\Anydesk, deseja baixar um atalho .bat que abre o AnyDesk já conectando no ID?'))mpAnydeskBat(id)},1800)}
 /* VNC trabalha só por IP — a porta (:5900) é descartada em toda a tela */
 function mpIP(v){return String(v||'').replace(/:\d+\s*$/,'').trim()}
-function mpVnc(end){const ip=mpIP(end);if(!ip)return toast('Sem IP para VNC');try{navigator.clipboard.writeText(ip)}catch(e){}toast('IP '+ip+' copiado. Abrindo UltraVNC Viewer…');window.location.href='vnc://'+ip}
+function mpVnc(end){const ip=mpIP(end);if(!ip)return toast('Sem IP para VNC');var ok=function(){toast('IP '+ip+' copiado')};try{navigator.clipboard.writeText(ip).then(ok,function(){mpCopyFallback(ip);ok()})}catch(e){mpCopyFallback(ip);ok()}}
+function mpCopyFallback(t){var x=document.createElement('textarea');x.value=t;x.style.position='fixed';x.style.opacity='0';document.body.appendChild(x);x.select();try{document.execCommand('copy')}catch(e){}x.remove()}
 /* Reset de senha — abre a Ferramenta de Acesso já como outro usuário (runas) */
 const RESET_FERRAMENTA='D:\\MODESK MASTER\\Programas\\Ferramenta_Acesso_a';
 const RESET_USUARIO='paulom';
@@ -2154,7 +2155,7 @@ function mpLinhas(){
     <td class="mono">${esc(mpFmtAny(p.anydesk)||'—')}${p.anyant?`<div class="dim">antes: ${esc(mpFmtAny(p.anyant))}</div>`:''}</td>
     <td>${esc(p.so||'—')}<div class="dim">${esc(p.ram||'')} ${esc(p.disco?'· '+p.disco:'')}</div></td>
      <td><div class="acc-grid">
-      <button class="accbtn vnc" onclick="mpVnc('${esc(p.vnc)}')" ${p.vnc?'':'disabled'} title="Conectar por VNC${p.vnc?' — '+esc(mpIP(p.vnc)):''}" aria-label="Conectar por VNC"><img src="${MP_ICO_VNC}" alt="VNC"/></button>
+      <button class="accbtn vnc" onclick="mpVnc('${esc(p.vnc)}')" ${p.vnc?'':'disabled'} title="Copiar IP do VNC${p.vnc?' — '+esc(mpIP(p.vnc)):''}" aria-label="Conectar por VNC"><img src="${MP_ICO_VNC}" alt="VNC"/></button>
       <button class="accbtn any" onclick="mpAnydesk('${esc(p.anydesk)}')" ${p.anydesk?'':'disabled'} title="Conectar por AnyDesk${p.anydesk?' — '+esc(mpFmtAny(p.anydesk)):''}" aria-label="Conectar por AnyDesk"><img src="${MP_ICO_ANY}" alt="AnyDesk"/></button>
       <button class="accbtn key" onclick="mpReset('${esc(p.nome||p.pat)}','${esc(p.vnc)}')" title="Reset de senha" aria-label="Reset de senha">🔑</button>
       <button class="accbtn cp" onclick="mpCopiar('${esc(mpIP(p.vnc)||p.anydesk)}','Acesso copiado')" title="Copiar acesso" aria-label="Copiar acesso">⧉</button>
