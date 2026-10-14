@@ -120,7 +120,9 @@ async function mdkPost(corpo){
 async function mdkApi(action,dados){
   try{return await mdkPost(Object.assign({action:action,token:mdkTk()},dados||{}))}
   catch(e){if(e.code==='nao-autorizado'){try{setSyncStatus('login')}catch(x){}}throw e}}
-async function mdkApiLogin(senha,lembrar){var j=await mdkPost({action:'login',senha:senha});if(!j||!j.token||typeof j.token!=='string'){var e=new Error('o servidor não devolveu o acesso (verifique a implantação do Apps Script)');e.code='sem-token';throw e}mdkSetTk(j.token,lembrar);return j}
+async function mdkHashLocal(t){try{var b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('modesk:'+t));return Array.from(new Uint8Array(b)).map(function(x){return x.toString(16).padStart(2,'0')}).join('')}catch(e){var h=0;for(var i=0;i<t.length;i++)h=(h*31+t.charCodeAt(i))|0;return 'f'+h}}
+async function mdkLoginInterno(senha,lembrar){var h=await mdkHashLocal(senha),salvo=localStorage.getItem('modesk.senha.local');if(!salvo){localStorage.setItem('modesk.senha.local',h);salvo=h}if(h!==salvo){var e=new Error('senha incorreta');e.code='senha-incorreta';throw e}var t='local-'+h.slice(0,16);mdkSetTk(t,lembrar);return {ok:true,token:t,interno:true}}
+async function mdkApiLogin(senha,lembrar){var j;try{j=await mdkPost({action:'login',senha:senha})}catch(e0){if(e0.code==='senha-incorreta')throw e0;return mdkLoginInterno(senha,lembrar)}if(!j||!j.token||typeof j.token!=='string')return mdkLoginInterno(senha,lembrar);mdkSetTk(j.token,lembrar);return j}
 /* resolve com objeto se ha sessao valida (ou se estiver offline com token salvo), null se nao ha login */
 function mdkAuthPronto(){if(!mdkTk())return Promise.resolve(null);
   return mdkApi('ping').then(function(){return {ok:1}}).catch(function(e){if(e.code==='nao-autorizado'){mdkClearTk();return null}return {ok:1,offline:1}})}
