@@ -8754,13 +8754,7 @@ if(window.SIRIUS)return;
 var K={el:''};
 function dec(s){try{return atob(s)}catch(e){return ''}}
 /* Motor Sirius: chaves fragmentadas no codigo e remontadas em execucao. */
-var GKF=[
-  ['6PQkl9c5','aAL0TVMU','s0aiDbYd','YF3bydGW','Smnm7q28','mNpcoMQk','x9Lt_ksg'],
-  ['FD7Nua2y','MjdRYRSh','weFqwLbT','YF3bydGW','4Qx8mXu0','aR7AAjjb','bF2M_ksg'],
-  ['IQlWpgZG','sryobGuv','jq8CwELp','YF3bydGW','Nzez5qBy','cCV96eBc','qVc4_ksg'],
-  ['xsEwsW6d','9wPcpBqh','vQYqzNdQ','YF3bydGW','JjVUwzqz','7N57JYVw','yp0p_ksg'],
-  ['Je3bmf8j','Z9r44pCj','qXEaR3AT','YF3bydGW','FcJhzCe5','TtPAv4Nq','UOKp_ksg']
-];
+var GKF=[]; /* Use a chave configurada no próprio aparelho; nenhuma chave privada acompanha o download. */
 function montarChaves(){return GKF.map(function(f){return f.slice().reverse().map(function(p){return p.split('').reverse().join('')}).join('')})}
 var GKM=montarChaves();
 var GKP=[];
@@ -8809,7 +8803,7 @@ window.SIRIUS_API=API;
 var SYS='Você é o Sirius, assistente operacional do sistema MODESK (gestão de chamados, agenda, cadastros, arquivos, compras e BI). Responda em português do Brasil, em Markdown enxuto. '+
 'NUNCA use tabelas Markdown (linhas com |). Responda em texto corrido e natural, com frases curtas; quando precisar listar, use no máximo uma lista simples com hífen. Evite estruturas rígidas de relatório. '+
 'Você PODE executar ações no sistema. Para executar, inclua no final da resposta um bloco: ```acao {"fn":"agendar|cadastrar|arquivo|excluir|chamado|ir","args":{...}}``` '+
-'Campos: agendar{titulo,data,hora,obs}; cadastrar{nome,cod,qtd,local,obs}; arquivo{nome,caminho,desc}; excluir{lista,nome}; chamado{titulo,desc,prio,prazo,tags}; ir{tela}. Só use ação quando o usuário pedir claramente.';
+'Campos: agendar{titulo,data,hora,obs,tipo,evento,cliente,local,sala,horaFim,servicos,resp}; Use tipo="evento" e evento=true para eventos, tipo="lembrete" para lembretes pessoais. Não duplique o mesmo compromisso. Compras são inseridas apenas pelo upload de PDF ou Excel; nunca crie compras por comando de cadastro.  cadastrar{nome,cod,qtd,local,obs}; arquivo{nome,caminho,desc}; excluir{lista,nome}; chamado{titulo,desc,prio,prazo,tags}; ir{tela}. Só use ação quando o usuário pedir claramente.';
 function motivoTroca(s){return s===429?'limite de uso':s===401?'chave invalida':s===403?'acesso negado':s===402?'creditos esgotados':'erro '+s}
 async function chamarIA(msgs){
   var cfg=S.cfg, ks=chavesGroq();
@@ -10774,7 +10768,7 @@ main:has(.agenda-shell)>.sect>.card:first-of-type{padding:10px 12px!important;ma
 
   /* download do HTML com o nome da versão */
   var dl=window.baixarHTML;
-  if(typeof dl==='function')window.baixarHTML=function(){var c=document.createElement.bind(document);var orig=HTMLAnchorElement.prototype.click;HTMLAnchorElement.prototype.click=function(){if(this.download&&/\.html$/i.test(this.download))this.download='MODESK_PESSOAL_v173.html';HTMLAnchorElement.prototype.click=orig;return orig.call(this)};return dl.apply(this,arguments)};
+  if(typeof dl==='function')window.baixarHTML=function(){var c=document.createElement.bind(document);var orig=HTMLAnchorElement.prototype.click;HTMLAnchorElement.prototype.click=function(){if(this.download&&/\.html$/i.test(this.download))this.download='MODESK_PESSOAL_v174.html';HTMLAnchorElement.prototype.click=orig;return orig.call(this)};return dl.apply(this,arguments)};
 })();
 </script>
 
@@ -10835,14 +10829,16 @@ main:has(.agenda-shell)>.sect>.card:first-of-type{padding:10px 12px!important;ma
   /* ---------- 4. Sirius: lembrete que é evento entra nos dois ---------- */
   var RX_EV=/\b(evento|eventos|palestra|semin[aá]rio|workshop|reuni[aã]o|aula show|formatura|confer[eê]ncia|audit[oó]rio|terra[cç]o|cerim[oô]nia|apresenta[cç][aã]o|treinamento|cliente|coffee|mayu)\b/i;
   function ehEvento(a){if(!a)return false;var t=String(a.tipo||'').toLowerCase();if(t==='evento')return true;if(t==='lembrete'&&!a.evento)return RX_EV.test([a.titulo,a.obs,a.local,a.sala].join(' '));return !!a.evento||!!a.local||!!a.sala||RX_EV.test([a.titulo,a.obs].join(' '))}
-  function siriusInserir(a){a=a||{};var st=ST(),tit=a.titulo||a.nome||'Lembrete Sirius',data=a.data||a.prazo||'',hora=a.hora||'';
-    var ja=st.atividades.some(function(x){return x.titulo===tit&&x.prazo===data&&x.hora===hora});
-    if(!ja)st.atividades.push({id:ID(),titulo:tit,prazo:data,hora:hora,tipo:'Pessoal',prioridade:'Alta',repetir:'',aviso:30,desc:a.obs||'criado pelo Sirius',arquivo:null,feito:false,criado:Date.now(),origem:'sirius'});
+  function siriusInserir(a){a=a||{};var st=ST(),tit=String(a.titulo||a.nome||'Lembrete Sirius').trim(),data=window.MDK_PARSE_DATA?MDK_PARSE_DATA(a.data||a.prazo||''):(a.data||a.prazo||''),hora=a.hora||'';
+    if(!data)return 'Informe uma data válida para o agendamento.';
     var ev=ehEvento(a);
-    if(ev){var je=st.eventos.some(function(x){return (x.titulo===tit||x.cliente===tit)&&x.data===data});
-      if(!je)st.eventos.push({id:ID(),cliente:a.cliente||tit,titulo:tit,servicos:[],local:a.local||a.sala||'',data:data,hora:hora,horaFim:a.horaFim||'',resp:a.resp||'',info:a.obs||'criado pelo Sirius',status:'Agendado',anexo:null,origem:'sirius'})}
+    if(ev){var je=st.eventos.find(function(x){return (x.titulo===tit||x.cliente===tit)&&x.data===data&&(x.hora||'')===hora});
+      if(!je)st.eventos.push({id:ID(),cliente:a.cliente||tit,titulo:tit,servicos:a.servicos||[],local:a.local||a.sala||'',data:data,hora:hora,horaFim:a.horaFim||'',resp:a.resp||'',info:a.obs||'',status:'Agendado',anexo:null,origem:'sirius'});
+    }else{var ja=st.atividades.some(function(x){return x.titulo===tit&&x.prazo===data&&(x.hora||'')===hora});
+      if(!ja)st.atividades.push({id:ID(),titulo:tit,prazo:data,hora:hora,tipo:'Pessoal',prioridade:'Alta',repetir:'',aviso:30,desc:a.obs||'',arquivo:null,feito:false,criado:Date.now(),origem:'sirius'});
+    }
     SV();try{render()}catch(e){}
-    return ev?'inserido em Lembretes e em Eventos: '+tit+' '+FD(data)+' '+hora:'lembrete salvo na agenda: '+tit+' '+FD(data)+' '+hora;
+    return (ev?'Evento salvo na agenda: ':'Lembrete salvo na agenda: ')+tit+' '+FD(data)+' '+hora;
   }
   function ligarSirius(){var A=window.SIRIUS_API;if(!A||A._v136)return !!A;A.agendar=siriusInserir;A.lembrete=siriusInserir;A.evento=function(a){a=a||{};a.evento=true;return siriusInserir(a)};A._v136=1;return true}
   if(!ligarSirius()){var sn=0,stt=setInterval(function(){if(ligarSirius()||++sn>20)clearInterval(stt)},1600)}
@@ -12001,5 +11997,63 @@ body[data-mdk-manual-theme] #login label{color:#9ca7ba!important}
 body[data-mdk-manual-theme] #login input[type=password]{background:#05080e!important;color:#f5f7fb!important;border:1px solid rgba(255,255,255,.12)!important}
 body[data-mdk-manual-theme] #login #lg-err{color:#ff6674!important}
 </style>
+<!-- MODESK v174 · Agenda via Sirius · Compras por arquivos · Cards 3D -->
+<style id="mdk-v174-css">
+:root{--card-3d-shadow:0 20px 40px var(--depth-shadow),0 5px 0 var(--bg0),inset 0 1px 0 var(--depth-highlight)}
+.mdk174-toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:12px 0 18px}.mdk174-toolbar .on{border-color:var(--info);background:var(--bg3)}
+.mdk174-upload{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--line)}
+.mdk174-sheet{overflow:auto}.mdk174-sheet tr{opacity:1!important;animation:none!important;color:var(--fg)}.mdk174-sheet table{width:100%;border-collapse:collapse;min-width:650px}.mdk174-sheet th,.mdk174-sheet td{padding:12px;text-align:left;border-bottom:1px solid var(--line);overflow-wrap:anywhere}.mdk174-sheet th{color:var(--mut);font-size:12px}.mdk174-sheet td small{display:block;color:var(--mut)}
+@media(hover:hover) and (pointer:fine){body:not([data-mdk-reduced-motion]) :is(.card,.syscard,.pastacard,.cp11-card):not(:has(.card,.syscard,.pastacard,.cp11-card)):not(.card-login){transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease!important;transform-origin:center;backface-visibility:hidden}body:not([data-mdk-reduced-motion]) :is(.card,.syscard,.pastacard,.cp11-card).mdk174-tilt{transform:perspective(1000px) translateY(-4px) rotateX(var(--tilt-x,0deg)) rotateY(var(--tilt-y,0deg))!important;box-shadow:var(--card-3d-shadow)!important;border-color:var(--depth-edge)!important}}
+@media(max-width:700px){html body:not(.mdk-drawer-open) div#app.app>aside{visibility:hidden!important;opacity:0!important;pointer-events:none!important}html body.mdk-drawer-open div#app.app>aside{visibility:visible!important;opacity:1!important;pointer-events:auto!important;background:var(--bg2)!important}}
+@media(prefers-reduced-motion:reduce){.mdk174-tilt{transform:none!important;transition:none!important}}
+</style>
+<script id="mdk-v174-js">
+(function(){
+'use strict';
+var mode='agenda',query='';
+function E(v){return esc(String(v==null?'':v))}
+function key(v){return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'')}
+function equivalent(a,e){var t=key(a.titulo).replace(/^evento/,'');return a.prazo===e.data&&(a.hora||'')===(e.hora||'')&&(t===key(e.titulo)||t===key(e.cliente)||t===key((e.cliente||e.titulo)+' '+(e.local||'')))&&((a.origem==='sirius'&&e.origem==='sirius')||a.origem==='planilha-eventos')}
+var itemsBase=window.agendaItens;
+window.agendaItens=function(){var s=window.state||{},ev=s.eventos||[];return itemsBase().filter(function(x){if(x.tipo==='evento')return true;var a=(s.atividades||[]).find(function(z){return z.id===x.id});return !a||!ev.some(function(e){return a.evId===e.id||a.eventoId===e.id||equivalent(a,e)})})};agendaItens=window.agendaItens;
+window.mdk174Mode=function(v){mode=v;render()};
+window.mdk174Search=function(v){query=v;var body=document.getElementById('mdk174-rows');if(body)body.innerHTML=sheetRows()};
+window.mdk174Sirius=function(){var p=document.getElementById('sirius-panel');if(p&&!p.classList.contains('open')){if(window.SIRIUS&&typeof SIRIUS.abrir==='function')SIRIUS.abrir()}var t=document.getElementById('sirius-txt');if(t)t.focus()};
+function sheetRows(){return agendaItens().filter(function(x){return !query||key([x.titulo,x.sub,x.data,x.tipo].join(' ')).includes(key(query))}).map(function(x){var ev=x.tipo==='evento';return '<tr><td><b>'+E(x.titulo)+'</b><small>'+E(x.sub)+'</small></td><td>'+E(fmt(x.data))+'<small>'+E(x.hora||'Dia inteiro')+'</small></td><td>'+(ev?'Evento':x.tipo==='lembrete'?'Lembrete':'Atividade')+'</td><td>'+(x.feito?'Concluído':'Pendente')+'</td><td><button class="btn sm" title="Ver detalhes" aria-label="Ver detalhes" onclick="'+(ev?'verEvento':'verAtiv')+'(\''+E(x.id)+'\')">👁</button><button class="btn sm" title="'+(x.feito?'Reabrir':'Finalizar')+'" onclick="'+(ev?'evConcluir':'agFeito')+'(\''+E(x.id)+'\')">'+(x.feito?'↺':'✓')+'</button></td></tr>'}).join('')||'<tr><td colspan="5" class="dim">Nenhum compromisso encontrado.</td></tr>'}
+var viewBase=window.vEventos;
+window.vEventos=function(){var box=document.createElement('div');box.innerHTML=viewBase();var sync=box.querySelector('.mdk173-sync'),ag=box.querySelector('.ev-unified-section:has(.agenda-shell)');if(ag){var side=ag.querySelector('.agenda-side');if(side)while(side.children.length>1)side.lastElementChild.remove();var tag=ag.querySelector('.ev-unified-head .tag');if(tag)tag.remove();var heading=ag.querySelector('h3');if(heading)heading.textContent='Agenda';}
+var toolbar='<div class="mdk174-toolbar"><button class="btn '+(mode==='agenda'?'on':'')+'" onclick="mdk174Mode(\'agenda\')">▦ Agenda</button><button class="btn '+(mode==='planilha'?'on':'')+'" onclick="mdk174Mode(\'planilha\')">☷ Planilha auxiliar</button><button class="btn primary" onclick="mdk174Sirius()">✦ Sirius</button><button class="btn sm" onclick="mdk167BackupAgenda()" title="Baixar backup">↓ Backup</button></div>';
+var sheet='<section><input aria-label="Buscar na planilha auxiliar" placeholder="Buscar compromisso" value="'+E(query)+'" oninput="mdk174Search(this.value)"><div class="mdk174-sheet"><table><thead><tr><th>Compromisso / informações</th><th>Data / horário</th><th>Tipo</th><th>Situação</th><th>Ações</th></tr></thead><tbody id="mdk174-rows">'+sheetRows()+'</tbody></table></div></section>';
+return page('Agenda & Lembretes','',(sync?sync.outerHTML:'')+toolbar+'<div class="ev-unified">'+(mode==='agenda'&&ag?ag.outerHTML:sheet)+'</div>')};vEventos=window.vEventos;
+var buildBase=window.buildMenu;window.buildMenu=function(){var r=buildBase.apply(this,arguments);MENU.forEach(function(g){g.itens.forEach(function(x){if(x.k==='eventos')x.n='Agenda & Lembretes'})});document.querySelectorAll('.navbtn[data-k="eventos"]').forEach(function(b){Array.from(b.childNodes).forEach(function(n){if(n.nodeType===3&&n.textContent.trim())n.textContent=' Agenda & Lembretes '})});return r};buildMenu=window.buildMenu;
+var renderBase=window.render;window.render=function(){var r=renderBase.apply(this,arguments);if(tab==='eventos'){var h=document.getElementById('tb-title');if(h)h.textContent='Agenda & Lembretes'}return r};render=window.render;
+// Manual entry is unavailable; the Sirius API and file imports remain separate paths.
+['addEvento','addAgendaItem','lbAdd','evLote','evsColar','evsImportar'].forEach(function(n){window[n]=function(){toast('Agendamentos são feitos pelo Sirius')}});
+addEvento=window.addEvento;addAgendaItem=window.addAgendaItem;
+['cp11Add','cp10Add','cpAddPedidoC','cpAddLista','cpColarLista','cp171AbrirNovo','mdk158PedidoImport','cp10Dup','addPedido'].forEach(function(n){window[n]=function(){toast('Importe um PDF ou uma planilha Excel')}});
+var purchaseBase=window.vPedidos;
+window.vPedidos=function(){var box=document.createElement('div');box.innerHTML=purchaseBase();box.querySelectorAll('.cp171-new-action,#cp171-new-drawer,.cp17-listform,.cp11-form,[onclick^="cp10Dup"]').forEach(function(e){e.remove()});var hint=box.querySelector('h2.page + .hint');if(hint)hint.remove();var root=box.querySelector('#cpv11');if(root){var upload=document.createElement('div');upload.className='mdk174-upload';upload.innerHTML='<label class="btn primary">⇪ Enviar PDF / Excel<input type="file" hidden multiple aria-label="Enviar PDF ou Excel de compras" accept=".pdf,.xlsx,.xls,.xlsm" onchange="mdk174Purchases(this)"></label><span id="mdk174-upload-status" role="status" class="dim"></span>';root.prepend(upload)}return box.innerHTML};vPedidos=window.vPedidos;window.vCompras=window.vPedidos;
+// Reuse the existing column recognizer and validations for purchase uploads.
+var fields=['desc','qtd','un','ri','catRi','rc','catRc','proj','forn','contato','data','deadline','status','obs'];
+var aliases={desc:['item','descricao','produto','nome','descricao do item'],qtd:['qtd','quantidade','qtde'],un:['un','unidade'],ri:['ri','req interna','requisicao interna','contrato','ata','numero requisicao interna'],catRi:['catri','tipo req interna','categoria interna','tipo requisicao interna'],rc:['rc','req compra','requisicao de compra','requisicao compra','pedido','pedido de compra','numero pedido'],catRc:['catrc','tipo req compra','categoria compra','tipo requisicao compra'],proj:['projeto','ata os outros'],forn:['fornecedor','fornecedor vencedor','empresa'],contato:['contato'],data:['data','data pedido','emissao'],deadline:['deadline','deadline 30d','prazo','prazo entrega'],status:['status','situacao'],obs:['obs','observacao','observacoes']};
+var loading={};function lib(src,name){if(window[name])return Promise.resolve(window[name]);if(loading[name])return loading[name];return loading[name]=new Promise(function(ok,no){var s=document.createElement('script');s.src=src;s.onload=function(){ok(window[name])};s.onerror=function(){delete loading[name];no(new Error('Conecte à internet para ler este formato.'))};document.head.appendChild(s)})}
+function asText(rows){return rows.map(function(r){return r.map(function(c){return '"'+String(c==null?'':c).replace(/"/g,'""')+'"'}).join('\t')}).join('\n')}
+function column(v){var n=key(v),found='';Object.keys(aliases).some(function(k){if(aliases[k].some(function(a){return key(a)===n})){found=k;return true}return false});return found}
+async function readPDF(f){var P=await lib('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js','pdfjsLib');P.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';var pdf=await P.getDocument({data:await f.arrayBuffer()}).promise,records=[],text=[];
+try{for(var i=1;i<=pdf.numPages;i++){var c=await(await pdf.getPage(i)).getTextContent(),lines=[];c.items.forEach(function(x){if(!x.str.trim())return;var y=Math.round(x.transform[5]),l=lines.find(function(r){return Math.abs(r.y-y)<3});if(!l){l={y:y,cells:[]};lines.push(l)}l.cells.push({x:x.transform[4],s:x.str})});lines.sort(function(a,b){return b.y-a.y});lines.forEach(function(l){l.cells.sort(function(a,b){return a.x-b.x});text.push(l.cells.map(function(x){return x.s}).join(' '))});var header=lines.find(function(l){var cols=l.cells.map(function(x){return column(x.s)});return cols.includes('desc')&&(cols.includes('ri')||cols.includes('rc'))});if(header){var cols=header.cells.map(function(x){return {x:x.x,k:column(x.s)}}).filter(function(x){return x.k});lines.filter(function(l){return l.y<header.y}).forEach(function(l){var o={};l.cells.forEach(function(x){var nearest=cols.reduce(function(a,b){return Math.abs(b.x-x.x)<Math.abs(a.x-x.x)?b:a});o[nearest.k]=(o[nearest.k]?o[nearest.k]+' ':'')+x.s});if(o.desc&&(o.ri||o.rc))records.push(o)})}}
+if(!records.length){var o={};text.forEach(function(l){var m=l.match(/^\s*([^:]{2,60})\s*:\s*(.+)$/);if(m){var k=column(m[1]);if(k)o[k]=m[2].trim()}});if(o.desc&&(o.ri||o.rc))records.push(o)}return records}finally{pdf.destroy()}}
+function fileStore(k,f){return new Promise(function(ok,no){var req=indexedDB.open('modeskCompras',1);req.onupgradeneeded=function(){if(!req.result.objectStoreNames.contains('files'))req.result.createObjectStore('files')};req.onerror=function(){no(req.error)};req.onsuccess=function(){var db=req.result,t=db.transaction('files','readwrite');t.objectStore('files').put(f,k);t.oncomplete=function(){db.close();ok()};t.onerror=function(){db.close();no(t.error)}}})}
+window.mdk174Purchases=async function(input){var files=Array.from(input.files||[]);if(!files.length)return;var added=0,updated=0,errors=[];input.disabled=true;var currentStatus=document.getElementById('mdk174-upload-status');if(currentStatus)currentStatus.textContent='Lendo arquivos…';
+try{for(var f of files){try{if(f.size>25*1024*1024)throw new Error('Arquivo maior que 25 MB');var rows=[],isPDF=/\.pdf$/i.test(f.name);if(isPDF)rows=await readPDF(f);else if(/\.(xlsx|xls|xlsm)$/i.test(f.name)){var X=await carregarSheetJS(),wb=X.read(await f.arrayBuffer(),{type:'array',cellDates:false});wb.SheetNames.forEach(function(n){var grid=X.utils.sheet_to_json(wb.Sheets[n],{header:1,raw:true,defval:''}),h=grid.findIndex(function(r){var cols=r.map(column);return cols.includes('desc')&&(cols.includes('ri')||cols.includes('rc'))});if(h>=0)rows=rows.concat(MDKExcel.parse(asText(grid.slice(h)),fields,aliases))})}else throw new Error('Envie PDF ou Excel');
+if(!rows.length)throw new Error('Não reconheci Item e Requisição/Pedido no arquivo');var c=comprasDados();for(var j=0;j<rows.length;j++){var o=rows[j];if(!o.desc)continue;if(o.ri&&!o.catRi)o.catRi=/ata|contrato/i.test(o.ri)?'Ata de registro':'EST01';if(o.rc&&!o.catRc)o.catRc='COMP01';var reason=mdkCompraMotivo(o);if(reason){errors.push(f.name+' · linha '+(j+1)+': '+reason);continue}var datesOK=true;['data','deadline'].forEach(function(k){if(o[k]){var d=MDK_PARSE_DATA(o[k]);if(!d){errors.push(f.name+' · linha '+(j+1)+': '+k+' inválida');datesOK=false}else o[k]=d}});if(!datesOK)continue;
+var p=c.pedidos.find(function(p){return ((o.rc&&p.rc===o.rc)||(!o.rc&&o.ri&&p.ri===o.ri))&&key(p.desc||p.item)===key(o.desc)});if(!p){p={id:u(),docs:{},paths:{},hist:[],status:'Aguardando entrega',em:Date.now()};c.pedidos.push(p);added++}else updated++;Object.keys(o).forEach(function(k){if(o[k]!==''&&o[k]!=null)p[k]=o[k]});Object.assign(p,{item:p.desc,num:p.ri||p.rc,cat:p.catRc||p.catRi,origem:'Upload '+f.name,_manual158:1});if(isPDF){var slot=o.rc?'rc':'ri';await fileStore(p.id+'|'+slot,f);p.docs=p.docs||{};p.docs[slot]={nome:f.name,tipo:f.type,tamanho:f.size,em:Date.now()}}}
+}catch(e){errors.push(f.name+': '+e.message)}}if(added||updated)save(true);render();var status=document.getElementById('mdk174-upload-status');var result=added+' novo(s) · '+updated+' atualizado(s)'+(errors.length?' · '+errors.join(' | '):'');if(status)status.textContent=result;toast(result)}finally{input.value='';input.disabled=false}};
+var active=null;var fine=matchMedia('(hover:hover) and (pointer:fine)'),reduce=matchMedia('(prefers-reduced-motion:reduce)');
+function clear(){if(active){active.classList.remove('mdk174-tilt');active.style.removeProperty('--tilt-x');active.style.removeProperty('--tilt-y');active=null}}
+document.addEventListener('pointermove',function(e){if(!fine.matches||reduce.matches||document.body.hasAttribute('data-mdk-reduced-motion'))return clear();var card=e.target.closest('.card,.syscard,.pastacard,.cp11-card');if(card&&(card.classList.contains('card-login')||card.querySelector('.card,.syscard,.pastacard,.cp11-card')))card=null;if(card!==active){clear();active=card}if(!card)return;var r=card.getBoundingClientRect();card.style.setProperty('--tilt-x',((.5-(e.clientY-r.top)/r.height)*5).toFixed(2)+'deg');card.style.setProperty('--tilt-y',(((e.clientX-r.left)/r.width-.5)*6).toFixed(2)+'deg');card.classList.add('mdk174-tilt')},{passive:true});document.addEventListener('pointerleave',clear);window.addEventListener('blur',clear);reduce.addEventListener('change',clear);
+buildMenu();try{render()}catch(e){}
+})();
+</script>
+
 </body>
 </html>
