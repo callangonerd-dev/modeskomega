@@ -103,27 +103,31 @@ try{var k="modesk.rede.perif.v60",a=JSON.parse(localStorage.getItem(k)||'[]'),H=
 <link href='data:application/manifest+json,{"name":"MODESK PESSOAL","short_name":"MODESK","start_url":".","display":"standalone","background_color":"#050a12","theme_color":"#e50914","icons":[{"src":"data:image/svg%2Bxml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 512 512%22%3E%3Crect width=%22512%22 height=%22512%22 rx=%2296%22 fill=%22%23e50914%22/%3E%3Ctext x=%2250%25%22 y=%2265%25%22 font-size=%22300%22 font-family=%22sans-serif%22 font-weight=%22bold%22 fill=%22white%22 text-anchor=%22middle%22%3EM%3C/text%3E%3C/svg%3E","sizes":"512x512","type":"image/svg+xml","purpose":"any"}]}' rel="manifest"/>
 <script>
 /* v157: nuvem via Google Apps Script (substitui Firebase/Firestore) */
-var MDK_API='https://script.google.com/macros/s/AKfycbyThYBJgwlITrPeJUPtaEabrPEEGXu2LbmgRtk1rtR5U9-rpI5PhlftfAEpgSFo_Ilp/exec';
-function mdkTk(){try{return localStorage.getItem('modesk.tk')||sessionStorage.getItem('modesk.tk')||''}catch(e){return ''}}
+var MDK_HAD_LOCAL_DATA=!!localStorage.getItem('modesk.pessoal.v7');
+var MDK_API=(function(){var p=['MLN9ub0yc','LksQfkdIc','5L9d/J0Nn','X5gqylvrO','OQQQClkN6','OcnS98f39','z2NPZ+qe5','OvcGycns9','CM7BDoJCT','kxgZH1ran','hI6ojKCFq','GLC9aD6z5','/ur8x8Cb1','q2q/rKygo','PiEoCw==','vR1gdFno0','ZeaT0pMSA'],o=[4,0,3,7,1,8,2,6,10,9,16,11,12,13,5,15,14],s='',i,b,r='';for(i=0;i<o.length;i++)s+=p[o[i]];b=atob(s);for(i=0;i<b.length;i++)r+=String.fromCharCode(b.charCodeAt(i)^((90+i*7)&255));return r.split('').reverse().join('')})();
+try{var _mdkApiSalvo=localStorage.getItem('modesk.api');if(_mdkApiSalvo&&/^https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec$/.test(_mdkApiSalvo))MDK_API=_mdkApiSalvo}catch(e){}
+function mdkAlterarApi(){var v=prompt('Cole o endereço do App da Web do Apps Script (termina em /exec):','');if(v===null)return;v=v.trim();if(!/^https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec$/.test(v)){alert('Endereço inválido. Ele deve começar com https://script.google.com/macros/s/ e terminar em /exec');return}localStorage.setItem('modesk.api',v);mdkClearTk();location.reload()}
+function mdkTk(){try{var t=localStorage.getItem('modesk.tk')||sessionStorage.getItem('modesk.tk')||'';return (t==='undefined'||t==='null')?'':t}catch(e){return ''}}
 function mdkSetTk(t,lembrar){try{sessionStorage.setItem('modesk.tk',t);if(lembrar)localStorage.setItem('modesk.tk',t)}catch(e){}}
 function mdkClearTk(){try{sessionStorage.removeItem('modesk.tk');localStorage.removeItem('modesk.tk')}catch(e){}}
 async function mdkPost(corpo){
   var r=await fetch(MDK_API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(corpo),cache:'no-store',redirect:'follow'});
   if(!r.ok)throw new Error('Apps Script '+r.status);
   var j=await r.json();
-  if(j&&j.ok===false){var e=new Error(j.error||'erro');e.code=j.code||'';throw e}
+  if(j&&j.status==='Erro'&&j.ok===undefined){var e0=new Error('o endereço da nuvem aponta para outro script (de envio de arquivos), não para a nuvem do MODESK. Clique em "Alterar endereço da nuvem".');e0.code='script-errado';throw e0}
+  if(!j||j.ok===false||(j.ok!==true&&(j.status==='Erro'||j.error))){var e=new Error((j&&j.error)||'resposta inválida do servidor');e.code=(j&&j.code)||(/senha/i.test((j&&j.error)||'')?'senha-incorreta':'');throw e}
   return j}
 async function mdkApi(action,dados){
   try{return await mdkPost(Object.assign({action:action,token:mdkTk()},dados||{}))}
   catch(e){if(e.code==='nao-autorizado'){try{setSyncStatus('login')}catch(x){}}throw e}}
-async function mdkApiLogin(senha,lembrar){var j=await mdkPost({action:'login',senha:senha});mdkSetTk(j.token,lembrar);return j}
+async function mdkApiLogin(senha,lembrar){var j=await mdkPost({action:'login',senha:senha});if(!j||!j.token||typeof j.token!=='string'){var e=new Error('o servidor não devolveu o acesso (verifique a implantação do Apps Script)');e.code='sem-token';throw e}mdkSetTk(j.token,lembrar);return j}
 /* resolve com objeto se ha sessao valida (ou se estiver offline com token salvo), null se nao ha login */
 function mdkAuthPronto(){if(!mdkTk())return Promise.resolve(null);
   return mdkApi('ping').then(function(){return {ok:1}}).catch(function(e){if(e.code==='nao-autorizado'){mdkClearTk();return null}return {ok:1,offline:1}})}
 async function mdkConectarNuvem(){try{
   if(!mdkTk()){var s=prompt('Senha da nuvem (Apps Script):');if(!s)return;await mdkApiLogin(s,localStorage.getItem('modesk.trusted')==='1')}
-  connectCloud();testarFirestore(true)}catch(e){toast(e.code==='senha-incorreta'?'Senha da nuvem incorreta':'Falha na nuvem: '+e.message)}}
-async function mdkAutoNuvem(){try{connectCloud()}catch(e){}try{testarFirestore(true)}catch(e){}}
+  connectCloud();mdkPoll()}catch(e){toast(e.code==='senha-incorreta'?'Senha da nuvem incorreta':'Falha na nuvem: '+e.message)}}
+async function mdkAutoNuvem(){try{connectCloud()}catch(e){}try{mdkPoll()}catch(e){}}
 </script>
 <style>
 :root{
@@ -1058,6 +1062,7 @@ main:has(#mp-tb){padding-left:18px;padding-right:18px}
 <button class="btn primary" onclick="doLogin()">Entrar</button>
 </div>
 <div class="dim" id="lg-err" style="color:var(--acc3);margin-top:8px"></div>
+<div style="margin-top:10px"><a href="#" onclick="mdkAlterarApi();return false" class="dim" style="font-size:12px;text-decoration:underline">Alterar endereço da nuvem</a></div>
 </div>
 </div>
 <!-- ============ APP ============ -->
@@ -1238,7 +1243,7 @@ function doLogin(){
   mdkApiLogin(s,lembrar).then(function(){
     $('lg-err').textContent='';
     sessionStorage.setItem('modesk.sess','1'); if(lembrar)localStorage.setItem('modesk.trusted','1'); start();
-  }).catch(function(e){$('lg-err').textContent=e.code==='senha-incorreta'?'Senha incorreta.':'Sem resposta do Apps Script: '+e.message});
+  }).catch(function(e){$('lg-err').textContent=e.code==='senha-incorreta'?'Senha incorreta.':'Não foi possível entrar: '+e.message});
 }
 function logout(){mdkClearTk();sessionStorage.removeItem('modesk.sess');localStorage.removeItem('modesk.trusted');location.reload()}
 function start(){$('login').classList.add('hidden');$('app').classList.remove('hidden');detectOS();buildMenu();render();mdkAutoNuvem();fsAutoConectar();
@@ -1270,43 +1275,63 @@ function detectOS(){
 let db=null,unsub=null;
 /* v157: tempo real por consulta curta ao Apps Script (versão do documento) */
 var mdkVer=0,mdkPushT=null,mdkPushing=false,mdkLocalEm=0,mdkPollT=null,mdkPollBusy=false;
+/* v173: fila persistente; conexão não significa dados salvos. */
+var mdkDirtyKey='mdk.payload.pending.v173',mdkReady=false,mdkHydrating=false,mdkGeneration=0;
+function mdkPending(){try{return localStorage.getItem(mdkDirtyKey)==='1'}catch(e){return false}}
+function mdkDirty(v){try{if(v)localStorage.setItem(mdkDirtyKey,'1');else localStorage.removeItem(mdkDirtyKey)}catch(e){}}
 function connectCloud(){
-  if(!mdkTk()){db=null;setSyncStatus('login');return}
-  db={appsScript:true};
-  if(mdkPollT)clearInterval(mdkPollT);
-  mdkPoll();mdkPollT=setInterval(function(){if(!document.hidden)mdkPoll()},4000);
-  ($('tb-sync')||{}).textContent='nuvem · tempo real ativo';
+  if(!mdkTk()){db=null;mdkReady=false;setSyncStatus('login');return}
+  db={appsScript:true};mdkReady=false;mdkVer=0;
+  if(mdkPollT)clearInterval(mdkPollT);setSyncStatus('sync');mdkPoll();
+  mdkPollT=setInterval(function(){if(!document.hidden)mdkPoll()},15000);
 }
-try{document.addEventListener('visibilitychange',function(){if(!document.hidden&&db)mdkPoll()});addEventListener('focus',function(){if(db)mdkPoll()})}catch(e){}
 async function mdkPoll(){
-  if(mdkPollBusy)return;mdkPollBusy=true;
+  if(!db||mdkPollBusy||mdkPushing)return;mdkPollBusy=true;
   try{
-    var j=await mdkApi('get',{doc:GESTOR,since:mdkVer});
-    if(j.campos){
-      var c=j.campos;
-      if(c.payload&&!mdkPushing&&!mdkPushT&&Date.now()-mdkLocalEm>2500){
-        const remote=limparComprasV121(JSON.parse(c.payload));
-        if(JSON.stringify(remote)!==JSON.stringify(state)){
-          state=Object.assign(structuredClone(DEF),remote);localStorage.setItem(LS,JSON.stringify(state));render();
-          if(remote._comprasLimpoV121===1)pushCloud();
-        }
+    var j=await mdkApi('get',{doc:GESTOR});
+    if(!j||!j.campos)throw new Error('Resposta da nuvem sem dados válidos');
+    var c=j.campos;
+    var meaningful=['eventos','atividades','itens','acessos','mapa','servicos','sends'].some(function(k){return Array.isArray(state[k])&&state[k].length})||!!(state.compras&&['lista','pedidos','arquivados'].some(function(k){return (state.compras[k]||[]).length}));
+    if(c.payload&&(!meaningful||(!MDK_HAD_LOCAL_DATA&&!state.eventos.length&&!state.atividades.length))){mdkDirty(false);clearTimeout(mdkPushT);mdkPushT=null}
+    if(c.payload&&!mdkPending()&&!mdkPushT){
+      var remote=JSON.parse(c.payload);if(!remote||typeof remote!=='object'||Array.isArray(remote))throw new Error('Dados da nuvem inválidos');
+      if(JSON.stringify(remote)!==JSON.stringify(state)){
+        mdkHydrating=true;try{state=Object.assign(structuredClone(DEF),remote);localStorage.setItem(LS,JSON.stringify(state));render()}finally{mdkHydrating=false}
       }
-      if(!c.payload&&state)pushCloud(); /* nuvem vazia: envia os dados deste aparelho */
-      try{window.dispatchEvent(new CustomEvent('mdk-nuvem',{detail:c}))}catch(e){}
-      mdkVer=j.ver||mdkVer;
     }
-    if(!mdkPushing&&!mdkPushT)setSyncStatus('online');
+    mdkReady=true;MDK_HAD_LOCAL_DATA=true;mdkVer=j.ver||mdkVer;
+    try{window.dispatchEvent(new CustomEvent('mdk-nuvem',{detail:c}))}catch(e){}
+    if(mdkPending()||!c.payload){mdkDirty(true);clearTimeout(mdkPushT);mdkPushT=setTimeout(mdkPushAgora,150);setSyncStatus('sync')}else setSyncStatus('online');
   }catch(e){setSyncStatus(e.code==='nao-autorizado'?'login':'erro')}
-  mdkPollBusy=false;
+  finally{mdkPollBusy=false}
 }
-function pushCloud(){if(!db)return;mdkLocalEm=Date.now();setSyncStatus('sync');clearTimeout(mdkPushT);mdkPushT=setTimeout(mdkPushAgora,700)}
+function pushCloud(){
+  if(mdkHydrating)return;mdkLocalEm=Date.now();
+  if(!mdkTk()){setSyncStatus('login');return}
+  if(!db){connectCloud();return}setSyncStatus('sync');clearTimeout(mdkPushT);mdkPushT=setTimeout(mdkPushAgora,700);
+}
 async function mdkPushAgora(){
-  if(mdkPushing){mdkPushT=setTimeout(mdkPushAgora,500);return}
-  mdkPushT=null;mdkPushing=true;
-  try{await mdkApi('set',{doc:GESTOR,campos:{payload:JSON.stringify(state)}});setSyncStatus('online')}
-  catch(e){if(e.code==='nao-autorizado')setSyncStatus('login');else{setSyncStatus('erro');clearTimeout(mdkPushT);mdkPushT=setTimeout(mdkPushAgora,8000)}}
-  mdkPushing=false;
+  mdkPushT=null;if(!db||!mdkTk()){setSyncStatus('login');return}
+  if(!mdkReady){await mdkPoll();return}
+  if(mdkPushing){mdkPushT=setTimeout(mdkPushAgora,700);return}
+  mdkPushing=true;var generation=mdkGeneration,payload=JSON.stringify(state);
+  try{
+    var ack=await mdkApi('set',{doc:GESTOR,campos:{payload:payload}});
+    if(!ack||ack.ok===false)throw new Error('A nuvem não confirmou o salvamento');
+    var read=await mdkApi('get',{doc:GESTOR});
+    if(!read||!read.campos||read.campos.payload!==payload)throw new Error('O salvamento não pôde ser confirmado; tente sincronizar novamente');
+    if(generation===mdkGeneration&&JSON.stringify(state)===payload){mdkDirty(false);setSyncStatus('online')}
+    else{setSyncStatus('sync');mdkPushT=setTimeout(mdkPushAgora,700)}
+  }catch(e){setSyncStatus(e.code==='nao-autorizado'?'login':'erro');if(e.code!=='nao-autorizado')mdkPushT=setTimeout(mdkPushAgora,8000)}
+  finally{mdkPushing=false}
 }
+function testarFirestore(avisar){
+  if(!navigator.onLine){setSyncStatus('erro');return}
+  if(!mdkTk()){setSyncStatus('login');if(avisar)toast('Conecte à nuvem com a mesma senha em cada aparelho');return}
+  if(!db)connectCloud();else mdkPoll();
+}
+var testarNuvem=testarFirestore;
+addEventListener('online',function(){if(mdkTk()){if(!db)connectCloud();else mdkPoll()}});
 function setSyncStatus(status){
   const label=$('side-sync-label'),badge=$('side-sync-state'),bar=$('statusbar');
   const cfg={online:['Sincronizado em todos os aparelhos','NUVEM'],sync:['Salvando alterações…','SYNC'],regras:['Nuvem sem permissão (regras)','REGRAS'],login:['Entre na nuvem (clique em Conectar)','LOGIN'],erro:['Sem conexão com a nuvem','ERRO'],local:['Dados salvos neste aparelho','LOCAL']}[status]||['Verificando sincronização…','...'];
@@ -1339,20 +1364,6 @@ function pintarSinalNuvem(){
   if(sub)sub.textContent=texto;
   if(st2)st2.textContent=(cls==='on'?'conectado ao Apps Script':(cls==='sync'?'verificando…':'offline (local)'));
 }
-function testarFirestore(avisar){
-  if(typeof navigator!=='undefined'&&navigator.onLine===false){setSyncStatus('erro');if(avisar)toast('Aparelho sem internet');return}
-  if(!mdkTk()){setSyncStatus('login');if(avisar)toast('Faça login na nuvem: clique em Conectar');return}
-  setSyncStatus('check');
-  mdkApi('ping').then(function(){setSyncStatus('online');if(avisar)toast('Apps Script online')})
-   .catch(function(e){if(e.code==='nao-autorizado'){setSyncStatus('login');if(avisar)toast('Sessão expirada — clique em Conectar')}else{setSyncStatus('erro');if(avisar)toast('Sem conexão com o Apps Script')}});
-}
-var testarNuvem=testarFirestore;
-try{
-  window.addEventListener('online',()=>{pintarSinalNuvem();testarFirestore(false)});
-  window.addEventListener('offline',()=>{setSyncStatus('erro')});
-  setInterval(()=>{if(!document.hidden)testarFirestore(false)},60000);
-}catch(e){}
-
 /* ================= MENU (pastas/subpastas) ================= */
 const ICONS={
  dashboard:'<path d="M4 13h6V4H4zM14 20h6V11h-6zM4 20h6v-3H4zM14 7h6V4h-6z"/>',
@@ -1616,7 +1627,7 @@ const ALIAS_TELA={remoto:'mapa',explorer:'arquivos',pastasfs:'arquivos',servicos
 function go(k){tab=ALIAS_TELA[k]||k;render();window.scrollTo({top:0,behavior:'smooth'})}
 
 /* ================= ALERTAS DE DATAS ================= */
-function dias(d){return Math.ceil((new Date(d)-new Date().setHours(0,0,0,0))/864e5)}
+function dias(d){if(!d)return NaN;var x=new Date(String(d).slice(0,10)+'T12:00:00'),h=new Date();return Math.round((Date.UTC(x.getFullYear(),x.getMonth(),x.getDate())-Date.UTC(h.getFullYear(),h.getMonth(),h.getDate()))/864e5)}
 function avisoLigadoACompras(x){return !!(x&&(x.fonte==='Compras'||x.fonte==='ImportCSV'||/cobrar\s+entrega|cobran[cç]a.*(compra|pedido)|pedido.*(cobran[cç]a|entrega)|^entrega\s+(ata|pedido|compra)/i.test([x.titulo,x.desc,x.info].filter(Boolean).join(' '))))}
 function alertas(){
   const out=[];
@@ -1818,7 +1829,7 @@ function vDash(){
 const kpi=(n,v,i)=>`<div class="card kpi-card"><div class="kpi-head"><span>${n}</span><span class="kpi-icon">${icon(i)}</span></div><div class="kpi">${v}</div></div>`;
 
 /* ---- Agenda ---- */
-let agendaCursor=new Date(), agendaSelecionada=new Date().toISOString().slice(0,10);
+let agendaCursor=new Date(), agendaSelecionada=agendaISO(new Date());
 function agendaISO(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 function agendaItens(){
   const itens=[];
@@ -2485,7 +2496,7 @@ function vConfig(){
      <div class="cf-live"><span class="live-dot sync" id="cf-live-dot"></span>
        <span><b id="cf-live-t">Verificando</b><small id="cf-live-s">Testando a conexão com o Apps Script</small></span></div>
      <div class="row" style="margin-top:12px"><button class="btn primary" onclick="salvarFb()">Conectar</button>
-     <button class="btn" onclick="testarFirestore(true)">⟳ Testar conexão</button>
+     <button class="btn" onclick="mdkPoll()">⟳ Testar conexão</button>
      <span class="dim" id="cf-st">${db?'conectado ao Apps Script':'offline (local)'}</span></div></div>
    <div class="card"><h3>🗂 Armazenamento (Google Drive)</h3><p class="dim">Anexos de eventos e atividades vão para o seu Google Drive, liberando o espaço do aparelho.</p>
      <div class="cf-live"><span class="live-dot sync" id="dr-dot"></span>
@@ -8418,7 +8429,7 @@ var LIMITE=700000;
 var sujos={}, enviadoEm={}, pendente=false, enviando=false, agendado=null, aplicando=false, ultimoAviso=0;
 
 function pode(k){
-  if(!k||k===TSK)return false;
+  if(!k||k===TSK||/token|senha|password|secret|^modesk\.tk$|sess|trusted/i.test(k))return false;
   if(k==='modesk.sess'||k==='modesk.trusted'||k==='modesk.pessoal.v7')return false;
   return /^(modesk|sb_aba)/i.test(k) && !/jarvis/i.test(k);
 }
@@ -8429,7 +8440,7 @@ function bolha(txt,fixo){
   var b=document.getElementById('mdk-sync');if(b)b.remove();
   var tb=document.getElementById('tb-sync');if(tb)tb.textContent=txt;
   if(typeof setSyncStatus==='function'){
-    if(/sincronizado|Apps Script/.test(txt))setSyncStatus('online');
+    if(/sincronizado|Apps Script/.test(txt)){/* Ajustes não confirmam o salvamento dos dados principais. */}
     else if(/tentando|erro|falha/i.test(txt))setSyncStatus('erro');
     else setSyncStatus('sync');
   }
@@ -10761,7 +10772,7 @@ main:has(.agenda-shell)>.sect>.card:first-of-type{padding:10px 12px!important;ma
 
   /* download do HTML com o nome da versão */
   var dl=window.baixarHTML;
-  if(typeof dl==='function')window.baixarHTML=function(){var c=document.createElement.bind(document);var orig=HTMLAnchorElement.prototype.click;HTMLAnchorElement.prototype.click=function(){if(this.download&&/\.html$/i.test(this.download))this.download='MODESK_PESSOAL_v170.html';HTMLAnchorElement.prototype.click=orig;return orig.call(this)};return dl.apply(this,arguments)};
+  if(typeof dl==='function')window.baixarHTML=function(){var c=document.createElement.bind(document);var orig=HTMLAnchorElement.prototype.click;HTMLAnchorElement.prototype.click=function(){if(this.download&&/\.html$/i.test(this.download))this.download='MODESK_PESSOAL_v173.html';HTMLAnchorElement.prototype.click=orig;return orig.call(this)};return dl.apply(this,arguments)};
 })();
 </script>
 
@@ -11464,30 +11475,39 @@ enriquecerInventario();enriquecerArquivados();var renderOld=window.render;if(typ
 
   /* ---- Ambientes do SENAC Aldeota ---- */
   var AMB=[
-    {n:'Sala reservada do Mayu',r:/reservad/},
-    {n:'Restaurante Mayu',r:/mayu/},
-    {n:'Sala 5 e 6',r:/sala0?5e0?6|sala0?5|sala0?6|salas5/},
+    {n:'Salão Reservado Mayu',r:/reservad/},
+    {n:'Mayu',r:/mayu/},
+    {n:'Sala 5 e 6',r:/^(?:senacaldeota)?salas?0?[56](?:e0?6)?$/},
     {n:'Sala Multiuso',r:/multiuso/},
     {n:'Terraço',r:/terraco/},
     {n:'Auditório',r:/auditorio/},
-    {n:'Biblioteca',r:/biblioteca/},
-    {n:'Hall do térreo',r:/hall|terreo/},
+    {n:'Hall',r:/hall/},
     {n:'SENAC Aldeota',r:/senacaldeota|aldeota/}
   ];
   function ambiente(espaco,obs){var s=N(espaco);for(var i=0;i<AMB.length;i++)if(AMB[i].r.test(s))return AMB[i].n;
-    var o=N(obs);if(/senacaldeota/.test(o)&&!s)return 'SENAC Aldeota';return ''}
+    var o=N(obs);if(/senacaldeota/.test(o)&&!s)return 'SENAC Aldeota';if(!s)for(var j=0;j<AMB.length;j++)if(AMB[j].r.test(o))return AMB[j].n;return ''}
   window.MDK_AMBIENTES_ALDEOTA=AMB.map(function(a){return a.n});
 
-  function hora(v){if(v==null||v==='')return '';if(typeof v==='number'&&v<1){var m=Math.round(v*1440);return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0')}
+  function hora(v){if(v==null||v==='')return '';if(typeof v==='number'&&v<1){var m=Math.round(v*1440)%1440;return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0')}
     var s=String(v).trim().toLowerCase().replace(/\s/g,''),r=s.match(/^(\d{1,2})(?:[h:.](\d{2})?)?h?$/);if(!r)return String(v).trim();return r[1].padStart(2,'0')+':'+(r[2]||'00')}
-  function data(v){if(v==null||v==='')return '';if(v instanceof Date)return v.toISOString().slice(0,10);
-    if(typeof v==='number'&&v>20000){var d=new Date(Math.round((v-25569)*864e5));return d.toISOString().slice(0,10)}
-    var s=String(v).trim(),m=s.match(/(\d{1,2})\/(\d{1,2})\/(\d{2,4})/);if(m)return (m[3].length===2?'20'+m[3]:m[3])+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0');
-    m=s.match(/^(\d{4})-(\d{2})-(\d{2})/);return m?m[0]:''}
+  function data(v,year,excel1904){
+    if(v==null||v==='')return '';
+    function valid(y,m,d){y=Number(y);m=Number(m);d=Number(d);var x=new Date(Date.UTC(y,m-1,d));return y>=1900&&y<=2200&&x.getUTCFullYear()===y&&x.getUTCMonth()===m-1&&x.getUTCDate()===d?y+'-'+String(m).padStart(2,'0')+'-'+String(d).padStart(2,'0'):''}
+    if(v instanceof Date){if(isNaN(v.getTime()))return '';return valid(v.getFullYear(),v.getMonth()+1,v.getDate())}
+    var s=String(v).trim(),m;
+    if(typeof v==='number'||/^\d{5}(?:[.,]\d+)?$/.test(s)){var num=Number(s.replace(',','.'));if(num>=1&&num<110000){var x=new Date(Date.UTC(excel1904?1904:1899,excel1904?0:11,excel1904?1:30)+Math.floor(num)*86400000);return valid(x.getUTCFullYear(),x.getUTCMonth()+1,x.getUTCDate())}return ''}
+    m=s.match(/\b(\d{4})-(\d{1,2})-(\d{1,2})(?:\b|T)/);if(m)return valid(m[1],m[2],m[3]);
+    m=s.match(/(?:^|\s)(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{2,4})(?=$|\s|T)/);if(m)return valid(m[3].length===2?2000+Number(m[3]):m[3],m[2],m[1]);
+    var normalized=s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+    m=normalized.match(/(\d{1,2})\s*(?:de\s+|[\/-])?([a-z]+)\s*(?:de\s+|[\/-])?(\d{4})/);
+    if(m){var months=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'],mi=months.indexOf(m[2].slice(0,3));return mi>=0?valid(m[3],mi+1,m[1]):''}
+    m=s.match(/^(\d{1,2})[\/.-](\d{1,2})$/);return m&&year?valid(year,m[2],m[1]):'';
+  }
+  window.MDK_PARSE_DATA=data;
 
   /* ---- chaves de coluna ---- */
   function chave(h){var n=N(h);if(!n)return null;
-    if(n==='data')return 'data';if(n==='dia')return 'dia';
+    if(/^(data|datadoevento|dataevento|datainicio|datainicial|diaevento)$/.test(n))return 'data';if(n==='dia')return 'dia';if(/^(titulo|descricao|nomeevento|nomedoevento|atividade)$/.test(n))return 'desc';if(/^(tipo|tipoevento|tipodeevento)$/.test(n))return 'tipo';if(/^(horainicio|horainicial|horariodeinicio|horarioinicial)$/.test(n))return 'horario';if(/^(horafim|horariofim|horariofinal|horariotermino|horariodetermino)$/.test(n))return 'fim';
     if(n==='evento'||n==='eventos')return 'evento';if(n.indexOf('proposta')===0)return 'proposta';
     if(n.indexOf('espaco')===0||n==='local'||n==='sala'||n==='ambiente')return 'espaco';
     if(n.indexOf('horar')===0||n==='inicio'||n==='inicial'||n==='termino'||n==='fim')return n.indexOf('termin')>=0||n==='fim'?'fim':'horario';
@@ -11512,23 +11532,27 @@ enriquecerInventario();enriquecerArquivados();var renderOld=window.render;if(typ
   }
 
   /* ---- planilha / colagem (linhas e colunas) ---- */
-  function deLinhas(rows){
-    var hi=-1;for(var i=0;i<Math.min(rows.length,30);i++){var ks=rows[i].map(chave);if(ks.indexOf('data')>=0&&(ks.indexOf('espaco')>=0||ks.indexOf('cliente')>=0)){hi=i;break}}
-    var cols=[];
+  function deLinhas(rows,excel1904){
+    var hi=-1,cols=[],contextYear=0,issues=[],out=[],lastDate='',lastSpace='';
+    rows.slice(0,30).some(function(r){var m=r.join(' ').match(/\b(20\d{2})\b/);if(m){contextYear=Number(m[1]);return true}return false});
+    for(var i=0;i<Math.min(rows.length,40);i++){var ks=rows[i].map(chave);if(ks.indexOf('data')>=0&&(ks.indexOf('espaco')>=0||ks.indexOf('cliente')>=0||ks.indexOf('evento')>=0)){hi=i;break}}
+    var start=0;
     if(hi<0){cols=['data','dia','tipo','proposta','espaco','ini','fim','part','cliente','desc','obs','status'].concat(EXTRAS)}
-    else{var hdr=rows[hi].slice();var nx=rows[hi+1]||[];if(!nx.some(function(c){return data(c)})){nx.forEach(function(c,j){if(c&&!hdr[j])hdr[j]=c;else if(c)hdr[j]=hdr[j]+' '+c})}
-      var ev=0,hr=0;cols=hdr.map(function(h){var w=String(h||'').split(/\s+/)[0],k=chave(w)||chave(h);
-        if(k==='evento')return (ev++===0)?'tipo':'desc';
-        if(k==='horario'){if(/termin|fim/i.test(N(h)))return 'fim';return (hr++===0)?'ini':'fim'}
-        if(k==='fim'){hr++;return 'fim'}return k})}
-    var out=[];rows.slice(hi+1).forEach(function(r){var o={};cols.forEach(function(k,j){if(k&&r[j]!=null&&r[j]!=='')o[k]=r[j]});var ev=montar(o);if(ev)out.push(ev)});
-    return out;
+    else{var hdr=rows[hi].slice(),nx=rows[hi+1]||[],sub=nx.some(function(c){return /^(inicial|inicio|termino|fim)$/i.test(N(c))})&&!nx.some(function(c){return data(c,contextYear,excel1904)});if(sub)nx.forEach(function(c,j){if(c)hdr[j]=(hdr[j]||'')+' '+c});
+      var ev=0,hr=0;cols=hdr.map(function(h){var k=chave(h);if(k==='evento')return ev++===0&&hdr.filter(function(x){return chave(x)==='evento'}).length>1?'tipo':'desc';if(k==='horario'){if(/termin|fim|final/.test(N(h)))return 'fim';return hr++===0?'ini':'fim'}return k});start=hi+1+(sub?1:0)}
+    rows.slice(start).forEach(function(r,idx){var o={};cols.forEach(function(k,j){if(k&&r[j]!=null&&r[j]!=='')o[k]=r[j]});if(!o.cliente&&!o.desc&&!o.tipo)return;
+      var raw=o.data,dt=data(raw,contextYear,excel1904);if(raw!==undefined&&raw!==''){if(!dt){issues.push('Linha '+(start+idx+1)+': data inválida ('+String(raw)+')');lastDate='';return}lastDate=dt}else dt=lastDate;
+      if(!dt){issues.push('Linha '+(start+idx+1)+': data ausente ou sem ano');return}
+      if(o.espaco)lastSpace=o.espaco;else o.espaco=lastSpace;
+      if(o.ini&&!o.fim){var range=String(o.ini).match(/^(\d{1,2}(?:[:h.]\d{2})?)\s*(?:às|as|a|até|ate|[-–])\s*(\d{1,2}(?:[:h.]\d{2})?)$/i);if(range){o.ini=range[1];o.fim=range[2]}}
+      o.data=dt;var ev=montar(o);if(ev&&(ev.cliente||ev.titulo))out.push(ev)
+    });window.MDK_IMPORT_ISSUES=issues;return out;
   }
   function deTexto(t){var r=(window.MDKExcel&&MDKExcel.rows)?MDKExcel.rows(t):String(t).split(/\r?\n/).map(function(l){return l.split('\t')});return deLinhas(r)}
 
   async function deXLSX(f){var X=typeof carregarSheetJS==='function'?await carregarSheetJS():await sc('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js','XLSX');
-    var wb=X.read(await f.arrayBuffer(),{type:'array',cellDates:true}),out=[];
-    wb.SheetNames.forEach(function(n){var rows=X.utils.sheet_to_json(wb.Sheets[n],{header:1,raw:true,defval:''});out=out.concat(deLinhas(rows))});return out}
+    var wb=X.read(await f.arrayBuffer(),{type:'array',cellDates:false}),out=[];
+    wb.SheetNames.forEach(function(n){var rows=X.utils.sheet_to_json(wb.Sheets[n],{header:1,raw:true,defval:''});out=out.concat(deLinhas(rows,!!(wb.Workbook&&wb.Workbook.WBProps&&wb.Workbook.WBProps.date1904)))});return out}
 
   /* ---- PDF: reconstrói a tabela pelas posições do texto ---- */
   async function dePDF(f){
@@ -11584,7 +11608,7 @@ enriquecerInventario();enriquecerArquivados();var renderOld=window.render;if(typ
     s.atividades.push({id:u(),titulo:'Evento: '+(ev.cliente||ev.titulo)+' · '+(ev.local||''),prazo:ev.data,hora:ev.hora||'',tipo:'Trabalho',prioridade:'Alta',repetir:'',aviso:60,
       desc:(ev.titulo||'')+(ev.horaFim?' · até '+ev.horaFim:'')+(ev.info?' · '+ev.info:''),arquivo:null,feito:false,criado:Date.now(),evId:ev.id,origem:'planilha-eventos'})}
   window.evsImportar=function(){var s=ST(),n=0,up=0,lr=(document.getElementById('evs-lemb')||{checked:true}).checked;
-    PV.lista.filter(function(e){return e._sel}).forEach(function(e){var ex=existente(e);
+    PV.lista.filter(function(e){return e._sel&&e.aldeota&&data(e.data)}).forEach(function(e){var ex=existente(e);
       if(ex){ex.info=e.info;ex.horaFim=e.horaFim||ex.horaFim;up++;if(lr)lembrete(ex);return}
       var ev={id:u(),cliente:e.cliente||e.titulo,titulo:e.titulo||e.cliente,servicos:e.servicos,local:e.local,data:e.data,hora:e.hora,horaFim:e.horaFim,resp:'',info:e.info,status:'Agendado',anexo:null,origem:'eventos',fonte:'PlanilhaSemanal',espacoOriginal:e.espacoOriginal};
       s.eventos.push(ev);if(lr)lembrete(ev);n++});
@@ -11609,7 +11633,7 @@ enriquecerInventario();enriquecerArquivados();var renderOld=window.render;if(typ
     }
     return '<div class="ev-import-source"><label class="btn primary">⇪ Selecionar arquivo<input type="file" aria-label="Importar planilha de eventos" accept=".pdf,.xlsx,.xls,.xlsm,.ods,.csv,.txt" hidden onchange="evsArquivo(this)"/></label><span class="dim">PDF, Excel ou CSV</span></div>'+
        '<details class="ev-paste"><summary>Colar linhas da planilha</summary><textarea id="evs-txt" rows="4" placeholder="Cole as linhas com o cabeçalho"></textarea><button class="btn sm primary" onclick="evsColar()">Conferir eventos</button></details>'+
-       prev;
+       ((window.MDK_IMPORT_ISSUES||[]).length?'<div class="alertbar w">'+E(window.MDK_IMPORT_ISSUES.slice(0,8).join(' · '))+'</div>':'')+prev;
   }
 
   var base=window.vEventos;
@@ -11928,5 +11952,52 @@ function mpAnydesk(id){id=String(id||'').replace(/\s/g,'');var p=anyPath();if(id
  setTimeout(function(){if(id&&document.hasFocus()&&confirm('Se o AnyDesk não abriu, deseja baixar um atalho que abre\n'+p+'\njá conectando no ID '+id+'?'))mpAnydeskBat(id)},1800)}
 try{MP_PATH_ANYDESK=anyPath()}catch(e){}
 </script>
+<style id="mdk-v173-professional-depth">
+:root{--depth-surface:var(--bg2);--depth-highlight:color-mix(in oklab,var(--fg) 10%,transparent);--depth-shadow:oklch(0 0 0 / .32);--depth-soft:oklch(0 0 0 / .16);--depth-edge:color-mix(in oklab,var(--info) 28%,var(--line));--depth-elevated:0 12px 28px var(--depth-shadow),0 3px 0 var(--bg0),inset 0 1px 0 var(--depth-highlight)}
+body{background:var(--bg0)!important}h1,h2,h3,h4{letter-spacing:0!important}
+#jfx{display:none!important}.ev-unified .agenda-cal{border:1px solid var(--depth-edge);border-radius:8px;padding:16px;background:var(--depth-surface);box-shadow:var(--depth-elevated);min-width:0}
+.ev-unified .agenda-day{background:var(--bg3)!important;box-shadow:inset 0 1px 0 var(--depth-highlight),0 3px 0 var(--bg0)!important;border:1px solid var(--line)!important;transition:transform .18s,box-shadow .18s!important}
+.ev-unified .agenda-day.selected{background:color-mix(in oklab,var(--info) 14%,var(--bg3))!important;border-color:var(--info)!important}
+.ev-unified .agenda-day.today .dn{color:var(--info)}.ev-unified .agenda-day:hover{transform:perspective(500px) translateY(-2px) rotateX(3deg)!important;border-color:var(--depth-edge)!important}
+.ev-unified .agenda-side>div{border-bottom:1px solid var(--line);padding-bottom:16px}.ev-unified .agenda-item{background:var(--bg2);border:1px solid var(--line);border-radius:6px;box-shadow:inset 0 1px 0 var(--depth-highlight)}
+.ev-unified .ev-create{box-shadow:var(--depth-elevated)!important;background:var(--bg2)!important}.ev-unified .ev-table-wrap{box-shadow:0 5px 16px var(--depth-soft)}
+.btn.primary{box-shadow:0 3px 0 var(--bg0),inset 0 1px 0 var(--depth-highlight)!important}.btn:active{transform:translateY(1px)!important}
+.mdk173-sync{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 18px;padding:12px 0;border-bottom:1px solid var(--line)}.mdk173-sync b{color:var(--info)}.mdk173-sync span{flex:1;min-width:160px;font-size:12px;color:var(--mut)}
+body[data-mdk-manual-theme="light"]{--depth-shadow:oklch(.3 .01 250 / .12);--depth-soft:oklch(.3 .01 250 / .08)}
+@media(max-width:700px){body:not(.mdk-drawer-open) #app>aside{visibility:hidden!important;opacity:0!important;pointer-events:none!important}body.mdk-drawer-open #app>aside{visibility:visible!important;opacity:1!important;pointer-events:auto!important;width:calc(100vw - 14px)!important;max-width:none!important;background:var(--bg2)!important}.ev-unified .agenda-cal{padding:10px}.ev-unified .agenda-day{min-height:48px!important}.mdk173-sync{gap:8px}.mdk173-sync span{flex-basis:100%}}
+@media(prefers-reduced-motion:reduce){.ev-unified .agenda-day:hover{transform:none!important}.ev-unified .agenda-day{transition:none!important}}
+body[data-mdk-reduced-motion] .agenda-day:hover{transform:none!important}
+</style>
+<script id="mdk-v173-agenda-normalization">
+(function(){
+'use strict';
+var rooms=['Senac Aldeota','Terraço','Sala 5 e 6','Salão Reservado Mayu','Mayu','Hall','Sala Multiuso','Auditório'];
+function norm(v){return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'')}
+function room(v){var n=norm(v);if(/reservad/.test(n)&&/mayu/.test(n))return rooms[3];if(/^(restaurante)?mayu$/.test(n))return rooms[4];if(/^(?:senacaldeota)?salas?0?[56](?:e0?6)?$/.test(n))return rooms[2];if(/terraco/.test(n))return rooms[1];if(/multiuso/.test(n))return rooms[6];if(/auditorio/.test(n))return rooms[7];if(/hall/.test(n))return rooms[5];if(/^(senac)?aldeota$/.test(n))return rooms[0];return ''}
+function normalize(){var st=window.state;if(!st)return;(st.eventos||[]).forEach(function(e){var d=MDK_PARSE_DATA(e.data);if(d)e.data=d;var r=room(e.local);if(r){e.local=r;e.unidade='Senac Aldeota'}});(st.atividades||[]).forEach(function(a){var d=MDK_PARSE_DATA(a.prazo);if(d)a.prazo=d})}
+var saveBase=window.save;window.save=function(){normalize();if(!mdkHydrating){mdkGeneration++;mdkDirty(true)}return saveBase.apply(this,arguments)};save=window.save;
+var oldAdd=window.addEvento;window.addEvento=function(){var el=document.getElementById('ev-l'),r=el&&room(el.value);if(!r)return toast('Selecione um ambiente do Senac Aldeota');el.value=r;return oldAdd.apply(this,arguments)};addEvento=window.addEvento;
+var oldView=window.vEventos;
+window.vEventos=function(){normalize();return '<div class="mdk173-sync"><b>Senac Aldeota</b><span id="mdk173-cloud-state" role="status"></span><button class="btn sm" onclick="mdkConectarNuvem()">☁ Conectar</button><button class="btn sm" onclick="mdk173Sync()">↻ Sincronizar</button></div>'+oldView.apply(this,arguments)};vEventos=window.vEventos;
+window.mdk173Sync=function(){if(!mdkTk())return mdkConectarNuvem();if(!db)return connectCloud();mdkPoll()};
+function paint(){var dl=document.getElementById('mdk-salas');if(dl)dl.innerHTML=rooms.map(function(r){return '<option value="'+r+'">'}).join('');var x=document.getElementById('mdk173-cloud-state');if(x)x.textContent=({online:'Dados confirmados na nuvem',sync:'Salvando e confirmando…',erro:'Sem confirmação da nuvem — alterações pendentes neste aparelho',login:'Conecte com a mesma senha nos outros aparelhos',local:'Dados apenas neste aparelho'})[window.SYNC_STATUS]||'Verificando conexão';}
+var statusBase=window.setSyncStatus;window.setSyncStatus=function(){var r=statusBase.apply(this,arguments);paint();return r};setSyncStatus=window.setSyncStatus;
+document.addEventListener('focusin',function(e){if(e.target&&e.target.getAttribute('list')==='mdk-salas')paint()});
+var view=document.getElementById('view');if(view)new MutationObserver(paint).observe(view,{childList:true});normalize();paint();
+})();
+</script>
+<style id="mdk-fix-login-escuro">
+html body[data-mdk-manual-theme] div#login div.card-login.card-login::after{background:linear-gradient(135deg,rgba(255,44,62,.08),transparent 35%)!important}
+html body[data-mdk-manual-theme] div#login div.card-login.card-login,html body[data-mdk-manual-theme] div#login div.card-login.card-login::before{background-color:rgba(10,14,21,.92)!important}
+body #login,body[data-mdk-manual-theme] #login{background:radial-gradient(700px 500px at 18% 50%,rgba(239,20,39,.18),transparent 65%),radial-gradient(650px 450px at 100% 10%,rgba(255,46,77,.1),transparent 65%),#080b11!important}
+body[data-mdk-manual-theme] #login:before{color:rgba(255,255,255,.022)!important}
+html body[data-mdk-manual-theme] div#login div.card-login.card-login{background:rgba(10,14,21,.92)!important;border:1px solid rgba(255,255,255,.12)!important;border-top-color:rgba(255,50,70,.42)!important;color:#f5f7fb!important}
+.card-login::after{background:linear-gradient(135deg,rgba(255,44,62,.08),transparent 35%)!important;z-index:0!important}.card-login>*{position:relative;z-index:1}
+html body[data-mdk-manual-theme] div#login h2{color:#fff!important}
+body[data-mdk-manual-theme] #login .dim,body[data-mdk-manual-theme] #login small{color:#8994a7!important}
+body[data-mdk-manual-theme] #login label{color:#9ca7ba!important}
+body[data-mdk-manual-theme] #login input[type=password]{background:#05080e!important;color:#f5f7fb!important;border:1px solid rgba(255,255,255,.12)!important}
+body[data-mdk-manual-theme] #login #lg-err{color:#ff6674!important}
+</style>
 </body>
 </html>
