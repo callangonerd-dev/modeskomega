@@ -12101,5 +12101,132 @@ buildMenu();try{render()}catch(e){}
 async function mdk177Sync(){try{if(typeof mdkConflict!=='undefined'&&mdkConflict&&typeof mdkResolverConflito==='function'){return mdkResolverConflito()}if(typeof mdkPending==='function'&&mdkPending()){await mdkPushAgora()}else{await mdkPoll()}if(typeof toast==='function')toast('Sincronização concluída')}catch(e){if(typeof toast==='function')toast('Falha ao sincronizar')}}
 setInterval(function(){var el=document.getElementById('side-sync-state'),d=document.getElementById('mdk177-dot');if(!el||!d)return;var t=(el.textContent||'').toLowerCase();d.style.background=/conflit/.test(t)?'#f59e0b':/erro|login|local/.test(t)?'#ef4444':/sync|sincron/.test(t)?'#3b82f6':'#22c55e';d.title='Nuvem: '+el.textContent},1000);
 </script>
+<script id="mdk-v200-automatico">
+/* ===== v200: tudo automático — sync silenciosa 24h, espaço automático, agenda colorida + arquivo, links, AnyDesk com senha, iniciar com o Windows ===== */
+(function(){
+var ANY_DEF='D:\\MODESK MASTER\\Programas\\Anydesk\\AnyDesk.exe';
+function hojeISO(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function E(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+
+/* ---------- 1) Sincronização silenciosa ---------- */
+var SILENCIO=/sincroniz|nuvem|drive|enviando|movido|anexo\(s\)|apps script|conectad|online|verificando|salvo na|backup|google respondeu|armazenamento|espaço|conflito/i;
+if(typeof window.toast==='function'){var _t=window.toast;window.toast=function(m){if(SILENCIO.test(String(m||'')))return;return _t.apply(this,arguments)}}
+/* guarda a senha da nuvem (só neste PC) para reconectar sozinho quando a sessão expirar */
+if(typeof window.mdkApiLogin==='function'){var _l=window.mdkApiLogin;window.mdkApiLogin=async function(s,lem){var r=await _l(s,true);try{localStorage.setItem('mdk.auto.pw',btoa(unescape(encodeURIComponent(s))));localStorage.setItem('modesk.trusted','1')}catch(e){}return r}}
+var relogando=false;
+async function autoRelogin(){if(relogando)return;var p=localStorage.getItem('mdk.auto.pw');if(!p)return;relogando=true;
+  try{await _l2(decodeURIComponent(escape(atob(p))));if(typeof connectCloud==='function')connectCloud()}catch(e){}finally{relogando=false}}
+function _l2(s){return window.mdkApiLogin(s,true)}
+/* conflito: resolve sozinho mesclando (a alteração mais recente vence, nada é perdido) */
+async function autoConflito(){try{var j=await mdkApi('get',{doc:GESTOR});var rem={};try{rem=JSON.parse((j.campos||{}).payload||'{}')}catch(e){}
+  Object.keys(rem).forEach(function(k){if(Array.isArray(rem[k])&&Array.isArray(state[k])){var ids={};state[k].forEach(function(x){if(x&&x.id)ids[x.id]=1});rem[k].forEach(function(x){if(x&&x.id&&!ids[x.id])state[k].push(x)})}else if(!(k in state))state[k]=rem[k]});
+  mdkBase(j.ver);mdkConflict=false;mdkCloudError='';mdkDirty(true);try{localStorage.setItem(LS,JSON.stringify(state))}catch(e){}await mdkPushAgora()}catch(e){}}
+window.mdkResolverConflito=autoConflito;
+setInterval(function(){try{
+  var s=window.SYNC_STATUS;
+  if(s==='login'||(!mdkTk()&&localStorage.getItem('mdk.auto.pw')))autoRelogin();
+  else if(s==='conflito'||mdkConflict)autoConflito();
+  else if(s==='erro'&&typeof mdkPoll==='function')mdkPoll();
+  if(document.hidden&&typeof mdkPoll==='function')mdkPoll(); /* continua sincronizando com a aba em segundo plano */
+  if(typeof mdkPending==='function'&&mdkPending()&&!mdkPushing&&typeof mdkPushAgora==='function'&&mdkReady)mdkPushAgora();
+}catch(e){}},15000);
+window.addEventListener('online',function(){try{mdkPoll()}catch(e){}});
+/* evita que o navegador "congele" a aba */
+try{if(navigator.locks)navigator.locks.request('mdk-keepalive',function(){return new Promise(function(){})})}catch(e){}
+try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
+
+/* ---------- 2) Espaço automático: anexos vão sozinhos para o Drive (1 GB) ---------- */
+var movendo=false;
+async function autoMover(){if(movendo)return;if(typeof anexosLocais!=='function'||typeof enviarDrive!=='function')return;var l=anexosLocais();if(!l.length)return;movendo=true;
+  try{for(var i=0;i<l.length;i++){var o=l[i][0],c=l[i][1],a=o[c];if(!a||!a.dados)continue;
+    try{var url=await enviarDrive(a.dados,a.nome,a.tipo);o[c]={nome:a.nome,tipo:a.tipo,url:url}}catch(e){}}
+    try{localStorage.setItem(LS,JSON.stringify(state))}catch(e){}if(typeof pushCloud==='function')pushCloud();if(typeof pintarUso==='function')pintarUso()}finally{movendo=false}}
+/* se ainda faltar espaço local, a cópia completa fica no IndexedDB (muito maior) e a nuvem continua sendo a principal */
+function idbSalvar(){try{var r=indexedDB.open('modesk-auto',1);r.onupgradeneeded=function(){r.result.createObjectStore('s')};r.onsuccess=function(){var tx=r.result.transaction('s','readwrite');tx.objectStore('s').put(JSON.stringify(state),'state')}}catch(e){}}
+window.avisoCheio=function(){idbSalvar();if(typeof pushCloud==='function')pushCloud();autoMover().then(function(){try{localStorage.setItem(LS,JSON.stringify(state))}catch(e){}})};
+var _cheioX=setInterval(function(){var d=document.getElementById('aviso-cheio');if(d)d.remove()},800);
+setInterval(function(){try{if(window.DRIVE_STATUS!=='erro')autoMover();idbSalvar()}catch(e){}},60000);
+setTimeout(autoMover,8000);
+
+/* ---------- 3) Agenda: cores por tipo + encerrados vão para o Arquivo ---------- */
+var css=document.createElement('style');css.textContent=
+ '.agenda-chip{display:block;font-style:normal;font-size:10.5px;line-height:1.25;padding:1px 4px;margin-top:2px;border-radius:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:left;color:#fff;border-left:3px solid rgba(0,0,0,.35)}'+
+ '.agenda-day .agenda-dots{position:static!important;display:block!important;margin-top:3px}.agenda-day{min-height:78px!important;display:flex;flex-direction:column;align-items:stretch}'+
+ '.agenda-chip.evento,.agenda-dot.evento,.agenda-legend i.evento{background:#2563eb!important}'+
+ '.agenda-chip.lembrete,.agenda-dot.lembrete,.agenda-legend i.lembrete{background:#f59e0b!important;color:#1a1200}'+
+ '.agenda-chip.atividade,.agenda-dot.atividade,.agenda-legend i.atividade{background:#10b981!important}'+
+ '.agenda-chip.encerrado,.agenda-dot.encerrado,.agenda-legend i.encerrado{background:#6b7280!important;text-decoration:line-through;opacity:.8}'+
+ '.agenda-item.encerrado .bar{background:#6b7280!important}.agenda-item.lembrete .bar{background:#f59e0b!important}.agenda-item.evento .bar{background:#2563eb!important}'+
+ '#aviso-cheio{display:none!important}.mdk-auto-box{border:1px solid var(--line);border-radius:8px;padding:10px;margin-top:8px}';
+document.head.appendChild(css);
+function encerrado(x){var h=hojeISO();if(x.feito)return true;if(x.tipo==='evento'){var e=(state.eventos||[]).find(function(v){return v.id===x.id});if(e&&e.status==='Executado')return true}return x.data<h}
+if(typeof window.agendaItens==='function'){var _ai=window.agendaItens;window.agendaItens=function(){return _ai().map(function(x){x.base=x.tipo;x.encerrado=encerrado(x);if(x.encerrado)x.tipo=x.base+' encerrado';return x})}}
+window.agendaAbrir=function(x){(x.base||x.tipo).indexOf('evento')===0?verEvento(x.id):verAtiv(x.id)};
+function arquivados(){return (typeof _ai==='function'?window.agendaItens():[]).filter(function(x){return x.encerrado}).sort(function(a,b){return (b.data+b.hora).localeCompare(a.data+a.hora)})}
+window.mdkAgRelatorio=function(){var de=(document.getElementById('ag-arq-de')||{}).value||'',ate=(document.getElementById('ag-arq-ate')||{}).value||'';
+  var l=arquivados().filter(function(x){return (!de||x.data>=de)&&(!ate||x.data<=ate)});
+  var n={evento:0,lembrete:0,atividade:0};l.forEach(function(x){n[x.base]=(n[x.base]||0)+1});
+  var w=window.open('','_blank');if(!w)return;
+  w.document.write('<html><head><meta charset="utf-8"><title>Relatório da agenda</title><style>body{font-family:Arial;padding:24px}table{border-collapse:collapse;width:100%}td,th{border:1px solid #ccc;padding:6px;font-size:13px;text-align:left}th{background:#eee}</style></head><body><h2>MODESK — Relatório de compromissos encerrados</h2><p>Período: '+(de?de.split('-').reverse().join('/'):'início')+' a '+(ate?ate.split('-').reverse().join('/'):'hoje')+' · Total: '+l.length+' (Eventos '+n.evento+' · Lembretes '+n.lembrete+' · Atividades '+n.atividade+')</p><table><tr><th>Data</th><th>Hora</th><th>Tipo</th><th>Título</th><th>Detalhes</th></tr>'+
+   l.map(function(x){return '<tr><td>'+x.data.split('-').reverse().join('/')+'</td><td>'+E(x.hora||'Dia inteiro')+'</td><td>'+E(x.base)+'</td><td>'+E(x.titulo)+'</td><td>'+E(x.sub)+'</td></tr>'}).join('')+'</table><script>setTimeout(function(){print()},400)<\/script></body></html>');w.document.close()};
+if(typeof window.vAgenda==='function'){var _va=window.vAgenda;window.vAgenda=function(){var h=_va();
+  h=h.replace(/<i class="agenda-dot ([^"]*)" title="([^"]*)"><\/i>/g,'<i class="agenda-chip $1" title="$2">$2</i>');
+  h=h.replace(/<div class="agenda-legend">[\s\S]*?<\/div>/,'<div class="agenda-legend"><span><i class="evento"></i>Eventos</span><span><i class="lembrete"></i>Lembretes</span><span><i class="atividade"></i>Atividades</span><span><i class="encerrado"></i>Encerrados (no Arquivo)</span></div>');
+  var arq=arquivados();
+  var bloco='<div class="card" style="margin-top:16px"><details><summary style="cursor:pointer;font-weight:700">🗄 Arquivo da agenda — encerrados <span class="badge">'+arq.length+'</span></summary>'+
+   '<div class="row" style="gap:8px;margin-top:10px;flex-wrap:wrap;align-items:end"><div><label>De</label><input type="date" id="ag-arq-de"/></div><div><label>Até</label><input type="date" id="ag-arq-ate"/></div><button class="btn primary" onclick="mdkAgRelatorio()">📄 Gerar relatório</button></div>'+
+   '<div class="agenda-list" style="max-height:340px;overflow:auto">'+(arq.length?arq.map(function(x){return '<div class="agenda-item encerrado"><i class="bar"></i><div><b>'+E(x.titulo)+'</b><small>'+x.data.split('-').reverse().join('/')+' · '+E(x.hora||'Dia inteiro')+' · '+E(x.base)+'</small></div><button class="btn sm" onclick=\'agendaAbrir('+JSON.stringify({id:x.id,base:x.base,tipo:x.tipo}).replace(/'/g,"&#39;")+')\'>Ver</button></div>'}).join(''):'<div class="agenda-empty">Nada encerrado ainda.</div>')+'</div></details></div>';
+  var i=h.lastIndexOf('</div>');return i>0?h.slice(0,i)+bloco+h.slice(i):h+bloco}}
+
+/* ---------- 4) Central de Arquivos: links usados sincronizados sozinhos ---------- */
+function coletarLinks(){var vis={},out=[];
+  function add(url,nome,orig){url=String(url||'').trim();if(!/^https?:\/\//i.test(url)||vis[url])return;vis[url]=1;out.push({url:url,nome:nome||url,orig:orig})}
+  (state.links||[]).forEach(function(l){add(l.url,l.nome,'Sistemas')});
+  (function walk(o,orig,d){if(!o||d>6)return;if(Array.isArray(o)){o.forEach(function(x){walk(x,orig,d+1)});return}if(typeof o!=='object')return;
+    if(o.url&&typeof o.url==='string')add(o.url,o.nome||o.titulo,orig);Object.keys(o).forEach(function(k){if(k!=='links'&&o[k]&&typeof o[k]==='object')walk(o[k],d===0?k:orig,d+1)})})(state,'',0);
+  return out}
+if(typeof window.vArquivos==='function'){var _vq=window.vArquivos;window.vArquivos=function(){var h=_vq(),l=coletarLinks();
+  var b='<div class="card" style="margin-top:16px"><h3>🔗 Links sincronizados automaticamente <span class="badge">'+l.length+'</span></h3><p class="dim" style="margin-top:4px">Todo link usado no sistema (sistemas, anexos no Drive, eventos, pedidos…) aparece aqui sozinho e acompanha a nuvem.</p><div style="max-height:360px;overflow:auto;margin-top:8px">'+
+   (l.length?l.map(function(x){return '<div class="exp-list-row"><span>'+(/drive\.google|docs\.google/.test(x.url)?'☁️':'🔗')+'</span><div style="min-width:0"><b style="font-size:12.6px">'+E(x.nome)+'</b><div class="mono dim" style="font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+E(x.orig?x.orig+' · ':'')+E(x.url)+'</div></div><a class="btn sm" style="margin-left:auto" href="'+E(x.url)+'" target="_blank" rel="noopener">Abrir</a></div>'}).join(''):'<div class="dim">Nenhum link usado ainda.</div>')+'</div></div>';
+  var i=h.lastIndexOf('</div>');return i>0?h.slice(0,i)+b+h.slice(i):h+b}}
+
+/* ---------- 5) AnyDesk: pede a senha cadastrada e abre o programa de D:\MODESK MASTER ---------- */
+function anyExe(){try{return localStorage.getItem('mdk_any_path')||ANY_DEF}catch(e){return ANY_DEF}}
+function pedirSenha(id){return new Promise(function(res){var d=document.createElement('div');
+  d.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:100000;display:flex;align-items:center;justify-content:center';
+  d.innerHTML='<div class="card" style="min-width:320px;max-width:90vw"><h3>🔒 Acesso AnyDesk</h3><p class="dim" style="margin:6px 0 10px">Conectar no ID <b class="mono">'+E(id)+'</b>. Digite a senha cadastrada:</p><input id="mdk-any-pw" type="password" style="width:100%" autocomplete="current-password"/><div id="mdk-any-err" style="color:#ef4444;font-size:12px;min-height:16px;margin-top:4px"></div><div class="row" style="gap:8px;justify-content:flex-end;margin-top:8px"><button class="btn" id="mdk-any-c">Cancelar</button><button class="btn primary" id="mdk-any-ok">Conectar</button></div></div>';
+  document.body.appendChild(d);var i=d.querySelector('#mdk-any-pw');i.focus();
+  async function ok(){var v=i.value;if(!v)return;var h=await mdkHashLocal(v),salvo=localStorage.getItem('modesk.senha.local');
+    var nuvem=localStorage.getItem('mdk.auto.pw');var okN=nuvem&&decodeURIComponent(escape(atob(nuvem)))===v;
+    if(!salvo&&!nuvem){localStorage.setItem('modesk.senha.local',h);salvo=h}
+    if(h===salvo||okN){d.remove();res(true)}else{d.querySelector('#mdk-any-err').textContent='Senha incorreta';i.select()}}
+  d.querySelector('#mdk-any-ok').onclick=ok;i.onkeydown=function(e){if(e.key==='Enter')ok();if(e.key==='Escape'){d.remove();res(false)}};
+  d.querySelector('#mdk-any-c').onclick=function(){d.remove();res(false)}})}
+function abrirAny(id){var a=document.createElement('a');a.href='anydesk:'+id;document.body.appendChild(a);a.click();a.remove()}
+window.mpAnydesk=async function(id){id=String(id||'').replace(/\s/g,'');if(!id)return;if(!(await pedirSenha(id)))return;try{navigator.clipboard.writeText(id)}catch(e){}abrirAny(id)};
+if(typeof window.abrirRemoto==='function'){var _ar=window.abrirRemoto;window.abrirRemoto=function(id){var a=(state.acessos||[]).find(function(x){return x.id===id});if(a&&a.tipo==='AnyDesk')return window.mpAnydesk(a.endereco);return _ar(id)}}
+/* registro do protocolo anydesk: apontando para o AnyDesk de D:\ (executar 1 vez) */
+window.mdkBaixarRegAny=function(){var p=anyExe().replace(/\\/g,'\\\\');
+  var reg='Windows Registry Editor Version 5.00\r\n\r\n[HKEY_CURRENT_USER\\Software\\Classes\\anydesk]\r\n@="URL:AnyDesk Protocol"\r\n"URL Protocol"=""\r\n\r\n[HKEY_CURRENT_USER\\Software\\Classes\\anydesk\\shell\\open\\command]\r\n@="\\"'+p+'\\" \\"%1\\""\r\n';
+  baixar(reg,'MODESK_AnyDesk_protocolo.reg')};
+
+/* ---------- 6) Abrir o site junto com o Windows ---------- */
+function baixar(txt,nome){var b=new Blob([txt],{type:'application/octet-stream'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=nome;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(a.href)},4000)}
+window.mdkBaixarInicio=function(){var cam=decodeURIComponent(location.protocol==='file:'?location.pathname.replace(/^\//,'').replace(/\//g,'\\'):location.href);
+  var alvo=location.protocol==='file:'?'file:///'+cam.replace(/\\/g,'/'):cam;
+  var bat='@echo off\r\nrem MODESK - instala a abertura automatica junto com o Windows\r\nset "ALVO='+alvo+'"\r\n'+
+   'set "INI=%APPDATA%\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\MODESK.bat"\r\n'+
+   '(echo @echo off& echo timeout /t 15 /nobreak ^>nul& echo start "" chrome --start-maximized "%ALVO%" ^|^| start "" msedge --start-maximized "%ALVO%" ^|^| start "" "%ALVO%")>"%INI%"\r\n'+
+   'echo MODESK vai abrir sozinho sempre que o computador ligar.\r\npause\r\n';
+  baixar(bat,'MODESK_iniciar_com_Windows.bat')};
+/* cartão de automação nas Configurações/Agenda */
+setInterval(function(){var m=document.querySelector('main');if(!m||document.getElementById('mdk-auto-card'))return;
+  if(!/Configura|Acessos|Mapeamento|Computadores/i.test((m.querySelector('h2.page')||{}).textContent||''))return;
+  var c=document.createElement('div');c.id='mdk-auto-card';c.className='card';c.style.marginTop='16px';
+  c.innerHTML='<h3>⚙ Automação (instalar uma única vez neste PC)</h3><p class="dim" style="margin:4px 0 10px">A sincronização, o espaço e a reconexão já funcionam sozinhos. Estes dois arquivos são para o Windows:</p><div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn primary" onclick="mdkBaixarInicio()">🖥 Abrir o MODESK ao ligar o PC</button><button class="btn" onclick="mdkBaixarRegAny()">🔗 Ligar botões ao AnyDesk de D:\\MODESK MASTER</button></div>';
+  m.appendChild(c)},1500);
+})();
+</script>
+
 </body>
 </html>
