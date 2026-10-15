@@ -1279,7 +1279,7 @@ let db=null,unsub=null;
 var mdkVer=0,mdkPushT=null,mdkPushing=false,mdkLocalEm=0,mdkPollT=null,mdkPollBusy=false;
 /* v173: fila persistente; conexão não significa dados salvos. */
 var mdkDirtyKey='mdk.payload.pending.v173',mdkReady=false,mdkHydrating=false,mdkGeneration=0;
-var mdkBaseKey='mdk.cloud.base.v176',mdkBaseVer=Number(localStorage.getItem(mdkBaseKey)||0),mdkConflict=false,mdkCloudError='';
+var mdkBaseKey='mdk.cloud.base.v177',mdkBaseVer=Number(localStorage.getItem(mdkBaseKey)||0),mdkConflict=false,mdkCloudError='';
 function mdkBase(v){mdkBaseVer=Number(v)||0;try{localStorage.setItem(mdkBaseKey,String(mdkBaseVer))}catch(e){}}
 function mdkError(e){mdkCloudError=e.message||'Falha na nuvem';mdkConflict=e.code==='conflito';setSyncStatus(e.code==='nao-autorizado'?'login':mdkConflict?'conflito':'erro');var x=document.getElementById('cf-live-s');if(x)x.textContent=mdkCloudError;var y=document.getElementById('mdk173-cloud-state');if(y)y.textContent=mdkCloudError;}
 async function mdkResolverConflito(){if(!mdkConflict)return mdk173Sync();exportJSON();if(!confirm('Foi baixado um backup deste aparelho. Usar os dados atualizados da nuvem? Cancelar mantém suas alterações pendentes sem sobrescrever a nuvem.'))return;var j=await mdkApi('get',{doc:GESTOR});if(!j.campos||!j.campos.payload)return toast('A nuvem não possui dados para carregar');mdkDirty(false);clearTimeout(mdkPushT);mdkPushT=null;mdkConflict=false;mdkHydrating=true;try{state=Object.assign(structuredClone(DEF),JSON.parse(j.campos.payload));localStorage.setItem(LS,JSON.stringify(state));mdkBase(j.ver);render()}finally{mdkHydrating=false}setSyncStatus('online');}
@@ -10772,7 +10772,7 @@ main:has(.agenda-shell)>.sect>.card:first-of-type{padding:10px 12px!important;ma
 
   /* download do HTML com o nome da versão */
   var dl=window.baixarHTML;
-  if(typeof dl==='function')window.baixarHTML=function(){var c=document.createElement.bind(document);var orig=HTMLAnchorElement.prototype.click;HTMLAnchorElement.prototype.click=function(){if(this.download&&/\.html$/i.test(this.download))this.download='MODESK_PESSOAL_v176.html';HTMLAnchorElement.prototype.click=orig;return orig.call(this)};return dl.apply(this,arguments)};
+  if(typeof dl==='function')window.baixarHTML=function(){var c=document.createElement.bind(document);var orig=HTMLAnchorElement.prototype.click;HTMLAnchorElement.prototype.click=function(){if(this.download&&/\.html$/i.test(this.download))this.download='MODESK_PESSOAL_v177.html';HTMLAnchorElement.prototype.click=orig;return orig.call(this)};return dl.apply(this,arguments)};
 })();
 </script>
 
@@ -12080,5 +12080,26 @@ buildMenu();try{render()}catch(e){}
 })();
 </script>
 
+<style>
+#mdk177-bar{visibility:visible!important;display:flex!important;position:fixed!important;right:12px;bottom:12px;z-index:99990;display:flex;gap:4px;align-items:center;padding:5px;border-radius:12px;background:rgba(15,23,42,.92);border:1px solid rgba(148,163,184,.25);box-shadow:0 6px 18px rgba(0,0,0,.3);font:600 12px system-ui,sans-serif;color:#e2e8f0}
+#mdk177-bar button{border:0;border-radius:8px;padding:7px 9px;background:rgba(148,163,184,.14);color:inherit;font:inherit;cursor:pointer}
+#mdk177-bar button:hover{background:rgba(59,130,246,.35)}
+#mdk177-dot{width:9px;height:9px;border-radius:50%;background:#94a3b8;margin:0 4px}
+#mdk177-bar.min button:not(#mdk177-tg){display:none!important}#mdk177-bar button{display:inline-block!important;visibility:visible!important}
+@media(max-width:520px){#mdk177-bar{left:8px;right:8px;bottom:8px;justify-content:space-between}#mdk177-bar button{padding:8px 6px;flex:1}}
+@media print{#mdk177-bar{display:none}}
+</style>
+<div id="mdk177-bar" role="toolbar" aria-label="Nuvem">
+<span id="mdk177-dot" title="Estado da nuvem"></span>
+<button type="button" onclick="mdk177Sync()">⟳ Sincronizar</button>
+<button type="button" onclick="fazerBackup()">⬇ Backup</button>
+<button type="button" onclick="document.getElementById('cf-f').click()">↺ Restaurar</button>
+<button type="button" onclick="logout()">⎋ Sair</button>
+<button type="button" id="mdk177-tg" title="Recolher" onclick="this.parentNode.classList.toggle('min')">–</button>
+</div>
+<script>
+async function mdk177Sync(){try{if(typeof mdkConflict!=='undefined'&&mdkConflict&&typeof mdkResolverConflito==='function'){return mdkResolverConflito()}if(typeof mdkPending==='function'&&mdkPending()){await mdkPushAgora()}else{await mdkPoll()}if(typeof toast==='function')toast('Sincronização concluída')}catch(e){if(typeof toast==='function')toast('Falha ao sincronizar')}}
+setInterval(function(){var el=document.getElementById('side-sync-state'),d=document.getElementById('mdk177-dot');if(!el||!d)return;var t=(el.textContent||'').toLowerCase();d.style.background=/conflit/.test(t)?'#f59e0b':/erro|login|local/.test(t)?'#ef4444':/sync|sincron/.test(t)?'#3b82f6':'#22c55e';d.title='Nuvem: '+el.textContent},1000);
+</script>
 </body>
 </html>
