@@ -104,16 +104,19 @@ try{var k="modesk.rede.perif.v60",a=JSON.parse(localStorage.getItem(k)||'[]'),H=
 <script>
 /* v157: nuvem via Google Apps Script (substitui Firebase/Firestore) */
 var MDK_HAD_LOCAL_DATA=!!localStorage.getItem('modesk.pessoal.v7');
-var MDK_API=(function(){var p=['MLN9ub0yc','LksQfkdIc','5L9d/J0Nn','X5gqylvrO','OQQQClkN6','OcnS98f39','z2NPZ+qe5','OvcGycns9','CM7BDoJCT','kxgZH1ran','hI6ojKCFq','GLC9aD6z5','/ur8x8Cb1','q2q/rKygo','PiEoCw==','vR1gdFno0','ZeaT0pMSA'],o=[4,0,3,7,1,8,2,6,10,9,16,11,12,13,5,15,14],s='',i,b,r='';for(i=0;i<o.length;i++)s+=p[o[i]];b=atob(s);for(i=0;i<b.length;i++)r+=String.fromCharCode(b.charCodeAt(i)^((90+i*7)&255));return r.split('').reverse().join('')})();
-try{var _mdkApiSalvo=localStorage.getItem('modesk.api');if(_mdkApiSalvo&&/^https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec$/.test(_mdkApiSalvo))MDK_API=_mdkApiSalvo}catch(e){}
+var MDK_API='https://script.google.com/macros/s/AKfycbyThYBJgwlITrPeJUPtaEabrPEEGXu2LbmgRtk1rtR5U9-rpI5PhlftfAEpgSFo_Ilp/exec';
 function mdkAlterarApi(){var v=prompt('Cole o endereço do App da Web do Apps Script (termina em /exec):','');if(v===null)return;v=v.trim();if(!/^https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec$/.test(v)){alert('Endereço inválido. Ele deve começar com https://script.google.com/macros/s/ e terminar em /exec');return}localStorage.setItem('modesk.api',v);mdkClearTk();location.reload()}
 function mdkTk(){try{var t=localStorage.getItem('modesk.tk')||sessionStorage.getItem('modesk.tk')||'';return (t==='undefined'||t==='null')?'':t}catch(e){return ''}}
 function mdkSetTk(t,lembrar){try{sessionStorage.setItem('modesk.tk',t);if(lembrar)localStorage.setItem('modesk.tk',t)}catch(e){}}
 function mdkClearTk(){try{sessionStorage.removeItem('modesk.tk');localStorage.removeItem('modesk.tk')}catch(e){}}
 async function mdkPost(corpo){
-  var r=await fetch(MDK_API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(corpo),cache:'no-store',redirect:'follow'});
-  if(!r.ok)throw new Error('Apps Script '+r.status);
-  var j=await r.json();
+  var j;
+  if(window.google&&google.script&&google.script.run){
+    j=await new Promise(function(resolve,reject){var done=false,t=setTimeout(function(){if(!done){done=true;reject(new Error('O Google não respondeu em 30 segundos.'))}},30000);google.script.run.withSuccessHandler(function(v){if(done)return;done=true;clearTimeout(t);resolve(v)}).withFailureHandler(function(){if(done)return;done=true;clearTimeout(t);reject(new Error('Falha no Google Apps Script. Verifique a implantação.'))}).modeskRequest(corpo)});
+  }else{
+    var controller=new AbortController(),timeout=setTimeout(function(){controller.abort()},30000);
+    try{var response=await fetch(MDK_API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(corpo),cache:'no-store',redirect:'follow',signal:controller.signal});if(!response.ok)throw new Error('Apps Script '+response.status);j=await response.json()}finally{clearTimeout(timeout)}
+  }
   if(j&&j.status==='Erro'&&j.ok===undefined){var e0=new Error('o endereço da nuvem aponta para outro script (de envio de arquivos), não para a nuvem do MODESK. Clique em "Alterar endereço da nuvem".');e0.code='script-errado';throw e0}
   if(!j||j.ok===false||(j.ok!==true&&(j.status==='Erro'||j.error))){var e=new Error((j&&j.error)||'resposta inválida do servidor');e.code=(j&&j.code)||(/senha/i.test((j&&j.error)||'')?'senha-incorreta':'');throw e}
   return j}
@@ -122,14 +125,14 @@ async function mdkApi(action,dados){
   catch(e){if(e.code==='nao-autorizado'){try{setSyncStatus('login')}catch(x){}}throw e}}
 async function mdkHashLocal(t){try{var b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('modesk:'+t));return Array.from(new Uint8Array(b)).map(function(x){return x.toString(16).padStart(2,'0')}).join('')}catch(e){var h=0;for(var i=0;i<t.length;i++)h=(h*31+t.charCodeAt(i))|0;return 'f'+h}}
 async function mdkLoginInterno(senha,lembrar){var h=await mdkHashLocal(senha),salvo=localStorage.getItem('modesk.senha.local');if(!salvo){localStorage.setItem('modesk.senha.local',h);salvo=h}if(h!==salvo){var e=new Error('senha incorreta');e.code='senha-incorreta';throw e}var t='local-'+h.slice(0,16);mdkSetTk(t,lembrar);return {ok:true,token:t,interno:true}}
-async function mdkApiLogin(senha,lembrar){var j;try{j=await mdkPost({action:'login',senha:senha})}catch(e0){if(e0.code==='senha-incorreta')throw e0;return mdkLoginInterno(senha,lembrar)}if(!j||!j.token||typeof j.token!=='string')return mdkLoginInterno(senha,lembrar);mdkSetTk(j.token,lembrar);return j}
+async function mdkApiLogin(senha,lembrar){var j=await mdkPost({action:'login',senha:senha});if(!j||!j.token||typeof j.token!=='string')throw new Error('O script não oferece login do MODESK. Atualize o Apps Script.');mdkSetTk(j.token,lembrar);return j}
 /* resolve com objeto se ha sessao valida (ou se estiver offline com token salvo), null se nao ha login */
-function mdkAuthPronto(){if(!mdkTk())return Promise.resolve(null);
+function mdkAuthPronto(){if(!mdkTk()||mdkTk().indexOf('local-')===0){mdkClearTk();return Promise.resolve(null);}
   return mdkApi('ping').then(function(){return {ok:1}}).catch(function(e){if(e.code==='nao-autorizado'){mdkClearTk();return null}return {ok:1,offline:1}})}
 async function mdkConectarNuvem(){try{
-  if(!mdkTk()){var s=prompt('Senha da nuvem (Apps Script):');if(!s)return;await mdkApiLogin(s,localStorage.getItem('modesk.trusted')==='1')}
-  connectCloud();mdkPoll()}catch(e){toast(e.code==='senha-incorreta'?'Senha da nuvem incorreta':'Falha na nuvem: '+e.message)}}
-async function mdkAutoNuvem(){try{connectCloud()}catch(e){}try{mdkPoll()}catch(e){}}
+  if(!mdkTk()||mdkTk().indexOf('local-')===0){mdkClearTk();var s=prompt('Senha da nuvem (Apps Script):');if(!s)return;await mdkApiLogin(s,localStorage.getItem('modesk.trusted')==='1')}
+  connectCloud()}catch(e){toast(e.code==='senha-incorreta'?'Senha da nuvem incorreta':'Falha na nuvem: '+e.message)}}
+async function mdkAutoNuvem(){try{connectCloud()}catch(e){}}
 </script>
 <style>
 :root{
@@ -1200,8 +1203,7 @@ function anexoHtml(a,estilo){if(!a)return '';var img=(a.tipo||'').indexOf('image
   return '<a class="btn" href="'+a.dados+'" download="'+esc(a.nome)+'">⬇ '+esc(a.nome)+'</a>'}
 async function enviarDrive(dataUrl,nome,tipo){
   var b64=String(dataUrl).split(',')[1]||'';
-  var r=await fetch(DRIVE_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'upload',token:mdkTk(),data:b64,filename:nome,mimeType:tipo||'application/octet-stream'})});
-  var j=await r.json(); if(j.status!=='Sucesso'||!j.url)throw new Error(j.error||'falha no envio');
+  var j=await mdkApi('upload',{data:b64,filename:nome,mimeType:tipo||'application/octet-stream'});if(j.status!=='Sucesso'||!j.url)throw new Error(j.error||'falha no envio');
   pintarDrive('online'); return j.url}
 function lerArquivo(f){return new Promise(function(ok,no){var r=new FileReader();r.onload=function(){ok(r.result)};r.onerror=no;r.readAsDataURL(f)})}
 /* recebe um File, envia ao Drive; se falhar e for pequeno, guarda local */
@@ -1215,9 +1217,7 @@ function pintarDrive(e){window.DRIVE_STATUS=e;var dot=document.getElementById('d
   dot.className='live-dot '+(e==='online'?'on':e==='sync'?'sync':'off');
   t.textContent=e==='online'?'Drive on-line':e==='sync'?'Verificando':'Drive fora do ar';
   s.textContent=e==='online'?'Anexos novos vão direto para o Google Drive':e==='sync'?'Testando o armazenamento':'Anexos ficarão só neste aparelho até voltar'}
-async function testarDrive(avisar){pintarDrive('sync');
-  try{await fetch(DRIVE_URL,{method:'GET',mode:'no-cors',cache:'no-store'});pintarDrive(navigator.onLine===false?'erro':'online');if(avisar)toast('Drive respondeu')}
-  catch(e){pintarDrive('erro');if(avisar)toast('Drive não respondeu')}}
+async function testarDrive(avisar){try{await mdkApi('ping');pintarDrive('online');if(avisar)toast('Google respondeu à sessão autenticada')}catch(e){pintarDrive('erro');if(avisar)toast('Google não confirmou a conexão: '+e.message)}}
 function usoLocal(){var t=0;try{for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);t+=(k.length+(localStorage.getItem(k)||'').length)*2}}catch(e){}return t}
 function pintarUso(){var el=document.getElementById('dr-uso'),bar=document.getElementById('dr-bar');if(!el)return;var u=usoLocal(),lim=5*1024*1024,p=Math.min(100,u/lim*100);
   el.textContent=(u/1048576).toFixed(2)+' MB de ~5 MB usados neste aparelho ('+p.toFixed(0)+'%) · '+contarLocais()+' anexo(s) ainda guardados no aparelho';
@@ -1279,13 +1279,18 @@ let db=null,unsub=null;
 var mdkVer=0,mdkPushT=null,mdkPushing=false,mdkLocalEm=0,mdkPollT=null,mdkPollBusy=false;
 /* v173: fila persistente; conexão não significa dados salvos. */
 var mdkDirtyKey='mdk.payload.pending.v173',mdkReady=false,mdkHydrating=false,mdkGeneration=0;
+var mdkBaseKey='mdk.cloud.base.v176',mdkBaseVer=Number(localStorage.getItem(mdkBaseKey)||0),mdkConflict=false,mdkCloudError='';
+function mdkBase(v){mdkBaseVer=Number(v)||0;try{localStorage.setItem(mdkBaseKey,String(mdkBaseVer))}catch(e){}}
+function mdkError(e){mdkCloudError=e.message||'Falha na nuvem';mdkConflict=e.code==='conflito';setSyncStatus(e.code==='nao-autorizado'?'login':mdkConflict?'conflito':'erro');var x=document.getElementById('cf-live-s');if(x)x.textContent=mdkCloudError;var y=document.getElementById('mdk173-cloud-state');if(y)y.textContent=mdkCloudError;}
+async function mdkResolverConflito(){if(!mdkConflict)return mdk173Sync();exportJSON();if(!confirm('Foi baixado um backup deste aparelho. Usar os dados atualizados da nuvem? Cancelar mantém suas alterações pendentes sem sobrescrever a nuvem.'))return;var j=await mdkApi('get',{doc:GESTOR});if(!j.campos||!j.campos.payload)return toast('A nuvem não possui dados para carregar');mdkDirty(false);clearTimeout(mdkPushT);mdkPushT=null;mdkConflict=false;mdkHydrating=true;try{state=Object.assign(structuredClone(DEF),JSON.parse(j.campos.payload));localStorage.setItem(LS,JSON.stringify(state));mdkBase(j.ver);render()}finally{mdkHydrating=false}setSyncStatus('online');}
+
 function mdkPending(){try{return localStorage.getItem(mdkDirtyKey)==='1'}catch(e){return false}}
 function mdkDirty(v){try{if(v)localStorage.setItem(mdkDirtyKey,'1');else localStorage.removeItem(mdkDirtyKey)}catch(e){}}
 function connectCloud(){
   if(!mdkTk()){db=null;mdkReady=false;setSyncStatus('login');return}
   db={appsScript:true};mdkReady=false;mdkVer=0;
   if(mdkPollT)clearInterval(mdkPollT);setSyncStatus('sync');mdkPoll();
-  mdkPollT=setInterval(function(){if(!document.hidden)mdkPoll()},15000);
+  mdkPollT=setInterval(function(){if(!document.hidden)mdkPoll()},5000);
 }
 async function mdkPoll(){
   if(!db||mdkPollBusy||mdkPushing)return;mdkPollBusy=true;
@@ -1293,38 +1298,37 @@ async function mdkPoll(){
     var j=await mdkApi('get',{doc:GESTOR});
     if(!j||!j.campos)throw new Error('Resposta da nuvem sem dados válidos');
     var c=j.campos;
-    var meaningful=['eventos','atividades','itens','acessos','mapa','servicos','sends'].some(function(k){return Array.isArray(state[k])&&state[k].length})||!!(state.compras&&['lista','pedidos','arquivados'].some(function(k){return (state.compras[k]||[]).length}));
-    if(c.payload&&(!meaningful||(!MDK_HAD_LOCAL_DATA&&!state.eventos.length&&!state.atividades.length))){mdkDirty(false);clearTimeout(mdkPushT);mdkPushT=null}
+    if(c.payload&&mdkPending()&&Number(j.ver)!==mdkBaseVer){var conflict=new Error('Outro aparelho alterou os dados. Clique em Resolver conflito; suas alterações foram preservadas.');conflict.code='conflito';throw conflict}
     if(c.payload&&!mdkPending()&&!mdkPushT){
       var remote=JSON.parse(c.payload);if(!remote||typeof remote!=='object'||Array.isArray(remote))throw new Error('Dados da nuvem inválidos');
       if(JSON.stringify(remote)!==JSON.stringify(state)){
         mdkHydrating=true;try{state=Object.assign(structuredClone(DEF),remote);localStorage.setItem(LS,JSON.stringify(state));render()}finally{mdkHydrating=false}
       }
     }
-    mdkReady=true;MDK_HAD_LOCAL_DATA=true;mdkVer=j.ver||mdkVer;
+    if(!mdkPending()||!c.payload)mdkBase(j.ver);mdkConflict=false;mdkCloudError='';mdkReady=true;MDK_HAD_LOCAL_DATA=true;mdkVer=j.ver||mdkVer;
     try{window.dispatchEvent(new CustomEvent('mdk-nuvem',{detail:c}))}catch(e){}
     if(mdkPending()||!c.payload){mdkDirty(true);clearTimeout(mdkPushT);mdkPushT=setTimeout(mdkPushAgora,150);setSyncStatus('sync')}else setSyncStatus('online');
-  }catch(e){setSyncStatus(e.code==='nao-autorizado'?'login':'erro')}
+  }catch(e){mdkError(e)}
   finally{mdkPollBusy=false}
 }
 function pushCloud(){
-  if(mdkHydrating)return;mdkLocalEm=Date.now();
+  if(mdkHydrating)return;if(!mdkReady&&!MDK_HAD_LOCAL_DATA){if(!db)connectCloud();return;}mdkDirty(true);mdkLocalEm=Date.now();if(mdkConflict){setSyncStatus('conflito');return;}
   if(!mdkTk()){setSyncStatus('login');return}
   if(!db){connectCloud();return}setSyncStatus('sync');clearTimeout(mdkPushT);mdkPushT=setTimeout(mdkPushAgora,700);
 }
 async function mdkPushAgora(){
-  mdkPushT=null;if(!db||!mdkTk()){setSyncStatus('login');return}
+  mdkPushT=null;if(mdkConflict)return;if(!db||!mdkTk()){setSyncStatus('login');return}
   if(!mdkReady){await mdkPoll();return}
   if(mdkPushing){mdkPushT=setTimeout(mdkPushAgora,700);return}
   mdkPushing=true;var generation=mdkGeneration,payload=JSON.stringify(state);
   try{
-    var ack=await mdkApi('set',{doc:GESTOR,campos:{payload:payload}});
+    var ack=await mdkApi('set',{doc:GESTOR,expectedVer:mdkBaseVer,campos:{payload:payload}});
     if(!ack||ack.ok===false)throw new Error('A nuvem não confirmou o salvamento');
     var read=await mdkApi('get',{doc:GESTOR});
     if(!read||!read.campos||read.campos.payload!==payload)throw new Error('O salvamento não pôde ser confirmado; tente sincronizar novamente');
-    if(generation===mdkGeneration&&JSON.stringify(state)===payload){mdkDirty(false);setSyncStatus('online')}
+    mdkBase(read.ver);if(generation===mdkGeneration&&JSON.stringify(state)===payload){mdkDirty(false);setSyncStatus('online')}
     else{setSyncStatus('sync');mdkPushT=setTimeout(mdkPushAgora,700)}
-  }catch(e){setSyncStatus(e.code==='nao-autorizado'?'login':'erro');if(e.code!=='nao-autorizado')mdkPushT=setTimeout(mdkPushAgora,8000)}
+  }catch(e){mdkError(e);if(e.code!=='nao-autorizado'&&e.code!=='conflito')mdkPushT=setTimeout(mdkPushAgora,8000)}
   finally{mdkPushing=false}
 }
 function testarFirestore(avisar){
@@ -1333,10 +1337,10 @@ function testarFirestore(avisar){
   if(!db)connectCloud();else mdkPoll();
 }
 var testarNuvem=testarFirestore;
-addEventListener('online',function(){if(mdkTk()){if(!db)connectCloud();else mdkPoll()}});
+addEventListener('online',function(){if(mdkTk()){if(!db)connectCloud();else mdkPoll()}});addEventListener('focus',function(){if(db)mdkPoll()});document.addEventListener('visibilitychange',function(){if(!document.hidden&&db)mdkPoll()});
 function setSyncStatus(status){
   const label=$('side-sync-label'),badge=$('side-sync-state'),bar=$('statusbar');
-  const cfg={online:['Sincronizado em todos os aparelhos','NUVEM'],sync:['Salvando alterações…','SYNC'],regras:['Nuvem sem permissão (regras)','REGRAS'],login:['Entre na nuvem (clique em Conectar)','LOGIN'],erro:['Sem conexão com a nuvem','ERRO'],local:['Dados salvos neste aparelho','LOCAL']}[status]||['Verificando sincronização…','...'];
+  const cfg={online:['Sincronizado em todos os aparelhos','NUVEM'],sync:['Salvando alterações…','SYNC'],regras:['Nuvem sem permissão (regras)','REGRAS'],login:['Entre na nuvem (clique em Conectar)','LOGIN'],erro:['Falha na nuvem — alterações preservadas','ERRO'],conflito:['Conflito entre dispositivos — resolver antes de salvar','CONFLITO'],local:['Dados salvos neste aparelho','LOCAL']}[status]||['Verificando sincronização…','...'];
   if(label)label.textContent=cfg[0];if(badge)badge.textContent=cfg[1];
   if(bar){const s=bar.querySelector('.sb-i:nth-of-type(3)');if(s)s.textContent=cfg[0]}
   window.SYNC_STATUS=status||'check';
@@ -1348,7 +1352,7 @@ function setSyncStatus(status){
 const SINAL={
   online:['on','Online','Apps Script respondendo — dados sincronizados'],
   sync:['sync','Sincronizando','Enviando alterações para o Apps Script'],
-  erro:['off','Offline','Sem resposta do Apps Script — trabalhando só neste aparelho'],
+  erro:['off','Falha na nuvem','Não foi possível confirmar o salvamento no Google'],conflito:['off','Conflito de alterações','Outro dispositivo alterou os dados; suas alterações foram preservadas'],
   local:['off','Offline','Nuvem não conectada — dados apenas neste aparelho'],
   check:['sync','Verificando','Testando a conexão com o Apps Script'],
   login:['off','Login necessário','Sessão da nuvem expirada — clique em Conectar e digite a senha'],
@@ -2498,7 +2502,7 @@ function vConfig(){
      <div class="cf-live"><span class="live-dot sync" id="cf-live-dot"></span>
        <span><b id="cf-live-t">Verificando</b><small id="cf-live-s">Testando a conexão com o Apps Script</small></span></div>
      <div class="row" style="margin-top:12px"><button class="btn primary" onclick="salvarFb()">Conectar</button>
-     <button class="btn" onclick="mdkPoll()">⟳ Testar conexão</button>
+     <button class="btn" onclick="testarFirestore(true)">⟳ Testar conexão</button><button class="btn" onclick="mdkResolverConflito()">Resolver conflito</button>
      <span class="dim" id="cf-st">${db?'conectado ao Apps Script':'offline (local)'}</span></div></div>
    <div class="card"><h3>🗂 Armazenamento (Google Drive)</h3><p class="dim">Anexos de eventos e atividades vão para o seu Google Drive, liberando o espaço do aparelho.</p>
      <div class="cf-live"><span class="live-dot sync" id="dr-dot"></span>
@@ -8432,13 +8436,13 @@ var sujos={}, enviadoEm={}, pendente=false, enviando=false, agendado=null, aplic
 
 function pode(k){
   if(!k||k===TSK||/token|senha|password|secret|^modesk\.tk$|sess|trusted/i.test(k))return false;
-  if(k==='modesk.sess'||k==='modesk.trusted'||k==='modesk.pessoal.v7')return false;
+  if(k==='modesk.sess'||k==='modesk.trusted'||k==='modesk.pessoal.v7'||k==='modesk.api'||/^modesk\.autobackup/.test(k))return false;
   return /^(modesk|sb_aba)/i.test(k) && !/jarvis/i.test(k);
 }
 function marcas(){try{return JSON.parse(localStorage.getItem(TSK)||'{}')||{}}catch(e){return {}}}
 function gravarMarcas(o){try{localStorage.setItem(TSK,JSON.stringify(o))}catch(e){}}
 
-function bolha(txt,fixo){
+function bolha(txt,fixo){return; /* The primary payload controller owns the cloud status. */
   var b=document.getElementById('mdk-sync');if(b)b.remove();
   var tb=document.getElementById('tb-sync');if(tb)tb.textContent=txt;
   if(typeof setSyncStatus==='function'){
@@ -10768,7 +10772,7 @@ main:has(.agenda-shell)>.sect>.card:first-of-type{padding:10px 12px!important;ma
 
   /* download do HTML com o nome da versão */
   var dl=window.baixarHTML;
-  if(typeof dl==='function')window.baixarHTML=function(){var c=document.createElement.bind(document);var orig=HTMLAnchorElement.prototype.click;HTMLAnchorElement.prototype.click=function(){if(this.download&&/\.html$/i.test(this.download))this.download='MODESK_PESSOAL_v175.html';HTMLAnchorElement.prototype.click=orig;return orig.call(this)};return dl.apply(this,arguments)};
+  if(typeof dl==='function')window.baixarHTML=function(){var c=document.createElement.bind(document);var orig=HTMLAnchorElement.prototype.click;HTMLAnchorElement.prototype.click=function(){if(this.download&&/\.html$/i.test(this.download))this.download='MODESK_PESSOAL_v176.html';HTMLAnchorElement.prototype.click=orig;return orig.call(this)};return dl.apply(this,arguments)};
 })();
 </script>
 
@@ -11988,12 +11992,12 @@ var rooms=['Senac Aldeota','Terraço','Sala 5 e 6','Salão Reservado Mayu','Mayu
 function norm(v){return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'')}
 function room(v){var n=norm(v);if(/reservad/.test(n)&&/mayu/.test(n))return rooms[3];if(/^(restaurante)?mayu$/.test(n))return rooms[4];if(/^(?:senacaldeota)?salas?0?[56](?:e0?6)?$/.test(n))return rooms[2];if(/terraco/.test(n))return rooms[1];if(/multiuso/.test(n))return rooms[6];if(/auditorio/.test(n))return rooms[7];if(/hall/.test(n))return rooms[5];if(/^(senac)?aldeota$/.test(n))return rooms[0];return ''}
 function normalize(){var st=window.state;if(!st)return;(st.eventos||[]).forEach(function(e){var d=MDK_PARSE_DATA(e.data);if(d)e.data=d;var r=room(e.local);if(r){e.local=r;e.unidade='Senac Aldeota'}});(st.atividades||[]).forEach(function(a){var d=MDK_PARSE_DATA(a.prazo);if(d)a.prazo=d})}
-var saveBase=window.save;window.save=function(){normalize();if(!mdkHydrating){mdkGeneration++;mdkDirty(true)}return saveBase.apply(this,arguments)};save=window.save;
+var saveBase=window.save;window.save=function(){normalize();if(!mdkHydrating&&(mdkReady||MDK_HAD_LOCAL_DATA)){mdkGeneration++;mdkDirty(true)}return saveBase.apply(this,arguments)};save=window.save;
 var oldAdd=window.addEvento;window.addEvento=function(){var el=document.getElementById('ev-l'),r=el&&room(el.value);if(!r)return toast('Selecione um ambiente do Senac Aldeota');el.value=r;return oldAdd.apply(this,arguments)};addEvento=window.addEvento;
 var oldView=window.vEventos;
 window.vEventos=function(){normalize();return '<div class="mdk173-sync"><b>Senac Aldeota</b><span id="mdk173-cloud-state" role="status"></span><button class="btn sm" onclick="mdkConectarNuvem()">☁ Conectar</button><button class="btn sm" onclick="mdk173Sync()">↻ Sincronizar</button></div>'+oldView.apply(this,arguments)};vEventos=window.vEventos;
-window.mdk173Sync=function(){if(!mdkTk())return mdkConectarNuvem();if(!db)return connectCloud();mdkPoll()};
-function paint(){var dl=document.getElementById('mdk-salas');if(dl)dl.innerHTML=rooms.map(function(r){return '<option value="'+r+'">'}).join('');var x=document.getElementById('mdk173-cloud-state');if(x)x.textContent=({online:'Dados confirmados na nuvem',sync:'Salvando e confirmando…',erro:'Sem confirmação da nuvem — alterações pendentes neste aparelho',login:'Conecte com a mesma senha nos outros aparelhos',local:'Dados apenas neste aparelho'})[window.SYNC_STATUS]||'Verificando conexão';}
+window.mdk173Sync=function(){if(mdkConflict)return mdkResolverConflito();if(!mdkTk())return mdkConectarNuvem();if(!db)return connectCloud();mdkPoll()};
+function paint(){var dl=document.getElementById('mdk-salas');if(dl)dl.innerHTML=rooms.map(function(r){return '<option value="'+r+'">'}).join('');var x=document.getElementById('mdk173-cloud-state');if(x)x.textContent=({online:'Dados confirmados na nuvem',sync:'Salvando e confirmando…',erro:mdkCloudError||'Sem confirmação da nuvem — alterações preservadas',conflito:'Outro aparelho atualizou os dados — clique em Sincronizar para resolver',login:'Conecte com a mesma senha nos outros aparelhos',local:'Dados apenas neste aparelho'})[window.SYNC_STATUS]||'Verificando conexão';}
 var statusBase=window.setSyncStatus;window.setSyncStatus=function(){var r=statusBase.apply(this,arguments);paint();return r};setSyncStatus=window.setSyncStatus;
 document.addEventListener('focusin',function(e){if(e.target&&e.target.getAttribute('list')==='mdk-salas')paint()});
 var view=document.getElementById('view');if(view)new MutationObserver(paint).observe(view,{childList:true});normalize();paint();
