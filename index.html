@@ -1049,7 +1049,31 @@ main:has(#mp-tb){padding-left:18px;padding-right:18px}
   #app>main{grid-column:2 !important}
 }
 </style>
-<style>main:has(#mk134-host) .sect{max-width:none!important;width:100%;min-width:0}main:has(#mk134-host){min-width:0} main:has(#mk134-host) h2.page{margin-bottom:6px}</style></head>
+<style>main:has(#mk134-host) .sect{max-width:none!important;width:100%;min-width:0}main:has(#mk134-host){min-width:0} main:has(#mk134-host) h2.page{margin-bottom:6px}</style>
+<style id="mdk-v202-agenda-estavel">
+/* A troca de datas recria #view: não repetir animações de entrada na agenda. */
+#view:has(.agenda-shell),
+#view:has(.agenda-shell) *,
+#view:has(.agenda-shell) *::before,
+#view:has(.agenda-shell) *::after {
+  animation: none !important;
+  transition: none !important;
+}
+#view:has(.agenda-shell) .sect,
+#view:has(.agenda-shell) .ev-unified-section,
+#view:has(.agenda-shell) .agenda-day,
+#view:has(.agenda-shell) .agenda-day:hover,
+#view:has(.agenda-shell) .agenda-day:active,
+#view:has(.agenda-shell) .card,
+#view:has(.agenda-shell) .card:hover {
+  transform: none !important;
+  translate: none !important;
+  rotate: none !important;
+  scale: none !important;
+  filter: none !important;
+}
+</style>
+</head>
 <body>
 <!-- #winbar removido (v12.3) — navegação já existe na barra lateral -->
 <div id="deadline-bar" onclick="go('agenda')"></div>
@@ -2504,7 +2528,7 @@ function vConfig(){
      <div class="row" style="margin-top:12px"><button class="btn primary" onclick="salvarFb()">Conectar</button>
      <button class="btn" onclick="testarFirestore(true)">⟳ Testar conexão</button><button class="btn" onclick="mdkResolverConflito()">Resolver conflito</button>
      <span class="dim" id="cf-st">${db?'conectado ao Apps Script':'offline (local)'}</span></div></div>
-   <div class="card"><h3>🗂 Armazenamento (Google Drive)</h3><p class="dim">Anexos de eventos e atividades vão para o seu Google Drive, liberando o espaço do aparelho.</p>
+   <div class="card"><h3>🗂 Armazenamento (Google Drive)</h3><p class="dim">Arquivos no Google Drive · cópias locais liberadas após confirmação. Cadastros e links permanecem no aparelho.</p>
      <div class="cf-live"><span class="live-dot sync" id="dr-dot"></span>
        <span><b id="dr-t">Verificando</b><small id="dr-s">Testando o armazenamento</small></span></div>
      <div style="margin-top:12px;height:8px;border-radius:6px;background:rgba(148,163,184,.18);overflow:hidden"><div id="dr-bar" style="height:100%;width:0"></div></div>
@@ -12135,18 +12159,11 @@ window.addEventListener('online',function(){try{mdkPoll()}catch(e){}});
 try{if(navigator.locks)navigator.locks.request('mdk-keepalive',function(){return new Promise(function(){})})}catch(e){}
 try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
 
-/* ---------- 2) Espaço automático: anexos vão sozinhos para o Drive (1 GB) ---------- */
-var movendo=false;
-async function autoMover(){if(movendo)return;if(typeof anexosLocais!=='function'||typeof enviarDrive!=='function')return;var l=anexosLocais();if(!l.length)return;movendo=true;
-  try{for(var i=0;i<l.length;i++){var o=l[i][0],c=l[i][1],a=o[c];if(!a||!a.dados)continue;
-    try{var url=await enviarDrive(a.dados,a.nome,a.tipo);o[c]={nome:a.nome,tipo:a.tipo,url:url}}catch(e){}}
-    try{localStorage.setItem(LS,JSON.stringify(state))}catch(e){}if(typeof pushCloud==='function')pushCloud();if(typeof pintarUso==='function')pintarUso()}finally{movendo=false}}
-/* se ainda faltar espaço local, a cópia completa fica no IndexedDB (muito maior) e a nuvem continua sendo a principal */
-function idbSalvar(){try{var r=indexedDB.open('modesk-auto',1);r.onupgradeneeded=function(){r.result.createObjectStore('s')};r.onsuccess=function(){var tx=r.result.transaction('s','readwrite');tx.objectStore('s').put(JSON.stringify(state),'state')}}catch(e){}}
-window.avisoCheio=function(){idbSalvar();if(typeof pushCloud==='function')pushCloud();autoMover().then(function(){try{localStorage.setItem(LS,JSON.stringify(state))}catch(e){}})};
-var _cheioX=setInterval(function(){var d=document.getElementById('aviso-cheio');if(d)d.remove()},800);
-setInterval(function(){try{if(window.DRIVE_STATUS!=='erro')autoMover();idbSalvar()}catch(e){}},60000);
-setTimeout(autoMover,8000);
+/* ---------- 2) Espaço automático seguro (v203) ---------- */
+function idbSalvar(){return window.mdk203Snapshot?window.mdk203Snapshot():Promise.resolve()}
+async function autoMover(){if(window.mdk203Move)return window.mdk203Move(false)}
+setInterval(function(){if(window.mdk203Check)window.mdk203Check()},15000);
+setTimeout(function(){if(window.mdk203Check)window.mdk203Check()},8000);
 
 /* ---------- 3) Agenda: cores por tipo + encerrados vão para o Arquivo ---------- */
 var css=document.createElement('style');css.textContent=
@@ -12247,5 +12264,49 @@ setInterval(function(){var m=document.querySelector('main');if(!m||document.getE
 })();
 </script>
 
+<script id="mdk-v203-storage">
+(function(){
+'use strict';
+var busy=null,lastTry=0,restored=false,status='',LIMIT=5*1024*1024;
+function dbOpen(name,store){return new Promise(function(ok,no){var q=indexedDB.open(name,1);q.onupgradeneeded=function(){if(!q.result.objectStoreNames.contains(store))q.result.createObjectStore(store)};q.onsuccess=function(){ok(q.result)};q.onerror=function(){no(q.error)}})}
+async function journal(action,value){var d=await dbOpen('modesk-storage-v203','recovery');return new Promise(function(ok,no){var t=d.transaction('recovery',action==='get'?'readonly':'readwrite'),s=t.objectStore('recovery'),q=action==='get'?s.get('pending'):action==='put'?s.put(value,'pending'):s.delete('pending');var result;q.onsuccess=function(){result=q.result};t.oncomplete=function(){d.close();ok(result)};t.onerror=t.onabort=function(){d.close();no(t.error||new Error('Não foi possível preservar a cópia local'))}})}
+window.mdk203Snapshot=async function(){var d=await dbOpen('modesk-auto','s');return new Promise(function(ok,no){var t=d.transaction('s','readwrite');t.objectStore('s').put(JSON.stringify(state),'state');t.oncomplete=function(){d.close();ok()};t.onerror=t.onabort=function(){d.close();no(t.error)}})};
+function inline(){var out=[],seen=new WeakSet();function walk(o,path){if(!o||typeof o!=='object'||seen.has(o))return;seen.add(o);Object.keys(o).forEach(function(k){var x=o[k],p=path.concat(k);if(x&&typeof x==='object'&&typeof x.dados==='string'&&/^data:[^,]+;base64,/.test(x.dados))out.push({o:o,k:k,path:p,a:x});else walk(x,p)})}walk(state,[]);return out}
+function at(path){var o=state;for(var i=0;i<path.length-1;i++){o=o&&o[path[i]]}return o?{o:o,k:path[path.length-1]}:null}
+function purchaseMeta(key){var cut=String(key).lastIndexOf('|');if(cut<0)return null;var id=String(key).slice(0,cut),slot=String(key).slice(cut+1),c=state.compras||{},lists=['pedidos','arquivados','lista','semDocumento'];for(var i=0;i<lists.length;i++){var rows=c[lists[i]]||[];for(var j=0;j<rows.length;j++){if(rows[j].id===id&&rows[j].docs&&rows[j].docs[slot])return {o:rows[j].docs,k:slot,a:rows[j].docs[slot]}}}return null}
+async function purchaseFiles(){var d=await dbOpen('modeskCompras','files');return new Promise(function(ok,no){var t=d.transaction('files','readonly'),q=t.objectStore('files').openCursor(),out=[];q.onsuccess=function(){var c=q.result;if(c){if(c.value instanceof Blob)out.push({key:c.key,file:c.value});c.continue()}};t.oncomplete=function(){d.close();ok(out)};t.onerror=t.onabort=function(){d.close();no(t.error)}})}
+async function removePurchase(key){var d=await dbOpen('modeskCompras','files');return new Promise(function(ok,no){var t=d.transaction('files','readwrite');t.objectStore('files').delete(key);t.oncomplete=function(){d.close();ok()};t.onerror=t.onabort=function(){d.close();no(t.error)}})}
+function paint(){pintarUso();var s=document.getElementById('dr-s');if(s&&status)s.textContent=status}
+function persist(){localStorage.setItem(LS,JSON.stringify(state));try{bc.postMessage({t:'sync',s:state})}catch(e){}pushCloud()}
+async function confirmCloud(){clearTimeout(mdkPushT);await mdkPushAgora();if(mdkPending()||window.SYNC_STATUS!=='online')throw new Error(mdkCloudError||'A nuvem ainda não confirmou as referências dos arquivos');var r=await mdkApi('get',{doc:GESTOR});if(!r||!r.campos||r.campos.payload!==JSON.stringify(state))throw new Error('A conferência dos arquivos na nuvem não foi concluída')}
+function scrubBackups(transfers){for(var i=0;i<5;i++){var key='modesk.autobackup.'+i,raw=localStorage.getItem(key);if(!raw)continue;try{var snap=JSON.parse(raw);function walk(o){if(!o||typeof o!=='object')return;Object.keys(o).forEach(function(k){var a=o[k];if(a&&typeof a==='object'&&a.dados){var hit=transfers.find(function(x){return x.data===a.dados&&x.nome===a.nome});if(hit){o[k]=Object.assign({},a,{url:hit.url});delete o[k].dados;return}}walk(a)})}walk(snap);localStorage.setItem(key,JSON.stringify(snap))}catch(e){}}}
+async function recover(){var pending=await journal('get');if(pending&&pending.inline){pending.inline.forEach(function(x){var p=at(x.path);if(p&&p.o[p.k]&&p.o[p.k].url===x.url){p.o[p.k]=Object.assign({},p.o[p.k],{dados:x.data})}});try{localStorage.setItem(LS,JSON.stringify(state))}catch(e){}status='Transferência anterior pendente · cópias locais preservadas';}restored=true;}
+async function run(){if(!restored)await recover();if(!navigator.onLine||!mdkTk()||!mdkReady||mdkConflict){status='Aguardando conexão confirmada · arquivos locais preservados';paint();return {ok:0,pending:true}}
+var items=inline(),files=await purchaseFiles(),transfers=[],edits=[],removed=[],fail=0;
+status='Enviando arquivos ao Google Drive…';paint();
+// O diário mantém os bytes locais até a nuvem confirmar as referências.
+for(var i=0;i<items.length;i++){var x=items[i];try{var url=x.a.url||await enviarDrive(x.a.dados,x.a.nome||'arquivo',x.a.tipo);if(!/^https:\/\//.test(url))throw new Error('Endereço do arquivo inválido');transfers.push({path:x.path,data:x.a.dados,nome:x.a.nome,url:url});edits.push({o:x.o,k:x.k,old:x.a,next:Object.assign({},x.a,{url:url})});delete edits[edits.length-1].next.dados}catch(e){fail++}}
+for(var f=0;f<files.length;f++){var entry=files[f],meta=purchaseMeta(entry.key);if(!meta){fail++;continue}try{var u=meta.a.url||await enviarDrive(await lerArquivo(entry.file),meta.a.nome||entry.file.name||'documento',meta.a.tipo||entry.file.type);if(!/^https:\/\//.test(u))throw new Error('Endereço inválido');edits.push({o:meta.o,k:meta.k,old:meta.a,next:Object.assign({},meta.a,{url:u})});removed.push({key:entry.key,meta:meta,next:edits[edits.length-1].next})}catch(e){fail++}}
+if(!edits.length){status=fail?'Envio não concluído · arquivos locais preservados':'Nenhum arquivo local pendente';paint();return {ok:0,failed:fail}}
+await journal('put',{inline:transfers,created:Date.now()});
+edits.forEach(function(e){if(e.o[e.k]===e.old)e.o[e.k]=e.next});
+try{persist();await confirmCloud()}catch(e){edits.forEach(function(v){if(v.o[v.k]===v.next)v.o[v.k]=v.old});try{persist()}catch(ignore){}status='Confirmação pendente · arquivos locais preservados: '+e.message;paint();return {ok:0,pending:true}}
+for(var j=0;j<removed.length;j++){var row=removed[j];if(row.meta.o[row.meta.k]===row.next)await removePurchase(row.key)}
+scrubBackups(transfers);await window.mdk203Snapshot();await journal('delete');
+status=fail?'Parte dos arquivos aguarda envio · cópias preservadas':'Arquivos no Drive · cópias locais de anexos liberadas';paint();return {ok:edits.length,failed:fail};}
+window.mdk203Move=function(manual){if(busy)return busy;lastTry=Date.now();busy=run().catch(function(e){status='Não foi possível liberar espaço · arquivos preservados: '+e.message;paint();return {ok:0,pending:true}}).finally(function(){busy=null});return busy};
+window.moverAnexosDrive=function(){return window.mdk203Move(true)};moverAnexosDrive=window.moverAnexosDrive;
+window.avisoCheio=function(){window.mdk203Snapshot().catch(function(){});return window.mdk203Move(false)};avisoCheio=window.avisoCheio;
+var oldUsage=window.pintarUso;window.pintarUso=function(){oldUsage();var el=document.getElementById('dr-uso');if(el)el.textContent=(usoLocal()/1048576).toFixed(2)+' MB de ~5 MB de dados locais · '+inline().length+' anexo(s) no aparelho. Cadastros e links continuam salvos.'};pintarUso=window.pintarUso;
+var saveOld=window.save;window.save=function(){var r=saveOld.apply(this,arguments);if(usoLocal()>=LIMIT*.8)window.mdk203Check();return r};save=window.save;
+window.mdk203Check=function(){if(busy||Date.now()-lastTry<30000)return;if(inline().length||usoLocal()>=LIMIT*.8)window.mdk203Move(false);else if(window.DRIVE_STATUS!=='erro')window.mdk203Move(false)};
+['cpVerAnexo','cp10VerAnexo','cp11VerAnexo'].forEach(function(name){var old=window[name];if(typeof old!=='function')return;window[name]=function(id,slot){var p=purchaseMeta(id+'|'+slot);if(p&&p.a.url){window.open(p.a.url,'_blank','noopener');return}return old.apply(this,arguments)}});
+window.addEventListener('online',function(){lastTry=0;window.mdk203Check()});
+var view=document.getElementById('view');if(view)new MutationObserver(function(){if(document.getElementById('dr-uso'))paint()}).observe(view,{childList:true});
+var drivePaint=window.pintarDrive;window.pintarDrive=function(){var r=drivePaint.apply(this,arguments);if(status)paint();return r};pintarDrive=window.pintarDrive;
+recover().catch(function(e){status='Cópia de recuperação indisponível: '+e.message;paint()});
+})();
+
+</script>
 </body>
 </html>
