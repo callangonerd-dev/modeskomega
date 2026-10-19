@@ -13119,45 +13119,107 @@ button:hover svg,a:hover svg,.btn:hover svg,.mdk-act:hover svg,nav *:hover>svg,[
  wrap();window.addEventListener('load',function(){wrap();if(typeof render==='function'&&typeof tab!=='undefined'&&tab==='dashboard')try{render()}catch(e){}});
 })();
 </script>
-<!-- SIRIUS HUB v7.9.4: Conectores + WhatsApp + Gemini -->
-<style>
-#shBtn{position:fixed;right:18px;bottom:18px;z-index:99999;width:58px;height:58px;border-radius:50%;border:0;background:linear-gradient(135deg,#0ea5e9,#22c55e);color:#fff;font-size:26px;cursor:pointer;box-shadow:0 6px 20px #0006}
-#shPan{position:fixed;right:18px;bottom:86px;z-index:99999;width:380px;max-width:94vw;max-height:80vh;overflow:auto;background:#0f172a;color:#e2e8f0;border:1px solid #334155;border-radius:14px;padding:14px;font:14px system-ui;display:none;box-shadow:0 10px 40px #0008}
-#shPan h3{margin:10px 0 6px;font-size:14px;color:#38bdf8}#shPan input,#shPan textarea{width:100%;box-sizing:border-box;background:#1e293b;color:#e2e8f0;border:1px solid #334155;border-radius:8px;padding:8px;margin:3px 0}
-#shPan button{background:#0ea5e9;color:#fff;border:0;border-radius:8px;padding:7px 10px;margin:3px 2px 3px 0;cursor:pointer}
-.shG{display:grid;grid-template-columns:1fr 1fr;gap:6px}.shC{background:#1e293b;border-radius:8px;padding:8px;text-align:center;text-decoration:none;color:#e2e8f0;font-size:12px}
-#shOut{white-space:pre-wrap;background:#1e293b;border-radius:8px;padding:8px;min-height:40px;font-size:13px}
+<!-- SIRIUS v7.9.5: Conectores integrados ao orbe do Sirius (sem painel paralelo) -->
+<style id="sirius-conectores-css">
+.srx-g{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.srx-t{display:flex;flex-direction:column;gap:3px;text-align:left;padding:9px 10px;border-radius:12px;border:1px solid rgba(148,163,184,.16);background:rgba(15,23,42,.6);color:#e2e8f0;cursor:pointer;font-size:12px;transition:border-color .2s,background .2s,transform .2s}
+.srx-t:hover{border-color:rgba(34,211,238,.55);background:rgba(34,211,238,.08);transform:translateY(-1px)}
+.srx-t.on{border-color:rgba(34,211,238,.7);background:rgba(34,211,238,.12)}
+.srx-t small{color:#64748b;font-size:10px}
+.srx-in{width:100%;box-sizing:border-box;background:rgba(15,23,42,.9);border:1px solid rgba(148,163,184,.22);border-radius:10px;color:#e2e8f0;padding:8px 10px;font-size:12px;outline:none;margin-bottom:6px;font-family:inherit}
+.srx-in:focus{border-color:rgba(34,211,238,.65);box-shadow:0 0 0 3px rgba(34,211,238,.1)}
+.srx-li{display:flex;align-items:center;gap:6px;padding:7px 0;border-bottom:1px solid rgba(148,163,184,.1);font-size:12px}
+.srx-li b{flex:1;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.srx-ok{color:#4ade80}.srx-no{color:#64748b}
 </style>
-<button id="shBtn" title="Sirius Hub">✦</button>
-<div id="shPan">
-<b>Sirius Hub — Conectores & IA</b>
-<h3>WhatsApp</h3>
-<input id="shWa" placeholder="Número com DDD (ex: 5585986001996)">
-<input id="shWaMsg" placeholder="Mensagem (opcional)">
-<button onclick="shSaveWa()">Salvar</button><button onclick="shWa()">Abrir WhatsApp</button><button onclick="shWa(1)">Ligar</button>
-<h3>Conectores</h3>
-<div class="shG" id="shCon"></div>
-<h3>Sirius IA (Gemini)</h3>
-<input id="shKey" type="password" placeholder="Sua chave Gemini (aistudio.google.com)">
-<textarea id="shQ" rows="3" placeholder="Pergunte ao Sirius: resumir, redigir mensagem, laudo, e-mail..."></textarea>
-<button onclick="shAsk()">Perguntar</button><button onclick="shToWa()">Enviar resposta no WhatsApp</button><button onclick="navigator.clipboard.writeText(shOut.textContent)">Copiar</button>
-<div id="shOut"></div>
-</div>
-<script>
+<script id="sirius-conectores">
 (function(){
-var L=localStorage,$=function(i){return document.getElementById(i)};
-$('shWa').value=L.getItem('sh_wa')||'5585986001996';$('shKey').value=L.getItem('sh_key')||'';
-$('shBtn').onclick=function(){var p=$('shPan');p.style.display=p.style.display=='block'?'none':'block'};
-var C=[['WhatsApp','https://web.whatsapp.com'],['Gmail','https://mail.google.com'],['Google Drive','https://drive.google.com'],['Google Agenda','https://calendar.google.com'],['Google Sheets','https://sheets.google.com'],['Outlook','https://outlook.live.com'],['Telegram','https://web.telegram.org'],['Notion','https://www.notion.so'],['Trello','https://trello.com'],['Slack','https://app.slack.com'],['Gemini','https://gemini.google.com'],['Maps','https://maps.google.com']];
-$('shCon').innerHTML=C.map(function(c){return '<a class="shC" target="_blank" href="'+c[1]+'">'+c[0]+'</a>'}).join('');
-function num(){return ($('shWa').value||'').replace(/\D/g,'')}
-window.shSaveWa=function(){L.setItem('sh_wa',num());alert('Número salvo')};
-window.shWa=function(call,txt){var n=num();if(!n)return alert('Informe o número');if(call){location.href='tel:+'+n;return}
-window.open('https://api.whatsapp.com/send?phone='+n+'&text='+encodeURIComponent(txt||$('shWaMsg').value||''),'_blank')};
-window.shToWa=function(){shWa(0,$('shOut').textContent)};
-window.shAsk=async function(){var k=$('shKey').value.trim(),q=$('shQ').value.trim(),o=$('shOut');if(!k)return alert('Cole sua chave Gemini');if(!q)return;L.setItem('sh_key',k);o.textContent='Pensando...';
-try{var r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+encodeURIComponent(k),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({systemInstruction:{parts:[{text:'Você é o Sirius, assistente do MODESK PESSOAL. Responda em português do Brasil, de forma objetiva e prática.'}]},contents:[{role:'user',parts:[{text:q}]}]})});
-var j=await r.json();o.textContent=r.ok?(j.candidates&&j.candidates[0].content.parts.map(function(p){return p.text}).join('')||'(sem resposta)'):'Erro '+r.status+': '+(j.error&&j.error.message)}catch(e){o.textContent='Erro: '+e.message}};
+'use strict';
+function pronto(fn){if(document.getElementById('srd-nav')&&window.SIRIUS&&window.SIRIUS.estado)return fn();setTimeout(function(){pronto(fn)},300)}
+pronto(function(){
+var $=function(i){return document.getElementById(i)};
+function S(){return window.SIRIUS.estado()}
+function cfg(){var s=S();s.cfg=s.cfg||{};return s.cfg}
+function gravar(){try{window.SIRIUS.gravar()}catch(e){}}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function aviso(t){var st=$('sr-status');if(st){st.textContent=t;setTimeout(function(){st.textContent='núcleo operacional do MODESK'},2600)}}
+/* migra dados do antigo painel separado para a configuração do Sirius */
+try{var c0=cfg();if(!c0.wa&&localStorage.getItem('sh_wa'))c0.wa=localStorage.getItem('sh_wa');
+ var ok=localStorage.getItem('sh_key');if(ok){c0.ias=c0.ias||[];if(!c0.ias.some(function(x){return x.key===ok}))c0.ias.push({prov:'gemini',key:ok,on:true});localStorage.removeItem('sh_key')}gravar()}catch(e){}
+
+function ultimaResposta(){var s=S(),c=(s.convs||[]).filter(function(x){return x.id===s.ativo})[0]||(s.convs||[])[0];if(!c||!c.msgs)return '';
+ for(var i=c.msgs.length-1;i>=0;i--)if(c.msgs[i].r!=='u')return String(c.msgs[i].c||'').replace(/```acao[\s\S]*?```/g,'').trim();return ''}
+function texto(){var v=($('srx-txt')||{}).value;return (v&&v.trim())||ultimaResposta()}
+function num(){return String(cfg().wa||'').replace(/\D/g,'')}
+function abrirUrl(u){window.open(u,'_blank','noopener')}
+function copiar(t){try{navigator.clipboard.writeText(t)}catch(e){}}
+function eventos(){var st=window.state||{},h=new Date().toISOString().slice(0,10);
+ return (st.eventos||[]).filter(function(e){return !e.data||String(e.data).slice(0,10)>=h}).sort(function(a,b){return String(a.data+a.hora).localeCompare(String(b.data+b.hora))}).slice(0,8)}
+function gcal(e){var d=String(e.data||'').slice(0,10).replace(/-/g,''),h=String(e.hora||'').replace(':',''),hf=String(e.horaFim||'').replace(':','');
+ var ds=d?(h?d+'T'+h+'00/'+d+'T'+(hf||(('0'+(Math.min(23,(+h.slice(0,2)||0)+1))).slice(-2)+h.slice(2)))+'00':d+'/'+d):'';
+ return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent(e.titulo||e.nome||e.cliente||'Evento MODESK')+(ds?'&dates='+ds:'')+'&details='+encodeURIComponent(e.obs||'')+'&location='+encodeURIComponent([e.local,e.sala].filter(Boolean).join(' · '))}
+function csv(){var st=window.state||{},L=[['lista','titulo','data','hora','detalhes']];
+ ['eventos','atividades','pedidos','servicos','sends'].forEach(function(k){(st[k]||[]).forEach(function(x){L.push([k,x.titulo||x.nome||x.cliente||'',x.data||x.prazo||'',x.hora||'',x.obs||x.desc||''])})});
+ var b=new Blob(['\ufeff'+L.map(function(r){return r.map(function(v){return '"'+String(v).replace(/"/g,'""')+'"'}).join(';')}).join('\n')],{type:'text/csv;charset=utf-8'});
+ var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='MODESK_dados.csv';document.body.appendChild(a);a.click();a.remove()}
+
+var CON={
+ whatsapp:{n:'WhatsApp',d:'Enviar texto / ligar',run:function(){if(!num())return aviso('Cadastre o número do WhatsApp abaixo');abrirUrl('https://api.whatsapp.com/send?phone='+num()+'&text='+encodeURIComponent(texto()))}},
+ gmail:{n:'Gmail',d:'Novo e-mail com o texto',run:function(){abrirUrl('https://mail.google.com/mail/?view=cm&fs=1&su='+encodeURIComponent('MODESK')+'&body='+encodeURIComponent(texto()))}},
+ outlook:{n:'Outlook',d:'Novo e-mail com o texto',run:function(){abrirUrl('https://outlook.live.com/mail/0/deeplink/compose?subject=MODESK&body='+encodeURIComponent(texto()))}},
+ agenda:{n:'Google Agenda',d:'Enviar eventos do MODESK',run:function(){vista='agenda';desenhar()}},
+ sheets:{n:'Google Sheets',d:'Exportar dados (CSV)',run:function(){csv();abrirUrl('https://sheets.new');aviso('CSV baixado — importe na planilha aberta')}},
+ drive:{n:'Google Drive',d:'Salvar dados no Drive',run:function(){csv();abrirUrl('https://drive.google.com/drive/my-drive');aviso('CSV baixado — arraste para o Drive')}},
+ telegram:{n:'Telegram',d:'Compartilhar texto',run:function(){abrirUrl('https://t.me/share/url?url='+encodeURIComponent(' ')+'&text='+encodeURIComponent(texto()))}},
+ maps:{n:'Maps',d:'Locais dos eventos',run:function(){vista='maps';desenhar()}},
+ notion:{n:'Notion',d:'Texto copiado + abrir',run:function(){copiar(texto());abrirUrl('https://www.notion.so');aviso('Texto copiado — cole no Notion')}},
+ trello:{n:'Trello',d:'Texto copiado + abrir',run:function(){copiar(texto());abrirUrl('https://trello.com');aviso('Texto copiado — cole no cartão')}},
+ slack:{n:'Slack',d:'Texto copiado + abrir',run:function(){copiar(texto());abrirUrl('https://app.slack.com');aviso('Texto copiado — cole no canal')}},
+ ia:{n:'IA do Sirius',d:'APIs cadastradas, em ordem',run:function(){vista='ia';desenhar()}}
+};
+var vista='';
+function slots(){var a=(cfg().ias||[]).filter(function(x){return x&&x.key});if(!a.length&&(cfg().groq||'').trim())a=[{prov:'groq',on:true}];return a}
+
+function desenhar(){
+ var b=$('sr-body');if(!b)return;var P=window.SR_IA_PROV||{},sl=slots(),c=cfg();
+ $('sr-foot').style.display='none';
+ var h='<div class="sr-card"><h5>Conectores do Sirius</h5><div style="font-size:11px;color:#94a3b8;margin-bottom:8px">Tudo passa pelo orbe. O texto usado é o abaixo ou a última resposta do Sirius.</div>'+
+  '<textarea id="srx-txt" class="srx-in" rows="3" placeholder="Texto para enviar (vazio = última resposta do Sirius)"></textarea>'+
+  '<div class="srx-g">'+Object.keys(CON).map(function(k){return '<button class="srx-t'+(vista===k?' on':'')+'" data-c="'+k+'"><span>'+CON[k].n+'</span><small>'+CON[k].d+'</small></button>'}).join('')+'</div></div>';
+ h+='<div class="sr-card"><h5>WhatsApp</h5><input id="srx-wa" class="srx-in" inputmode="tel" placeholder="Número com DDI e DDD (ex: 5585986001996)" value="'+esc(c.wa||'')+'">'+
+  '<div class="sr-row"><button class="sr-btn" id="srx-wa-s">Salvar número</button><button class="sr-btn" data-c="whatsapp">Enviar</button><button class="sr-btn gh" id="srx-call">Ligar</button></div></div>';
+ if(vista==='agenda'){var ev=eventos();h+='<div class="sr-card"><h5>Google Agenda</h5>'+(ev.length?ev.map(function(e,i){return '<div class="srx-li"><b>'+esc((e.data?String(e.data).slice(0,10).split('-').reverse().join('/')+' ':'')+(e.hora||'')+' · '+(e.titulo||e.nome||e.cliente||'Evento'))+'</b><button class="sr-btn" data-ev="'+i+'">Adicionar</button></div>'}).join(''):'<div style="font-size:11px;color:#64748b">Nenhum evento futuro na Agenda do MODESK.</div>')+'</div>'}
+ if(vista==='maps'){var ev2=eventos().filter(function(e){return e.local||e.sala});h+='<div class="sr-card"><h5>Maps</h5><input id="srx-map" class="srx-in" placeholder="Buscar endereço ou local"><div class="sr-row"><button class="sr-btn" id="srx-map-go">Buscar</button></div>'+
+  ev2.map(function(e,i){return '<div class="srx-li"><b>'+esc(e.local||e.sala)+'</b><button class="sr-btn" data-mp="'+esc(e.local||e.sala)+'">Rota</button></div>'}).join('')+'</div>'}
+ if(vista==='ia'){h+='<div class="sr-card"><h5>IA do Sirius · ordem de uso</h5>'+(sl.length?sl.map(function(x,i){var p=P[x.prov]||{n:x.prov||'API'};return '<div class="srx-li"><span class="'+(x.on===false?'srx-no':'srx-ok')+'">●</span><b>'+(i+1)+'. '+esc(p.n)+(x.modelo?' · '+esc(x.modelo):'')+'</b><small style="color:#64748b">'+(x.on===false?'desligada':'ativa')+'</small></div>'}).join(''):'<div style="font-size:11px;color:#94a3b8">Nenhuma API cadastrada. O Sirius usa o motor interno.</div>')+
+  '<div style="font-size:11px;color:#94a3b8;margin:8px 0">Se uma API falhar ou atingir o limite, o Sirius passa automaticamente para a próxima da lista.</div><div class="sr-row"><button class="sr-btn" id="srx-cfg">Gerenciar APIs nas Configurações</button><button class="sr-btn gh" id="srx-chat">Ir ao Chat</button></div></div>'}
+ b.innerHTML=h;
+ Array.prototype.forEach.call(b.querySelectorAll('[data-c]'),function(x){x.onclick=function(){CON[x.dataset.c].run()}});
+ var t=$('srx-txt');if(t)t.value=memo;if(t)t.oninput=function(){memo=t.value};
+ $('srx-wa-s').onclick=function(){cfg().wa=String($('srx-wa').value||'').replace(/\D/g,'');gravar();aviso('Número do WhatsApp salvo')};
+ $('srx-call').onclick=function(){if(!num())return aviso('Cadastre o número');location.href='tel:+'+num()};
+ Array.prototype.forEach.call(b.querySelectorAll('[data-ev]'),function(x){x.onclick=function(){abrirUrl(gcal(eventos()[+x.dataset.ev]))}});
+ Array.prototype.forEach.call(b.querySelectorAll('[data-mp]'),function(x){x.onclick=function(){abrirUrl('https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(x.dataset.mp))}});
+ var mg=$('srx-map-go');if(mg)mg.onclick=function(){var q=$('srx-map').value.trim();if(q)abrirUrl('https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(q))};
+ var cf=$('srx-cfg');if(cf)cf.onclick=function(){var tb=document.querySelector('#sr-tabs .sr-tab[data-t="cfg"]');if(tb)tb.click();else{try{go('config')}catch(e){}}};
+ var ch=$('srx-chat');if(ch)ch.onclick=function(){var tb=document.querySelector('#sr-tabs .sr-tab[data-t="chat"]');if(tb)tb.click()};
+}
+var memo='';
+window.SIRIUS.conectores=function(v){window.SIRIUS.abrir&&!document.getElementById('sirius-panel').classList.contains('open')&&window.SIRIUS.abrir();vista=v||'';setTimeout(desenhar,60)};
+
+/* adiciona a seção "Conectores" no menu do próprio orbe */
+function injetar(){var nav=$('srd-nav');if(!nav||nav.querySelector('[data-srx]'))return;
+ var bt=document.createElement('button');bt.className='dt';bt.setAttribute('data-srx','1');bt.textContent='Conectores';
+ bt.onclick=function(e){e.stopPropagation();vista='';desenhar();var d=$('sr-drawer');if(d){d.classList.remove('open');d.setAttribute('aria-hidden','true')}var bu=$('sr-burger');if(bu)bu.setAttribute('aria-expanded','false')};
+ nav.appendChild(bt)}
+new MutationObserver(injetar).observe($('srd-nav'),{childList:true});injetar();
+
+/* comandos no chat: "conectores", "whatsapp", "gmail", "agenda google" */
+var txt=$('sirius-txt');
+if(txt)txt.addEventListener('keydown',function(e){if(e.key!=='Enter'||e.shiftKey)return;var v=(txt.value||'').trim().toLowerCase();
+ var m={'conectores':'','abrir conectores':'','whatsapp':'whatsapp','enviar whatsapp':'whatsapp','gmail':'gmail','google agenda':'agenda','maps':'maps','apis':'ia'};
+ if(v in m){e.preventDefault();e.stopImmediatePropagation();txt.value='';var k=m[v];if(k&&k!=='agenda'&&k!=='maps'&&k!=='ia'){CON[k].run()}else{vista=k;desenhar()}}},true);
+});
 })();
 </script>
 </body>
