@@ -9005,7 +9005,7 @@ async function falar(t){
     return await vozNavegador(t);
   }finally{st('núcleo operacional do MODESK')}
 }
-window.SR_VOZ={prov:VOZ_PROV,listar:vozListar,esgotada:vzEsgotada,liberar:function(){try{localStorage.removeItem(VZ_ESG)}catch(e){}},
+window.SR_VOZ={prov:VOZ_PROV,listar:vozListar,ler:async function(t){var o=S.cfg.falar;S.cfg.falar=true;var r;try{r=await falar(t)}finally{S.cfg.falar=o}var a=elevenAudio;if(a&&!a.paused)await new Promise(function(ok){a.addEventListener('ended',ok);a.addEventListener('error',ok);a.addEventListener('pause',ok)});return r},parar:function(){pararEleven();try{speechSynthesis.cancel()}catch(e){}},temVoz:function(){return slotsVoz().some(function(x){return x.prov!=='navegador'})},esgotada:vzEsgotada,liberar:function(){try{localStorage.removeItem(VZ_ESG)}catch(e){}},
   testar:async function(x,t){t=t||'Olá! Eu sou o Sirius. Esta é a voz selecionada para mim.';try{return await vozTocar(x,t,'Teste de voz · '+((VOZ_PROV[x.prov]||{}).n||x.prov))}catch(e){if(e&&e.cota)vzMarcar(x);throw e}}};
 function st(m){var e=document.getElementById('sr-status');if(e)e.textContent=m}
 
@@ -9440,6 +9440,10 @@ pronto(function(){
   var falandoEl=null;
   function lerTexto(t,btn){
     try{
+      if(window.SR_VOZ&&SR_VOZ.temVoz()){
+        if(falandoEl===btn){SR_VOZ.parar();btn.innerHTML=OUVIR;falandoEl=null;return}
+        SR_VOZ.parar();if(falandoEl)falandoEl.innerHTML=OUVIR;falandoEl=btn;btn.innerHTML=PARAR;
+        SR_VOZ.ler(String(t).slice(0,4000)).finally(function(){if(falandoEl===btn){btn.innerHTML=OUVIR;falandoEl=null}});return}
       if(!window.speechSynthesis){alert('Leitura em voz não suportada neste navegador.');return}
       if(falandoEl===btn){speechSynthesis.cancel();btn.innerHTML=OUVIR;falandoEl=null;return}
       speechSynthesis.cancel();
@@ -12464,7 +12468,7 @@ requestAnimationFrame(loop);
 /* ---------- voz ---------- */
 var an=null,fd=null,stream=null,rec=null,ouvindo=false;
 function vozFala(){var vs=speechSynthesis.getVoices();return vs.find(function(v){return/pt-BR/i.test(v.lang)&&/male|daniel|ricardo|antonio|google/i.test(v.name)})||vs.find(function(v){return/^pt/i.test(v.lang)})}
-function falar(txt,semVoz){$('jv-s').textContent=txt;if(semVoz||!window.speechSynthesis)return;try{speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(txt.replace(/[•\n]+/g,'. '));u.lang='pt-BR';u.rate=1.04;u.pitch=.85;var v=vozFala();if(v)u.voice=v;
+function falar(txt,semVoz){$('jv-s').textContent=txt;if(semVoz)return;if(window.SR_VOZ&&SR_VOZ.temVoz()){SR_VOZ.parar();talk=1;SR_VOZ.ler(String(txt).replace(/[•\n]+/g,'. ')).finally(function(){talk=0});return}if(!window.speechSynthesis)return;try{speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(txt.replace(/[•\n]+/g,'. '));u.lang='pt-BR';u.rate=1.04;u.pitch=.85;var v=vozFala();if(v)u.voice=v;
   u.onstart=function(){talk=1};u.onend=function(){talk=0};speechSynthesis.speak(u)}catch(e){}}
 function iniciarMic(){var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(!SR){falar('Seu navegador não tem reconhecimento de voz. Use o Chrome ou Edge, ou digite o comando.');return}
