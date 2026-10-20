@@ -2686,7 +2686,9 @@ function restaurarBackup(inp){
     let d=null;
     try{d=JSON.parse(String(r.result||''))}catch(e){return toast('JSON inválido')}
     if(!d||typeof d!=='object'||Array.isArray(d))return toast('Arquivo não parece um backup do MODESK');
-    if(!confirm('Restaurar este backup? Os dados atuais deste aparelho serão substituídos.'))return;
+    const _n=k=>Array.isArray(d[k])?d[k].length:0;
+    const _res='Itens: '+_n('itens')+' · Eventos: '+_n('eventos')+' · Atividades: '+_n('atividades')+' · Impressoras: '+_n('impressoras')+' · Mapa: '+_n('mapa')+' · Links: '+_n('links')+' · Pastas: '+_n('pastas')+' · Arquivos: '+_n('arquivos');
+    if(!confirm('Restaurar este backup?\n\n'+(f.name||'')+'\n'+_res+'\n\nOs dados atuais deste aparelho serão substituídos.'))return;
     try{
       state=limparComprasV121(Object.assign(structuredClone(DEF),d));
       if(typeof migrar==='function')migrar(state);
@@ -8847,13 +8849,13 @@ window.SIRIUS_API=API;
 var SYS='Você é o Sirius, assistente operacional do sistema MODESK (gestão de chamados, agenda, cadastros, arquivos, compras e BI). Responda em português do Brasil, em Markdown enxuto. '+
 'NUNCA use tabelas Markdown (linhas com |). Responda em texto corrido e natural, com frases curtas; quando precisar listar, use no máximo uma lista simples com hífen. Evite estruturas rígidas de relatório. '+
 'Você PODE executar ações no sistema. Para executar, inclua no final da resposta um bloco: ```acao {"fn":"agendar|cadastrar|arquivo|excluir|chamado|ir","args":{...}}``` '+
-'Campos: agendar{titulo,data,hora,obs,tipo,evento,cliente,local,sala,horaFim,servicos,resp}; Use tipo="evento" e evento=true para eventos, tipo="lembrete" para lembretes pessoais. Não duplique o mesmo compromisso. Compras são inseridas apenas pelo upload de PDF ou Excel; nunca crie compras por comando de cadastro.  cadastrar{nome,cod,qtd,local,obs}; arquivo{nome,caminho,desc}; excluir{lista,nome}; chamado{titulo,desc,prio,prazo,tags}; ir{tela}. Só use ação quando o usuário pedir claramente.';
+'Ações extras do núcleo avançado: memoria{q} consulta a base técnica indexada; sandbox{codigo} gera dry-run de risco de um script; agente{tipo:ip|manut|resumo|script,nome,alvo,min} cria um agente de segundo plano. Campos: agendar{titulo,data,hora,obs,tipo,evento,cliente,local,sala,horaFim,servicos,resp}; Use tipo="evento" e evento=true para eventos, tipo="lembrete" para lembretes pessoais. Não duplique o mesmo compromisso. Compras são inseridas apenas pelo upload de PDF ou Excel; nunca crie compras por comando de cadastro.  cadastrar{nome,cod,qtd,local,obs}; arquivo{nome,caminho,desc}; excluir{lista,nome}; chamado{titulo,desc,prio,prazo,tags}; ir{tela}. Só use ação quando o usuário pedir claramente.';
 function motivoTroca(s){return s===429?'limite de uso':s===401?'chave invalida':s===403?'acesso negado':s===402?'creditos esgotados':'erro '+s}
 var IA_PROV={groq:{n:'Groq',u:'https://api.groq.com/openai/v1/chat/completions',m:'openai/gpt-oss-120b'},grok:{n:'Grok (xAI)',u:'https://api.x.ai/v1/chat/completions',m:'grok-4'},gemini:{n:'Gemini',u:'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',m:'gemini-2.5-flash'},openai:{n:'ChatGPT (OpenAI)',u:'https://api.openai.com/v1/chat/completions',m:'gpt-4o-mini'},openrouter:{n:'OpenRouter',u:'https://openrouter.ai/api/v1/chat/completions',m:'openai/gpt-oss-120b:free'},deepseek:{n:'DeepSeek',u:'https://api.deepseek.com/chat/completions',m:'deepseek-chat'},mistral:{n:'Mistral',u:'https://api.mistral.ai/v1/chat/completions',m:'mistral-small-latest'},custom:{n:'Outro (URL compatível OpenAI)',u:'',m:''}};
 window.SR_IA_PROV=IA_PROV;
 function slotsIA(){var a=(S.cfg.ias||[]).filter(function(x){return x&&x.key&&x.on!==false});if(!a.length&&(S.cfg.groq||'').trim())a=[{prov:'groq',key:S.cfg.groq.trim(),modelo:S.cfg.modelo}];return a}
 function motivoTroca(s){return s===429?'cota/limite':s===401?'chave invalida':s===403?'acesso negado':s===402?'creditos esgotados':'erro '+s}
-function contexto(){try{var d=new Date(),p=['Agora: '+d.toLocaleString('pt-BR')];try{var k=kpis();p.push('Chamados abertos: '+k.ab+', eventos: '+k.ev+', tarefas pendentes: '+k.tar)}catch(e){}try{var st=window.state||{};var ev=(st.eventos||[]).slice(0,15).map(function(e){return [e.data,e.hora,e.titulo||e.nome||e.cliente].filter(Boolean).join(' ')});if(ev.length)p.push('Próximos eventos: '+ev.join('; '))}catch(e){}return p.join(' | ').slice(0,3500)}catch(e){return ''}}
+function contexto(){try{var d=new Date(),p=['Agora: '+d.toLocaleString('pt-BR')];try{var k=kpis();p.push('Chamados abertos: '+k.ab+', eventos: '+k.ev+', tarefas pendentes: '+k.tar)}catch(e){}try{var st=window.state||{};var ev=(st.eventos||[]).slice(0,15).map(function(e){return [e.data,e.hora,e.titulo||e.nome||e.cliente].filter(Boolean).join(' ')});if(ev.length)p.push('Próximos eventos: '+ev.join('; '))}catch(e){}var base=p.join(' | ').slice(0,3500);try{if(window.SiriusMemory){var mm=SiriusMemory.ctx();if(mm)base+=' | '+mm.slice(0,4500)}}catch(e){}return base}catch(e){return ''}}
 async function chamarIA(msgs){
   var cfg=S.cfg, sl=slotsIA();
   if(!sl.length)return simulado(msgs[msgs.length-1].content);
@@ -9356,7 +9358,7 @@ pronto(function(){
   pan.insertBefore(dr,pan.firstChild);
   var S=function(){return window.SIRIUS.estado()};
   function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
-  function aba(t){var b=document.querySelector('#sr-tabs .sr-tab[data-t="'+t+'"]');if(b)b.click()}
+  function aba(t){var L=window.SiriusLab;if(/^(mem|sbx|bg)$/.test(t)){if(L)L.abrir(t);return}if(L&&L.fechar)L.fechar();var b=document.querySelector('#sr-tabs .sr-tab[data-t="'+t+'"]');if(b)b.click()}
   function repintar(){var on=document.querySelector('#sr-tabs .sr-tab.on');if(on)on.click()}
 
   /* ---------- 1. botao hamburguer + menu de secoes ---------- */
@@ -9364,10 +9366,10 @@ pronto(function(){
   burger.className='sr-ic'; burger.id='sr-burger'; burger.type='button'; burger.title='Menu e histórico'; burger.setAttribute('aria-label','Abrir menu e histórico'); burger.setAttribute('aria-expanded','false'); burger.innerHTML='☰';
   head.insertBefore(burger,head.firstChild);
 
-  var SECOES=[['painel','Painel'],['chat','Chat'],];
+  var SECOES=[['painel','Painel'],['chat','Chat'],['mem','Memória'],['sbx','Sandbox'],['bg','Agentes']];
   function pintarDrawer(){
     var s=S(),q=(document.getElementById('srd-q').value||'').toLowerCase();
-    var atual=(document.querySelector('#sr-tabs .sr-tab.on')||{}).dataset;
+    var atual=(window.SiriusLab&&SiriusLab.aberto&&SiriusLab.aberto())?{t:SiriusLab.atual()}:(document.querySelector('#sr-tabs .sr-tab.on')||{}).dataset;
     document.getElementById('srd-nav').innerHTML=SECOES.map(function(t){
       return '<button class="dt'+((atual&&atual.t===t[0])?' on':'')+'" data-t="'+t[0]+'">'+t[1]+'</button>'}).join('');
     Array.prototype.forEach.call(dr.querySelectorAll('.dt'),function(b){
@@ -13569,5 +13571,310 @@ if(window.MDKCORE&&MDKCORE.modulos)MDKCORE.modulos.M8={titulo:'Cadastro intelige
 })();
 </script>
 
+<!-- ================= v207 · SÍRIUS NÚCLEO AVANÇADO: Memória Híbrida + Sandbox + Watchers ================= -->
+<style id="sirius-v207-css">
+#sx-lab{position:fixed;right:24px;top:70px;width:min(760px,calc(100vw - 32px));height:min(640px,calc(100vh - 100px));z-index:2147483000;display:none;flex-direction:column;background:linear-gradient(160deg,rgba(5,10,18,.97),rgba(3,6,12,.98));border:1px solid rgba(34,211,238,.45);border-radius:14px;box-shadow:0 0 0 1px rgba(34,211,238,.08),0 0 40px rgba(34,211,238,.18),0 30px 80px rgba(0,0,0,.7);color:#e7eaf0;font:13px/1.45 system-ui,Segoe UI,sans-serif;overflow:hidden;backdrop-filter:blur(10px)}
+#sx-lab.open{display:flex;animation:sx-in .25s ease}
+@keyframes sx-in{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
+#sx-lab:before{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(34,211,238,.025) 0 1px,transparent 1px 3px)}
+.sx-h{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid rgba(34,211,238,.2);cursor:move;user-select:none}
+.sx-h b{letter-spacing:.18em;font-size:12px;color:#22d3ee;text-shadow:0 0 10px rgba(34,211,238,.6)}
+.sx-h small{color:#6f7b8f;font-size:11px;flex:1}
+.sx-x{background:none;border:1px solid rgba(34,211,238,.3);color:#22d3ee;border-radius:7px;width:28px;height:28px;cursor:pointer}
+.sx-tabs{display:flex;gap:4px;padding:8px 12px 0}
+.sx-tab{background:transparent;border:1px solid rgba(34,211,238,.18);border-bottom:none;color:#94a3b8;padding:7px 12px;border-radius:8px 8px 0 0;cursor:pointer;font-size:12px;letter-spacing:.05em}
+.sx-tab.on{color:#22d3ee;background:rgba(34,211,238,.08);border-color:rgba(34,211,238,.5);box-shadow:inset 0 2px 0 #22d3ee}
+.sx-b{flex:1;overflow:auto;padding:12px 14px;border-top:1px solid rgba(34,211,238,.2)}
+.sx-pane{display:none}.sx-pane.on{display:block}
+.sx-drop{border:1.5px dashed rgba(34,211,238,.45);border-radius:12px;padding:20px;text-align:center;color:#94a3b8;transition:.2s;cursor:pointer}
+.sx-drop.hot{background:rgba(34,211,238,.1);color:#22d3ee;box-shadow:0 0 24px rgba(34,211,238,.25) inset}
+.sx-row{display:flex;gap:8px;align-items:center;margin:10px 0;flex-wrap:wrap}
+.sx-in,.sx-ta,.sx-sel{background:rgba(10,17,29,.9);border:1px solid rgba(34,211,238,.25);color:#e7eaf0;border-radius:8px;padding:7px 10px;font:inherit}
+.sx-in{flex:1;min-width:140px}.sx-ta{width:100%;min-height:150px;font:12px/1.5 ui-monospace,Consolas,monospace;resize:vertical;box-sizing:border-box}
+.sx-btn{background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.5);color:#22d3ee;border-radius:8px;padding:7px 12px;cursor:pointer;font:600 12px system-ui;letter-spacing:.04em}
+.sx-btn:hover{background:rgba(34,211,238,.22);box-shadow:0 0 14px rgba(34,211,238,.35)}
+.sx-btn.r{color:#ff5a63;border-color:rgba(255,90,99,.5);background:rgba(255,90,99,.08)}
+.sx-card{border:1px solid rgba(34,211,238,.16);background:rgba(12,19,30,.7);border-radius:10px;padding:9px 11px;margin:7px 0}
+.sx-card .t{display:flex;justify-content:space-between;gap:8px;color:#c3cad6}.sx-card .m{color:#6f7b8f;font-size:11px}
+.sx-tag{display:inline-block;font-size:10px;padding:1px 7px;border-radius:99px;border:1px solid currentColor;margin-left:4px}
+.sx-ok{color:#22c58b}.sx-warn{color:#fbbf24}.sx-bad{color:#ff5a63}.sx-info{color:#4aa3ff}
+.sx-hl{background:rgba(34,211,238,.25);color:#fff;border-radius:3px}
+#sx-term{position:fixed;left:24px;bottom:24px;width:min(560px,calc(100vw - 48px));height:260px;z-index:2147483001;display:none;flex-direction:column;background:rgba(2,5,9,.97);border:1px solid rgba(34,197,139,.5);border-radius:12px;box-shadow:0 0 30px rgba(34,197,139,.2);font:12px/1.5 ui-monospace,Consolas,monospace;color:#9ef0c9}
+#sx-term.open{display:flex}
+#sx-term .sx-h{border-color:rgba(34,197,139,.25)}#sx-term .sx-h b{color:#22c58b;text-shadow:0 0 8px rgba(34,197,139,.6)}
+#sx-term pre{flex:1;margin:0;padding:10px 12px;overflow:auto;white-space:pre-wrap;word-break:break-word}
+#sx-term .e{color:#ff5a63}#sx-term .w{color:#fbbf24}#sx-term .i{color:#4aa3ff}
+#sirius-orb.sx-run:after{content:"";position:absolute;inset:-7px;border-radius:50%;border:2px solid rgba(34,211,238,.8);animation:sx-pulse 1.8s ease-out infinite;pointer-events:none}
+#sirius-orb.sx-alert:after{border-color:rgba(255,32,53,.95);animation-duration:1s}
+#sirius-orb .sx-badge{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;border-radius:9px;background:#ff2035;color:#fff;font:700 10px/18px system-ui;text-align:center;box-shadow:0 0 10px #ff2035;display:none;z-index:2}
+#sirius-orb.sx-alert .sx-badge{display:block}
+@keyframes sx-pulse{0%{transform:scale(.9);opacity:1}100%{transform:scale(1.5);opacity:0}}
+#sx-fab{position:fixed;z-index:2147482999;width:34px;height:34px;border-radius:50%;border:1px solid rgba(34,211,238,.6);background:rgba(3,6,12,.9);color:#22d3ee;cursor:pointer;box-shadow:0 0 14px rgba(34,211,238,.35);font-size:15px}
+.sx-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.sx-k{border:1px solid rgba(34,211,238,.16);border-radius:10px;padding:8px;text-align:center}.sx-k b{display:block;font-size:20px;color:#22d3ee}
+@media(max-width:560px){#sx-lab{right:8px;left:8px;width:auto;top:56px}.sx-grid{grid-template-columns:1fr 1fr}}
+
+/* v208 · Núcleo avançado acoplado ao Sirius (uma só entidade) */
+#sirius-panel #sx-lab{position:absolute;right:auto;height:auto;max-height:none;z-index:6;border:0;border-top:1px solid rgba(34,211,238,.3);border-radius:0 0 inherit inherit;box-shadow:none;animation:none}
+#sirius-panel #sx-lab.open{display:flex}
+#sirius-panel #sx-lab #sx-drag{cursor:default}
+#sirius-panel #sx-lab>.sx-h,#sirius-panel #sx-lab>.sx-tabs{display:none}
+#sirius-panel #sx-lab{border-top:0}
+#sirius-panel #sx-term{position:absolute;left:8px;right:8px;bottom:8px;top:auto;width:auto;z-index:7}
+#sx-hbtn.on{color:#0b1220;background:#22d3ee;box-shadow:0 0 12px rgba(34,211,238,.6)}
+#sx-fab{display:none!important}
+@media(max-width:560px){#sirius-panel #sx-lab{left:0!important;width:100%!important}}
+</style>
+<script id="sirius-v207-js">
+(function(){
+'use strict';
+if(window.SiriusMemory)return;
+var E=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
+var $=function(i){return document.getElementById(i)};
+function aviso(m){try{if(typeof toast==='function')return toast(m)}catch(e){}console.log('[Sirius]',m)}
+function uid(){return Math.random().toString(36).slice(2,10)}
+
+/* =================== 1. MEMÓRIA HÍBRIDA (BM25 + Vetorial + RRF) =================== */
+var LSM='modesk.sirius.mem.v1', DIM=512, K1=1.4, B=.75, RRF_K=60;
+var STOP={};'a o e de da do das dos em no na nos nas um uma para por com sem que se os as ao the and of to in is for on or not como mais ou seu sua é ser são foi'.split(' ').forEach(function(w){STOP[w]=1});
+function norm(t){return String(t||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')}
+function toks(t){return norm(t).split(/[^a-z0-9_.\-\/]+/).map(function(w){return w.replace(/^[.\-\/]+|[.\-\/]+$/g,'')}).filter(function(w){return w&&w.length>1&&!STOP[w]})}
+function hash(s){var h=2166136261;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
+/* embedding local: feature hashing de palavras + trigramas de caracteres, normalizado (L2) */
+function embed(text){var v=new Float32Array(DIM),w=toks(text);
+  w.forEach(function(t){var h=hash(t);v[h%DIM]+=(h&1?1:-1)*1.5;var p='#'+t+'#';for(var i=0;i<p.length-2;i++){var g=hash(p.substr(i,3));v[g%DIM]+=(g&2?1:-1)*.5}});
+  for(var i=0;i+1<w.length;i++){var b=hash(w[i]+' '+w[i+1]);v[b%DIM]+=(b&1?1:-1)}
+  var n=0;for(i=0;i<DIM;i++)n+=v[i]*v[i];n=Math.sqrt(n)||1;for(i=0;i<DIM;i++)v[i]/=n;return v}
+function cos(a,b){var s=0;for(var i=0;i<DIM;i++)s+=a[i]*b[i];return s}
+function lev(a,b){if(Math.abs(a.length-b.length)>2)return 9;var d=[],i,j;for(i=0;i<=a.length;i++)d[i]=[i];for(j=0;j<=b.length;j++)d[0][j]=j;for(i=1;i<=a.length;i++)for(j=1;j<=b.length;j++)d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));return d[a.length][b.length]}
+function chunk(text){var out=[],paras=String(text).replace(/\r/g,'').split(/\n\s*\n/),buf='';
+  paras.forEach(function(p){if((buf+'\n\n'+p).length>900&&buf){out.push(buf.trim());buf=buf.slice(-150)+'\n\n'+p}else buf+=(buf?'\n\n':'')+p;
+    while(buf.length>1400){out.push(buf.slice(0,1200).trim());buf=buf.slice(1050)}});
+  if(buf.trim())out.push(buf.trim());return out.filter(function(c){return c.length>20})}
+var MEM={docs:[]}, IDX=null;
+function carregar(){try{var v=localStorage.getItem(LSM);if(v)MEM=JSON.parse(v)}catch(e){}if(!MEM.docs)MEM.docs=[];
+  try{var st=window.state;if(st&&Array.isArray(st.siriusDocs)){var ids={};MEM.docs.forEach(function(d){ids[d.id]=1});st.siriusDocs.forEach(function(d){if(!ids[d.id])MEM.docs.push(d)})}}catch(e){}}
+function gravar(){try{localStorage.setItem(LSM,JSON.stringify(MEM))}catch(e){aviso('Memória local cheia — remova documentos antigos')}
+  /* espelha no estado do MODESK: sincroniza junto com o Apps Script já configurado */
+  try{var st=window.state;if(st){var tot=0;st.siriusDocs=MEM.docs.filter(function(d){tot+=d.texto.length;return tot<1500000});if(typeof save==='function')save()}}catch(e){}
+  IDX=null}
+function indexar(){var C=[],df={},tl=0;
+  MEM.docs.forEach(function(d){chunk(d.texto).forEach(function(c,i){var t=toks(c),tf={};t.forEach(function(w){tf[w]=(tf[w]||0)+1});Object.keys(tf).forEach(function(w){df[w]=(df[w]||0)+1});tl+=t.length;C.push({doc:d.id,nome:d.nome,tipo:d.tipo,i:i,txt:c,tf:tf,len:t.length,vec:embed(d.nome+' '+c)})})});
+  /* fontes vivas do MODESK: inventário, eventos, arquivos */
+  try{var st=window.state||{};[['itens','Inventário'],['arquivos','Arquivos'],['eventos','Agenda']].forEach(function(p){(st[p[0]]||[]).slice(0,400).forEach(function(o,k){var c=Object.keys(o).filter(function(x){return typeof o[x]==='string'||typeof o[x]==='number'}).map(function(x){return x+': '+o[x]}).join(' · ');if(c.length<10)return;var t=toks(c),tf={};t.forEach(function(w){tf[w]=(tf[w]||0)+1});Object.keys(tf).forEach(function(w){df[w]=(df[w]||0)+1});tl+=t.length;C.push({doc:'live-'+p[0],nome:p[1]+' (MODESK)',tipo:'live',i:k,txt:c,tf:tf,len:t.length,vec:embed(c)})})})}catch(e){}
+  IDX={C:C,df:df,N:C.length,avg:tl/(C.length||1),vocab:Object.keys(df)};return IDX}
+function bm25(q){var I=IDX,qt=toks(q),ex=[];
+  /* fuzzy: expande termos com typos (Levenshtein<=1/2) e prefixos */
+  qt.forEach(function(t){ex.push([t,1]);if(I.df[t])return;var n=0;for(var i=0;i<I.vocab.length&&n<4;i++){var v=I.vocab[i];if(v.indexOf(t)===0&&v!==t){ex.push([v,.7]);n++}else if(t.length>3&&lev(t,v)<=(t.length>6?2:1)){ex.push([v,.6]);n++}}});
+  return I.C.map(function(c,ix){var s=0;ex.forEach(function(p){var f=c.tf[p[0]];if(!f)return;var idf=Math.log(1+(I.N-I.df[p[0]]+.5)/(I.df[p[0]]+.5));s+=p[1]*idf*(f*(K1+1))/(f+K1*(1-B+B*c.len/I.avg))});return[ix,s]}).filter(function(x){return x[1]>0}).sort(function(a,b){return b[1]-a[1]})}
+function vetorial(q){var qv=embed(q);return IDX.C.map(function(c,ix){return[ix,cos(qv,c.vec)]}).filter(function(x){return x[1]>.08}).sort(function(a,b){return b[1]-a[1]})}
+function buscar(q,k){if(!q||!q.trim())return[];if(!IDX)indexar();if(!IDX.N)return[];k=k||6;
+  var a=bm25(q).slice(0,50),b=vetorial(q).slice(0,50),F={};
+  a.forEach(function(x,r){F[x[0]]=(F[x[0]]||{s:0});F[x[0]].s+=1/(RRF_K+r+1);F[x[0]].kw=r+1});
+  b.forEach(function(x,r){F[x[0]]=(F[x[0]]||{s:0});F[x[0]].s+=1/(RRF_K+r+1);F[x[0]].sem=r+1;F[x[0]].cos=x[1]});
+  return Object.keys(F).map(function(ix){var c=IDX.C[ix],f=F[ix];return{nome:c.nome,doc:c.doc,txt:c.txt,rrf:f.s,kw:f.kw||0,sem:f.sem||0,cos:f.cos||0}}).sort(function(x,y){return y.rrf-x.rrf}).slice(0,k)}
+var ultimaPergunta='';
+function ctx(q){q=q||ultimaPergunta;var r=buscar(q,5);if(!r.length)return'';
+  return 'MEMÓRIA TÉCNICA (trechos recuperados por busca híbrida BM25+vetorial com RRF; cite a fonte entre colchetes quando usar): '+r.map(function(x,i){return'['+(i+1)+'·'+x.nome+'] '+x.txt.replace(/\s+/g,' ').slice(0,700)}).join(' || ')}
+var TXT=/\.(txt|md|markdown|json|csv|tsv|log|xml|html?|js|ts|py|ps1|psm1|bat|cmd|sh|bash|mos|moscript|ini|conf|cfg|yaml|yml|sql|rsc|cisco|toml|env)$/i;
+function lerArquivos(files){var L=[].slice.call(files||[]),ok=0,falha=[];if(!L.length)return;
+  Promise.all(L.map(function(f){return new Promise(function(res){if(f.size>3e6){falha.push(f.name+' (>3MB)');return res()}
+    if(!TXT.test(f.name)&&!/^text\//.test(f.type)){falha.push(f.name+' (formato binário — salve como .txt/.md)');return res()}
+    var r=new FileReader();r.onload=function(){var t=String(r.result||'');if(/\.html?$/i.test(f.name)){var d=document.createElement('div');d.innerHTML=t.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/gi,'');t=d.textContent}
+      MEM.docs=MEM.docs.filter(function(d){return d.nome!==f.name});MEM.docs.unshift({id:uid(),nome:f.name,tipo:(f.name.split('.').pop()||'txt').toLowerCase(),tam:t.length,at:Date.now(),texto:t});ok++;res()};r.onerror=function(){falha.push(f.name);res()};r.readAsText(f)})}))
+  .then(function(){gravar();indexar();pintarMem();aviso('Sirius indexou '+ok+' documento(s)'+(falha.length?' · ignorados: '+falha.join(', '):''));SX.log('i','[memória] '+ok+' doc(s) indexados → '+IDX.N+' fragmentos')})}
+window.SiriusMemory={buscar:buscar,ctx:ctx,indexar:function(){return indexar()},docs:function(){return MEM.docs},adicionar:function(nome,texto){MEM.docs.unshift({id:uid(),nome:nome,tipo:'txt',tam:texto.length,at:Date.now(),texto:texto});gravar()},remover:function(id){MEM.docs=MEM.docs.filter(function(d){return d.id!==id});gravar()}};
+
+/* =================== 2. SANDBOX MOSCRIPT (Web Worker isolado + Dry-Run) =================== */
+var RISCOS=[
+ [/\brm\s+-rf?\b|\bdel\s+\/[sfq]|Remove-Item[^\n]*-Recurse|\bformat\s+[a-z]:|\bmkfs\b|\bdd\s+if=/i,40,'Exclusão/formatação destrutiva'],
+ [/\b(shutdown|reboot|restart-computer|stop-computer|halt|poweroff)\b/i,30,'Desligamento/reinício de host'],
+ [/\bDROP\s+(TABLE|DATABASE)|\bTRUNCATE\b|\bDELETE\s+FROM\b(?![^\n;]*WHERE)/i,40,'Operação destrutiva em banco de dados'],
+ [/\bnetsh\b|\broute\s+(add|delete)|\bip\s+route\b|\biptables\b|\bufw\b|New-NetFirewallRule|set-netipaddress|\binterface\s+\S+|no\s+shutdown/i,20,'Altera rede/firewall/roteamento'],
+ [/\breg(\.exe)?\s+(add|delete)|Set-ItemProperty\s+HKLM|\bgpupdate\b|\bsc\s+(config|delete)\b/i,20,'Altera registro/serviços'],
+ [/\b(useradd|userdel|net\s+user|Add-LocalGroupMember|passwd|chmod\s+777|chown)\b/i,20,'Altera contas/permissões'],
+ [/\bwhile\s*\(\s*(true|1)\s*\)|for\s*\(\s*;\s*;\s*\)/i,15,'Laço infinito potencial'],
+ [/\beval\s*\(|new\s+Function|Invoke-Expression|\biex\b/i,15,'Execução dinâmica de código'],
+ [/(password|senha|token|api[_-]?key)\s*[:=]\s*['"][^'"]+/i,15,'Credencial exposta no script'],
+ [/\b(curl|wget|Invoke-WebRequest|fetch)\b[^\n]*(\|\s*(sh|bash|iex))/i,35,'Download e execução remota']
+];
+function detectar(code){if(/^\s*(\/\/|#)\s*lang\s*[:=]\s*(js|javascript)/im.test(code))return'js';if(/\$[A-Za-z]+\s*=|Get-[A-Z]|Write-Host|-ErrorAction/.test(code))return'powershell';if(/^#!.*(ba)?sh|\becho\b|\bfi\b|\bdone\b/m.test(code))return'shell';if(/\b(interface|vlan|hostname|ip address|switchport)\b/i.test(code))return'rede';if(/\b(function|var|let|const|=>|console\.)\b/.test(code))return'js';return'moscript'}
+function dryRun(code){var lang=detectar(code),linhas=code.split('\n'),ach=[],score=0,entradas={},saidas=[],ips={};
+  linhas.forEach(function(l,n){RISCOS.forEach(function(r){if(r[0].test(l)){ach.push({linha:n+1,msg:r[2],peso:r[1],trecho:l.trim().slice(0,120)});score+=r[1]}});
+    (l.match(/\b\d{1,3}(\.\d{1,3}){3}(\/\d{1,2})?\b/g)||[]).forEach(function(ip){ips[ip]=1});
+    var m=l.match(/(?:\$|\b(?:var|let|const|set)\s+)([A-Za-z_]\w*)\s*=/);if(m)entradas[m[1]]=1;
+    if(/console\.log|Write-(Host|Output)|\becho\b|\bprint\b|\blog\s*\(/i.test(l))saidas.push('L'+(n+1)+': '+l.trim().slice(0,90))});
+  var sint=null;if(lang==='js'){try{new Function(code)}catch(e){sint=e.message;score+=10}}
+  score=Math.min(100,score);var nivel=score>=60?'CRÍTICO':score>=35?'ALTO':score>=15?'MÉDIO':'BAIXO';
+  return{lang:lang,linhas:linhas.length,risco:score,nivel:nivel,achados:ach,entradas:Object.keys(entradas),saidas:saidas.slice(0,20),alvos:Object.keys(ips),sintaxe:sint,executavel:lang==='js'&&!sint,at:Date.now()}}
+var WORKER_SRC=[
+"'use strict';var out=function(t,a){postMessage({t:t,m:[].map.call(a,function(x){try{return typeof x==='object'?JSON.stringify(x):String(x)}catch(e){return String(x)}}).join(' ')})};",
+"var console={log:function(){out('o',arguments)},info:function(){out('i',arguments)},warn:function(){out('w',arguments)},error:function(){out('e',arguments)}};",
+"self.fetch=function(u){out('w',['[sandbox] fetch bloqueado (simulado): '+u]);return Promise.resolve({ok:true,status:200,json:function(){return Promise.resolve({simulado:true})},text:function(){return Promise.resolve('simulado')}})};",
+"['XMLHttpRequest','WebSocket','indexedDB','caches','EventSource','BroadcastChannel'].forEach(function(k){try{Object.defineProperty(self,k,{value:undefined,configurable:true})}catch(e){}});self.importScripts=function(){throw new Error('importScripts bloqueado na sandbox')};",
+"var net={ping:function(ip){var ok=/^\\d{1,3}(\\.\\d{1,3}){3}$/.test(ip);out('i',['[sim] ping '+ip+' → '+(ok?'resposta simulada '+(5+Math.random()*30|0)+'ms':'host inválido')]);return ok},",
+"exec:function(c){out('w',['[sim] comando NÃO executado (dry-run): '+c]);return{code:0,stdout:'(simulado)'}},sleep:function(ms){return new Promise(function(r){setTimeout(r,Math.min(ms,5000))})}};",
+"onmessage=function(e){var t0=Date.now();try{var r=(0,eval)('(async function(net,console){\"use strict\";\\n'+e.data.code+'\\n})');Promise.resolve(r(net,console)).then(function(v){postMessage({t:'fim',v:v===undefined?null:String(v),ms:Date.now()-t0})},function(err){postMessage({t:'erro',m:String(err&&err.stack||err),ms:Date.now()-t0})})}catch(err){postMessage({t:'erro',m:String(err&&err.message||err),ms:Date.now()-t0})}};"
+].join('\n');
+var SX={hist:[],
+  log:function(c,m){var p=$('sx-term-o');if(!p)return;var s=document.createElement('span');s.className=c||'';s.textContent='['+new Date().toLocaleTimeString('pt-BR')+'] '+m+'\n';p.appendChild(s);p.scrollTop=p.scrollHeight},
+  term:function(on){var t=$('sx-term');if(t)t.classList.toggle('open',on!==false)},
+  analisar:function(code){var r=dryRun(code);SX.hist.unshift(r);SX.hist=SX.hist.slice(0,20);return r},
+  executar:function(code,timeout){timeout=timeout||4000;var rep=SX.analisar(code);SX.term(true);
+    SX.log('i','══ DRY-RUN · '+rep.lang.toUpperCase()+' · '+rep.linhas+' linhas · risco '+rep.risco+'/100 ('+rep.nivel+')');
+    rep.achados.forEach(function(a){SX.log(a.peso>=30?'e':'w','  L'+a.linha+' ⚠ '+a.msg+' → '+a.trecho)});
+    if(rep.alvos.length)SX.log('i','  alvos de rede: '+rep.alvos.join(', '));
+    if(rep.sintaxe)SX.log('e','  erro de sintaxe: '+rep.sintaxe);
+    if(!rep.executavel){SX.log('w','  execução isolada disponível apenas para JS (marque "// lang: js"). Análise estática concluída.');return Promise.resolve(rep)}
+    if(rep.risco>=60){SX.log('e','  BLOQUEADO: risco crítico — revise antes de executar.');return Promise.resolve(rep)}
+    return new Promise(function(res){var url=URL.createObjectURL(new Blob([WORKER_SRC],{type:'text/javascript'})),w;
+      try{w=new Worker(url)}catch(e){SX.log('e','Worker indisponível: '+e.message);return res(rep)}
+      var tm=setTimeout(function(){w.terminate();URL.revokeObjectURL(url);SX.log('e','  ⏱ TIMEOUT '+timeout+'ms — processo isolado encerrado à força.');rep.exec={ok:false,erro:'timeout'};res(rep)},timeout);
+      SX.log('i','  ▶ executando em Worker isolado (sem DOM, rede simulada, timeout '+timeout+'ms)…');
+      w.onmessage=function(e){var d=e.data;if(d.t==='o'||d.t==='i'||d.t==='w'||d.t==='e'){SX.log(d.t==='o'?'':d.t,'  │ '+d.m);return}
+        clearTimeout(tm);w.terminate();URL.revokeObjectURL(url);
+        if(d.t==='fim'){SX.log('','  ✔ concluído em '+d.ms+'ms'+(d.v!=null?' · retorno: '+d.v:''));rep.exec={ok:true,ms:d.ms,v:d.v}}else{SX.log('e','  ✖ exceção: '+d.m);rep.exec={ok:false,erro:d.m}}res(rep)};
+      w.onerror=function(e){e.preventDefault();clearTimeout(tm);w.terminate();SX.log('e','  ✖ '+e.message);rep.exec={ok:false,erro:e.message};res(rep)};
+      w.postMessage({code:code})})}};
+window.SiriusSandbox=SX;
+
+/* =================== 3. BACKGROUND WATCHERS (Web Worker de agendamento) =================== */
+var LSW='modesk.sirius.watchers.v1';
+var W={tarefas:[],alertas:[],log:[]};
+try{var wv=localStorage.getItem(LSW);if(wv)W=Object.assign(W,JSON.parse(wv))}catch(e){}
+if(!W.tarefas.length)W.tarefas=[
+ {id:uid(),tipo:'manut',nome:'Alertas de manutenção (próx. 24h)',min:15,ativo:true,ult:0},
+ {id:uid(),tipo:'resumo',nome:'Resumo automático de atividades',min:120,ativo:true,ult:0}];
+function gravarW(){W.alertas=W.alertas.slice(0,80);W.log=W.log.slice(0,120);try{localStorage.setItem(LSW,JSON.stringify(W))}catch(e){}orbEstado()}
+function alerta(nivel,msg,tarefa){W.alertas.unshift({id:uid(),t:Date.now(),nivel:nivel,msg:msg,tarefa:tarefa,lido:false});gravarW();if(nivel!=='info')aviso('Sirius · '+msg);
+  try{if(nivel!=='info'&&'Notification' in window&&Notification.permission==='granted'&&document.hidden)new Notification('Sirius · MODESK',{body:msg})}catch(e){}}
+function sonda(alvo){var url=/^https?:/.test(alvo)?alvo:(location.protocol==='https:'?'https://':'http://')+alvo;var t0=performance.now(),c=new AbortController(),tm=setTimeout(function(){c.abort()},5000);
+  return fetch(url,{mode:'no-cors',cache:'no-store',signal:c.signal}).then(function(){return{ok:true,ms:Math.round(performance.now()-t0)}},function(e){var ms=Math.round(performance.now()-t0);return{ok:ms<4900&&e.name!=='AbortError'?'?':false,ms:ms,err:e.name}}).finally(function(){clearTimeout(tm)})}
+var RUN=0;
+var EXEC={
+ ip:function(t){var alvos=String(t.alvo||'').split(/[\s,;]+/).filter(Boolean);return Promise.all(alvos.map(function(a){return sonda(a).then(function(r){return[a,r]})})).then(function(rs){var off=rs.filter(function(x){return x[1].ok===false});
+   W.log.unshift({t:Date.now(),m:t.nome+': '+rs.map(function(x){return x[0]+'='+(x[1].ok===true?x[1].ms+'ms':x[1].ok==='?'?'responde (porta fechada)':'sem resposta')}).join(' · ')});
+   if(off.length)alerta('crit',off.length+' alvo(s) sem resposta: '+off.map(function(x){return x[0]}).join(', '),t.nome)})},
+ manut:function(t){var st=window.state||{},ag=Date.now(),lim=ag+864e5,n=0;(st.eventos||[]).forEach(function(e){if(!e.data)return;var d=new Date(e.data+'T'+(e.hora||'08:00')).getTime();if(d>=ag&&d<=lim){var ch='m-'+(e.id||e.titulo)+e.data;if(W.log.some(function(l){return l.k===ch}))return;W.log.unshift({t:ag,k:ch,m:'aviso: '+(e.titulo||e.nome)});n++;alerta('warn','Em até 24h: '+(e.titulo||e.nome||'evento')+' · '+e.data.split('-').reverse().join('/')+' '+(e.hora||''),t.nome)}});
+   (st.itens||[]).forEach(function(i){if(i.validade){var v=new Date(i.validade).getTime();if(v&&v-ag<7*864e5&&v>ag-864e5){var ch='v-'+i.id;if(!W.log.some(function(l){return l.k===ch})){W.log.unshift({t:ag,k:ch,m:'validade '+i.nome});alerta('warn','Validade/garantia próxima: '+i.nome,t.nome)}}}});
+   if(!n)W.log.unshift({t:ag,m:t.nome+': nada nas próximas 24h'})},
+ resumo:function(t){var st=window.state||{},S=(window.SIRIUS&&SIRIUS.estado&&SIRIUS.estado())||{},hoje=new Date().toISOString().slice(0,10),ch=(S.chamados||[]),ab=ch.filter(function(c){return c.col!=='resolvidos'}).length;
+   var evh=(st.eventos||[]).filter(function(e){return e.data===hoje}).length;
+   alerta('info','Resumo: '+ab+' chamado(s) aberto(s), '+evh+' evento(s) hoje, '+(st.itens||[]).length+' item(ns) no inventário, '+MEM.docs.length+' doc(s) na memória.',t.nome)},
+ script:function(t){return SX.executar(t.alvo||'',3000).then(function(r){if(r.exec&&!r.exec.ok)alerta('crit','Rotina "'+t.nome+'" falhou: '+r.exec.erro,t.nome)})}
+};
+function tick(){var ag=Date.now();W.tarefas.forEach(function(t){if(!t.ativo||t.rodando)return;if(ag-(t.ult||0)<t.min*6e4)return;t.ult=ag;t.rodando=true;RUN++;orbEstado();
+  Promise.resolve().then(function(){return EXEC[t.tipo]&&EXEC[t.tipo](t)}).catch(function(e){alerta('crit',t.nome+': '+e.message,t.nome)}).then(function(){t.rodando=false;RUN--;gravarW();pintarW()})})}
+/* Worker de relógio: continua batendo com a aba em segundo plano (timers de Worker não são estrangulados como setInterval da página) */
+(function(){try{var u=URL.createObjectURL(new Blob(["setInterval(function(){postMessage(1)},20000)"],{type:'text/javascript'}));var wk=new Worker(u);wk.onmessage=tick}catch(e){setInterval(tick,20000)}setTimeout(tick,4000)})();
+function orbEstado(){var o=$('sirius-orb');if(!o)return;var pend=W.alertas.filter(function(a){return!a.lido&&a.nivel!=='info'}).length,ativos=W.tarefas.some(function(t){return t.ativo});
+  o.classList.toggle('sx-run',ativos||RUN>0);o.classList.toggle('sx-alert',pend>0);var b=o.querySelector('.sx-badge');if(!b){b=document.createElement('span');b.className='sx-badge';o.appendChild(b)}b.textContent=pend>9?'9+':pend;
+  o.title='Sirius · '+(RUN?'agentes executando':ativos?W.tarefas.filter(function(t){return t.ativo}).length+' agente(s) vigiando':'agentes parados')+(pend?' · '+pend+' alerta(s)':'')}
+window.SiriusBackgroundService={tarefas:function(){return W.tarefas},alertas:function(){return W.alertas},adicionar:function(t){t.id=uid();t.ult=0;t.ativo=t.ativo!==false;W.tarefas.push(t);gravarW();pintarW();return t},rodarAgora:function(id){W.tarefas.forEach(function(t){if(t.id===id)t.ult=0});tick()}};
+
+/* =================== UI · SÍRIUS LAB =================== */
+var aba='mem';
+function montarUI(){if($('sx-lab'))return;
+  var d=document.createElement('div');d.id='sx-lab';d.innerHTML=
+  '<div class="sx-h" id="sx-drag"><b>◈ SÍRIUS · NÚCLEO AVANÇADO</b><small id="sx-sub">memória híbrida · sandbox · agentes</small><button class="sx-x" id="sx-tt" title="Terminal">⌘</button><button class="sx-x" id="sx-close">✕</button></div>'+
+  '<div class="sx-tabs"><button class="sx-tab on" data-a="mem">MEMÓRIA</button><button class="sx-tab" data-a="sbx">SANDBOX</button><button class="sx-tab" data-a="bg">AGENTES</button></div>'+
+  '<div class="sx-b">'+
+   '<div class="sx-pane on" data-p="mem"><div class="sx-drop" id="sx-drop">⇣ Arraste manuais, MOScripts, inventários e procedimentos aqui<br><small>.txt .md .json .csv .log .ps1 .sh .mos .xml .html .conf… · ou clique para escolher</small><input type="file" id="sx-file" multiple hidden></div>'+
+   '<div class="sx-row"><input class="sx-in" id="sx-q" placeholder="Testar busca híbrida (ex.: vlan impressora 3º andar)"><button class="sx-btn" id="sx-qb">BUSCAR</button><button class="sx-btn" id="sx-reidx">REINDEXAR</button></div><div id="sx-res"></div><div id="sx-docs"></div></div>'+
+   '<div class="sx-pane" data-p="sbx"><textarea class="sx-ta" id="sx-code" spellcheck="false">// lang: js\n// API da sandbox: net.ping(ip), net.exec(cmd) [simulado], net.sleep(ms), fetch [simulado]\nconst rede = ["10.18.1.219","10.18.1.1"];\nfor (const ip of rede) net.ping(ip);\nnet.exec("netsh interface ip set dns Ethernet static 8.8.8.8");\nconsole.log("verificação concluída");\nreturn rede.length;</textarea>'+
+   '<div class="sx-row"><button class="sx-btn" id="sx-dry">DRY-RUN</button><button class="sx-btn" id="sx-run">SIMULAR NA SANDBOX</button><select class="sx-sel" id="sx-to"><option value="2000">timeout 2s</option><option value="4000" selected>timeout 4s</option><option value="10000">timeout 10s</option></select><button class="sx-btn" id="sx-ask">PEDIR REVISÃO AO SIRIUS</button></div><div id="sx-rep"></div></div>'+
+   '<div class="sx-pane" data-p="bg"><div class="sx-grid" id="sx-kpi"></div>'+
+   '<div class="sx-row"><select class="sx-sel" id="sx-nt"><option value="ip">Verificar IPs/hosts</option><option value="manut">Alertas de manutenção</option><option value="resumo">Resumo de atividades</option><option value="script">Rotina JS (sandbox)</option></select><input class="sx-in" id="sx-nn" placeholder="Nome da rotina"><input class="sx-in" id="sx-na" placeholder="Alvos (10.0.0.1, srv.local) ou código"><input class="sx-in" id="sx-nm" type="number" min="1" value="10" style="max-width:80px;flex:0" title="minutos"><button class="sx-btn" id="sx-add">+ AGENTE</button></div>'+
+   '<div id="sx-tasks"></div><div class="sx-row"><b style="color:#22d3ee;font-size:12px;flex:1">ALERTAS</b><button class="sx-btn" id="sx-lidos">MARCAR LIDOS</button><button class="sx-btn" id="sx-notif">ATIVAR NOTIFICAÇÕES</button></div><div id="sx-al"></div></div>'+
+  '</div>';(document.getElementById('sirius-panel')||document.body).appendChild(d);
+  var t=document.createElement('div');t.id='sx-term';t.innerHTML='<div class="sx-h" id="sx-tdrag"><b>▸ SANDBOX CONSOLE</b><small>processo isolado</small><button class="sx-x" id="sx-tc2" title="Limpar">⌫</button><button class="sx-x" id="sx-tc">✕</button></div><pre id="sx-term-o"></pre>';d.appendChild(t);
+  [].forEach.call(d.querySelectorAll('.sx-tab'),function(b){b.onclick=function(){aba=b.dataset.a;[].forEach.call(d.querySelectorAll('.sx-tab'),function(x){x.classList.toggle('on',x===b)});[].forEach.call(d.querySelectorAll('.sx-pane'),function(p){p.classList.toggle('on',p.dataset.p===aba)});pintar()}});
+  $('sx-close').onclick=function(){fecharLab()};$('sx-close').title='Voltar ao chat do Sirius';$('sx-close').textContent='←';$('sx-tt').onclick=function(){SX.term(!$('sx-term').classList.contains('open'))};
+  $('sx-tc').onclick=function(){SX.term(false)};$('sx-tc2').onclick=function(){$('sx-term-o').textContent=''};
+  
+  var dp=$('sx-drop'),fi=$('sx-file');dp.onclick=function(){fi.click()};fi.onchange=function(){lerArquivos(fi.files);fi.value=''};
+  ['dragenter','dragover'].forEach(function(ev){dp.addEventListener(ev,function(e){e.preventDefault();dp.classList.add('hot')})});
+  ['dragleave','drop'].forEach(function(ev){dp.addEventListener(ev,function(e){e.preventDefault();dp.classList.remove('hot')})});
+  dp.addEventListener('drop',function(e){lerArquivos(e.dataTransfer.files)});
+  $('sx-qb').onclick=function(){pintarBusca($('sx-q').value)};$('sx-q').onkeydown=function(e){if(e.key==='Enter')pintarBusca(this.value)};
+  $('sx-reidx').onclick=function(){carregar();indexar();pintarMem();aviso('Índice reconstruído: '+IDX.N+' fragmentos')};
+  $('sx-dry').onclick=function(){pintarRep(SX.analisar($('sx-code').value))};
+  $('sx-run').onclick=function(){SX.executar($('sx-code').value,+$('sx-to').value).then(pintarRep)};
+  $('sx-ask').onclick=function(){var r=dryRun($('sx-code').value);try{fecharLab();SIRIUS.abrir();SIRIUS.enviar('Revise este script antes da execução real. Dry-run local: linguagem '+r.lang+', risco '+r.risco+'/100 ('+r.nivel+'), achados: '+(r.achados.map(function(a){return'L'+a.linha+' '+a.msg}).join('; ')||'nenhum')+'. Aponte falhas, efeitos colaterais e uma versão mais segura.\n```\n'+$('sx-code').value.slice(0,4000)+'\n```')}catch(e){aviso('Sirius indisponível')}};
+  $('sx-add').onclick=function(){var tp=$('sx-nt').value,a=$('sx-na').value.trim();if((tp==='ip'||tp==='script')&&!a)return aviso('Informe os alvos ou o código');
+    SiriusBackgroundService.adicionar({tipo:tp,nome:$('sx-nn').value.trim()||$('sx-nt').selectedOptions[0].text,alvo:a,min:Math.max(1,+$('sx-nm').value||10)});$('sx-nn').value=$('sx-na').value=''};
+  $('sx-lidos').onclick=function(){W.alertas.forEach(function(a){a.lido=true});gravarW();pintarW()};
+  $('sx-notif').onclick=function(){try{Notification.requestPermission().then(function(p){aviso('Notificações: '+p)})}catch(e){aviso('Navegador sem suporte')}};
+  /* soltar arquivos direto no painel do Sirius também indexa */
+  var sp=$('sirius-panel');if(sp){sp.addEventListener('dragover',function(e){if(e.dataTransfer&&[].indexOf.call(e.dataTransfer.types,'Files')>=0)e.preventDefault()});sp.addEventListener('drop',function(e){if(e.dataTransfer&&e.dataTransfer.files.length){e.preventDefault();lerArquivos(e.dataTransfer.files)}})}
+  /* botão no cabeçalho do Sirius */
+  var hd=document.querySelector('#sirius-panel .sr-head'),pop=$('sr-pop');if(false){var hb=document.createElement('button');hb.className='sr-ic';hb.id='sx-hbtn';hb.title='Núcleo avançado: memória, sandbox e agentes';hb.textContent='◈';hb.onclick=function(){var l=$('sx-lab');l&&l.classList.contains('open')?fecharLab():abrir()};hd.insertBefore(hb,pop||null)}
+  orbEstado();}
+function arrastar(el,h){var sx,sy,ox,oy;h.addEventListener('pointerdown',function(e){if(e.target.tagName==='BUTTON')return;var r=el.getBoundingClientRect();sx=e.clientX;sy=e.clientY;ox=r.left;oy=r.top;h.setPointerCapture(e.pointerId);
+  h.onpointermove=function(m){el.style.left=Math.max(0,ox+m.clientX-sx)+'px';el.style.top=Math.max(0,oy+m.clientY-sy)+'px';el.style.right='auto';el.style.bottom='auto'};h.onpointerup=function(){h.onpointermove=null}})}
+function encaixar(){var p=$('sirius-panel'),l=$('sx-lab'),h=p&&p.querySelector('.sr-head'),b=$('sr-body');if(!p||!l||!h)return;var pr=p.getBoundingClientRect(),hr=h.getBoundingClientRect(),br=(b&&b.getBoundingClientRect().width)?b.getBoundingClientRect():hr;l.style.top=(hr.bottom-pr.top)+'px';l.style.left=(br.left-pr.left)+'px';l.style.width=br.width+'px';var ft=$('sr-foot'),fr=ft&&ft.offsetParent?ft.getBoundingClientRect():null;l.style.bottom=(fr&&fr.height?Math.max(0,pr.bottom-fr.top):0)+'px'}
+function fecharLab(){var l=$('sx-lab'),p=$('sirius-panel');if(l)l.classList.remove('open');if(p)p.classList.remove('sx-mode');var hb=$('sx-hbtn');if(hb)hb.classList.remove('on')}
+function abrir(t){montarUI();var p=$('sirius-panel');if(p&&!p.classList.contains('open')){try{SIRIUS.abrir()}catch(e){p.classList.add('open')}}
+  if(p&&!p._sxObs){p._sxObs=1;var wasOpen=p.classList.contains('open');new MutationObserver(function(){var o=p.classList.contains('open');if(o===wasOpen)return;wasOpen=o;if(!o)fecharLab();else setTimeout(encaixar,30)}).observe(p,{attributes:true,attributeFilter:['class']});try{new ResizeObserver(encaixar).observe(p)}catch(e){}addEventListener('resize',encaixar)}
+  if(p)p.classList.add('sx-mode');var hb=$('sx-hbtn');if(hb)hb.classList.add('on');$('sx-lab').classList.add('open');encaixar();setTimeout(encaixar,300);if(t){var b=document.querySelector('.sx-tab[data-a="'+t+'"]');if(b)b.click()}else pintar()}
+function pintar(){if(aba==='mem')pintarMem();else if(aba==='bg')pintarW()}
+function pintarMem(){var el=$('sx-docs');if(!el)return;if(!IDX)indexar();var tot=MEM.docs.reduce(function(s,d){return s+d.tam},0);
+  el.innerHTML='<div class="sx-row" style="color:#6f7b8f;font-size:11px">'+MEM.docs.length+' documento(s) · '+(tot/1024).toFixed(1)+' KB · '+IDX.N+' fragmentos indexados (inclui inventário/agenda/arquivos do MODESK) · '+IDX.vocab.length+' termos</div>'+
+  MEM.docs.map(function(d){return'<div class="sx-card"><div class="t"><span>▤ '+E(d.nome)+'<span class="sx-tag sx-info">'+E(d.tipo)+'</span></span><button class="sx-btn r" data-rm="'+d.id+'">remover</button></div><div class="m">'+(d.tam/1024).toFixed(1)+' KB · '+new Date(d.at).toLocaleString('pt-BR')+'</div></div>'}).join('');
+  [].forEach.call(el.querySelectorAll('[data-rm]'),function(b){b.onclick=function(){SiriusMemory.remover(b.dataset.rm);pintarMem()}})}
+function pintarBusca(q){var el=$('sx-res'),r=buscar(q,8),qt=toks(q);if(!r.length){el.innerHTML='<div class="sx-card m">Nada encontrado.</div>';return}
+  el.innerHTML=r.map(function(x,i){var tx=E(x.txt.slice(0,360));qt.forEach(function(t){if(t.length>2)tx=tx.replace(new RegExp('('+t.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<mark class="sx-hl">$1</mark>')});
+   return'<div class="sx-card"><div class="t"><span>#'+(i+1)+' '+E(x.nome)+'</span><span class="m">RRF '+x.rrf.toFixed(4)+' · BM25 #'+(x.kw||'–')+' · vetor #'+(x.sem||'–')+(x.cos?' ('+x.cos.toFixed(2)+')':'')+'</span></div><div style="color:#c3cad6;font-size:12px;margin-top:4px;white-space:pre-wrap">'+tx+'</div></div>'}).join('')}
+function pintarRep(r){var el=$('sx-rep');if(!el||!r)return;var c=r.risco>=60?'sx-bad':r.risco>=35?'sx-bad':r.risco>=15?'sx-warn':'sx-ok';
+  el.innerHTML='<div class="sx-card"><div class="t"><b>RELATÓRIO DE SIMULAÇÃO (DRY-RUN)</b><span class="'+c+'">RISCO '+r.risco+'/100 · '+r.nivel+'</span></div>'+
+  '<div class="m">Linguagem: '+r.lang+' · '+r.linhas+' linhas · '+new Date(r.at).toLocaleTimeString('pt-BR')+'</div>'+
+  '<div style="margin-top:6px"><b class="sx-info">Entradas:</b> '+(E(r.entradas.join(', '))||'—')+'<br><b class="sx-info">Alvos de rede:</b> '+(E(r.alvos.join(', '))||'—')+'<br><b class="sx-info">Saídas esperadas:</b> '+(r.saidas.length?'<br>'+r.saidas.map(E).join('<br>'):'—')+'</div>'+
+  '<div style="margin-top:6px"><b class="sx-warn">Achados:</b> '+(r.achados.length?r.achados.map(function(a){return'<br>L'+a.linha+' · <span class="'+(a.peso>=30?'sx-bad':'sx-warn')+'">'+E(a.msg)+'</span> <span class="m">'+E(a.trecho)+'</span>'}).join(''):'<span class="sx-ok">nenhum padrão perigoso</span>')+'</div>'+
+  (r.sintaxe?'<div class="sx-bad" style="margin-top:6px">Sintaxe: '+E(r.sintaxe)+'</div>':'')+
+  (r.exec?'<div style="margin-top:6px" class="'+(r.exec.ok?'sx-ok':'sx-bad')+'">Execução isolada: '+(r.exec.ok?'OK em '+r.exec.ms+'ms'+(r.exec.v!=null?' · retorno '+E(r.exec.v):''):'FALHA · '+E(r.exec.erro))+'</div>':'')+'</div>'}
+function pintarW(){var el=$('sx-tasks');if(!el)return;var pend=W.alertas.filter(function(a){return!a.lido&&a.nivel!=='info'}).length;
+  $('sx-kpi').innerHTML='<div class="sx-k"><b>'+W.tarefas.filter(function(t){return t.ativo}).length+'</b>agentes ativos</div><div class="sx-k"><b>'+RUN+'</b>executando agora</div><div class="sx-k"><b class="'+(pend?'sx-bad':'')+'">'+pend+'</b>alertas pendentes</div>';
+  el.innerHTML=W.tarefas.map(function(t){var prox=t.ativo?Math.max(0,Math.round(((t.ult||0)+t.min*6e4-Date.now())/6e4)):null;
+   return'<div class="sx-card"><div class="t"><span>'+(t.rodando?'<span class="sx-info">◉</span>':t.ativo?'<span class="sx-ok">●</span>':'<span class="m">○</span>')+' '+E(t.nome)+'<span class="sx-tag sx-info">'+t.tipo+'</span></span><span><button class="sx-btn" data-run="'+t.id+'">▶</button> <button class="sx-btn" data-tg="'+t.id+'">'+(t.ativo?'pausar':'ativar')+'</button> <button class="sx-btn r" data-del="'+t.id+'">✕</button></span></div><div class="m">a cada '+t.min+' min'+(t.alvo?' · '+E(String(t.alvo).slice(0,60)):'')+(t.ult?' · última: '+new Date(t.ult).toLocaleTimeString('pt-BR'):'')+(prox!=null?' · próxima em ~'+prox+' min':'')+'</div></div>'}).join('');
+  [].forEach.call(el.querySelectorAll('[data-run]'),function(b){b.onclick=function(){SiriusBackgroundService.rodarAgora(b.dataset.run);setTimeout(pintarW,300)}});
+  [].forEach.call(el.querySelectorAll('[data-tg]'),function(b){b.onclick=function(){W.tarefas.forEach(function(t){if(t.id===b.dataset.tg)t.ativo=!t.ativo});gravarW();pintarW()}});
+  [].forEach.call(el.querySelectorAll('[data-del]'),function(b){b.onclick=function(){W.tarefas=W.tarefas.filter(function(t){return t.id!==b.dataset.del});gravarW();pintarW()}});
+  $('sx-al').innerHTML=W.alertas.slice(0,30).map(function(a){var c=a.nivel==='crit'?'sx-bad':a.nivel==='warn'?'sx-warn':'sx-info';return'<div class="sx-card" style="'+(a.lido?'opacity:.55':'')+'"><div class="t"><span class="'+c+'">'+(a.nivel==='crit'?'▲':a.nivel==='warn'?'◆':'●')+' '+E(a.msg)+'</span><span class="m">'+new Date(a.t).toLocaleString('pt-BR')+'</span></div><div class="m">'+E(a.tarefa||'')+'</div></div>'}).join('')||'<div class="sx-card m">Sem alertas.</div>'}
+setInterval(function(){if($('sx-lab')&&$('sx-lab').classList.contains('open')&&aba==='bg')pintarW()},15000);
+
+/* =================== Integração com o núcleo do Sirius =================== */
+function ligar(){if(!window.SIRIUS||!$('sirius-orb'))return setTimeout(ligar,400);
+  carregar();montarUI();
+  if(!SIRIUS._v207){SIRIUS._v207=true;var env=SIRIUS.enviar;
+    SIRIUS.enviar=function(t){ultimaPergunta=String(t||'');var m=ultimaPergunta.trim().toLowerCase();
+      if(/^\/(mem|memoria|memória)\b/.test(m)){abrir('mem');return}
+      if(/^\/(sandbox|sbx|script)\b/.test(m)){abrir('sbx');var c=ultimaPergunta.replace(/^\/\S+\s*/,'');if(c){$('sx-code').value=c;SX.executar(c).then(pintarRep)}return}
+      if(/^\/(agentes|watchers|bg)\b/.test(m)){abrir('bg');return}
+      return env.apply(this,arguments)};
+    var A=window.SIRIUS_API;if(A){A.memoria=function(a){var r=buscar((a&&a.q)||'',5);return r.length?r.map(function(x){return x.nome+': '+x.txt.slice(0,200)}).join(' | '):'nada na memória'};
+      A.sandbox=function(a){var r=dryRun((a&&a.codigo)||'');abrir('sbx');if(a&&a.codigo)$('sx-code').value=a.codigo;pintarRep(r);return'dry-run: risco '+r.risco+'/100 ('+r.nivel+'), '+r.achados.length+' achado(s)'};
+      A.agente=function(a){a=a||{};var t=SiriusBackgroundService.adicionar({tipo:a.tipo||'ip',nome:a.nome||'Agente Sirius',alvo:a.alvo||'',min:+a.min||10});return'agente "'+t.nome+'" ativo a cada '+t.min+' min'}}}
+  orbEstado();
+  /* atalho flutuante ao lado do orb */
+  if(false){var f=document.createElement('button');f.id='sx-fab';f.title='Sirius · núcleo avançado (Ctrl+Shift+L)';f.textContent='◈';f.onclick=function(){abrir()};document.body.appendChild(f);
+    var pos=function(){var o=$('sirius-orb');if(!o)return;var r=o.getBoundingClientRect();if(!r.width){f.style.display='none';return}f.style.display='';f.style.left=Math.max(4,r.left-40)+'px';f.style.top=Math.max(4,r.top+r.height/2-17)+'px'};pos();setInterval(pos,1200);addEventListener('resize',pos)}
+  addEventListener('keydown',function(e){if(e.ctrlKey&&e.shiftKey&&(e.key==='L'||e.key==='l')){e.preventDefault();var l=$('sx-lab');l&&l.classList.contains('open')?fecharLab():abrir()}});
+  setTimeout(function(){try{SX.log('i','Sirius v210 · memória '+MEM.docs.length+' doc(s) · '+W.tarefas.filter(function(t){return t.ativo}).length+' agente(s) ativos')}catch(e){}},500)}
+window.SiriusLab={abrir:abrir,fechar:fecharLab,aberto:function(){var l=$('sx-lab');return!!(l&&l.classList.contains('open'))},atual:function(){return aba}};
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',ligar);else ligar();
+})();
+</script>
+
+
+
+<script id="mdk-v209-drop-backup">
+/* v209: arrastar um backup .json do MODESK para qualquer parte do site (fora do Sirius) restaura os dados */
+(function(){
+  function ehArq(e){return e.dataTransfer&&[].indexOf.call(e.dataTransfer.types||[],'Files')>=0}
+  function noSirius(e){return e.target&&e.target.closest&&e.target.closest('#sirius-panel,#sx-lab')}
+  function logado(){var l=document.getElementById('login');return l&&l.classList.contains('hidden')}
+  addEventListener('dragover',function(e){if(ehArq(e)&&!noSirius(e)&&logado())e.preventDefault()});
+  addEventListener('drop',function(e){if(!ehArq(e)||noSirius(e)||!logado())return;var f=e.dataTransfer.files[0];if(!f||!/\.json$/i.test(f.name))return;e.preventDefault();if(typeof restaurarBackup==='function')restaurarBackup(f)});
+})();
+</script>
 </body>
 </html>
