@@ -11486,7 +11486,7 @@ window.cp150Entregue=function(id){
 <script id="mdk-v167-js">
 (function(){
 'use strict';
-var VERSAO=167;
+var VERSAO=212;
 function E(s){try{return esc(s)}catch(e){return String(s==null?'':s)}}
 function ID(){try{return u()}catch(e){return Math.random().toString(36).slice(2,10)}}
 function hoje(){return new Date().toISOString().slice(0,10)}
@@ -13878,6 +13878,68 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   function logado(){var l=document.getElementById('login');return l&&l.classList.contains('hidden')}
   addEventListener('dragover',function(e){if(ehArq(e)&&!noSirius(e)&&logado())e.preventDefault()});
   addEventListener('drop',function(e){if(!ehArq(e)||noSirius(e)||!logado())return;var f=e.dataTransfer.files[0];if(!f||!/\.json$/i.test(f.name))return;e.preventDefault();if(typeof restaurarBackup==='function')restaurarBackup(f)});
+})();
+</script>
+<script>
+/* v212 — Reconhecedor inteligente de backup + backup unificado */
+(function(){
+  function arr(x){return Array.isArray(x)?x:[]}
+  function chave(o){return o&&(o.id||o.nome||o.titulo||o.desc||o.item||JSON.stringify(o))}
+  function mesclar(dest,orig){dest=arr(dest).slice();var m={};dest.forEach(function(o,i){m[String(chave(o)).toLowerCase()]=i});
+    var add=0,upd=0;arr(orig).forEach(function(o){var k=String(chave(o)).toLowerCase();if(k in m){dest[m[k]]=Object.assign({},dest[m[k]],o);upd++}else{dest.push(o);m[k]=dest.length-1;add++}});return {lista:dest,add:add,upd:upd}}
+  var ID=function(){return Math.random().toString(36).slice(2,10)};
+  function pedidoDeLinha(r){var g=function(k){return r[k]==null?'':String(r[k])};var q=g('Qtd');
+    return {id:ID(),desc:g('Item'),item:g('Item'),qtd:q,un:(q.split(' ')[1]||'UN'),ri:g('REQ. INTERNA'),rc:g('REQ. Compra'),num:g('REQ. INTERNA'),catRi:g('TIPO REQ. INTERNA'),catRc:g('TIPO REQ. COMPRA'),cat:g('TIPO REQ. COMPRA'),proj:g('Ata/OS Outros'),forn:g('Fornecedor Vencedor'),contato:'',data:g('Data Pedido'),deadline:g('Deadline (30d)'),status:g('Status')||'PENDENTE',obs:'',docs:{},paths:{},hist:[],em:Date.now(),origem:'Backup compras'}}
+  /* Identifica o tipo do arquivo */
+  window.mdkDetectarBackup=function(j){
+    if(!j||typeof j!=='object')return null;
+    if(Array.isArray(j)){if(j.length&&j[0]&&('Item' in j[0]))return {tipo:'compras',nome:'Compras (planilha)',dados:{itens:j}};return null}
+    if((j.modesk==='backup-unificado'||j.modesk==='backup-completo')&&j.dados)return {tipo:'completo',nome:j.modesk==='backup-unificado'?'Backup unificado':'Backup completo',dados:j.dados};
+    if(j.modesk==='backup-eventos-agenda'||(j.eventos&&j.atividades&&!j.itens&&!j.compras))return {tipo:'agenda',nome:'Eventos e agenda',dados:j};
+    if(j.modesk==='backup-compras'||(arr(j.itens).length&&arr(j.itens)[0]&&('Item' in arr(j.itens)[0])))return {tipo:'compras',nome:'Compras',dados:j};
+    if(j.modesk==='backup-itens')return {tipo:'itens',nome:'Itens da sala de som',dados:j};
+    var marcas=['itens','eventos','atividades','compras','links','pastas','impressoras','mapa','servicos','acessos','arquivos','senha'];
+    if(marcas.filter(function(k){return k in j}).length>=3)return {tipo:'completo',nome:'Backup completo do MODESK',dados:j};
+    return null};
+  function resumo(t){var d=t.dados,n=function(k){return arr(d[k]).length};
+    if(t.tipo==='completo'){var c=d.compras||{};return 'Itens: '+n('itens')+' · Eventos: '+n('eventos')+' · Atividades: '+n('atividades')+' · Links: '+n('links')+' · Pastas: '+n('pastas')+' · Impressoras: '+n('impressoras')+' · Mapa: '+n('mapa')+' · Arquivos: '+n('arquivos')+' · Pedidos de compra: '+arr(c.pedidos).length+' · Realizados: '+(arr(c.arquivados).length+arr(c.baixados).length)}
+    if(t.tipo==='agenda')return 'Eventos: '+n('eventos')+' · Atividades: '+n('atividades');
+    return 'Registros: '+n('itens')}
+  function aplicar(t,modo){var d=t.dados,r=[];
+    if(t.tipo==='completo'){
+      if(modo==='substituir'){state=Object.assign(structuredClone(DEF),d)}
+      else{Object.keys(d).forEach(function(k){var v=d[k];
+        if(Array.isArray(v)){var m=mesclar(state[k],v);state[k]=m.lista;if(m.add||m.upd)r.push(k+': +'+m.add+' novos, '+m.upd+' atualizados')}
+        else if(k==='compras'&&v&&typeof v==='object'){state.compras=state.compras||{};Object.keys(v).forEach(function(ck){if(Array.isArray(v[ck])){var m=mesclar(state.compras[ck],v[ck]);state.compras[ck]=m.lista}else if(v[ck]&&typeof v[ck]==='object')state.compras[ck]=Object.assign({},state.compras[ck]||{},v[ck]);else if(!(ck in state.compras))state.compras[ck]=v[ck]});r.push('compras atualizadas')}
+        else if(v&&typeof v==='object')state[k]=Object.assign({},state[k]||{},v);
+        else if(state[k]==null||state[k]==='')state[k]=v})}
+      try{if(typeof limparComprasV121==='function')state=limparComprasV121(state)}catch(e){}
+      try{if(typeof migrar==='function')migrar(state)}catch(e){}}
+    else if(t.tipo==='agenda'){var a=mesclar(state.eventos,d.eventos),b=mesclar(state.atividades,d.atividades);state.eventos=a.lista;state.atividades=b.lista;state.avisosOk=Object.assign({},state.avisosOk||{},d.avisosOk||{});r.push('Eventos +'+a.add+' · Atividades +'+b.add)}
+    else if(t.tipo==='compras'){state.compras=state.compras||{};var P=arr(state.compras.pedidos),add=0;
+      arr(d.itens).forEach(function(l){var p=pedidoDeLinha(l);var x=P.find(function(o){return (p.rc&&o.rc===p.rc)||(p.ri&&o.ri===p.ri&&o.desc===p.desc)});if(x){Object.assign(x,Object.assign({},p,{id:x.id,docs:x.docs||{},hist:x.hist||[]}))}else{P.push(p);add++}});
+      state.compras.pedidos=P;r.push('Pedidos +'+add)}
+    else if(t.tipo==='itens'){var m=mesclar(state.itens,d.itens);state.itens=m.lista;r.push('Itens +'+m.add)}
+    save();try{if(typeof save==='function')save(true)}catch(e){}try{render()}catch(e){}return r}
+  window.restaurarBackup=function(inp){var f=null;try{if(!inp)inp=document.getElementById('cf-f');if(typeof inp==='string')inp=document.getElementById(inp);if(inp&&inp.target)inp=inp.target;if(inp instanceof File)f=inp;else if(inp&&inp.files)f=inp.files[0]}catch(e){}
+    if(!f)return toast('Selecione o arquivo .json do backup');
+    f.text().then(function(txt){var j;try{j=JSON.parse(txt)}catch(e){return toast('Arquivo JSON inválido')}
+      var t=mdkDetectarBackup(j);if(!t)return toast('Não reconheci este arquivo como backup do MODESK');
+      var msg='Arquivo reconhecido: '+t.nome+'\n'+(f.name||'')+'\n\n'+resumo(t)+'\n\n';
+      var modo='mesclar';
+      if(t.tipo==='completo'){modo=confirm(msg+'OK = SUBSTITUIR tudo deste aparelho pelos dados do backup\nCancelar = escolher MESCLAR (manter o atual e adicionar o que falta)')?'substituir':null;
+        if(!modo){if(!confirm('Mesclar o backup com os dados atuais?\nNada será apagado.'))return;modo='mesclar'}}
+      else if(!confirm(msg+'Os dados serão inseridos nos lugares certos, sem apagar o restante.'))return;
+      try{var r=aplicar(t,modo);toast(t.nome+' carregado e salvo'+(r.length?' — '+r.slice(0,3).join(' · '):''))}catch(e){console.error(e);toast('Falha ao carregar o backup')}
+    }).finally(function(){try{if(inp&&inp.value!==undefined)inp.value=''}catch(e){}})};
+  window.importJSON=function(){return restaurarBackup(document.getElementById('cf-f'))};
+  window.mdk167RestaurarEspecial=window.restaurarBackup;
+  /* Backup gerado já sai no formato unificado */
+  window.exportJSON=function(){try{var d=new Date(),p=function(n){return String(n).padStart(2,'0')};var pk={modesk:'backup-unificado',versao:212,data:d.toISOString(),dados:state};
+    dl(new Blob([JSON.stringify(pk,null,1)],{type:'application/json'}),'MODESK_Backup_Unificado_'+d.getFullYear()+p(d.getMonth()+1)+p(d.getDate())+'-'+p(d.getHours())+p(d.getMinutes())+'.json');toast('Backup unificado gerado — verifique seus Downloads')}catch(e){toast('Não foi possível gerar o backup')}};
+  window.fazerBackup=function(){return window.exportJSON()};
+  window.mdk167BackupCompleto=window.fazerBackup;
+  try{exportJSON=window.exportJSON;fazerBackup=window.fazerBackup;restaurarBackup=window.restaurarBackup;importJSON=window.importJSON}catch(e){}
 })();
 </script>
 </body>
