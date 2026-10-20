@@ -12654,7 +12654,7 @@ function mostrarPlanilha(nome,L){L=(L||[]).filter(function(r){return r&&r.some(f
 #sirius-orb.sx-full .tag{letter-spacing:.18em}
 body.sx-jv-on #sirius-orb,body.sx-jv-on #sirius-panel{display:none!important}
 #sr-full{color:#7ff0ff}
-#jv .sx-chat{position:absolute;right:168px;top:58px;background:none;border:1px solid rgba(0,229,255,.35);color:#9ff3ff;border-radius:20px;padding:6px 14px;cursor:pointer;font-size:12px;letter-spacing:.15em}
+#jv .sx-chat{position:absolute;right:150px;top:58px;background:none;border:1px solid rgba(0,229,255,.35);color:#9ff3ff;border-radius:20px;padding:6px 14px;cursor:pointer;font-size:12px;letter-spacing:.15em}
 #jv .sx-chat:hover{background:rgba(0,229,255,.15)}
 </style>
 <script id="sirius-unify">
@@ -13942,6 +13942,93 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   window.fazerBackup=function(){return window.exportJSON()};
   window.mdk167BackupCompleto=window.fazerBackup;
   try{exportJSON=window.exportJSON;fazerBackup=window.fazerBackup;restaurarBackup=window.restaurarBackup;importJSON=window.importJSON}catch(e){}
+})();
+</script>
+<script id="mdk-v214">
+/* ===== MODESK v214 · cache local seguro (IndexedDB) + envio imediato do backup para o Apps Script ===== */
+(function(){
+  var IDB='modeskCacheV214',ST='snap',dbi=null;
+  function abrir(){if(dbi)return Promise.resolve(dbi);return new Promise(function(ok,no){try{var r=indexedDB.open(IDB,1);r.onupgradeneeded=function(){r.result.createObjectStore(ST)};r.onsuccess=function(){dbi=r.result;ok(dbi)};r.onerror=function(){no(r.error)}}catch(e){no(e)}})}
+  function gravar(k,v){return abrir().then(function(d){return new Promise(function(ok){var t=d.transaction(ST,'readwrite');t.objectStore(ST).put(v,k);t.oncomplete=ok;t.onerror=ok})}).catch(function(){})}
+  function ler(k){return abrir().then(function(d){return new Promise(function(ok){var q=d.transaction(ST).objectStore(ST).get(k);q.onsuccess=function(){ok(q.result)};q.onerror=function(){ok(null)}})}).catch(function(){return null})}
+  var cacheT=null;
+  function cachear(){clearTimeout(cacheT);cacheT=setTimeout(function(){try{gravar('ultimo',{ts:Date.now(),pendente:mdkPending(),dados:JSON.stringify(state)})}catch(e){}},120)}
+  window.mdkCacheLer=function(){return ler('ultimo')};
+
+  /* 1. toda gravação vai para o cache do PC */
+  var s0=window.save;window.save=function(){var r=s0.apply(this,arguments);cachear();if(window.__mdkForcar)agendarForcado();return r};save=window.save;
+
+  /* 2. se o localStorage foi perdido/cheio, recupera do cache */
+  ler('ultimo').then(function(c){try{if(!c||!c.dados)return;var atual=localStorage.getItem(LS);if(!atual||atual.length<20){state=Object.assign(structuredClone(DEF),JSON.parse(c.dados));try{localStorage.setItem(LS,c.dados)}catch(e){}if(c.pendente)mdkDirty(true);try{render()}catch(e){}toast('Dados recuperados do cache local do PC')}}catch(e){}});
+
+  /* 3. envio forçado (backup carregado) direto ao Apps Script */
+  var fT=null,enviando=false,tent=0;
+  function agendarForcado(){clearTimeout(fT);fT=setTimeout(enviarForcado,250)}
+  async function enviarForcado(){
+    fT=null;if(enviando){fT=setTimeout(enviarForcado,500);return}
+    if(!mdkTk()||mdkTk().indexOf('local-')===0){setSyncStatus('login');toast('Backup salvo no PC. Entre com a senha da nuvem para enviar ao Apps Script.');return}
+    if(!navigator.onLine){setSyncStatus('erro');toast('Sem internet — backup guardado no PC, será enviado ao reconectar');return}
+    enviando=true;var flag=localStorage.getItem('modesk.nuvem.escrever');
+    try{
+      localStorage.setItem('modesk.nuvem.escrever','1');
+      clearTimeout(mdkPushT);mdkPushT=null;setSyncStatus('sync');
+      if(!db)db={appsScript:true};
+      var payload=JSON.stringify(state),g=mdkGeneration;
+      var cur=await mdkApi('get',{doc:GESTOR});
+      await mdkApi('set',{doc:GESTOR,expectedVer:Number(cur&&cur.ver)||0,campos:{payload:payload}});
+      var rd=await mdkApi('get',{doc:GESTOR});
+      if(!rd||!rd.campos||rd.campos.payload!==payload)throw new Error('A nuvem não confirmou o backup');
+      mdkBase(rd.ver);mdkVer=rd.ver||mdkVer;mdkConflict=false;mdkCloudError='';mdkReady=true;MDK_HAD_LOCAL_DATA=true;
+      window.__mdkForcar=false;tent=0;
+      if(g===mdkGeneration&&JSON.stringify(state)===payload){mdkDirty(false);setSyncStatus('online')}else agendarForcado();
+      cachear();toast('☁ Backup salvo na nuvem (Apps Script)');
+    }catch(e){
+      tent++;try{mdkError(e)}catch(x){}
+      if(e.code!=='nao-autorizado'){fT=setTimeout(enviarForcado,Math.min(15000,1000*tent))}
+    }finally{enviando=false;try{if(flag===null)localStorage.removeItem('modesk.nuvem.escrever');else localStorage.setItem('modesk.nuvem.escrever',flag)}catch(e){}}
+  }
+  window.mdkEnviarForcado=enviarForcado;
+
+  var rb=window.restaurarBackup;
+  window.restaurarBackup=function(inp){
+    window.__mdkForcar=true;
+    /* cópia de segurança do arquivo enviado no cache, antes de aplicar */
+    try{var f=inp&&inp.files?inp.files[0]:(inp instanceof File?inp:null);if(!f){var el=document.getElementById('cf-f');f=el&&el.files&&el.files[0]}if(f)f.text().then(function(t){gravar('arquivo-backup',{ts:Date.now(),nome:f.name,conteudo:t})})}catch(e){}
+    setTimeout(function(){if(window.__mdkForcar&&!fT&&!enviando)window.__mdkForcar=false},120000);
+    return rb.apply(this,arguments)};
+  try{restaurarBackup=window.restaurarBackup}catch(e){}
+  window.importJSON=function(){return window.restaurarBackup(document.getElementById('cf-f'))};try{importJSON=window.importJSON}catch(e){}
+
+  /* 4. queda de internet: ao voltar, envia na hora o que estiver pendente */
+  addEventListener('online',function(){toast('Internet de volta — sincronizando');if(window.__mdkForcar)agendarForcado();else if(mdkPending()){try{if(!db)connectCloud();mdkPushAgora()}catch(e){}}});
+  addEventListener('beforeunload',function(){try{localStorage.setItem(LS,JSON.stringify(state))}catch(e){}});
+})();
+</script>
+<script id="mdk-v215-firestore">
+/* ===== MODESK v215 · espelho no Firebase Firestore (reforço da nuvem + fila offline) ===== */
+(function(){
+  var CFG={apiKey:"AIzaSyD1OoDmK0VL5g20BGhi6CYtyQ7rIOT97lQ",authDomain:"modeskpro.firebaseapp.com",projectId:"modeskpro",storageBucket:"modeskpro.firebasestorage.app",messagingSenderId:"460535767375",appId:"1:460535767375:web:377259dfbf0211a5ab653a",measurementId:"G-083HWPSYPT"};
+  var V='10.12.2',B='https://www.gstatic.com/firebasejs/'+V+'/',fs=null,F=null,carregando=null,T=null,ultimo='',PARTE=700000;
+  function iniciar(){if(carregando)return carregando;carregando=Promise.all([import(B+'firebase-app.js'),import(B+'firebase-firestore.js')]).then(function(m){var app=m[0].initializeApp(CFG,'modesk');F=m[1];
+    try{fs=F.initializeFirestore(app,{localCache:F.persistentLocalCache({tabManager:F.persistentMultipleTabManager()})})}catch(e){fs=F.getFirestore(app)}return fs}).catch(function(e){console.warn('Firestore indisponível',e);carregando=null;throw e});return carregando}
+  async function espelhar(motivo){
+    try{var payload=JSON.stringify(state);if(payload===ultimo)return;await iniciar();
+      var n=Math.ceil(payload.length/PARTE)||1,ts=Date.now(),b=F.writeBatch(fs);
+      for(var i=0;i<n;i++)b.set(F.doc(fs,'modesk',GESTOR,'partes',String(i)),{ts:ts,d:payload.slice(i*PARTE,(i+1)*PARTE)});
+      b.set(F.doc(fs,'modesk',GESTOR),{ts:ts,partes:n,tamanho:payload.length,motivo:motivo||'save',aparelho:navigator.userAgent.slice(0,80)});
+      var p=b.commit();ultimo=payload;
+      p.then(function(){var l=document.getElementById('side-sync-label');if(motivo==='backup')toast('🔥 Backup salvo também no Firebase');window.mdkFirestoreOk=ts}).catch(function(e){ultimo='';console.warn('Firestore',e);if(motivo==='backup')toast('Firebase recusou a gravação: '+(e.code||e.message))});
+    }catch(e){ultimo=''}
+  }
+  function agendar(m){clearTimeout(T);T=setTimeout(function(){espelhar(m)},m==='backup'?50:400)}
+  window.mdkFirestoreLer=async function(){await iniciar();var h=await F.getDoc(F.doc(fs,'modesk',GESTOR));if(!h.exists())return null;var meta=h.data(),s='';for(var i=0;i<meta.partes;i++){var p=await F.getDoc(F.doc(fs,'modesk',GESTOR,'partes',String(i)));if(!p.exists()||p.data().ts!==meta.ts)throw new Error('Cópia do Firebase incompleta');s+=p.data().d}return JSON.parse(s)};
+  window.mdkFirestoreRecuperar=async function(){try{var d=await mdkFirestoreLer();if(!d)return toast('Nada salvo no Firebase ainda');if(!confirm('Substituir os dados deste aparelho pela cópia do Firebase?'))return;state=Object.assign(structuredClone(DEF),d);save();toast('Dados recuperados do Firebase')}catch(e){toast('Falha ao ler o Firebase: '+(e.code||e.message))}};
+
+  var s1=window.save;window.save=function(){var forc=!!window.__mdkForcar;var r=s1.apply(this,arguments);if(!(typeof mdkHydrating!=='undefined'&&mdkHydrating))agendar(forc?'backup':'save');return r};save=window.save;
+  /* dados perdidos no aparelho e sem cache: tenta o Firebase */
+  setTimeout(function(){try{var a=localStorage.getItem(LS);if(a&&a.length>20)return;(window.mdkCacheLer?mdkCacheLer():Promise.resolve(null)).then(function(c){if(c&&c.dados)return;mdkFirestoreLer().then(function(d){if(d){state=Object.assign(structuredClone(DEF),d);try{localStorage.setItem(LS,JSON.stringify(state))}catch(e){}render();toast('Dados recuperados do Firebase')}}).catch(function(){})})}catch(e){}},2500);
+  addEventListener('online',function(){agendar('save')});
+  setTimeout(function(){iniciar().catch(function(){})},1500);
 })();
 </script>
 </body>
