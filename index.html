@@ -11335,11 +11335,17 @@ window.cp150Entregue=function(id){
     pr.getElementById('bx').onclick=function(){cfg.xlsx().catch(function(){T('Sem internet para gerar Excel — use JSON')})};
     pr.getElementById('bp').onclick=function(){cfg.pdf().catch(function(){T('Sem internet para gerar PDF — use JSON')})};
     pr.getElementById('bu').onclick=function(){pr.getElementById('bf').click()};
-    pr.getElementById('bf').onchange=function(e){var f=e.target.files[0];if(f)lerArquivo(f,cfg.cols,cfg.extra,function(R,j){if(cfg.aplicar(R,j))fechar()})};
+    var aplicarComModo=function(R,j){
+      if(!cfg.perguntarModo){if(cfg.aplicar(R,j))fechar();return}
+      var n=Array.isArray(R)?R.length:0;
+      mdkModoImport(cfg.titulo,n+' item(ns) reconhecido(s) no backup.',function(modo){
+        if(cfg.aplicar(R,j,modo))fechar();
+      });
+    };
+    pr.getElementById('bf').onchange=function(e){var f=e.target.files[0];if(f)lerArquivo(f,cfg.cols,cfg.extra,function(R,j){aplicarComModo(R,j)})};
     pr.getElementById('bi').onclick=function(){
       var t=ta.value.trim(),j=null;try{j=JSON.parse(t)}catch(e){}
-      var ok=j?cfg.aplicar(Array.isArray(j)?j:(j.itens||[]),j):cfg.aplicar(parseTab(t,cfg.cols,cfg.extra),null);
-      if(ok)fechar();
+      aplicarComModo(j?(Array.isArray(j)?j:(j.itens||[])):parseTab(t,cfg.cols,cfg.extra),j);
     };
   }
 
@@ -11348,19 +11354,23 @@ window.cp150Entregue=function(id){
   var iNorm=fazNorm(IC,{patrimonio:'patr',descricao:'desc',unidade:'un',numeropatrimonio:'patrNum',estoquemin:'min',estoqueminimo:'min',sala:'local',localizacao:'local'});
   function iLista(){var s=window.state;if(!s)return[];if(!Array.isArray(s.itens))s.itens=[];return s.itens}
   function iLinhas(){return iLista().map(function(p){var o={};IC.forEach(function(c){o[c[1]]=(c[0]==='patr')?(p.patr?'Sim':'Nao'):String(p[c[0]]==null?'':p[c[0]])});return o})}
-  function iAplicar(R,j){
+  function iAplicar(R,j,modo){
     R=(R||[]).map(iNorm).filter(function(o){return o.nome});
     if(!R.length){T('Nenhum item reconhecido no backup');return false}
     var s=window.state;if(!Array.isArray(s.itens))s.itens=[];
+    R.forEach(function(o){if(o.patr!=null)o.patr=/^(sim|s|true|1|yes|x)$/i.test(o.patr)});
     var nv=0,up=0;
-    R.forEach(function(o){
-      if(o.patr!=null)o.patr=/^(sim|s|true|1|yes|x)$/i.test(o.patr);
-      var k=NM(o.nome),x=s.itens.find(function(p){return NM(p.nome||p.desc)===k});
-      if(x){Object.keys(o).forEach(function(c){if(o[c]!==''&&c!=='id')x[c]=o[c]});up++}
-      else{o.id=ID();o.em=Date.now();s.itens.push(o);nv++}
-    });
+    if(modo==='substituir'){
+      s.itens=R.map(function(o){o.id=ID();o.em=Date.now();return o});nv=R.length;
+    }else{
+      R.forEach(function(o){
+        var k=NM(o.nome),x=s.itens.find(function(p){return NM(p.nome||p.desc)===k});
+        if(x){if(modo!=='acrescentar'){Object.keys(o).forEach(function(c){if(o[c]!==''&&c!=='id')x[c]=o[c]});up++}}
+        else{o.id=ID();o.em=Date.now();s.itens.push(o);nv++}
+      });
+    }
     SV();try{render()}catch(e){}
-    T('Backup de itens inserido: '+nv+' novo(s), '+up+' atualizado(s)');return true;
+    T(modo==='substituir'?'Backup de itens substituído: '+nv+' item(ns)':modo==='acrescentar'?'Backup de itens acrescentado: '+nv+' novo(s)':'Backup de itens agregado: '+nv+' novo(s), '+up+' atualizado(s)');return true;
   }
   /* ===== v171 · Backup / upload de backup do Fiscal & Caixas (mesmos moldes) ===== */
   var FC=[['orgao','Órgão'],['cnpj','CPF / CNPJ Base'],['razao','Razão Social'],['aba','Aba do portal'],['idToken','Id Token'],['csc','Código CSC'],['ativacao','Data de ativação'],['telefone','Telefone'],['portal','Portal SEFAZ'],['ipServidor','IP servidor TOTVS Chef'],['apk','Link do APK']];
@@ -11387,7 +11397,7 @@ window.cp150Entregue=function(id){
     aplicar:fAplicar
   })};
   window.mk165Itens=function(){abrir({
-    id:'mk165-ibk',titulo:'Backup dos itens da sala de som',cols:IC,extra:{},
+    id:'mk165-ibk',titulo:'Backup dos itens da sala de som',cols:IC,extra:{},perguntarModo:true,
     desc:'Abaixo estão os '+iLista().length+' itens do inventário, com todos os campos (a foto do item não entra no backup).',
     total:function(){return iLista().length},
     texto:function(){return textoDe(IC,iLinhas())},
@@ -12661,7 +12671,7 @@ function mostrarPlanilha(nome,L){L=(L||[]).filter(function(r){return r&&r.some(f
 #sirius-orb.sx-full .tag{letter-spacing:.18em}
 body.sx-jv-on #sirius-orb,body.sx-jv-on #sirius-panel{display:none!important}
 #sr-full{color:#7ff0ff}
-#jv .sx-chat{position:absolute;right:168px;top:58px;background:none;border:1px solid rgba(0,229,255,.35);color:#9ff3ff;border-radius:20px;padding:6px 14px;cursor:pointer;font-size:12px;letter-spacing:.15em}
+#jv .sx-chat{position:absolute;right:150px;top:58px;background:none;border:1px solid rgba(0,229,255,.35);color:#9ff3ff;border-radius:20px;padding:6px 14px;cursor:pointer;font-size:12px;letter-spacing:.15em}
 #jv .sx-chat:hover{background:rgba(0,229,255,.15)}
 </style>
 <script id="sirius-unify">
