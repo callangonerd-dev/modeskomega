@@ -11486,7 +11486,7 @@ window.cp150Entregue=function(id){
 <script id="mdk-v167-js">
 (function(){
 'use strict';
-var VERSAO=212;
+var VERSAO=213;
 function E(s){try{return esc(s)}catch(e){return String(s==null?'':s)}}
 function ID(){try{return u()}catch(e){return Math.random().toString(36).slice(2,10)}}
 function hoje(){return new Date().toISOString().slice(0,10)}
@@ -13906,6 +13906,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     if(t.tipo==='agenda')return 'Eventos: '+n('eventos')+' · Atividades: '+n('atividades');
     return 'Registros: '+n('itens')}
   function aplicar(t,modo){var d=t.dados,r=[];
+    if(d&&typeof d==='object'&&!Array.isArray(d)){d=Object.assign({},d);delete d.senha;delete d._senhaV152;var _s=state.senha,_s2=state._senhaV152}
     if(t.tipo==='completo'){
       if(modo==='substituir'){state=Object.assign(structuredClone(DEF),d)}
       else{Object.keys(d).forEach(function(k){var v=d[k];
@@ -13920,6 +13921,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
       arr(d.itens).forEach(function(l){var p=pedidoDeLinha(l);var x=P.find(function(o){return (p.rc&&o.rc===p.rc)||(p.ri&&o.ri===p.ri&&o.desc===p.desc)});if(x){Object.assign(x,Object.assign({},p,{id:x.id,docs:x.docs||{},hist:x.hist||[]}))}else{P.push(p);add++}});
       state.compras.pedidos=P;r.push('Pedidos +'+add)}
     else if(t.tipo==='itens'){var m=mesclar(state.itens,d.itens);state.itens=m.lista;r.push('Itens +'+m.add)}
+    if(t.tipo==='completo'){if(_s!==undefined)state.senha=_s;else delete state.senha;if(_s2!==undefined)state._senhaV152=_s2}
     save();try{if(typeof save==='function')save(true)}catch(e){}try{render()}catch(e){}return r}
   window.restaurarBackup=function(inp){var f=null;try{if(!inp)inp=document.getElementById('cf-f');if(typeof inp==='string')inp=document.getElementById(inp);if(inp&&inp.target)inp=inp.target;if(inp instanceof File)f=inp;else if(inp&&inp.files)f=inp.files[0]}catch(e){}
     if(!f)return toast('Selecione o arquivo .json do backup');
@@ -13935,7 +13937,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   window.importJSON=function(){return restaurarBackup(document.getElementById('cf-f'))};
   window.mdk167RestaurarEspecial=window.restaurarBackup;
   /* Backup gerado já sai no formato unificado */
-  window.exportJSON=function(){try{var d=new Date(),p=function(n){return String(n).padStart(2,'0')};var pk={modesk:'backup-unificado',versao:212,data:d.toISOString(),dados:state};
+  window.exportJSON=function(){try{var d=new Date(),p=function(n){return String(n).padStart(2,'0')};var _c=Object.assign({},state);delete _c.senha;delete _c._senhaV152;var pk={modesk:'backup-unificado',versao:213,data:d.toISOString(),dados:_c};
     dl(new Blob([JSON.stringify(pk,null,1)],{type:'application/json'}),'MODESK_Backup_Unificado_'+d.getFullYear()+p(d.getMonth()+1)+p(d.getDate())+'-'+p(d.getHours())+p(d.getMinutes())+'.json');toast('Backup unificado gerado — verifique seus Downloads')}catch(e){toast('Não foi possível gerar o backup')}};
   window.fazerBackup=function(){return window.exportJSON()};
   window.mdk167BackupCompleto=window.fazerBackup;
