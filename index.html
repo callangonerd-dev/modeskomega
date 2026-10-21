@@ -1086,7 +1086,7 @@ table{max-width:100%}
 [class*="table-wrap"],[class*="tableWrap"]{overflow-x:auto}
 pre,code{white-space:pre-wrap;overflow-wrap:anywhere}
 @media(max-width:768px){[class*="grid"]:not([class*="grid-cols"]){grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr))!important}}
-</style></head>
+</style><script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script></head>
 <body>
 <!-- #winbar removido (v12.3) — navegação já existe na barra lateral -->
 <div id="deadline-bar" onclick="go('agenda')"></div>
@@ -2568,6 +2568,7 @@ function vConfig(){
      <div class="dim" id="dr-uso" style="font-size:12px;margin-top:6px"></div>
      <div class="row" style="margin-top:12px"><button class="btn primary" onclick="moverAnexosDrive()">☁ Mover anexos para o Drive</button>
      <button class="btn" onclick="testarDrive(true)">⟳ Testar Drive</button></div></div>
+   <div class="card"><h3>✉ Backup de Dados por E-mail</h3><p class="dim">Envia uma cópia completa (JSON + data/hora) para o seu e-mail.</p><div class="row"><input id="mdk-bk-mail" type="email" placeholder="seu@email.com" style="flex:1"/><button class="btn" onclick="mdkSalvarEmail()">Guardar</button></div><div class="row" style="margin-top:8px"><button class="btn primary" onclick="mdkBackupEmail()">☁ Realizar Backup Agora</button></div></div>
    <div class="card"><h3>${icon('save')} Backup e restauração</h3>
      <p class="dim">Faça uma cópia completa do MODESK em um arquivo <b class="mono">.json</b> e guarde no PC ou na nuvem. Para restaurar, escolha o arquivo de backup e clique em <b>Enviar backup</b> — os dados atuais são substituídos pelos do arquivo.</p>
      <div class="row"><button class="btn primary" onclick="fazerBackup()">⬇ Fazer backup</button>
@@ -14029,7 +14030,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   function iniciar(){if(carregando)return carregando;carregando=Promise.all([import(B+'firebase-app.js'),import(B+'firebase-firestore.js')]).then(function(m){var app=m[0].initializeApp(CFG,'modesk');F=m[1];
     try{fs=F.initializeFirestore(app,{localCache:F.persistentLocalCache({tabManager:F.persistentMultipleTabManager()})})}catch(e){fs=F.getFirestore(app)}return fs}).catch(function(e){console.warn('Firestore indisponível',e);carregando=null;throw e});return carregando}
   async function espelhar(motivo){
-    try{var payload=JSON.stringify(state);if(payload===ultimo)return;await iniciar();
+    try{var payload=JSON.stringify({state:state,ls:(window.mdkTudoLS?mdkTudoLS():{})});if(payload===ultimo)return;await iniciar();
       var n=Math.ceil(payload.length/PARTE)||1,ts=Date.now(),b=F.writeBatch(fs);
       for(var i=0;i<n;i++)b.set(F.doc(fs,'modesk',GESTOR,'partes',String(i)),{ts:ts,d:payload.slice(i*PARTE,(i+1)*PARTE)});
       b.set(F.doc(fs,'modesk',GESTOR),{ts:ts,partes:n,tamanho:payload.length,motivo:motivo||'save',aparelho:navigator.userAgent.slice(0,80)});
@@ -14038,7 +14039,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     }catch(e){ultimo=''}
   }
   function agendar(m){clearTimeout(T);T=setTimeout(function(){espelhar(m)},m==='backup'?50:400)}
-  window.mdkFirestoreLer=async function(){await iniciar();var h=await F.getDoc(F.doc(fs,'modesk',GESTOR));if(!h.exists())return null;var meta=h.data(),s='';for(var i=0;i<meta.partes;i++){var p=await F.getDoc(F.doc(fs,'modesk',GESTOR,'partes',String(i)));if(!p.exists()||p.data().ts!==meta.ts)throw new Error('Cópia do Firebase incompleta');s+=p.data().d}return JSON.parse(s)};
+  window.mdkFirestoreLer=async function(){await iniciar();var h=await F.getDoc(F.doc(fs,'modesk',GESTOR));if(!h.exists())return null;var meta=h.data(),s='';for(var i=0;i<meta.partes;i++){var p=await F.getDoc(F.doc(fs,'modesk',GESTOR,'partes',String(i)));if(!p.exists()||p.data().ts!==meta.ts)throw new Error('Cópia do Firebase incompleta');s+=p.data().d}var j=JSON.parse(s);if(j&&j.ls&&j.state){try{window.mdkAplicarLS&&mdkAplicarLS(j.ls)}catch(e){}return j.state}return j};
   window.mdkFirestoreRecuperar=async function(){try{var d=await mdkFirestoreLer();if(!d)return toast('Nada salvo no Firebase ainda');if(!confirm('Substituir os dados deste aparelho pela cópia do Firebase?'))return;state=Object.assign(structuredClone(DEF),d);save();toast('Dados recuperados do Firebase')}catch(e){toast('Falha ao ler o Firebase: '+(e.code||e.message))}};
 
   var s1=window.save;window.save=function(){var forc=!!window.__mdkForcar;var r=s1.apply(this,arguments);if(!(typeof mdkHydrating!=='undefined'&&mdkHydrating))agendar(forc?'backup':'save');return r};save=window.save;
@@ -14076,5 +14077,107 @@ function mdkModoImport(nome,res,cb){var o=document.createElement('div');o.classN
 #sr-anx small{opacity:.6;font-size:12px}
 #sr-drawer textarea{min-height:120px!important;max-height:40vh!important;resize:vertical!important;border-radius:14px!important;padding:14px 16px!important;line-height:1.5!important;width:100%!important;box-sizing:border-box!important}
 .sr-clip,.sr-mic{width:42px!important;height:42px!important;border-radius:12px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;flex:0 0 42px!important}
-</style></body>
+</style><script>
+/* ==== EmailJS — edite aqui ==== */
+var EMAILJS_PUBLIC_KEY="5J9JnYEwQZRJvopkl";
+var EMAILJS_SERVICE_ID="service_neoa1vl";
+var EMAILJS_TEMPLATE_ID="template_al6t5k9";
+var MDK_MAIL_KEY="modesk.backup.email";
+try{emailjs.init(EMAILJS_PUBLIC_KEY)}catch(e){}
+function mdkT(m){try{toast(m)}catch(e){alert(m)}}
+function mdkSalvarEmail(){var i=document.getElementById('mdk-bk-mail'),v=(i&&i.value||'').trim();if(!/^\S+@\S+\.\S+$/.test(v))return mdkT('E-mail inválido');localStorage.setItem(MDK_MAIL_KEY,v);mdkT('E-mail de backup guardado')}
+setInterval(function(){var i=document.getElementById('mdk-bk-mail');if(i&&!i.dataset.f){i.dataset.f=1;i.value=localStorage.getItem(MDK_MAIL_KEY)||''}},800);
+async function mdkBackupEmail(){var mail=localStorage.getItem(MDK_MAIL_KEY);var i=document.getElementById('mdk-bk-mail');if(i&&i.value.trim()&&i.value.trim()!==mail){mail=i.value.trim()}
+ if(!mail){mail=prompt('Informe o e-mail de destino do backup:');if(!mail)return}
+ if(!/^\S+@\S+\.\S+$/.test(mail))return mdkT('E-mail inválido');localStorage.setItem(MDK_MAIL_KEY,mail);
+ if(typeof emailjs==='undefined')return mdkT('Erro: EmailJS não carregou (sem internet?)');
+ var d=window.mdkTudoLS?mdkTudoLS():{};
+ var ts=new Date().toLocaleString('pt-BR'),json=JSON.stringify(d);
+ mdkT('Enviando backup...');
+ try{await emailjs.send(EMAILJS_SERVICE_ID,EMAILJS_TEMPLATE_ID,{to_email:mail,email:mail,timestamp:ts,backup_date:ts,modulo_nome:"MODESK Pessoal - Backup Completo",backup_json:json,message:json},EMAILJS_PUBLIC_KEY);mdkT('✔ Backup enviado para '+mail)}
+ catch(e){mdkT('✖ Falha no envio: '+((e&&(e.text||e.message))||'erro'))}}
+</script>
+<style>
+/* v223 · tela de sincronia no visual do MODESK (usa os tokens do site) */
+#sirius-ov{position:fixed;inset:0;z-index:99999;display:grid;place-items:center;padding:20px;background:rgba(3,6,11,.75);backdrop-filter:blur(6px);font-family:inherit;animation:sirFade .25s ease}
+#sirius-box{width:100%;max-width:440px;background:var(--glass,rgba(12,19,30,.62));backdrop-filter:blur(14px);border:1px solid var(--line,rgba(255,255,255,.08));border-radius:var(--r,16px);box-shadow:var(--sh,0 20px 60px rgba(0,0,0,.45));padding:22px;color:var(--fg,#e7eaf0)}
+#sirius-box h3{margin:0 0 4px;font-size:17px;font-weight:700;display:flex;align-items:center;gap:8px}
+#sirius-box h3 i{width:9px;height:9px;border-radius:50%;background:var(--acc,#e50914);box-shadow:0 0 10px var(--acc,#e50914)}
+#sirius-box .sir-sub{margin:0 0 14px;font-size:12px;color:var(--dim,#6d7686)}
+#sirius-box p{font-size:13.5px;line-height:1.55;margin:0 0 14px;color:var(--mut,#9aa3b2)}
+#sirius-box p b{color:var(--fg,#e7eaf0)}
+#sirius-box input{width:100%;box-sizing:border-box;margin-bottom:10px}
+#sirius-box .sir-acts{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;margin-top:6px}
+#sirius-box .sir-err{color:var(--acc,#e50914);font-size:12px;min-height:14px;margin-bottom:6px}
+#sirius-box .sir-ok{color:#22c55e}
+.sirius-sp{width:34px;height:34px;border:3px solid var(--line,rgba(255,255,255,.1));border-top-color:var(--acc,#e50914);border-radius:50%;animation:sirSp 1s linear infinite;margin:8px auto 14px}
+@keyframes sirSp{to{transform:rotate(360deg)}}@keyframes sirFade{from{opacity:0}}
+#sirius-fab{display:none!important}
+</style>
+<script>
+/* ===== MODESK v223 · sincronia por e-mail (Apps Script) + Firebase + localStorage + backup periódico por e-mail =====
+   A tela só aparece quando: (1) o sistema foi reinstalado / está sem dados locais, ou
+   (2) a identidade do aparelho é diferente da do aparelho padrão (onde o MODESK foi criado).
+   Navegadores não leem o MAC Address real; usamos uma impressão digital do aparelho como equivalente. */
+(function(){
+var K='mdk_sync_email',VK='mdk_sync_ver',HK='mdk_device_home',DK='mdk_device_id',LK='mdk_sync_local',EK='mdk_email_last',LSK='modesk.pessoal.v7',busy=false,lastHash='';
+var EMAIL_CADA=24*3600*1000; /* backup por e-mail a cada 24h */
+function api(){return localStorage.getItem('modesk.api')||window.MDK_API}
+function em(){return localStorage.getItem(K)||localStorage.getItem('modesk.backup.email')||''}
+function ver(){return Number(localStorage.getItem(VK)||0)}
+function h(s){var x=0;for(var i=0;i<s.length;i++)x=(x*31+s.charCodeAt(i))|0;return String(x)}
+function esc(s){return String(s||'').replace(/[<>"&]/g,'')}
+/* impressão digital estável do aparelho (substitui o MAC Address) */
+function digital(){var n=navigator,s=screen;return 'd'+h([n.platform,n.hardwareConcurrency,n.deviceMemory,n.language,s.width+'x'+s.height,s.colorDepth,Intl.DateTimeFormat().resolvedOptions().timeZone,(n.userAgent||'').replace(/[\d.]+/g,'')].join('|'))}
+var DIG=digital();
+var FORA=[K,VK,HK,DK,LK,EK,'modesk.tk','mdk.sync.ts'];
+function snap(){var o={};for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(FORA.indexOf(k)<0&&!/^(firebase|sb-|_grecaptcha)/.test(k))o[k]=localStorage.getItem(k)}return o}
+window.mdkTudoLS=snap;window.mdkAplicarLS=function(d){apply(d)};
+function apply(d){Object.keys(d||{}).forEach(function(k){if([K,VK,HK,DK,LK,EK].indexOf(k)<0)localStorage.setItem(k,d[k])})}
+async function call(action,extra){if(!api())throw new Error('URL do Apps Script não configurada');var r=await fetch(api(),{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(Object.assign({action:action,email:em(),aparelho:DIG},extra||{}))});return r.json()}
+function ov(html){var o=document.getElementById('sirius-ov');if(!o){o=document.createElement('div');o.id='sirius-ov';document.body.appendChild(o)}o.innerHTML='<div id="sirius-box"><h3><i></i>Sincronizar MODESK</h3><div class="sir-sub">Apps Script · Firebase · Backup por e-mail</div>'+html+'</div>';return o}
+function close(){var o=document.getElementById('sirius-ov');if(o)o.remove()}
+function ok(m){ov('<p class="sir-ok">'+m+'</p><div class="sir-acts"><button class="btn primary" onclick="document.getElementById(\'sirius-ov\').remove()">OK</button></div>')}
+function ask(motivo){ov('<p>'+(motivo==='aparelho'?'Este acesso vem de um <b>aparelho diferente</b> do aparelho padrão.':'Este MODESK está <b>sem dados</b> — parece uma nova instalação.')+' Deseja recuperar seus dados da nuvem?</p><div class="sir-acts"><button class="btn" id="sN">Continuar local</button><button class="btn primary" id="sY">Sincronizar</button></div>');
+ document.getElementById('sY').onclick=askEmail;document.getElementById('sN').onclick=function(){localStorage.setItem(LK,DIG);localStorage.setItem(DK,DIG);close()}}
+function askEmail(){ov('<p>Informe o e-mail cadastrado para o backup:</p><input id="sE" type="email" maxlength="255" placeholder="voce@exemplo.com" value="'+esc(em())+'"><div class="sir-err" id="sErr"></div><div class="sir-acts"><button class="btn" id="sC">Cancelar</button><button class="btn primary" id="sOk">Sincronizar</button></div>');
+ var i=document.getElementById('sE');i.focus();document.getElementById('sC').onclick=close;
+ i.onkeydown=function(e){if(e.key==='Enter')document.getElementById('sOk').click()};
+ document.getElementById('sOk').onclick=function(){var v=i.value.trim().toLowerCase();if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)){document.getElementById('sErr').textContent='E-mail inválido.';return}localStorage.setItem(K,v);localStorage.setItem('modesk.backup.email',v);restore()}}
+function marcar(){localStorage.setItem(DK,DIG);localStorage.setItem(HK,localStorage.getItem(HK)||DIG);localStorage.removeItem(LK)}
+async function restore(){ov('<div class="sirius-sp"></div><p style="text-align:center">Buscando seu backup na nuvem…</p>');
+ var r=null,erro='';
+ try{r=await call('syncPull')}catch(e){erro=e.message||String(e)}
+ if(r&&r.ok&&r.data){apply(r.data);localStorage.setItem(VK,String(r.version||0));marcar();ok('Sincronização concluída pelo Apps Script. Recarregando…');setTimeout(function(){location.reload()},1500);return}
+ /* garantia: Firebase/Firestore */
+ try{if(window.mdkFirestoreLer){var d=await mdkFirestoreLer();if(d){localStorage.setItem(LSK,JSON.stringify(d));marcar();ok('Dados recuperados pelo Firebase. Recarregando…');setTimeout(function(){location.reload()},1500);return}}}catch(e){erro=erro||e.message}
+ marcar();
+ if(erro&&!r){ov('<p>Não foi possível falar com a nuvem agora: '+esc(erro)+'</p><p>O e-mail ficou guardado; a sincronização tentará de novo sozinha.</p><div class="sir-acts"><button class="btn primary" onclick="document.getElementById(\'sirius-ov\').remove()">OK</button></div>');return}
+ try{localStorage.setItem(VK,'0');await push(true)}catch(e){}
+ ok('Nenhum backup encontrado para este e-mail. Os dados deste aparelho foram enviados para a nuvem.')}
+async function push(force){var s=snap(),j=JSON.stringify(s),hh=h(j);if(!force&&hh===lastHash)return;var v=ver()+1;var r=await call('syncPush',{version:v,data:s});if(r&&r.ok){localStorage.setItem(VK,String(r.version||v));lastHash=hh}else if(r&&r.conflict){await pull()}}
+function editing(){var a=document.activeElement;return a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName)||(a&&a.isContentEditable)}
+async function pull(){var r=await call('syncPull');if(r&&r.ok&&r.data&&Number(r.version)>ver()){if(editing())return;var antes=snap(),outras=false;Object.keys(r.data).forEach(function(k){if(k!==LSK&&antes[k]!==r.data[k])outras=true});apply(r.data);localStorage.setItem(VK,String(r.version));lastHash=h(JSON.stringify(snap()));try{if(typeof toast==='function')toast('Dados atualizados de outro aparelho')}catch(e){}
+ if(outras){setTimeout(function(){location.reload()},900)}else{try{state=Object.assign(structuredClone(DEF),JSON.parse(localStorage.getItem(LSK)));render()}catch(e){location.reload()}}return true}}
+/* backup periódico por e-mail (silencioso) */
+async function emailPeriodico(){var mail=em();if(!mail||!navigator.onLine||typeof emailjs==='undefined')return;var ult=Number(localStorage.getItem(EK)||0);if(Date.now()-ult<EMAIL_CADA)return;
+ try{var ts=new Date().toLocaleString('pt-BR'),json=JSON.stringify(snap());
+  await emailjs.send(EMAILJS_SERVICE_ID,EMAILJS_TEMPLATE_ID,{to_email:mail,email:mail,timestamp:ts,backup_date:ts,modulo_nome:'MODESK Pessoal - Backup Automático',backup_json:json,message:json},EMAILJS_PUBLIC_KEY);localStorage.setItem(EK,String(Date.now()))}catch(e){console.warn('Backup por e-mail',e)}}
+async function tick(){if(busy||!em()||!navigator.onLine||document.hidden)return;busy=true;try{if(!(await pull()))await push(false)}catch(e){}busy=false;emailPeriodico()}
+window.mdkSiriusResync=function(){askEmail()};
+function temDados(){var a=localStorage.getItem(LSK);return !!(a&&a.length>20)}
+function init(){
+ var home=localStorage.getItem(HK),dev=localStorage.getItem(DK),motivo=null;
+ if(!temDados()&&!dev)motivo='instalacao';                 /* reinstalado / ambiente limpo */
+ else if(home&&home!==DIG&&dev!==DIG)motivo='aparelho';     /* aparelho diferente do padrão */
+ if(!home&&temDados()){localStorage.setItem(HK,DIG);localStorage.setItem(DK,DIG)} /* define o aparelho padrão */
+ if(motivo&&localStorage.getItem(LK)!==DIG)setTimeout(function(){ask(motivo)},1200);else lastHash=h(JSON.stringify(snap()));
+ var MOB=/Android|iPhone|iPad|Mobile/i.test(navigator.userAgent);setInterval(tick,MOB?40000:25000);
+ try{var sv=window.save;window.save=function(){var x=sv.apply(this,arguments);clearTimeout(window.__sirT);window.__sirT=setTimeout(function(){if(!busy&&em()&&navigator.onLine){busy=true;push(false).catch(function(){}).then(function(){busy=false})}},2500);return x};save=window.save}catch(e){}
+ setInterval(emailPeriodico,3600*1000);setTimeout(tick,4000);
+ document.addEventListener('visibilitychange',function(){if(!document.hidden)tick()});window.addEventListener('online',tick)}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();
+</script>
+</body>
 </html>
