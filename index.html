@@ -6076,11 +6076,11 @@ console.log('[MODESK v80] brilho por cor · telas sem rolagem · menu arrastáve
     '<div class="unit"><label>Un.</label><input id="cp-l-u" value="UN"/></div><div class="cat"><label>Categoria</label><input id="cp-l-c" placeholder="Som, TI..."/></div>'+
     '<div class="obs"><label>Observação</label><input id="cp-l-o" placeholder="opcional"/></div><button class="btn primary cp17-add" onclick="cpAddLista()" title="Adicionar à lista">\uFF0B Adicionar</button></div>'+
     '<details class="cp17-bulk"><summary>Adicionar vários itens de uma vez</summary><div><textarea id="cp-l-bulk" rows="2" placeholder="Item&#9;Quantidade&#9;Unidade&#9;Categoria&#9;Observação" oninput="mdk158ListPreview(this.value)"></textarea><button class="btn" onclick="cpColarLista()">Cadastrar todos</button><div id="mdk158-list-preview" class="dim"></div></div></details></div>'+
-    '<div class="card"><div class="cp11-wrap" style="max-height:none"><table><thead><tr><th>Item</th><th>Qtd</th><th>Categoria</th><th></th></tr></thead><tbody>'+
+    '<div class="card"><div class="cp11-wrap" style="max-height:none"><table><thead><tr><th>Item</th><th>Qtd</th><th>Categoria</th><th>Já foi pedido?</th><th></th></tr></thead><tbody>'+
     ((c.lista||[]).map(function(i){return '<tr><td><b>'+esc(i.desc)+'</b><div class="dim">'+esc(i.obs||'')+'</div></td>'+
       '<td class="mono">'+esc(i.qtd)+' '+esc(i.un||'')+'</td><td>'+esc(i.cat||'\u2014')+'</td>'+
-      '<td><button class="btn sm" onclick="cpDelLista(\''+i.id+'\')">apagar</button></td></tr>'}).join('')
-      ||'<tr><td colspan="4" class="dim">Lista previa vazia.</td></tr>')+'</tbody></table></div></div>';
+      '<td>'+(i.status==='pedido'?'<button class="btn sm primary" title="Desmarcar" onclick="cpPedidoLista(\''+i.id+'\')">\u2714 Pedido'+(i.pedidoEm?' em '+esc(String(i.pedidoEm).split("-").reverse().join("/")):'')+'</button>':'<button class="btn sm" onclick="cpPedidoLista(\''+i.id+'\')">Marcar como pedido</button>')+'</td>'+'<td><button class="btn sm" onclick="cpDelLista(\''+i.id+'\')">apagar</button></td></tr>'}).join('')
+      ||'<tr><td colspan="5" class="dim">Lista prévia vazia — cadastre acima ou use “repor” no inventário da sala de som.</td></tr>')+'</tbody></table></div></div>';
   }
 
   function pintar(){
@@ -8864,10 +8864,18 @@ window.SR_IA_PROV=IA_PROV;
 function slotsIA(){var a=(S.cfg.ias||[]).filter(function(x){return x&&x.key&&x.on!==false});if(!a.length&&(S.cfg.groq||'').trim())a=[{prov:'groq',key:S.cfg.groq.trim(),modelo:S.cfg.modelo}];return a}
 function motivoTroca(s){return s===429?'cota/limite':s===401?'chave invalida':s===403?'acesso negado':s===402?'creditos esgotados':'erro '+s}
 function contexto(){try{var d=new Date(),p=['Agora: '+d.toLocaleString('pt-BR')];try{var k=kpis();p.push('Chamados abertos: '+k.ab+', eventos: '+k.ev+', tarefas pendentes: '+k.tar)}catch(e){}try{var st=window.state||{};var ev=(st.eventos||[]).slice(0,15).map(function(e){return [e.data,e.hora,e.titulo||e.nome||e.cliente].filter(Boolean).join(' ')});if(ev.length)p.push('Próximos eventos: '+ev.join('; '))}catch(e){}var base=p.join(' | ').slice(0,3500);try{if(window.SiriusMemory){var mm=SiriusMemory.ctx();if(mm)base+=' | '+mm.slice(0,4500)}}catch(e){}return base}catch(e){return ''}}
+function memLonga(){try{var nome=(S.cfg.nomeUsuario||'').trim(),fatos=(S.cfg.fatos||[]).slice(-40),at=S.ativo,ant=[];
+ S.convs.forEach(function(c){if(c.id===at)return;(c.msgs||[]).slice(-6).forEach(function(m){if(m.r!=='s')ant.push((m.r==='u'?'Usuário: ':'Sirius: ')+String(m.c).replace(/```[\s\S]*?```/g,'').slice(0,220))})});
+ ant=ant.slice(-40);
+ return ' MEMÓRIA DE LONGO PRAZO (use naturalmente, sem dizer que está lendo memória): '+(nome?'O usuário se chama '+nome+'; chame-o pelo nome com naturalidade. ':'Você ainda não sabe o nome do usuário; se for natural, pergunte. ')+
+ (fatos.length?'Fatos que ele pediu para lembrar: '+fatos.join(' | ')+'. ':'')+(ant.length?'Trechos de conversas anteriores: '+ant.join(' / ')+'. ':'')+
+ 'Você pode e deve responder QUALQUER pergunta, inclusive assuntos fora do MODESK (conhecimento geral, explicações, cálculos, ideias), não só comandos do sistema. Quando a resposta for falada, seja direto e natural.'}catch(e){return ''}}
+function capturarNome(t){var m=String(t).match(/\b(?:meu nome (?:é|e)|me chame de|pode me chamar de|eu sou o|eu sou a)\s+([A-Za-zÀ-ÿ]{2,}(?:\s+[A-Za-zÀ-ÿ]{2,})?)/i);if(m){S.cfg.nomeUsuario=m[1].replace(/\b\w/g,function(c){return c.toUpperCase()});gravar()}
+ var f=String(t).match(/\b(?:lembre(?:-se)?(?: de)? que|guarde que|anote que|memorize que)\s+(.{3,200})/i);if(f){S.cfg.fatos=(S.cfg.fatos||[]).concat([f[1].trim()]).slice(-80);gravar()}}
 async function chamarIA(msgs){
   var cfg=S.cfg, sl=slotsIA();
   if(!sl.length)return simulado(msgs[msgs.length-1].content);
-  var sys={role:'system',content:SYS+' Persona: '+PERSONAS[cfg.persona]+' Contexto: '+contexto()};
+  var sys={role:'system',content:SYS+' Persona: '+PERSONAS[cfg.persona]+memLonga()+' Contexto: '+contexto()};
   var ini=(cfg.iaIdx|0)%sl.length, ult=null;
   for(var n=0;n<sl.length;n++){
     var i=(ini+n)%sl.length, x=sl[i], P=IA_PROV[x.prov]||IA_PROV.custom, url=(x.url||P.u||'').trim(), mod=(x.modelo||P.m||'').trim(), nome=P.n+' #'+(i+1);
@@ -9020,7 +9028,7 @@ function st(m){var e=document.getElementById('sr-status');if(e)e.textContent=m}
 var ocupado=false;
 async function enviar(texto){
   texto=(texto||'').trim();if(!texto||ocupado)return;
-  var c=conv();c.msgs.push({r:'u',c:texto,t:Date.now()});
+  var c=conv();capturarNome(texto);c.msgs.push({r:'u',c:texto,t:Date.now()});
   if(c.titulo==='Nova operação')c.titulo=texto.slice(0,40);
   c.at=Date.now();gravar();aba='chat';pintar();
   ocupado=true;st('processando…');
@@ -9034,7 +9042,11 @@ async function enviar(texto){
   }catch(e){c.msgs.push({r:'s',c:'Falha: '+e.message,t:Date.now()});gravar();pintar()}
   ocupado=false;st('núcleo operacional do MODESK');
 }
-window.SIRIUS={enviar:enviar,estado:function(){return S},gravar:gravar,abrir:abrir,api:API};
+async function perguntar(texto){texto=(texto||'').trim();if(!texto)return '';var c=conv();capturarNome(texto);c.msgs.push({r:'u',c:texto,t:Date.now(),full:1});c.at=Date.now();gravar();
+ var hist=c.msgs.filter(function(m){return m.r!=='s'}).slice(-14).map(function(m){return{role:m.r==='u'?'user':'assistant',content:m.c}});
+ var res=await chamarIA(hist),ex=executar(res);c.msgs.push({r:'a',c:ex.texto||'(sem texto)',t:Date.now()});ex.acoes.forEach(function(a){c.msgs.push({r:'s',c:'⚙ '+a,t:Date.now()});log(a)});gravar();try{pintar()}catch(e){}
+ return String(ex.texto||'').replace(/```[\s\S]*?```/g,'').replace(/[*_#>`]/g,'').trim()}
+window.SIRIUS={perguntar:perguntar,enviar:enviar,estado:function(){return S},gravar:gravar,abrir:abrir,api:API};
 
 /* ---------- interface ---------- */
 var orb=document.getElementById('sirius-orb'),pan=document.getElementById('sirius-panel'),aba='chat';
@@ -12441,7 +12453,7 @@ var reo=document.createElement('button');reo.id='jv-reopen';reo.textContent='◉
 $('jv-more').onclick=function(){$('jv-chips').classList.toggle('open')};
 (function(){var st=document.createElement('style');st.textContent='#jv #jv-chips{max-height:0!important;opacity:0;overflow:hidden!important;pointer-events:none;left:50%!important;right:auto!important;width:min(820px,94vw)!important;margin:0!important;display:flex!important;transform:translate(-50%,8px)!important;transition:all .25s ease;gap:6px!important;flex-wrap:wrap;justify-content:center!important}#jv #jv-chips.open{max-height:120px!important;opacity:1;pointer-events:auto;transform:translate(-50%,0)!important;padding:6px 0}#jv #jv-chips span{font-size:12px!important;padding:4px 10px!important}';document.head.appendChild(st)})();
 
-function abrir(){root.classList.add('on');reo.style.display='none';if(!ini){ini=true;falar('Olá. Sirius online. Como posso ajudar?')}}
+function abrir(){root.classList.add('on');reo.style.display='none';if(!ini){ini=true;var nm='';try{nm=(SIRIUS.estado().cfg.nomeUsuario||'').split(' ')[0]}catch(e){}falar('Olá'+(nm?', '+nm:'')+'. Sirius online. Pode falar ou digitar, como posso ajudar?')}}
 function fechar(){root.classList.remove('on');reo.style.display='block';pararMic()}
 var ini=false;
 $('jv-x').onclick=fechar;reo.onclick=abrir;
@@ -12575,7 +12587,11 @@ function tabela(c,titulo){var arr=ST()[c]||[];if(!arr.length){janela(titulo,'<i>
 
 /* ---------- cérebro ---------- */
 function processar(txt){$('jv-u').textContent='“'+txt+'”';var n=norm(txt).replace(/[?!.,;]+/g,' ').replace(/\s+/g,' ').trim();n=numTxt(n);var r;
-  try{r=entender(n,txt)}catch(e){r='Tive um problema: '+e.message}
+  var pergunta=/\?|^(quem|qual|quais|quanto|quantos|como|por ?que|porque|o que|oque|quando|onde fica|explique|explica|me (fale|conte|diga|explique)|fale|conte|diga|voce|sabe|pode me|me ajuda|lembra|qual e meu|qual o meu|o que e|o que sao|resuma|traduz|calcule|escreva|crie|sugira|recomende)\b/.test(n)&&!/agenda|lembrete|evento|reuniao|compromisso/.test(n);
+  if(!pergunta){try{r=entender(n,txt)}catch(e){r=null}}
+  var generico=!r||/^(Não entendi|Nada encontrado|Não conheço|Não encontrei|Bom dia\. Estou|Boa tarde\. Estou|Boa noite\. Estou)/.test(r);
+  if(generico&&window.SIRIUS&&SIRIUS.perguntar){$('jv-s').textContent='pensando…';
+    SIRIUS.perguntar(txt).then(function(t){falar(t||'Sem resposta.')}).catch(function(e){falar(r||('Não consegui falar com a IA: '+e.message))});return '…'}
   if(r)falar(r);return r}
 function entender(n,orig){
   var hoje=ymd(new Date());
@@ -14177,6 +14193,23 @@ function init(){
  setInterval(emailPeriodico,3600*1000);setTimeout(tick,4000);
  document.addEventListener('visibilitychange',function(){if(!document.hidden)tick()});window.addEventListener('online',tick)}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();
+</script>
+<script>
+/* ===== MODESK v225 · Lista prévia: confirmar "já foi pedido" + backup diário automático no site ===== */
+(function(){
+window.cpPedidoLista=function(id){var c=window.comprasDados&&window.comprasDados();if(!c)return;var i=(c.lista||[]).find(function(x){return x.id===id});if(!i)return;
+ if(i.status==='pedido'){i.status='pendente';delete i.pedidoEm}else{i.status='pedido';i.pedidoEm=new Date().toISOString().slice(0,10)}
+ try{save(true)}catch(e){}try{toast(i.status==='pedido'?'Marcado como pedido':'Voltou para pendente')}catch(e){}try{render()}catch(e){}};
+/* backup diário automático para a nuvem do site (sem clicar em nada) */
+var DK='mdk_site_daily';
+async function diario(){try{var mail=localStorage.getItem('mdk_sync_email')||localStorage.getItem('modesk.backup.email');if(!mail||!navigator.onLine)return;
+ var hoje=new Date().toISOString().slice(0,10);if(localStorage.getItem(DK)===hoje)return;
+ var api=localStorage.getItem('modesk.api')||window.MDK_API;if(!api||!window.mdkTudoLS)return;
+ var dados=mdkTudoLS(),v=Number(localStorage.getItem('mdk_sync_ver')||0)+1;
+ var r=await fetch(api,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'syncPush',email:mail,version:v,data:dados,backupDiario:hoje})}).then(function(x){return x.json()});
+ if(r&&r.ok){localStorage.setItem('mdk_sync_ver',String(r.version||v));localStorage.setItem(DK,hoje);console.log('[MODESK v225] backup diário enviado ao site')}}catch(e){console.warn('[MODESK v225] backup diário',e)}}
+setTimeout(diario,15000);setInterval(diario,30*60*1000);window.addEventListener('online',diario);
 })();
 </script>
 </body>
