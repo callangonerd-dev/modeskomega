@@ -1097,7 +1097,8 @@ pre,code{white-space:pre-wrap;overflow-wrap:anywhere}
 <div class="logo">M</div>
 <div><h2 style="font-size:20px">MODESK PESSOAL</h2><small class="dim">v16 · assistente diário pessoal</small></div>
 </div>
-<p class="dim">Digite a senha de acesso da nuvem (Apps Script).</p>
+<p class="dim">Informe seu nome e a senha de acesso da nuvem (Apps Script).</p>
+<label>Seu nome <span style="color:var(--acc3)">*</span></label><input id="lg-nome" type="text" maxlength="60" autocomplete="name" placeholder="Como o Sirius deve chamar você" required onkeydown="if(event.key==='Enter')doLogin()"/>
 <label>Senha</label><input id="lg-pass" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"/>
 <label class="remember-row"><input checked="" id="lg-remember" type="checkbox"/><span>Manter este PC conectado</span></label>
 <div class="row" style="margin-top:16px">
@@ -1277,7 +1278,9 @@ const $=id=>document.getElementById(id);
 
 /* ================= LOGIN ================= */
 function doLogin(){
+  var nm=(($('lg-nome')||{}).value||'').trim().replace(/\s+/g,' ');if(nm.length<2||!/[A-Za-zÀ-ÿ]/.test(nm)){$('lg-err').textContent='O nome é obrigatório.';($('lg-nome')||{focus:function(){}}).focus();return}
   var s=($('lg-pass')||{}).value||'';if(!s){$('lg-err').textContent='Digite a senha.';return}
+  try{localStorage.setItem('modesk.usuario.nome',nm.replace(/(^|\s)\S/g,function(c){return c.toUpperCase()}))}catch(e){}
   $('lg-err').textContent='Verificando…';var lembrar=$('lg-remember').checked;
   mdkApiLogin(s,lembrar).then(function(){
     $('lg-err').textContent='';
@@ -1289,6 +1292,7 @@ function start(){$('login').classList.add('hidden');$('app').classList.remove('h
   setInterval(()=>{($('tb-clock')||{}).textContent=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})},1000);}
 
 /* início automático só depois de TODO o script carregar (evita erro de "OSINFO/MENU antes da inicialização" quando o PC está marcado como conectado) */
+setTimeout(function(){var i=document.getElementById('lg-nome');if(i&&!i.value)i.value=localStorage.getItem('modesk.usuario.nome')||''},0);
 function autoStart(){try{if(!(sessionStorage.getItem('modesk.sess')||localStorage.getItem('modesk.trusted')==='1'))return;mdkAuthPronto().then(function(u){if(u)start();else{sessionStorage.removeItem('modesk.sess');localStorage.removeItem('modesk.trusted')}});}catch(e){console.error('autoStart',e);try{$('login').classList.remove('hidden');$('app').classList.add('hidden')}catch(_){}}}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',autoStart);else setTimeout(autoStart,0);
 
@@ -8864,13 +8868,13 @@ window.SR_IA_PROV=IA_PROV;
 function slotsIA(){var a=(S.cfg.ias||[]).filter(function(x){return x&&x.key&&x.on!==false});if(!a.length&&(S.cfg.groq||'').trim())a=[{prov:'groq',key:S.cfg.groq.trim(),modelo:S.cfg.modelo}];return a}
 function motivoTroca(s){return s===429?'cota/limite':s===401?'chave invalida':s===403?'acesso negado':s===402?'creditos esgotados':'erro '+s}
 function contexto(){try{var d=new Date(),p=['Agora: '+d.toLocaleString('pt-BR')];try{var k=kpis();p.push('Chamados abertos: '+k.ab+', eventos: '+k.ev+', tarefas pendentes: '+k.tar)}catch(e){}try{var st=window.state||{};var ev=(st.eventos||[]).slice(0,15).map(function(e){return [e.data,e.hora,e.titulo||e.nome||e.cliente].filter(Boolean).join(' ')});if(ev.length)p.push('Próximos eventos: '+ev.join('; '))}catch(e){}var base=p.join(' | ').slice(0,3500);try{if(window.SiriusMemory){var mm=SiriusMemory.ctx();if(mm)base+=' | '+mm.slice(0,4500)}}catch(e){}return base}catch(e){return ''}}
-function memLonga(){try{var nome=(S.cfg.nomeUsuario||'').trim(),fatos=(S.cfg.fatos||[]).slice(-40),at=S.ativo,ant=[];
+function memLonga(){try{var nome=(localStorage.getItem('modesk.usuario.nome')||S.cfg.nomeUsuario||'').trim(),fatos=(S.cfg.fatos||[]).slice(-40),at=S.ativo,ant=[];
  S.convs.forEach(function(c){if(c.id===at)return;(c.msgs||[]).slice(-6).forEach(function(m){if(m.r!=='s')ant.push((m.r==='u'?'Usuário: ':'Sirius: ')+String(m.c).replace(/```[\s\S]*?```/g,'').slice(0,220))})});
  ant=ant.slice(-40);
- return ' MEMÓRIA DE LONGO PRAZO (use naturalmente, sem dizer que está lendo memória): '+(nome?'O usuário se chama '+nome+'; chame-o pelo nome com naturalidade. ':'Você ainda não sabe o nome do usuário; se for natural, pergunte. ')+
+ return ' MEMÓRIA DE LONGO PRAZO (use naturalmente, sem dizer que está lendo memória): '+(nome?'O usuário se chama '+nome+'; SEMPRE trate o usuário pelo nome ('+nome.split(' ')[0]+') em todas as respostas, com naturalidade. ':'Pergunte o nome do usuário. ')+
  (fatos.length?'Fatos que ele pediu para lembrar: '+fatos.join(' | ')+'. ':'')+(ant.length?'Trechos de conversas anteriores: '+ant.join(' / ')+'. ':'')+
  'Você pode e deve responder QUALQUER pergunta, inclusive assuntos fora do MODESK (conhecimento geral, explicações, cálculos, ideias), não só comandos do sistema. Quando a resposta for falada, seja direto e natural.'}catch(e){return ''}}
-function capturarNome(t){var m=String(t).match(/\b(?:meu nome (?:é|e)|me chame de|pode me chamar de|eu sou o|eu sou a)\s+([A-Za-zÀ-ÿ]{2,}(?:\s+[A-Za-zÀ-ÿ]{2,})?)/i);if(m){S.cfg.nomeUsuario=m[1].replace(/\b\w/g,function(c){return c.toUpperCase()});gravar()}
+function capturarNome(t){var m=String(t).match(/\b(?:meu nome (?:é|e)|me chame de|pode me chamar de|eu sou o|eu sou a)\s+([A-Za-zÀ-ÿ]{2,}(?:\s+[A-Za-zÀ-ÿ]{2,})?)/i);if(m){S.cfg.nomeUsuario=m[1].replace(/(^|\s)\S/g,function(c){return c.toUpperCase()});try{localStorage.setItem('modesk.usuario.nome',S.cfg.nomeUsuario)}catch(e){}gravar()}
  var f=String(t).match(/\b(?:lembre(?:-se)?(?: de)? que|guarde que|anote que|memorize que)\s+(.{3,200})/i);if(f){S.cfg.fatos=(S.cfg.fatos||[]).concat([f[1].trim()]).slice(-80);gravar()}}
 async function chamarIA(msgs){
   var cfg=S.cfg, sl=slotsIA();
@@ -12453,7 +12457,7 @@ var reo=document.createElement('button');reo.id='jv-reopen';reo.textContent='◉
 $('jv-more').onclick=function(){$('jv-chips').classList.toggle('open')};
 (function(){var st=document.createElement('style');st.textContent='#jv #jv-chips{max-height:0!important;opacity:0;overflow:hidden!important;pointer-events:none;left:50%!important;right:auto!important;width:min(820px,94vw)!important;margin:0!important;display:flex!important;transform:translate(-50%,8px)!important;transition:all .25s ease;gap:6px!important;flex-wrap:wrap;justify-content:center!important}#jv #jv-chips.open{max-height:120px!important;opacity:1;pointer-events:auto;transform:translate(-50%,0)!important;padding:6px 0}#jv #jv-chips span{font-size:12px!important;padding:4px 10px!important}';document.head.appendChild(st)})();
 
-function abrir(){root.classList.add('on');reo.style.display='none';if(!ini){ini=true;var nm='';try{nm=(SIRIUS.estado().cfg.nomeUsuario||'').split(' ')[0]}catch(e){}falar('Olá'+(nm?', '+nm:'')+'. Sirius online. Pode falar ou digitar, como posso ajudar?')}}
+function abrir(){root.classList.add('on');reo.style.display='none';if(!ini){ini=true;var nm='';try{nm=(localStorage.getItem('modesk.usuario.nome')||SIRIUS.estado().cfg.nomeUsuario||'').split(' ')[0]}catch(e){}falar('Olá'+(nm?', '+nm:'')+'. Sirius online. Pode falar ou digitar, como posso ajudar?')}}
 function fechar(){root.classList.remove('on');reo.style.display='block';pararMic()}
 var ini=false;
 $('jv-x').onclick=fechar;reo.onclick=abrir;
