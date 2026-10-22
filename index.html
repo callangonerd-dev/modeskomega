@@ -10,7 +10,7 @@
 <meta content="MODESK" name="apple-mobile-web-app-title"/>
 <meta content="#03060c" name="theme-color"/>
 <link href="/manifest.webmanifest" rel="manifest"/>
-<title>MODESK PESSOAL — Acessos & Mapeamento</title>
+<title>MODESK CORE Serviços de TI</title>
 
 <script id="mdk-v158-excel-core">
 (function(){
@@ -28,7 +28,7 @@ try{var k="modesk.rede.perif.v60",a=JSON.parse(localStorage.getItem(k)||'[]'),H=
  function filter(obj,k,fn){if(!Array.isArray(obj[k]))return;var before=obj[k].length;obj[k]=obj[k].filter(fn);if(before!==obj[k].length)updated=true}
  filter(st,'mapa',function(x){return x._manual158||(!seeds.includes(hash(x.nome))&&x.origem!=='mapeado')});
  filter(st,'acessos',function(x){return x._manual158||(!['PC Sala de Som','Servidor Local'].includes(x.nome)&&!seeds.includes(hash(String(x.nome||'').replace(/ \((AnyDesk|VNC)\)$/,''))))});
- var c=st.compras||{};['lista','pedidos','arquivados','semDocumento'].forEach(function(k){filter(c,k,function(x){return x._manual158||(!x.chaveAta&&!x.chaveCP36&&!['TR 2026 - Audio e Video','Atas 2026','Controle de Pedidos 2026'].includes(x.proj)&&!x.codItem)})});
+ var c=st.compras||{}; /* v232: itens de Compras/Pedidos nao sao mais filtrados a cada sincronizacao */
  c.seedTR2026v98=1;c.atas2026v28=1;c.controlePedidos36v2=1;st._semPredefinidos158=1;return st};
  window.MDKExcel={rows:rows,parse:parse,norm:norm};
 })();
@@ -100,7 +100,7 @@ try{var k="modesk.rede.perif.v60",a=JSON.parse(localStorage.getItem(k)||'[]'),H=
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&amp;family=Manrope:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;600&amp;display=swap" rel="stylesheet"/>
-<link href='data:application/manifest+json,{"name":"MODESK PESSOAL","short_name":"MODESK","start_url":".","display":"standalone","background_color":"#050a12","theme_color":"#e50914","icons":[{"src":"data:image/svg%2Bxml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 512 512%22%3E%3Crect width=%22512%22 height=%22512%22 rx=%2296%22 fill=%22%23e50914%22/%3E%3Ctext x=%2250%25%22 y=%2265%25%22 font-size=%22300%22 font-family=%22sans-serif%22 font-weight=%22bold%22 fill=%22white%22 text-anchor=%22middle%22%3EM%3C/text%3E%3C/svg%3E","sizes":"512x512","type":"image/svg+xml","purpose":"any"}]}' rel="manifest"/>
+<link href='data:application/manifest+json,{"name":"MODESK CORE Serviços de TI","short_name":"MODESK CORE","start_url":".","display":"standalone","background_color":"#050a12","theme_color":"#e50914","icons":[{"src":"data:image/svg%2Bxml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 512 512%22%3E%3Crect width=%22512%22 height=%22512%22 rx=%2296%22 fill=%22%23e50914%22/%3E%3Ctext x=%2250%25%22 y=%2265%25%22 font-size=%22300%22 font-family=%22sans-serif%22 font-weight=%22bold%22 fill=%22white%22 text-anchor=%22middle%22%3EM%3C/text%3E%3C/svg%3E","sizes":"512x512","type":"image/svg+xml","purpose":"any"}]}' rel="manifest"/>
 <script>
 /* v157: nuvem via Google Apps Script (substitui Firebase/Firestore) */
 var MDK_HAD_LOCAL_DATA=!!localStorage.getItem('modesk.pessoal.v7');
@@ -1095,7 +1095,7 @@ pre,code{white-space:pre-wrap;overflow-wrap:anywhere}
 <div class="card-login">
 <div class="row" style="gap:14px;margin-bottom:12px">
 <div class="logo">M</div>
-<div><h2 style="font-size:20px">MODESK PESSOAL</h2><small class="dim">v16 · assistente diário pessoal</small></div>
+<div><h2 style="font-size:20px">MODESK CORE</h2><small class="dim">v16 · assistente diário pessoal</small></div>
 </div>
 <p class="dim">Informe seu nome e a senha de acesso da nuvem (Apps Script).</p>
 <label>Seu nome <span style="color:var(--acc3)">*</span></label><input id="lg-nome" type="text" maxlength="60" autocomplete="name" placeholder="Como o Sirius deve chamar você" required onkeydown="if(event.key==='Enter')doLogin()"/>
@@ -1113,7 +1113,7 @@ pre,code{white-space:pre-wrap;overflow-wrap:anywhere}
 <aside>
 <div class="brand">
 <div class="logo">M</div>
-<div><h3 style="font-size:16px">MODESK PESSOAL</h3><small>gestão de serviços</small></div>
+<div><h3 style="font-size:16px">MODESK CORE</h3><small>Serviços de TI</small></div>
 </div>
 <div id="menu"></div>
 <div aria-label="Ações do sistema" class="side-command">
@@ -6805,7 +6805,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0
   window.vDash=function(){
     var abertas=(state.atividades||[]).filter(function(x){return !x.feito}).length;
     var agora=new Date(), hora=agora.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}), data=agora.toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'short'});
-    return '<div class="mdk-v20-dash"><div class="v20-hero"><section class="v20-glass v20-command"><p class="v20-kicker">Painel de comando</p><h1 class="v20-title"><span id="v20-cumprimento">'+fraseCumprimento(USUARIO_NOME)+'</span> <span style="color:#ff4960">Marcio!</span></h1><p class="v20-sub">Sistemas sincronizados · '+abertas+' tarefas em aberto</p><div class="v20-clock">'+hora+'<small>'+data+'</small></div><div class="v20-stats"><div class="v20-stat"><b>'+(state.servicos||[]).length+'<i>+</i></b><small>Serviços</small></div><div class="v20-stat"><b>'+(state.pedidos||[]).length+'</b><small>Pedidos</small></div><div class="v20-stat"><b>'+(state.eventos||[]).length+'</b><small>Eventos</small></div></div></section></div><div class="v20-metrics"><section class="v20-glass v20-meter"><div><div class="v20-mline"><span>Atividades</span><b>'+abertas+'</b></div><div class="v20-track"><i style="width:'+Math.min(100,abertas*12)+'%"></i></div><small>PENDÊNCIAS EM FOCO</small></div></section><section class="v20-glass v20-meter"><div><div class="v20-mline"><span>SEND</span><b>'+(state.sends||[]).length+'</b></div><div class="v20-track"><i style="width:'+Math.min(100,(state.sends||[]).length*10)+'%"></i></div><small>ACOMPANHAMENTOS</small></div></section><section class="v20-glass v20-meter red"><div><div class="v20-mline"><span>Avisos</span><b>'+alertas().length+'</b></div><div class="v20-track"><i style="width:'+Math.min(100,alertas().length*16)+'%"></i></div><small>ANÁLISE DE PRAZOS</small></div></section></div>'+blocoGraficos()+'<div class="v20-bottom"><section class="v20-glass v20-snapshot"><p class="v20-kicker">Snapshot</p><h3>Backup de dados</h3><p class="v20-sub">Salve uma cópia dos dados importantes do MODESK.</p><div class="v20-snapbox"><b>BACKUP_MODESK.json</b><div class="v20-track"><i style="width:100%"></i></div><small class="mono">ATUALIZADO · AGORA</small></div><button class="btn" onclick="go(\'arquivos\')">Abrir Central de Arquivos</button></section></div></div>';
+    return '<div class="mdk-v20-dash"><div class="v20-hero"><section class="v20-glass v20-command"><p class="v20-kicker">Painel de comando</p><h1 class="v20-title"><span id="v20-cumprimento">'+fraseCumprimento(USUARIO_NOME)+'</span> <span style="color:#ff4960">Marcio!</span></h1><p class="v20-sub">Sistemas sincronizados · '+abertas+' tarefas em aberto</p><div class="v20-clock">'+hora+'<small>'+data+'</small></div><div class="v20-stats"><div class="v20-stat"><b>'+(state.servicos||[]).length+'<i>+</i></b><small>Serviços</small></div><div class="v20-stat"><b>'+(state.pedidos||[]).length+'</b><small>Pedidos</small></div><div class="v20-stat"><b>'+(state.eventos||[]).length+'</b><small>Eventos</small></div></div></section></div><div class="v20-metrics mdk-split-a"><section class="v20-glass v20-meter"><div><div class="v20-mline"><span>Atividades</span><b>'+abertas+'</b></div><div class="v20-track"><i style="width:'+Math.min(100,abertas*12)+'%"></i></div><small>PENDÊNCIAS EM FOCO</small></div></section><section class="v20-glass v20-meter"><div><div class="v20-mline"><span>SEND</span><b>'+(state.sends||[]).length+'</b></div><div class="v20-track"><i style="width:'+Math.min(100,(state.sends||[]).length*10)+'%"></i></div><small>ACOMPANHAMENTOS</small></div></section></div><div class="card mdk230-bar mdk230-bar-dash"><h3>Relatórios BI</h3><p class="mdk232-sub">Gere um relatório com indicadores, gráficos e tabelas de uma página ou o Relatório Geral BI.</p><div class="lb-acoes"><button class="lb-btn" onclick="mdk230EscolherRelatorio()">Gerar relatório BI</button></div></div><div class="v20-metrics mdk-split-b"><section class="v20-glass v20-meter red"><div><div class="v20-mline"><span>Avisos</span><b>'+alertas().length+'</b></div><div class="v20-track"><i style="width:'+Math.min(100,alertas().length*16)+'%"></i></div><small>ANÁLISE DE PRAZOS</small></div></section></div>'+blocoGraficos()+'<div class="v20-bottom"><section class="v20-glass v20-snapshot"><p class="v20-kicker">Snapshot</p><h3>Backup de dados</h3><p class="v20-sub">Salve uma cópia dos dados importantes do MODESK.</p><div class="v20-snapbox"><b>BACKUP_MODESK.json</b><div class="v20-track"><i style="width:100%"></i></div><small class="mono">ATUALIZADO · AGORA</small></div><button class="btn" onclick="go(\'arquivos\')">Abrir Central de Arquivos</button></section></div></div>';
   };
   if(typeof oldArquivos==='function')window.vArquivos=function(){return oldArquivos().replace('<div class="exp-toolbar">','<div class="exp-toolbar">')};
   window.baixarHTML=function(){var clone=document.documentElement.cloneNode(true);var toast=clone.querySelector('#toast');if(toast)toast.innerHTML='';var html='<!doctype html>\n'+clone.outerHTML;dl(new Blob([html],{type:'text/html;charset=utf-8'}),'MODESK_PESSOAL_v92.html');if(typeof window.toast==='function')window.toast('HTML v20 gerado — verifique seus Downloads')};
@@ -12692,8 +12692,8 @@ function mostrarPlanilha(nome,L){L=(L||[]).filter(function(r){return r&&r.some(f
 #sirius-orb.sx-full .tag{letter-spacing:.18em}
 body.sx-jv-on #sirius-orb,body.sx-jv-on #sirius-panel{display:none!important}
 #sr-full{color:#7ff0ff}
-#jv .sx-chat{position:absolute;right:150px;top:58px;background:none;border:1px solid rgba(0,229,255,.35);color:#9ff3ff;border-radius:20px;padding:6px 14px;cursor:pointer;font-size:12px;letter-spacing:.15em}
-#jv .sx-chat:hover{background:rgba(0,229,255,.15)}
+#jv .sx-chat{height:42px;white-space:nowrap;border:1px solid rgba(0,229,255,.45);background:rgba(0,229,255,.08);color:#9ff3ff;border-radius:21px;padding:0 16px;cursor:pointer;font-size:12px;letter-spacing:.15em;flex:none}
+#jv .sx-chat:hover{background:rgba(0,229,255,.25)}
 </style>
 <script id="sirius-unify">
 (function(){
@@ -12747,7 +12747,7 @@ function boot(){
   if(!jv.querySelector('.sx-chat')){
     var c=document.createElement('button');c.className='sx-chat';c.textContent='CHAT ▣';c.title='Voltar ao chat em card';
     c.onclick=function(){window.SIRIUSJ.fechar();setTimeout(function(){try{window.SIRIUS.abrir()}catch(e){pan.classList.add('open')}},60)};
-    jv.appendChild(c);
+    var bar=jv.querySelector('.bar');(bar||jv).appendChild(c);
   }
   /* esconde orb/popup enquanto a full está aberta: um só S.I.R.I.U.S visível */
   function sync(){document.body.classList.toggle('sx-jv-on',jv.classList.contains('on'))}
@@ -14362,7 +14362,7 @@ setTimeout(diario,15000);setInterval(diario,30*60*1000);window.addEventListener(
     }catch(e){}
     // For Windows taskbar / PWA
     if('serviceWorker' in navigator){} // placeholder
-    document.title = document.title.replace(/MODESK.*/, 'MODESK PESSOAL — v229');
+    document.title = document.title.replace(/MODESK.*/, 'MODESK CORE Serviços de TI');
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', setConsistentIcon);
   else setConsistentIcon();
@@ -14528,7 +14528,7 @@ setTimeout(diario,15000);setInterval(diario,30*60*1000);window.addEventListener(
     if(window.SiriusMemory && window.SiriusMemory.adicionar){
       // Inject site knowledge
       var knowledge = [
-        'MODESK PESSOAL v229: sistema de gestão de acessos, mapeamento de rede, compras (lista prévia → req interna → pedido), agenda, inventário de itens da sala de som, arquivos, Sirius IA.',
+        'MODESK CORE Serviços de TI (antes MODESK PESSOAL): sistema de gestão de acessos, mapeamento de rede, compras (lista prévia → req interna → pedido), agenda, inventário de itens da sala de som, arquivos, Sirius IA.',
         'Módulo de compras: lista prévia livre (cadastro manual ou colar), controle de pedidos com status, deadlines, anexos PDF. Sincroniza via Apps Script + Firebase + e-mail.',
         'Sincronização multi-dispositivo: merge inteligente offline, poll frequente, backup automático por e-mail a cada alteração significativa.',
         'Ícone oficial: logo vermelho com letra M (mesmo da versão mobile/online).',
@@ -14560,5 +14560,103 @@ setTimeout(diario,15000);setInterval(diario,30*60*1000);window.addEventListener(
 
 })();
 </script>
+<!-- ===== MODESK v230 · sem sinal online, botões Limpar tudo, Relatórios BI por página e no Dashboard, mapa/tutorial atualizados ===== -->
+<style id="mdk230-css">
+#mdk228-st{display:none!important}
+.mdk230-bar.card{padding:18px;margin:4px 0 14px}.mdk230-bar h3{margin:0 0 4px;font-size:15px}.mdk230-bar .mdk232-sub{margin:0 0 12px;color:#8ca1b1;font-size:12.5px}.v20-metrics.mdk-split-a{grid-template-columns:repeat(2,1fr)}.v20-metrics.mdk-split-b{grid-template-columns:1fr}@media(max-width:980px){.v20-metrics.mdk-split-a,.v20-metrics.mdk-split-b{grid-template-columns:1fr}}
+
+#mdk230-modal{position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center}
+#mdk230-modal .box{background:#070c14;color:#e7f2f8;border:1px solid rgba(113,220,250,.22);border-radius:10px;padding:20px;width:min(420px,92vw);box-shadow:0 18px 50px rgba(0,0,0,.62)}
+#mdk230-modal label{display:flex;gap:8px;align-items:center;padding:7px 0;cursor:pointer}
+#mdk230-modal .acts{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
+.mdk230-news{margin-top:18px;padding:14px 16px;border:1px solid var(--line,#333);border-radius:8px}
+.mdk230-news li{margin:5px 0}
+</style>
+<script id="mdk230">
+(function(){
+var S=function(){return window.state||{}};
+function arr(x){return Array.isArray(x)?x:[]}
+function sv(){try{save(true)}catch(e){try{save()}catch(_){}}}
+function rr(){try{render()}catch(e){}}
+function t(m){try{toast(m)}catch(e){alert(m)}}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function comp(){var s=S();try{if(window.comprasDados)return window.comprasDados()}catch(e){}s.compras=s.compras||{};return s.compras}
+function backup(nome,dados){try{var b=new Blob([JSON.stringify(dados,null,2)],{type:'application/json'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='backup_antes_limpar_'+nome+'_'+new Date().toISOString().slice(0,10)+'.json';a.click()}catch(e){}}
+
+/* ---------- LIMPAR TUDO ---------- */
+var LIMPAR={
+  itens:{n:'Itens da sala de som',fn:function(){var s=S();backup('itens',s.itens);s.itens=[];s.seedSalaSom=1}},
+  pedidos:{n:'Controle de Pedidos',fn:function(){var c=comp();backup('pedidos',{lista:c.lista,pedidos:c.pedidos,arquivados:c.arquivados});c.lista=[];c.pedidos=[];c.arquivados=[];var s=S();if(Array.isArray(s.pedidos))s.pedidos=[]}},
+  mapa:{n:'Acessos & Mapeamento',reload:true,fn:function(){var s=S();backup('mapeamento',{mapa:s.mapa,impressoras:s.impressoras,acessos:s.acessos});s.mapa=[];s.impressoras=[];s.acessos=[]}},
+  eventos:{n:'Agenda & Lembretes',fn:function(){var s=S();backup('agenda',{atividades:s.atividades,eventos:s.eventos});s.atividades=[];s.eventos=[]}}
+};
+window.mdk230Limpar=function(k){var L=LIMPAR[k];if(!L)return;
+  if(!confirm('Limpar TODOS os dados de "'+L.n+'" para começar do zero?\n\nUm arquivo de backup será baixado antes, por segurança.'))return;
+  if(!confirm('Tem certeza? Esta ação remove todos os registros desta página.'))return;
+  L.fn();sv();rr();t(L.n+': todos os itens foram removidos');
+  if(L.reload)setTimeout(function(){location.reload()},1800)};
+
+/* ---------- DADOS DOS RELATÓRIOS ---------- */
+function grp(l,campos){var o={};l.forEach(function(x){var v='';for(var i=0;i<campos.length;i++){var c=x[campos[i]];if(c!=null&&c!==''&&typeof c!=='object'){v=String(c);break}}v=v||'Não informado';o[v]=(o[v]||0)+1});return o}
+function soma(l,c){return l.reduce(function(a,x){var n=parseFloat(String(x[c]||0).replace(',','.'));return a+(isNaN(n)?0:n)},0)}
+function mes(l,campos){var o={};l.forEach(function(x){var d='';campos.some(function(c){if(x[c]){d=String(x[c]).slice(0,7);return true}});if(/^\d{4}-\d{2}$/.test(d))o[d]=(o[d]||0)+1});var k=Object.keys(o).sort(),r={};k.forEach(function(i){r[i.slice(5)+'/'+i.slice(0,4)]=o[i]});return r}
+function tabela(l,cols){return '<table><thead><tr>'+cols.map(function(c){return '<th>'+c[1]+'</th>'}).join('')+'</tr></thead><tbody>'+(l.length?l.slice(0,300).map(function(x){return '<tr>'+cols.map(function(c){var v=x[c[0]];if(typeof v==='boolean')v=v?'Sim':'Não';if(v&&typeof v==='object')v='';return '<td>'+esc(v)+'</td>'}).join('')+'</tr>'}).join(''):'<tr><td colspan="'+cols.length+'">Sem registros</td></tr>')+'</tbody></table>'+(l.length>300?'<p class="dim">Mostrando 300 de '+l.length+'</p>':'')}
+
+var REL={
+  itens:function(){var l=arr(S().itens);return{t:'Itens da sala de som',kpi:[['Itens cadastrados',l.length],['Quantidade total',soma(l,'qtd')],['Patrimoniados',l.filter(function(x){return x.patr}).length],['Categorias',Object.keys(grp(l,['cat'])).length]],
+    g:[['Itens por categoria','bar',grp(l,['cat'])],['Itens por local','doughnut',grp(l,['local'])],['Patrimônio','pie',{'Com patrimônio':l.filter(function(x){return x.patr}).length,'Sem patrimônio':l.filter(function(x){return !x.patr}).length}]],
+    tb:tabela(l,[['nome','Item'],['cat','Categoria'],['desc','Descrição'],['qtd','Qtd'],['local','Local'],['patrNum','Patrimônio']])}},
+  pedidos:function(){var c=comp(),li=arr(c.lista),pe=arr(c.pedidos),ar=arr(c.arquivados);return{t:'Controle de Pedidos',kpi:[['Lista prévia',li.length],['Pedidos em controle',pe.length],['Pedidos realizados',ar.length],['Total geral',li.length+pe.length+ar.length]],
+    g:[['Distribuição','doughnut',{'Lista prévia':li.length,'Em controle':pe.length,'Realizados':ar.length}],['Pedidos por status','bar',grp(pe.concat(ar),['status','situacao','etapa'])],['Pedidos por mês','line',mes(pe.concat(ar),['data','criado','prazo','em'])]],
+    tb:'<h3>Em controle</h3>'+tabela(pe,[['numero','Nº'],['titulo','Título'],['descricao','Descrição'],['status','Status'],['data','Data'],['prazo','Prazo']])+'<h3>Lista prévia</h3>'+tabela(li,[['nome','Item'],['desc','Descrição'],['qtd','Qtd'],['un','Un']])+'<h3>Realizados</h3>'+tabela(ar,[['numero','Nº'],['titulo','Título'],['status','Status'],['data','Data']])}},
+  mapa:function(){var s=S(),m=arr(s.mapa),im=arr(s.impressoras),ac=arr(s.acessos);return{t:'Acessos & Mapeamento',kpi:[['Computadores / equipamentos',m.length],['Impressoras',im.length],['Acessos remotos',ac.length],['Setores',Object.keys(grp(m,['setor','ambiente','local','sala'])).length]],
+    g:[['Equipamentos por setor','bar',grp(m,['setor','ambiente','local','sala'])],['Equipamentos por tipo','doughnut',grp(m,['tipo','categoria','so','os'])],['Impressoras por local','pie',grp(im,['local','setor','modelo'])]],
+    tb:'<h3>Equipamentos</h3>'+tabela(m,[['nome','Nome'],['setor','Setor'],['ambiente','Ambiente'],['ip','IP'],['usuario','Usuário'],['patrimonio','Patrimônio']])+'<h3>Impressoras</h3>'+tabela(im,[['nome','Nome'],['modelo','Modelo'],['local','Local'],['ip','IP']])}},
+  eventos:function(){var s=S(),a=arr(s.atividades),e=arr(s.eventos);var pend=a.filter(function(x){return !x.feito}).length;return{t:'Agenda & Lembretes',kpi:[['Lembretes / atividades',a.length],['Pendentes',pend],['Concluídos',a.length-pend],['Eventos',e.length]],
+    g:[['Situação dos lembretes','doughnut',{'Pendentes':pend,'Concluídos':a.length-pend}],['Eventos por status','bar',grp(e,['status'])],['Compromissos por mês','line',mes(a.concat(e),['data','prazo'])]],
+    tb:'<h3>Lembretes / atividades</h3>'+tabela(a,[['titulo','Título'],['tipo','Tipo'],['prazo','Prazo'],['hora','Hora'],['feito','Concluído']])+'<h3>Eventos</h3>'+tabela(e,[['titulo','Título'],['cliente','Cliente'],['data','Data'],['hora','Hora'],['local','Local'],['status','Status']])}}
+};
+REL.geral=function(){var p=['itens','pedidos','mapa','eventos'].map(function(k){return REL[k]()});var tot={};p.forEach(function(r){tot[r.t]=+r.kpi[0][1]||0});
+  var tb=p.map(function(r){return '<section class="sec"><h2>'+r.t+'</h2><div class="kpis">'+r.kpi.map(function(k){return '<div class="k"><small>'+k[0]+'</small><b>'+k[1]+'</b></div>'}).join('')+'</div></section>'}).join('');
+  var g=[['Volume de registros por área','bar',tot]];p.forEach(function(r){g.push([r.t+' · '+r.g[0][0],r.g[0][1],r.g[0][2]])});
+  return{t:'Relatório Geral BI',kpi:p.map(function(r){return [r.t,r.kpi[0][1]]}),g:g,tb:tb}};
+var NOMES={geral:'Relatório Geral BI (todas as páginas)',itens:'Itens da sala de som',pedidos:'Controle de Pedidos',mapa:'Acessos & Mapeamento',eventos:'Agenda & Lembretes'};
+
+window.mdk230Relatorio=function(k){var R=REL[k];if(!R)return;var r=R();var w=window.open('','_blank');if(!w)return t('Permita pop-ups para abrir o relatório');
+  var gid=0,cv=r.g.map(function(g){return '<div class="chart"><h4>'+esc(g[0])+'</h4><canvas id="c'+(gid++)+'"></canvas></div>'}).join('');
+  var data=JSON.stringify(r.g.map(function(g){return{type:g[1],labels:Object.keys(g[2]),vals:Object.values(g[2])}}));
+  w.document.write('<!doctype html><html><head><meta charset="utf-8"><title>MODESK · BI · '+esc(r.t)+'</title><script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"><\/script><style>body{font-family:Arial,sans-serif;margin:0;padding:28px;color:#0f172a;background:#f1f5f9}header{display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #0ea5e9;padding-bottom:12px;margin-bottom:18px}h1{margin:0;font-size:22px}.dim{color:#64748b;font-size:12px}.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:18px}.k{background:#fff;border-radius:8px;padding:14px;border-left:4px solid #0ea5e9;box-shadow:0 1px 3px #0002}.k small{display:block;color:#64748b;font-size:11px;text-transform:uppercase}.k b{font-size:26px}.charts{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px;margin-bottom:18px}.chart{background:#fff;border-radius:8px;padding:12px;box-shadow:0 1px 3px #0002;break-inside:avoid}.chart h4{margin:0 0 8px;font-size:13px}canvas{max-height:260px}table{width:100%;border-collapse:collapse;background:#fff;font-size:11px;margin-bottom:14px}th{background:#0f172a;color:#fff;text-align:left;padding:6px}td{border-bottom:1px solid #e2e8f0;padding:5px 6px}h3{font-size:14px;margin:16px 0 6px}.sec{background:#fff;border-radius:8px;padding:12px;margin-bottom:12px}.sec h2{font-size:15px;margin:0 0 8px}button{padding:8px 14px;border:0;border-radius:6px;background:#0ea5e9;color:#fff;cursor:pointer}@media print{button{display:none}body{background:#fff}}</style></head><body><header><div><h1>MODESK · '+esc(r.t)+'</h1><div class="dim">Relatório BI gerado em '+new Date().toLocaleString('pt-BR')+'</div></div><button onclick="print()">Imprimir / Salvar PDF</button></header><div class="kpis">'+r.kpi.map(function(k){return '<div class="k"><small>'+esc(k[0])+'</small><b>'+esc(k[1])+'</b></div>'}).join('')+'</div><div class="charts">'+cv+'</div>'+r.tb+'<script>var D='+data.replace(/</g,'\\u003c')+';var P=["#0ea5e9","#22c55e","#f59e0b","#ef4444","#8b5cf6","#14b8a6","#ec4899","#64748b","#84cc16","#f97316"];function go(){if(!window.Chart)return setTimeout(go,200);D.forEach(function(d,i){new Chart(document.getElementById("c"+i),{type:d.type,data:{labels:d.labels,datasets:[{label:"Registros",data:d.vals,backgroundColor:d.type==="line"?"#0ea5e933":P,borderColor:d.type==="line"?"#0ea5e9":P,fill:d.type==="line",tension:.3}]},options:{plugins:{legend:{display:d.type!=="bar"&&d.type!=="line"}}}})})}go();<\/script></body></html>');w.document.close()};
+
+window.mdk230EscolherRelatorio=function(){var m=document.createElement('div');m.id='mdk230-modal';
+  m.innerHTML='<div class="box"><h3 style="margin-top:0">Gerar relatório BI</h3><p class="dim">Escolha a página do relatório:</p>'+Object.keys(NOMES).map(function(k,i){return '<label><input type="radio" name="mdk230r" value="'+k+'"'+(i?'':' checked')+'> '+NOMES[k]+'</label>'}).join('')+'<div class="acts"><button class="lb-btn ghost" id="mdk230x">Cancelar</button><button class="lb-btn" id="mdk230ok">Gerar relatório</button></div></div>';
+  document.body.appendChild(m);m.onclick=function(e){if(e.target===m)m.remove()};
+  m.querySelector('#mdk230x').onclick=function(){m.remove()};
+  m.querySelector('#mdk230ok').onclick=function(){var v=m.querySelector('input[name=mdk230r]:checked').value;m.remove();mdk230Relatorio(v)}};
+
+/* ---------- INJEÇÃO DOS BOTÕES ---------- */
+function curTab(){try{return tab}catch(e){return ''}}
+function mapTab(k){if(k==='agenda'||k==='atividades'||k==='lembretes')return 'eventos';if(k==='remoto')return 'mapa';return k}
+window.mdk230Injetar=function(){return injetar()};function injetar(){var v=document.getElementById('view');if(!v||v.querySelector('.mdk230-bar'))return;var k=mapTab(curTab()),h=v.querySelector('h2.page');var html='';
+  if(k==='dashboard')html='<h3>Relatórios BI</h3><p class="mdk232-sub">Gere um relatório com indicadores, gráficos e tabelas de uma página ou o Relatório Geral BI.</p><div class="lb-acoes"><button class="lb-btn" onclick="mdk230EscolherRelatorio()">Gerar relatório BI</button></div>';
+  else if(LIMPAR[k])html='<h3>Relatório e limpeza</h3><p class="mdk232-sub">Relatório BI com os dados desta página, ou apague tudo para recomeçar (um backup é baixado antes).</p><div class="lb-acoes"><button class="lb-btn" onclick="mdk230Relatorio(\''+k+'\')">Gerar relatório BI</button><button class="lb-btn danger" onclick="mdk230Limpar(\''+k+'\')">Limpar tudo</button></div>';
+  else if(k==='entrega')html='';
+  if(k==='entrega'&&!v.querySelector('.mdk230-news')){var d=document.createElement('div');d.className='mdk230-news';d.innerHTML=NEWS;var help=v.querySelector('.site-help');if(help||h)(help||h).insertAdjacentElement('afterend',d);else v.appendChild(d)}
+  if(!html)return;var b=document.createElement('div');b.className='card mdk230-bar';b.innerHTML=html;var ref=h;if(h){var nx=h.nextElementSibling;if(nx&&nx.classList&&nx.classList.contains('hint'))ref=nx}if(ref)ref.insertAdjacentElement('afterend',b);else v.insertBefore(b,v.firstChild)}
+var NEWS='<h3>Novidades e tutorial das funções recentes (v230–v234)</h3><ol>'+
+ '<li><b>Dashboard → 📊 Gerar relatório BI:</b> escolha a página (Itens da sala de som, Controle de Pedidos, Acessos & Mapeamento, Agenda & Lembretes) ou o <b>Relatório Geral BI</b>. O relatório abre em nova aba com indicadores, gráficos e tabelas; use “Imprimir / Salvar PDF”.</li>'+
+ '<li><b>📊 Gerar relatório BI em cada página:</b> Itens da sala de som, Controle de Pedidos, Acessos & Mapeamento e Agenda & Lembretes têm o botão logo abaixo do título, com as métricas daquela página.</li>'+
+ '<li><b>🧹 Limpar tudo:</b> nas mesmas quatro páginas, remove todos os registros para recomeçar do zero. Pede confirmação duas vezes e baixa automaticamente um backup (.json) antes de apagar.</li>'+
+ '<li><b>Selo verde “● Online — sincronizado”</b> (canto inferior) fica oculto; o indicador “Sistema” do menu e os demais sinais continuam visíveis.</li>'+
+ '<li><b>v232 · Nome do site:</b> agora <b>MODESK CORE Serviços de TI</b>.</li>'+
+ '<li><b>v232 · Botões de relatório:</b> ficam num quadro próprio, no mesmo estilo dos quadros do Laudo de Baixa, logo abaixo do texto de explicação de cada página.</li>'+
+ '<li><b>v232 · Controle de Pedidos em tempo real:</b> os pedidos importados da planilha não são mais descartados durante a sincronização, então aparecem nos outros aparelhos como nas demais páginas.</li><li><b>v233 · Dashboard:</b> o quadro de Relatórios BI não fica mais no topo: agora fica abaixo da mensagem de boas-vindas, entre os indicadores de Atividades/SEND e o indicador de Avisos.</li><li><b>v234 · Botões do Sirius em tela cheia:</b> o botão CHAT ▣ saiu do topo e agora fica na barra inferior de comandos, junto de ☰ 🎙 📎; o MINIMIZAR ✕ continua no canto superior direito.</li></ol>'+
+ '<p class="dim">Atalhos: <a href="#" onclick="go(\'dashboard\');return false">Dashboard</a> · <a href="#" onclick="go(\'itens\');return false">Itens</a> · <a href="#" onclick="go(\'pedidos\');return false">Pedidos</a> · <a href="#" onclick="go(\'mapa\');return false">Mapeamento</a> · <a href="#" onclick="go(\'eventos\');return false">Agenda</a></p>';
+function iniciar(){var v=document.getElementById('view');if(!v)return setTimeout(iniciar,500);new MutationObserver(function(){injetar()}).observe(v,{childList:true,subtree:false});injetar();setInterval(injetar,800);
+  try{if(window.SiriusMemory)window.SiriusMemory.adicionar('novidades-v230','Botões Limpar tudo e Relatório BI em Itens, Pedidos, Mapeamento e Agenda; Dashboard gera relatório BI por página ou geral.')}catch(e){}}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',iniciar);else iniciar();
+console.log('[MODESK v234] botão CHAT movido para a barra do Sirius em tela cheia');
+})();
+</script>
+
 </body>
 </html>
