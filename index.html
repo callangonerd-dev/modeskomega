@@ -12692,8 +12692,7 @@ function mostrarPlanilha(nome,L){L=(L||[]).filter(function(r){return r&&r.some(f
 #sirius-orb.sx-full .tag{letter-spacing:.18em}
 body.sx-jv-on #sirius-orb,body.sx-jv-on #sirius-panel{display:none!important}
 #sr-full{color:#7ff0ff}
-#jv .sx-chat{height:42px;white-space:nowrap;border:1px solid rgba(0,229,255,.45);background:rgba(0,229,255,.08);color:#9ff3ff;border-radius:21px;padding:0 16px;cursor:pointer;font-size:12px;letter-spacing:.15em;flex:none}
-#jv .sx-chat:hover{background:rgba(0,229,255,.25)}
+#jv .sx-chat{display:none!important}
 </style>
 <script id="sirius-unify">
 (function(){
@@ -12742,12 +12741,6 @@ function boot(){
     var b=document.createElement('button');b.className='sr-ic';b.id='sr-full';b.title='Abrir interface full do S.I.R.I.U.S';b.textContent='◉';
     var ref=$('sr-pop')||$('sr-close');head.insertBefore(b,ref);
     b.onclick=function(e){e.stopPropagation();pan.classList.remove('open');window.SIRIUSJ.abrir()};
-  }
-  /* na interface full: botão para voltar ao chat em card */
-  if(!jv.querySelector('.sx-chat')){
-    var c=document.createElement('button');c.className='sx-chat';c.textContent='CHAT ▣';c.title='Voltar ao chat em card';
-    c.onclick=function(){window.SIRIUSJ.fechar();setTimeout(function(){try{window.SIRIUS.abrir()}catch(e){pan.classList.add('open')}},60)};
-    var bar=jv.querySelector('.bar');(bar||jv).appendChild(c);
   }
   /* esconde orb/popup enquanto a full está aberta: um só S.I.R.I.U.S visível */
   function sync(){document.body.classList.toggle('sx-jv-on',jv.classList.contains('on'))}
