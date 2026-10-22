@@ -12692,7 +12692,7 @@ function mostrarPlanilha(nome,L){L=(L||[]).filter(function(r){return r&&r.some(f
 #sirius-orb.sx-full .tag{letter-spacing:.18em}
 body.sx-jv-on #sirius-orb,body.sx-jv-on #sirius-panel{display:none!important}
 #sr-full{color:#7ff0ff}
-#jv .sx-chat{position:absolute;right:168px;top:58px;background:none;border:1px solid rgba(0,229,255,.35);color:#9ff3ff;border-radius:20px;padding:6px 14px;cursor:pointer;font-size:12px;letter-spacing:.15em}
+#jv .sx-chat{position:absolute;right:150px;top:58px;background:none;border:1px solid rgba(0,229,255,.35);color:#9ff3ff;border-radius:20px;padding:6px 14px;cursor:pointer;font-size:12px;letter-spacing:.15em}
 #jv .sx-chat:hover{background:rgba(0,229,255,.15)}
 </style>
 <script id="sirius-unify">
@@ -14214,6 +14214,350 @@ async function diario(){try{var mail=localStorage.getItem('mdk_sync_email')||loc
  var r=await fetch(api,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'syncPush',email:mail,version:v,data:dados,backupDiario:hoje})}).then(function(x){return x.json()});
  if(r&&r.ok){localStorage.setItem('mdk_sync_ver',String(r.version||v));localStorage.setItem(DK,hoje);console.log('[MODESK v225] backup diário enviado ao site')}}catch(e){console.warn('[MODESK v225] backup diário',e)}}
 setTimeout(diario,15000);setInterval(diario,30*60*1000);window.addEventListener('online',diario);
+})();
+</script>
+<script id="mdk-v228-offline-merge">
+/* ===== MODESK v228 · trabalho offline + mesclagem inteligente ao reconectar =====
+   Guarda a "base" (última versão sincronizada). Ao voltar a internet, junta
+   o que foi feito offline com o que mudou na nuvem (Apps Script e Firestore),
+   item a item (pelo id), em vez de um lado apagar o outro. */
+(function(){
+  var BK='mdk.base.v228',PK='mdk.pend.v228',LSK='modesk.pessoal.v7';
+  var META=/^(firebase|sb-|_grecaptcha|mdk\.base|mdk\.pend|modesk\.tk$|mdk\.sync\.ts$|mdk_sync_ver$)/;
+  function P(s){try{return JSON.parse(s)}catch(e){return undefined}}
+  function J(v){return JSON.stringify(v)}
+  function eq(a,b){return J(a)===J(b)}
+  function hasId(a){return Array.isArray(a)&&a.length&&a.every(function(x){return x&&typeof x==='object'&&!Array.isArray(x)&&x.id!=null})}
+  function m3(base,loc,rem){
+    if(eq(loc,rem))return loc;
+    if(loc===undefined&&base===undefined)return rem;
+    if(rem===undefined&&base===undefined)return loc;
+    if(eq(loc,base))return rem;          /* só a nuvem mudou */
+    if(eq(rem,base))return loc;          /* só este aparelho mudou */
+    /* os dois mudaram */
+    if(Array.isArray(loc)&&Array.isArray(rem)){
+      var b=Array.isArray(base)?base:[];
+      if(hasId(loc)||hasId(rem)||hasId(b)){
+        var bm={},lm={},rm={},out=[],seen={};
+        b.forEach(function(x){if(x&&x.id!=null)bm[x.id]=x});
+        loc.forEach(function(x){if(x&&x.id!=null)lm[x.id]=x});
+        rem.forEach(function(x){if(x&&x.id!=null)rm[x.id]=x});
+        function put(id){if(seen[id])return;seen[id]=1;var l=lm[id],r=rm[id],bb=bm[id];
+          if(bb!==undefined&&(l===undefined&&eq(r,bb)||r===undefined&&eq(l,bb)))return; /* apagado de um lado */
+          if(l===undefined)out.push(r);else if(r===undefined)out.push(l);else out.push(m3(bb,l,r))}
+        loc.forEach(function(x){if(x&&x.id!=null)put(x.id);else out.push(x)});
+        rem.forEach(function(x){if(x&&x.id!=null)put(x.id)});
+        return out}
+      /* listas sem id (linhas de planilha): mantém as locais e acrescenta as novas da nuvem */
+      var bs=b.map(J),ls=loc.map(J),res=loc.slice();
+      rem.forEach(function(x){var s=J(x);if(bs.indexOf(s)<0&&ls.indexOf(s)<0)res.push(x)});
+      return res}
+    if(loc&&rem&&typeof loc==='object'&&typeof rem==='object'&&!Array.isArray(loc)&&!Array.isArray(rem)){
+      var bo=(base&&typeof base==='object')?base:{},o={},ks={};
+      Object.keys(loc).concat(Object.keys(rem),Object.keys(bo)).forEach(function(k){ks[k]=1});
+      Object.keys(ks).forEach(function(k){var v=m3(bo[k],loc[k],rem[k]);if(v!==undefined)o[k]=v});
+      return o}
+    return loc; /* conflito simples: vale o que foi digitado neste aparelho */
+  }
+  function mStr(b,l,r){
+    if(l===r)return l; if(l==null&&b==null)return r; if(r==null&&b==null)return l;
+    if(l===b)return r; if(r===b)return l;
+    var pb=P(b),pl=P(l),pr=P(r);
+    if(pl!==undefined&&pr!==undefined&&typeof pl==='object'&&typeof pr==='object')return J(m3(pb,pl,pr));
+    return l;
+  }
+  function base(){return P(localStorage.getItem(BK)||'null')}
+  function setBase(d){try{localStorage.setItem(BK,J(d))}catch(e){}}
+  function local(){var o={};for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(!META.test(k))o[k]=localStorage.getItem(k)}return o}
+  window.mdkMesclar=function(rem){
+    var b=base()||{},l=local(),out={},ks={};
+    Object.keys(rem||{}).concat(Object.keys(b)).forEach(function(k){ks[k]=1});
+    Object.keys(l).forEach(function(k){if(k===LSK||/^modesk|^mdk/.test(k))ks[k]=1});
+    Object.keys(ks).forEach(function(k){if(META.test(k))return;var v=mStr(b[k],l[k],rem?rem[k]:undefined);if(v!=null)out[k]=v});
+    return out};
+  window.mdkMesclarState=function(remState){
+    var b=P((base()||{})[LSK]||'null'),l=(typeof state!=='undefined')?state:P(localStorage.getItem(LSK)||'null');
+    return m3(b,l,remState)};
+
+  /* ---- intercepta o Apps Script: syncPull mescla, syncPush grava a base ---- */
+  var of=window.fetch.bind(window);
+  window.fetch=async function(url,opt){
+    var u=String(url&&url.url||url||''),body=null;
+    if(/script\.google\.com/.test(u)&&opt&&typeof opt.body==='string'){body=P(opt.body)}
+    if(!body||!body.action)return of(url,opt);
+    var res;
+    try{res=await of(url,opt)}catch(e){
+      if(body.action==='syncPush')localStorage.setItem(PK,'1'); /* fica na fila até a internet voltar */
+      pinta();throw e}
+    if(body.action==='syncPush'){
+      try{var j=await res.clone().json();if(j&&j.ok){setBase(body.data);localStorage.removeItem(PK)}}catch(e){}
+      pinta();return res}
+    if(body.action==='syncPull'){
+      try{var r=await res.clone().json();
+        if(r&&r.ok&&r.data){
+          var merged=mdkMesclar(r.data);
+          if(!eq(merged,r.data)){
+            /* há trabalho deste aparelho que a nuvem ainda não tem: envia já a versão unida */
+            var v=Number(r.version||0)+1;
+            try{var pr=await of(url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:J({action:'syncPush',email:body.email,aparelho:body.aparelho,version:v,data:merged})}).then(function(x){return x.json()});
+              if(pr&&pr.ok){r.version=pr.version||v;setBase(merged);localStorage.removeItem(PK)}}catch(e){localStorage.setItem(PK,'1')}
+            r.data=merged;
+            setTimeout(function(){try{typeof toast==='function'&&toast('Trabalho offline unido à nuvem ✔')}catch(e){}},1200);
+          }else setBase(merged);
+          pinta();
+          return new Response(J(r),{status:200,headers:{'Content-Type':'application/json'}})}
+      }catch(e){}
+      return res}
+    return res};
+
+  /* ---- Firestore: ao ler, também mescla ---- */
+  setTimeout(function(){var fl=window.mdkFirestoreLer;if(!fl||fl.__m)return;
+    window.mdkFirestoreLer=async function(){var d=await fl.apply(this,arguments);return d?mdkMesclarState(d):d};window.mdkFirestoreLer.__m=1},3000);
+
+  /* ---- marca alterações feitas sem internet ---- */
+  setTimeout(function(){var s=window.save;if(!s||s.__m)return;window.save=function(){var x=s.apply(this,arguments);if(!navigator.onLine){localStorage.setItem(PK,'1');pinta()}return x};window.save.__m=1;try{save=window.save}catch(e){}},3500);
+
+  /* primeira execução: a base é o estado atual */
+  if(!localStorage.getItem(BK))setBase(local());
+
+  /* ---- selo de status ---- */
+  function pinta(){var e=document.getElementById('mdk228-st');if(!e){if(!document.body)return;e=document.createElement('div');e.id='mdk228-st';
+      e.style.cssText='position:fixed;left:12px;bottom:12px;z-index:99999;font:600 12px system-ui;padding:6px 10px;border-radius:999px;box-shadow:0 2px 8px rgba(0,0,0,.25);pointer-events:none';document.body.appendChild(e)}
+    var off=!navigator.onLine,pend=!!localStorage.getItem(PK);
+    e.style.background=off?'#b45309':pend?'#1d4ed8':'#15803d';e.style.color='#fff';
+    e.textContent=off?'● Offline — salvando no PC':pend?'● Sincronizando alterações…':'● Online — sincronizado';
+    if(!off&&!pend)setTimeout(function(){if(navigator.onLine&&!localStorage.getItem(PK))e.style.opacity='.55'},4000);else e.style.opacity='1'}
+  addEventListener('offline',pinta);
+  addEventListener('online',function(){pinta();setTimeout(function(){try{window.save&&window.save()}catch(e){}},1500)});
+  setTimeout(pinta,1000);setInterval(pinta,10000);
+})();
+</script>
+
+<script id="mdk-v229-fixes">
+/* ===== MODESK v229 · correções de sincronia, ícone, lista prévia, backup e-mail constante e Sirius completo ===== */
+(function(){
+  'use strict';
+  console.log('[MODESK v229] aplicando correções de sincronia multi-dispositivo, ícone, lista prévia e Sirius');
+
+  /* 1. ÍCONE CONSISTENTE (mesmo da versão online/mobile — logo vermelho M) */
+  function setConsistentIcon(){
+    var svg = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="96" fill="#e50914"/><text x="50%" y="65%" font-size="300" font-family="sans-serif" font-weight="bold" fill="white" text-anchor="middle">M</text></svg>');
+    // Favicon
+    var link = document.querySelector('link[rel="icon"]') || document.createElement('link');
+    link.rel = 'icon';
+    link.type = 'image/svg+xml';
+    link.href = svg;
+    if(!link.parentNode) document.head.appendChild(link);
+    // Apple touch
+    var apple = document.querySelector('link[rel="apple-touch-icon"]') || document.createElement('link');
+    apple.rel = 'apple-touch-icon';
+    apple.href = svg;
+    if(!apple.parentNode) document.head.appendChild(apple);
+    // Manifest update if possible
+    try{
+      var man = document.querySelector('link[rel="manifest"]');
+      if(man && man.href.startsWith('data:')){
+        // already has it, but reinforce
+      }
+    }catch(e){}
+    // For Windows taskbar / PWA
+    if('serviceWorker' in navigator){} // placeholder
+    document.title = document.title.replace(/MODESK.*/, 'MODESK PESSOAL — v229');
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', setConsistentIcon);
+  else setConsistentIcon();
+  setTimeout(setConsistentIcon, 1000);
+
+  /* 2. LISTA PRÉVIA — garantir botões +item e cadastrar sempre visíveis */
+  function ensureListaBotoes(){
+    // Patch the paneLista if it exists
+    if(window.cpAddLista && !window._v229ListaPatched){
+      window._v229ListaPatched = true;
+      var origPane = window.paneLista || (function(){}); // may not be global
+      // Force re-render of compras if open
+      setInterval(function(){
+        var pane = document.querySelector('.cp-pane[data-k="lista"].on, #cp-lista, [data-view="pedidos"]');
+        if(!pane) return;
+        if(pane.innerHTML.indexOf('cpAddLista') < 0 && pane.innerHTML.indexOf('+ Adicionar') < 0 && pane.innerHTML.indexOf('Lista previa') >= 0){
+          // inject form if missing
+          var form = document.createElement('div');
+          form.className = 'card v229-lista-form';
+          form.innerHTML = '<h3>＋ Cadastrar item na Lista Prévia</h3>' +
+            '<div class="grid g3"><div><label>Item</label><input id="cp-l-d-v229"/></div><div><label>Qtd</label><input id="cp-l-q-v229" value="1"/></div>' +
+            '<div><label>Unidade</label><input id="cp-l-u-v229" value="UN"/></div></div>' +
+            '<div class="row" style="margin-top:10px"><button class="btn primary" onclick="v229AddItem()">＋ Adicionar item</button> ' +
+            '<button class="btn" onclick="v229CadastrarLista()">Cadastrar lista</button></div>';
+          pane.insertBefore(form, pane.firstChild);
+        }
+      }, 2000);
+    }
+  }
+  window.v229AddItem = function(){
+    var d = (document.getElementById('cp-l-d-v229')||{}).value || prompt('Descrição do item:');
+    if(!d) return;
+    var q = (document.getElementById('cp-l-q-v229')||{}).value || '1';
+    var u = (document.getElementById('cp-l-u-v229')||{}).value || 'UN';
+    if(window.C && window.u){
+      window.C().lista.push({id:window.u(),_manual158:1,desc:d,qtd:q,un:u,status:'pendente',em:Date.now()});
+      if(window.save) window.save();
+      if(window.toast) toast('Item adicionado à lista prévia');
+      if(window.render) window.render();
+    }
+  };
+  window.v229CadastrarLista = function(){
+    var t = prompt('Cole a lista (1 item por linha: descrição ; qtd ; unidade):');
+    if(!t || !window.C) return;
+    var n=0;
+    t.split(/\r?\n/).forEach(function(l){
+      l=l.trim(); if(!l) return;
+      var p=l.split(/[;\t|]/);
+      window.C().lista.push({id:window.u(),desc:(p[0]||'').trim(),qtd:(p[1]||'1').trim(),un:(p[2]||'UN').trim(),status:'pendente',em:Date.now()});
+      n++;
+    });
+    if(n && window.save) window.save();
+    if(window.toast) toast(n+' itens cadastrados');
+    if(window.render) window.render();
+  };
+  setTimeout(ensureListaBotoes, 3000);
+
+  /* 3. BACKUP POR E-MAIL CONSTANTE (a cada inserção significativa, com debounce) */
+  var lastEmail = 0, emailQueue = false;
+  function triggerEmailBackup(reason){
+    var now = Date.now();
+    if(now - lastEmail < 5*60*1000 && !reason) return; // debounce 5 min, unless forced
+    lastEmail = now;
+    emailQueue = true;
+    setTimeout(function(){
+      if(!emailQueue) return;
+      emailQueue = false;
+      try{
+        if(typeof mdkBackupEmail === 'function'){
+          // silent if possible
+          var mail = localStorage.getItem('modesk.backup.email') || localStorage.getItem('mdk_sync_email');
+          if(mail && typeof emailjs !== 'undefined'){
+            var json = JSON.stringify(window.mdkTudoLS ? mdkTudoLS() : {});
+            emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+              to_email: mail, email: mail,
+              timestamp: new Date().toLocaleString('pt-BR'),
+              backup_date: new Date().toISOString(),
+              modulo_nome: 'MODESK PESSOAL - Backup Automático v229',
+              backup_json: json, message: json
+            }, EMAILJS_PUBLIC_KEY).then(function(){
+              console.log('[v229] Backup e-mail enviado:', reason||'auto');
+              if(window.toast) toast('☁ Backup enviado para o e-mail');
+            }).catch(function(e){ console.warn('[v229] falha e-mail', e); });
+          }
+        }
+      }catch(e){ console.warn(e); }
+    }, 2000);
+  }
+  // Hook save
+  setTimeout(function(){
+    var origSave = window.save;
+    if(origSave && !origSave.__v229){
+      window.save = function(){
+        var r = origSave.apply(this, arguments);
+        triggerEmailBackup('save');
+        return r;
+      };
+      window.save.__v229 = true;
+      try{ save = window.save; }catch(e){}
+    }
+  }, 2000);
+  // Also on specific compras changes
+  setInterval(function(){
+    if(window.state && window.state.compras && window.state.compras.lista){
+      var hash = (window.state.compras.lista.length + (window.state.compras.pedidos||[]).length);
+      if(window._v229LastCompHash !== hash){
+        window._v229LastCompHash = hash;
+        triggerEmailBackup('compras-change');
+      }
+    }
+  }, 15000);
+
+  /* 4. SINCRONIZAÇÃO MELHORADA — multi-dispositivo + pull inicial por e-mail */
+  // Force more frequent poll if mdkPoll exists
+  setTimeout(function(){
+    if(window.mdkPoll){
+      clearInterval(window.mdkPollT);
+      window.mdkPollT = setInterval(window.mdkPoll, 8000); // 8s instead of default
+      console.log('[v229] poll de sincronia a cada 8s');
+    }
+  }, 4000);
+
+  // First-time / EXE detection and email pull
+  function isLikelyEXE(){
+    return location.protocol === 'file:' || !!window.electron || !!window.process || navigator.userAgent.indexOf('Electron')>=0 || localStorage.getItem('mdk_is_exe')==='1';
+  }
+  setTimeout(function(){
+    if(isLikelyEXE() && !localStorage.getItem('mdk_v229_pulled')){
+      var mail = localStorage.getItem('modesk.backup.email') || localStorage.getItem('mdk_sync_email');
+      if(!mail){
+        var ask = prompt('Primeiro acesso neste dispositivo (EXE?). Informe o e-mail cadastrado para puxar o backup da nuvem:');
+        if(ask && /^\S+@\S+\.\S+$/.test(ask)){
+          localStorage.setItem('modesk.backup.email', ask);
+          localStorage.setItem('mdk_sync_email', ask);
+          mail = ask;
+        }
+      }
+      if(mail && window.mdkSiriusResync){
+        setTimeout(function(){ try{ window.mdkSiriusResync(); }catch(e){} }, 1500);
+      }
+      localStorage.setItem('mdk_v229_pulled', '1');
+      localStorage.setItem('mdk_is_exe', '1');
+    }
+  }, 2500);
+
+  // Ensure compras are fully included in any state export/sync
+  if(window.mdkTudoLS){
+    var origTudo = window.mdkTudoLS;
+    window.mdkTudoLS = function(){
+      var o = origTudo();
+      try{
+        if(window.state){
+          o['modesk.pessoal.v7'] = JSON.stringify(window.state); // force full
+          o['modesk.compras.extra'] = JSON.stringify(window.state.compras||{});
+        }
+      }catch(e){}
+      return o;
+    };
+  }
+
+  /* 5. SIRIUS COMPLETO — conhecimento total do site e acessos */
+  setTimeout(function(){
+    if(window.SiriusMemory && window.SiriusMemory.adicionar){
+      // Inject site knowledge
+      var knowledge = [
+        'MODESK PESSOAL v229: sistema de gestão de acessos, mapeamento de rede, compras (lista prévia → req interna → pedido), agenda, inventário de itens da sala de som, arquivos, Sirius IA.',
+        'Módulo de compras: lista prévia livre (cadastro manual ou colar), controle de pedidos com status, deadlines, anexos PDF. Sincroniza via Apps Script + Firebase + e-mail.',
+        'Sincronização multi-dispositivo: merge inteligente offline, poll frequente, backup automático por e-mail a cada alteração significativa.',
+        'Ícone oficial: logo vermelho com letra M (mesmo da versão mobile/online).',
+        'Para adicionar item na lista prévia: use o botão + Adicionar item ou cole lista. Botões garantidos na v229.',
+        'Primeiro acesso em EXE: informa e-mail para puxar backup da nuvem.'
+      ];
+      knowledge.forEach(function(k,i){
+        try{ window.SiriusMemory.adicionar('conhecimento-site-v229-'+i, k); }catch(e){}
+      });
+    }
+    // Expand live indexing if possible
+    if(window.state){
+      try{
+        var live = [];
+        if(window.state.compras) live.push('Compras: '+ (window.state.compras.lista||[]).length +' itens lista prévia, '+(window.state.compras.pedidos||[]).length+' pedidos');
+        if(window.state.itens) live.push('Inventário: '+window.state.itens.length+' itens');
+        if(window.state.eventos) live.push('Eventos: '+window.state.eventos.length);
+        if(live.length && window.SiriusMemory) window.SiriusMemory.adicionar('estado-atual-v229', live.join(' | '));
+      }catch(e){}
+    }
+    console.log('[v229] Sirius enriquecido com conhecimento do site');
+  }, 5000);
+
+  // Status indicator for v229
+  setTimeout(function(){
+    var st = document.getElementById('mdk228-st');
+    if(st) st.textContent = st.textContent + ' · v229';
+  }, 6000);
+
 })();
 </script>
 </body>
