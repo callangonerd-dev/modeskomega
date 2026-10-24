@@ -13534,11 +13534,25 @@ if(window.MDKCORE&&MDKCORE.modulos)MDKCORE.modulos.M8={titulo:'Cadastro intelige
 #view .v20-track,#view .v20-mline{border-radius:99px!important}
 #view .card .btn,#view .v20-glass .btn,#view .v20-glass button{border-radius:9px!important}
 </style>
+<script id="mdk-v233-sync-fix">
+/* v233: libera envio à nuvem em qualquer cópia e destrava aparelhos presos em "pendente" */
+(function(){try{
+ if(localStorage.getItem('mdk.fix.v233')!=='1'){
+  var p=localStorage.getItem('modesk.pessoal.v7');
+  if(p&&localStorage.getItem('mdk.payload.pending.v173')==='1'){try{localStorage.setItem('mdk.backup.antes.v233',p)}catch(e){}}
+  localStorage.removeItem('mdk.payload.pending.v173');
+  localStorage.removeItem('mdk.cloud.base.v177');
+  localStorage.setItem('mdk.fix.v233','1');
+  try{mdkBase(0);mdkConflict=false}catch(e){}
+ }
+ localStorage.setItem('modesk.nuvem.escrever','1');
+}catch(e){}})();
+</script>
 <script id="mdk-v206">
 /* ===== MODESK v206 · vozes do Sirius com escolha/teste · aba de configurações estável · cópia baixada não grava na nuvem ===== */
 (function(){
   /* ---------- 1. cópia baixada não envia para a nuvem (só a versão publicada no GitHub) ---------- */
-  function copiaBaixada(){try{if(localStorage.getItem('modesk.nuvem.escrever')==='1')return false;
+  function copiaBaixada(){return false;/* v233: sincroniza em qualquer aparelho/cópia */try{if(localStorage.getItem('modesk.nuvem.escrever')==='1')return false;
     var h=location.hostname||'';if(/(^|\.)github\.io$|githubusercontent\.com$/i.test(h))return false;
     if(window.google&&google.script&&google.script.run)return false;return true}catch(e){return true}}
   window.mdkCopiaBaixada=copiaBaixada;
@@ -14038,7 +14052,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 <script id="mdk-v215-firestore">
 /* ===== MODESK v215 · espelho no Firebase Firestore (reforço da nuvem + fila offline) ===== */
 (function(){
-  var CFG={apiKey:"AIzaSyD1OoDmK0VL5g20BGhi6CYtyQ7rIOT97lQ",authDomain:"modeskpro.firebaseapp.com",projectId:"modeskpro",storageBucket:"modeskpro.firebasestorage.app",messagingSenderId:"460535767375",appId:"1:460535767375:web:377259dfbf0211a5ab653a",measurementId:"G-083HWPSYPT"};
+  var CFG={apiKey:"@secret:GOOGLE_API_KEY",authDomain:"modeskpro.firebaseapp.com",projectId:"modeskpro",storageBucket:"modeskpro.firebasestorage.app",messagingSenderId:"460535767375",appId:"1:460535767375:web:377259dfbf0211a5ab653a",measurementId:"@secret:GOOGLE_ANALYTICS_MEASUREMENT_ID"};
   var V='10.12.2',B='https://www.gstatic.com/firebasejs/'+V+'/',fs=null,F=null,carregando=null,T=null,ultimo='',PARTE=700000;
   function iniciar(){if(carregando)return carregando;carregando=Promise.all([import(B+'firebase-app.js'),import(B+'firebase-firestore.js')]).then(function(m){var app=m[0].initializeApp(CFG,'modesk');F=m[1];
     try{fs=F.initializeFirestore(app,{localCache:F.persistentLocalCache({tabManager:F.persistentMultipleTabManager()})})}catch(e){fs=F.getFirestore(app)}return fs}).catch(function(e){console.warn('Firestore indisponível',e);carregando=null;throw e});return carregando}
