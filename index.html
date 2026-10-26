@@ -1086,7 +1086,16 @@ table{max-width:100%}
 [class*="table-wrap"],[class*="tableWrap"]{overflow-x:auto}
 pre,code{white-space:pre-wrap;overflow-wrap:anywhere}
 @media(max-width:768px){[class*="grid"]:not([class*="grid-cols"]){grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr))!important}}
-</style><script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script></head>
+</style><script id="mdk-v303-local-guard">
+/* v303: somente armazenamento local — bloqueia Apps Script, Firebase e EmailJS */
+(function(){var BL=/script\.google\.com|script\.googleusercontent\.com|googleapis\.com|firebase|gstatic\.com\/firebasejs|emailjs/i;
+window.MDK_SOMENTE_LOCAL=true;
+var f=window.fetch;if(f)window.fetch=function(u,o){var x=typeof u==='string'?u:(u&&u.url)||'';if(BL.test(x))return Promise.reject(new Error('Sincronização desativada (somente local)'));return f.apply(this,arguments)};
+var op=XMLHttpRequest.prototype.open;XMLHttpRequest.prototype.open=function(m,u){if(BL.test(String(u)))throw new Error('Sincronização desativada');return op.apply(this,arguments)};
+var ce=Document.prototype.createElement;Document.prototype.createElement=function(t){var el=ce.apply(this,arguments);if(String(t).toLowerCase()==='script'){var d=Object.getOwnPropertyDescriptor(HTMLScriptElement.prototype,'src');Object.defineProperty(el,'src',{get:function(){return d.get.call(this)},set:function(v){if(BL.test(String(v)))return;d.set.call(this,v)}})}return el};
+window.emailjs={init:function(){},send:function(){return Promise.reject(new Error('Backup por e-mail desativado'))}};
+})();
+</script></head>
 <body>
 <!-- #winbar removido (v12.3) — navegação já existe na barra lateral -->
 <div id="deadline-bar" onclick="go('agenda')"></div>
@@ -14049,36 +14058,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   addEventListener('beforeunload',function(){try{localStorage.setItem(LS,JSON.stringify(state))}catch(e){}});
 })();
 </script>
-<script id="mdk-v215-firestore">
-/* ===== MODESK v215 · espelho no Firebase Firestore (reforço da nuvem + fila offline) ===== */
-(function(){
-  var CFG=(function(){try{var c=JSON.parse(localStorage.getItem('modesk.firebase.cfg')||'null');if(c&&c.apiKey&&c.projectId)return c}catch(e){}return null})();
-  window.mdkFirebaseConfigurar=function(){var cur=CFG?JSON.stringify(CFG):'';var v=prompt('Cole a configuração do Firebase (objeto firebaseConfig do console, em JSON). Deixe vazio para desligar o Firebase:',cur);if(v===null)return;v=v.trim();if(!v){localStorage.removeItem('modesk.firebase.cfg');toast('Firebase desligado');return location.reload()}
-    try{var c=Function('return ('+v.replace(/^[^{]*/,'').replace(/;\s*$/,'')+')')();if(!c||!c.apiKey||!c.projectId||/^@secret/.test(c.apiKey))throw 0;delete c.measurementId;localStorage.setItem('modesk.firebase.cfg',JSON.stringify(c));toast('Firebase configurado');location.reload()}catch(e){alert('Configuração inválida. Copie o bloco firebaseConfig em Configurações do projeto → Seus apps no console do Firebase.')}};
-  function limite(p,ms,msg){return Promise.race([p,new Promise(function(_,rej){setTimeout(function(){rej(new Error(msg||'Firebase não respondeu'))},ms)})])}
-  var V='10.12.2',B='https://www.gstatic.com/firebasejs/'+V+'/',fs=null,F=null,carregando=null,T=null,ultimo='',PARTE=700000;
-  function iniciar(){if(!CFG)return Promise.reject(new Error('Firebase não configurado'));if(carregando)return carregando;carregando=Promise.all([import(B+'firebase-app.js'),import(B+'firebase-firestore.js')]).then(function(m){var app=m[0].initializeApp(CFG,'modesk');F=m[1];
-    try{fs=F.initializeFirestore(app,{localCache:F.persistentLocalCache({tabManager:F.persistentMultipleTabManager()})})}catch(e){fs=F.getFirestore(app)}return fs}).catch(function(e){console.warn('Firestore indisponível',e);carregando=null;throw e});return carregando}
-  async function espelhar(motivo){
-    try{var payload=JSON.stringify({state:state,ls:(window.mdkTudoLS?mdkTudoLS():{})});if(payload===ultimo)return;await iniciar();
-      var n=Math.ceil(payload.length/PARTE)||1,ts=Date.now(),b=F.writeBatch(fs);
-      for(var i=0;i<n;i++)b.set(F.doc(fs,'modesk',GESTOR,'partes',String(i)),{ts:ts,d:payload.slice(i*PARTE,(i+1)*PARTE)});
-      b.set(F.doc(fs,'modesk',GESTOR),{ts:ts,partes:n,tamanho:payload.length,motivo:motivo||'save',aparelho:navigator.userAgent.slice(0,80)});
-      var p=limite(b.commit(),20000,'Firebase não respondeu em 20s');ultimo=payload;
-      p.then(function(){var l=document.getElementById('side-sync-label');if(motivo==='backup')toast('🔥 Backup salvo também no Firebase');window.mdkFirestoreOk=ts}).catch(function(e){ultimo='';console.warn('Firestore',e);if(motivo==='backup')toast('Firebase recusou a gravação: '+(e.code||e.message))});
-    }catch(e){ultimo=''}
-  }
-  function agendar(m){clearTimeout(T);T=setTimeout(function(){espelhar(m)},m==='backup'?50:400)}
-  window.mdkFirestoreLer=async function(){if(!CFG)return null;await limite(iniciar(),15000);var h=await F.getDoc(F.doc(fs,'modesk',GESTOR));if(!h.exists())return null;var meta=h.data(),s='';for(var i=0;i<meta.partes;i++){var p=await F.getDoc(F.doc(fs,'modesk',GESTOR,'partes',String(i)));if(!p.exists()||p.data().ts!==meta.ts)throw new Error('Cópia do Firebase incompleta');s+=p.data().d}var j=JSON.parse(s);if(j&&j.ls&&j.state){try{window.mdkAplicarLS&&mdkAplicarLS(j.ls)}catch(e){}return j.state}return j};
-  window.mdkFirestoreRecuperar=async function(){try{var d=await mdkFirestoreLer();if(!d)return toast('Nada salvo no Firebase ainda');if(!confirm('Substituir os dados deste aparelho pela cópia do Firebase?'))return;state=Object.assign(structuredClone(DEF),d);save();toast('Dados recuperados do Firebase')}catch(e){toast('Falha ao ler o Firebase: '+(e.code||e.message))}};
-
-  var s1=window.save;window.save=function(){var forc=!!window.__mdkForcar;var r=s1.apply(this,arguments);if(!(typeof mdkHydrating!=='undefined'&&mdkHydrating))agendar(forc?'backup':'save');return r};save=window.save;
-  /* dados perdidos no aparelho e sem cache: tenta o Firebase */
-  setTimeout(function(){try{var a=localStorage.getItem(LS);if(a&&a.length>20)return;(window.mdkCacheLer?mdkCacheLer():Promise.resolve(null)).then(function(c){if(c&&c.dados)return;mdkFirestoreLer().then(function(d){if(d){state=Object.assign(structuredClone(DEF),d);try{localStorage.setItem(LS,JSON.stringify(state))}catch(e){}render();toast('Dados recuperados do Firebase')}}).catch(function(){})})}catch(e){}},2500);
-  addEventListener('online',function(){agendar('save')});
-  if(CFG)setTimeout(function(){iniciar().catch(function(){})},1500);
-})();
-</script>
+<!-- v303: espelho Firestore removido (somente localStorage) -->
 <script>
 function mdkChave(o){if(!o||typeof o!=='object')return JSON.stringify(o);return String(o.id||o.uid||((o.titulo||o.nome||o.item||'')+'|'+(o.data||o.inicio||o.ip||'')))}
 function mdkMesclar(atual,novo,modo){var r=Object.assign(structuredClone(DEF),structuredClone(atual||{}));
@@ -14798,6 +14778,18 @@ window.mdk300Pedido=function(id){var c={};try{c=window.comprasDados?comprasDados
 /* marca linhas clicáveis */
 new MutationObserver(function(){document.querySelectorAll('tr:not(.cp300-row), .cp11-card:not(.cp300-row)').forEach(function(tr){if(tr.querySelector('[onclick*="cp11Gaveta("]')){tr.classList.add('cp300-row');tr.title='Clique para ver os detalhes do pedido'}})}).observe(document.documentElement,{childList:true,subtree:true});
 })();
+</script>
+<script id="mdk-v303-local-only">
+(function(){var nada=function(){},rej=function(){return Promise.reject(new Error('Sincronização desativada — dados ficam só neste aparelho'))};
+['connectCloud','pushCloud','mdkAutoNuvem','mdkPoll','mdkPushAgora','mdk173Sync','mdk177Sync','testarDrive','emailPeriodico','triggerEmailBackup','mdkBackupEmail','confirmCloud','mdkResolverConflito'].forEach(function(n){window[n]=nada});
+window.mdkPost=rej;window.mdkApi=rej;window.enviarDrive=rej;window.mdkApiLogin=rej;window.exigirNuvem=function(){return true};
+window.mdkConectarNuvem=function(){toast('Sincronização desativada: os dados ficam salvos só neste aparelho. Use o backup em arquivo para levar a outro aparelho.')};
+window.testarFirestore=window.testarNuvem=function(a){if(a)toast('Modo somente local — sem nuvem')};
+window.mdkAlterarApi=function(){toast('Nuvem desativada nesta versão')};
+try{if(window.mdkPollT)clearInterval(mdkPollT)}catch(e){}try{db=null}catch(e){}
+window.setSyncStatus=function(){window.SYNC_STATUS='local';var l=document.getElementById('side-sync-label'),b=document.getElementById('side-sync-state');if(l)l.textContent='Dados salvos neste aparelho';if(b)b.textContent='LOCAL'};
+window.pintarDrive=function(){var t=document.getElementById('dr-t'),s=document.getElementById('dr-s');if(t)t.textContent='Somente local';if(s)s.textContent='Anexos ficam salvos neste aparelho'};
+try{setSyncStatus()}catch(e){}})();
 </script>
 </body>
 </html>
