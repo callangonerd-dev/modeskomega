@@ -104,7 +104,7 @@ try{var k="modesk.rede.perif.v60",a=JSON.parse(localStorage.getItem(k)||'[]'),H=
 <script>
 /* v157: nuvem via Google Apps Script (substitui Firebase/Firestore) */
 var MDK_HAD_LOCAL_DATA=!!localStorage.getItem('modesk.pessoal.v7');
-var MDK_API='https://script.google.com/macros/s/AKfycbyThYBJgwlITrPeJUPtaEabrPEEGXu2LbmgRtk1rtR5U9-rpI5PhlftfAEpgSFo_Ilp/exec';
+var MDK_API=(function(){var d='https://script.google.com/macros/s/AKfycbyThYBJgwlITrPeJUPtaEabrPEEGXu2LbmgRtk1rtR5U9-rpI5PhlftfAEpgSFo_Ilp/exec';try{var v=localStorage.getItem('modesk.api');if(v&&/^https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec$/.test(v))return v}catch(e){}return d})();window.MDK_API=MDK_API;
 function mdkAlterarApi(){var v=prompt('Cole o endereço do App da Web do Apps Script (termina em /exec):','');if(v===null)return;v=v.trim();if(!/^https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec$/.test(v)){alert('Endereço inválido. Ele deve começar com https://script.google.com/macros/s/ e terminar em /exec');return}localStorage.setItem('modesk.api',v);mdkClearTk();location.reload()}
 function mdkTk(){try{var t=localStorage.getItem('modesk.tk')||sessionStorage.getItem('modesk.tk')||'';return (t==='undefined'||t==='null')?'':t}catch(e){return ''}}
 function mdkSetTk(t,lembrar){try{sessionStorage.setItem('modesk.tk',t);if(lembrar)localStorage.setItem('modesk.tk',t)}catch(e){}}
@@ -2563,7 +2563,7 @@ function vConfig(){
      <div class="cf-live"><span class="live-dot sync" id="cf-live-dot"></span>
        <span><b id="cf-live-t">Verificando</b><small id="cf-live-s">Testando a conexão com o Apps Script</small></span></div>
      <div class="row" style="margin-top:12px"><button class="btn primary" onclick="salvarFb()">Conectar</button>
-     <button class="btn" onclick="testarFirestore(true)">⟳ Testar conexão</button><button class="btn" onclick="mdkResolverConflito()">Resolver conflito</button>
+     <button class="btn" onclick="testarFirestore(true)">⟳ Testar conexão</button><button class="btn" onclick="mdkResolverConflito()">Resolver conflito</button><button class="btn" onclick="mdkFirebaseConfigurar&&mdkFirebaseConfigurar()">Firebase</button>
      <span class="dim" id="cf-st">${db?'conectado ao Apps Script':'offline (local)'}</span></div></div>
    <div class="card"><h3>${icon('drive')} Armazenamento (Google Drive)</h3><p class="dim">Arquivos no Google Drive · cópias locais liberadas após confirmação. Cadastros e links permanecem no aparelho.</p>
      <div class="cf-live"><span class="live-dot sync" id="dr-dot"></span>
@@ -14052,28 +14052,31 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 <script id="mdk-v215-firestore">
 /* ===== MODESK v215 · espelho no Firebase Firestore (reforço da nuvem + fila offline) ===== */
 (function(){
-  var CFG={apiKey:"@secret:GOOGLE_API_KEY",authDomain:"modeskpro.firebaseapp.com",projectId:"modeskpro",storageBucket:"modeskpro.firebasestorage.app",messagingSenderId:"460535767375",appId:"1:460535767375:web:377259dfbf0211a5ab653a",measurementId:"@secret:GOOGLE_ANALYTICS_MEASUREMENT_ID"};
+  var CFG=(function(){try{var c=JSON.parse(localStorage.getItem('modesk.firebase.cfg')||'null');if(c&&c.apiKey&&c.projectId)return c}catch(e){}return null})();
+  window.mdkFirebaseConfigurar=function(){var cur=CFG?JSON.stringify(CFG):'';var v=prompt('Cole a configuração do Firebase (objeto firebaseConfig do console, em JSON). Deixe vazio para desligar o Firebase:',cur);if(v===null)return;v=v.trim();if(!v){localStorage.removeItem('modesk.firebase.cfg');toast('Firebase desligado');return location.reload()}
+    try{var c=Function('return ('+v.replace(/^[^{]*/,'').replace(/;\s*$/,'')+')')();if(!c||!c.apiKey||!c.projectId||/^@secret/.test(c.apiKey))throw 0;delete c.measurementId;localStorage.setItem('modesk.firebase.cfg',JSON.stringify(c));toast('Firebase configurado');location.reload()}catch(e){alert('Configuração inválida. Copie o bloco firebaseConfig em Configurações do projeto → Seus apps no console do Firebase.')}};
+  function limite(p,ms,msg){return Promise.race([p,new Promise(function(_,rej){setTimeout(function(){rej(new Error(msg||'Firebase não respondeu'))},ms)})])}
   var V='10.12.2',B='https://www.gstatic.com/firebasejs/'+V+'/',fs=null,F=null,carregando=null,T=null,ultimo='',PARTE=700000;
-  function iniciar(){if(carregando)return carregando;carregando=Promise.all([import(B+'firebase-app.js'),import(B+'firebase-firestore.js')]).then(function(m){var app=m[0].initializeApp(CFG,'modesk');F=m[1];
+  function iniciar(){if(!CFG)return Promise.reject(new Error('Firebase não configurado'));if(carregando)return carregando;carregando=Promise.all([import(B+'firebase-app.js'),import(B+'firebase-firestore.js')]).then(function(m){var app=m[0].initializeApp(CFG,'modesk');F=m[1];
     try{fs=F.initializeFirestore(app,{localCache:F.persistentLocalCache({tabManager:F.persistentMultipleTabManager()})})}catch(e){fs=F.getFirestore(app)}return fs}).catch(function(e){console.warn('Firestore indisponível',e);carregando=null;throw e});return carregando}
   async function espelhar(motivo){
     try{var payload=JSON.stringify({state:state,ls:(window.mdkTudoLS?mdkTudoLS():{})});if(payload===ultimo)return;await iniciar();
       var n=Math.ceil(payload.length/PARTE)||1,ts=Date.now(),b=F.writeBatch(fs);
       for(var i=0;i<n;i++)b.set(F.doc(fs,'modesk',GESTOR,'partes',String(i)),{ts:ts,d:payload.slice(i*PARTE,(i+1)*PARTE)});
       b.set(F.doc(fs,'modesk',GESTOR),{ts:ts,partes:n,tamanho:payload.length,motivo:motivo||'save',aparelho:navigator.userAgent.slice(0,80)});
-      var p=b.commit();ultimo=payload;
+      var p=limite(b.commit(),20000,'Firebase não respondeu em 20s');ultimo=payload;
       p.then(function(){var l=document.getElementById('side-sync-label');if(motivo==='backup')toast('🔥 Backup salvo também no Firebase');window.mdkFirestoreOk=ts}).catch(function(e){ultimo='';console.warn('Firestore',e);if(motivo==='backup')toast('Firebase recusou a gravação: '+(e.code||e.message))});
     }catch(e){ultimo=''}
   }
   function agendar(m){clearTimeout(T);T=setTimeout(function(){espelhar(m)},m==='backup'?50:400)}
-  window.mdkFirestoreLer=async function(){await iniciar();var h=await F.getDoc(F.doc(fs,'modesk',GESTOR));if(!h.exists())return null;var meta=h.data(),s='';for(var i=0;i<meta.partes;i++){var p=await F.getDoc(F.doc(fs,'modesk',GESTOR,'partes',String(i)));if(!p.exists()||p.data().ts!==meta.ts)throw new Error('Cópia do Firebase incompleta');s+=p.data().d}var j=JSON.parse(s);if(j&&j.ls&&j.state){try{window.mdkAplicarLS&&mdkAplicarLS(j.ls)}catch(e){}return j.state}return j};
+  window.mdkFirestoreLer=async function(){if(!CFG)return null;await limite(iniciar(),15000);var h=await F.getDoc(F.doc(fs,'modesk',GESTOR));if(!h.exists())return null;var meta=h.data(),s='';for(var i=0;i<meta.partes;i++){var p=await F.getDoc(F.doc(fs,'modesk',GESTOR,'partes',String(i)));if(!p.exists()||p.data().ts!==meta.ts)throw new Error('Cópia do Firebase incompleta');s+=p.data().d}var j=JSON.parse(s);if(j&&j.ls&&j.state){try{window.mdkAplicarLS&&mdkAplicarLS(j.ls)}catch(e){}return j.state}return j};
   window.mdkFirestoreRecuperar=async function(){try{var d=await mdkFirestoreLer();if(!d)return toast('Nada salvo no Firebase ainda');if(!confirm('Substituir os dados deste aparelho pela cópia do Firebase?'))return;state=Object.assign(structuredClone(DEF),d);save();toast('Dados recuperados do Firebase')}catch(e){toast('Falha ao ler o Firebase: '+(e.code||e.message))}};
 
   var s1=window.save;window.save=function(){var forc=!!window.__mdkForcar;var r=s1.apply(this,arguments);if(!(typeof mdkHydrating!=='undefined'&&mdkHydrating))agendar(forc?'backup':'save');return r};save=window.save;
   /* dados perdidos no aparelho e sem cache: tenta o Firebase */
   setTimeout(function(){try{var a=localStorage.getItem(LS);if(a&&a.length>20)return;(window.mdkCacheLer?mdkCacheLer():Promise.resolve(null)).then(function(c){if(c&&c.dados)return;mdkFirestoreLer().then(function(d){if(d){state=Object.assign(structuredClone(DEF),d);try{localStorage.setItem(LS,JSON.stringify(state))}catch(e){}render();toast('Dados recuperados do Firebase')}}).catch(function(){})})}catch(e){}},2500);
   addEventListener('online',function(){agendar('save')});
-  setTimeout(function(){iniciar().catch(function(){})},1500);
+  if(CFG)setTimeout(function(){iniciar().catch(function(){})},1500);
 })();
 </script>
 <script>
@@ -14117,12 +14120,23 @@ setInterval(function(){var i=document.getElementById('mdk-bk-mail');if(i&&!i.dat
 async function mdkBackupEmail(){var mail=localStorage.getItem(MDK_MAIL_KEY);var i=document.getElementById('mdk-bk-mail');if(i&&i.value.trim()&&i.value.trim()!==mail){mail=i.value.trim()}
  if(!mail){mail=prompt('Informe o e-mail de destino do backup:');if(!mail)return}
  if(!/^\S+@\S+\.\S+$/.test(mail))return mdkT('E-mail inválido');localStorage.setItem(MDK_MAIL_KEY,mail);
- if(typeof emailjs==='undefined')return mdkT('Erro: EmailJS não carregou (sem internet?)');
- var d=window.mdkTudoLS?mdkTudoLS():{};
- var ts=new Date().toLocaleString('pt-BR'),json=JSON.stringify(d);
- mdkT('Enviando backup...');
- try{await emailjs.send(EMAILJS_SERVICE_ID,EMAILJS_TEMPLATE_ID,{to_email:mail,email:mail,timestamp:ts,backup_date:ts,modulo_nome:"MODESK Pessoal - Backup Completo",backup_json:json,message:json},EMAILJS_PUBLIC_KEY);mdkT('✔ Backup enviado para '+mail)}
- catch(e){mdkT('✖ Falha no envio: '+((e&&(e.text||e.message))||'erro'))}}
+ if(!navigator.onLine)return mdkT('Sem internet — tente novamente quando reconectar');
+ var d=window.mdkTudoLS?mdkTudoLS():{};var agora=new Date(),ts=agora.toLocaleString('pt-BR'),json=JSON.stringify(d);
+ var nome='MODESK_backup_'+agora.toISOString().slice(0,16).replace(/[:T]/g,'-')+'.json';
+ mdkT('Enviando backup ('+Math.round(json.length/1024)+' KB)...');
+ /* 1) Apps Script: envia o JSON como ANEXO (sem limite de 50 KB do EmailJS) */
+ var erroGs='';
+ try{var api=localStorage.getItem('modesk.api')||window.MDK_API;var c=new AbortController(),t=setTimeout(function(){c.abort()},60000);
+  var r=await fetch(api,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'emailBackup',to:mail,filename:nome,timestamp:ts,data:json}),redirect:'follow',signal:c.signal}).then(function(x){if(!x.ok)throw new Error('Apps Script '+x.status);return x.json()}).finally(function(){clearTimeout(t)});
+  if(r&&r.ok){localStorage.setItem('modesk.backup.email.ultimo',agora.toISOString());return mdkT('✔ Backup enviado para '+mail+' (anexo '+nome+')')}
+  erroGs=(r&&r.error)||'resposta inválida'}catch(e){erroGs=e.name==='AbortError'?'tempo esgotado':(e.message||'erro')}
+ /* 2) Reserva: EmailJS (só cabe backup pequeno) */
+ if(typeof emailjs==='undefined')return mdkT('✖ Falha no envio: '+erroGs+' — e o EmailJS não carregou. Use "Fazer backup" para baixar o arquivo.');
+ var cabe=json.length<45000;
+ try{await emailjs.send(EMAILJS_SERVICE_ID,EMAILJS_TEMPLATE_ID,{to_email:mail,email:mail,timestamp:ts,backup_date:ts,modulo_nome:"MODESK Pessoal - Backup Completo",backup_json:cabe?json:'(backup grande demais para o EmailJS — '+Math.round(json.length/1024)+' KB. Atualize o Apps Script para receber o anexo.)',message:cabe?json:'Backup grande demais para envio pelo EmailJS.'},EMAILJS_PUBLIC_KEY);
+  if(cabe){localStorage.setItem('modesk.backup.email.ultimo',agora.toISOString());mdkT('✔ Backup enviado para '+mail+' (via EmailJS)')}
+  else{mdkT('⚠ Apps Script falhou ('+erroGs+'). Aviso enviado, mas o backup é grande demais para o EmailJS — baixando o arquivo.');try{fazerBackup()}catch(x){}}}
+ catch(e){mdkT('✖ Falha no envio: '+erroGs+' / EmailJS: '+((e&&(e.text||e.message))||'erro'))}}
 </script>
 <style>
 /* v223 · tela de sincronia no visual do MODESK (usa os tokens do site) */
@@ -14674,5 +14688,116 @@ console.log('[MODESK v234] botão CHAT movido para a barra do Sirius em tela che
 }
 @media (max-width:420px){#jv #jv-x{font-size:0!important;width:48px;padding:0!important}#jv #jv-x::after{content:"✕";font-size:20px}}
 </style>
+<style id="mdk-v300-leitura">
+/* v300: agenda mais legível + popups de detalhes */
+.ag6 .agenda-week span{font-size:12px!important;letter-spacing:.06em;color:var(--fg)!important;opacity:.75}
+.ag6 .agenda-day{height:124px!important;min-height:124px!important;padding:10px 8px!important}
+.ag6 .agenda-day .dn{font-size:14px!important;font-weight:800!important;margin-bottom:6px}
+.agenda-chip{font-size:12px!important;line-height:1.45!important;padding:3px 7px!important;margin-top:4px!important;border-radius:5px!important;font-weight:600;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.25);transition:filter .15s,transform .15s}
+.agenda-chip:hover{filter:brightness(1.15);transform:translateX(2px)}
+.agenda-more{font-size:11px!important;font-weight:700;margin-top:3px;display:block}
+.agenda-item{padding:12px 12px!important;gap:12px!important;cursor:pointer;border-radius:10px!important;transition:background .15s,border-color .15s}
+.agenda-item:hover{background:var(--bg3,rgba(255,255,255,.06))!important;border-color:var(--tech-cyan,#56d9ff)!important}
+.agenda-item b{font-size:15px!important;line-height:1.35;white-space:normal!important}
+.agenda-item small{font-size:12.5px!important;line-height:1.45;margin-top:4px!important;color:var(--mut)!important;white-space:normal!important}
+.agenda-item .bar{min-height:44px!important;width:5px}
+.ag6 .agenda-side h3,.ag6 .agenda-side h4{font-size:16px!important}
+@media(max-width:850px){.ag6 .agenda-day{height:100px!important;min-height:100px!important}}
+@media(max-width:480px){.ag6 .agenda-day{height:80px!important;min-height:80px!important}.agenda-chip{font-size:10px!important;padding:1px 3px!important}}
+.ev-row-click,tr.cp300-row{cursor:pointer}
+tr.cp300-row:hover>td{background:rgba(86,217,255,.07)}
+.cp11-card.cp300-row{cursor:pointer;transition:border-color .15s,transform .15s}.cp11-card.cp300-row:hover{border-color:var(--tech-cyan,#56d9ff)!important;transform:translateY(-2px)}
+/* popup central */
+#mdk300-back{position:fixed;inset:0;background:rgba(0,0,0,.62);backdrop-filter:blur(3px);z-index:99998;opacity:0;pointer-events:none;transition:opacity .2s}
+#mdk300-back.on{opacity:1;pointer-events:auto}
+#mdk300-pop{position:fixed;z-index:99999;background:var(--bg1,#111827);color:var(--fg,#eee);border:1px solid var(--line2,rgba(255,255,255,.15));box-shadow:0 30px 80px rgba(0,0,0,.55);display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .2s,transform .25s}
+#mdk300-pop.modal-c{left:50%;top:50%;width:min(620px,94vw);max-height:88vh;border-radius:14px;transform:translate(-50%,-46%)}
+#mdk300-pop.modal-c.on{transform:translate(-50%,-50%)}
+#mdk300-pop.drawer-r{top:0;right:0;height:100vh;width:min(520px,96vw);border-radius:14px 0 0 14px;transform:translateX(100%)}
+#mdk300-pop.drawer-r.on{transform:none}
+#mdk300-pop.on{opacity:1;pointer-events:auto}
+.m3-head{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;padding:20px 22px 14px;border-bottom:1px solid var(--line,rgba(255,255,255,.1))}
+.m3-kick{font:700 10.5px/1 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--mut,#9aa)}
+.m3-head h3{margin:6px 0 4px;font-size:21px;line-height:1.25}
+.m3-sub{font-size:13px;color:var(--mut,#9aa)}
+.m3-body{padding:16px 22px 20px;overflow:auto;flex:1}
+.m3-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.m3-f{border:1px solid var(--line,rgba(255,255,255,.1));border-radius:9px;padding:10px 12px;background:rgba(255,255,255,.025);min-width:0}
+.m3-f.wide{grid-column:1/-1}
+.m3-f small{display:block;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut,#9aa);margin-bottom:4px}
+.m3-f div{font-size:14.5px;line-height:1.45;word-break:break-word;white-space:pre-wrap}
+.m3-sec{margin:18px 0 8px;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--mut,#9aa)}
+.m3-foot{display:flex;gap:8px;justify-content:flex-end;padding:14px 22px;border-top:1px solid var(--line,rgba(255,255,255,.1));flex-wrap:wrap}
+.m3-badge{display:inline-block;padding:3px 9px;border-radius:999px;font-size:11.5px;font-weight:700;background:rgba(86,217,255,.15);color:var(--tech-cyan,#56d9ff);margin-right:6px}
+.m3-hist div{padding:8px 0;border-bottom:1px dashed var(--line,rgba(255,255,255,.1));font-size:13px}
+.m3-hist small{display:block;color:var(--mut,#9aa);font-size:11px}
+@media(max-width:560px){.m3-grid{grid-template-columns:1fr}}
+</style>
+<script id="mdk-v300-detalhes">
+(function(){
+'use strict';
+function S(){try{return state||{}}catch(e){return window.state||{}}}
+function E(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function F(d){var m=String(d||'').match(/^(\d{4})-(\d{2})-(\d{2})/);return m?m[3]+'/'+m[2]+'/'+m[1]:d}
+var LABEL={titulo:'Título',cliente:'Cliente',local:'Local',sala:'Sala',data:'Data',hora:'Início',horaFim:'Término',status:'Status',resp:'Responsável',responsavel:'Responsável',contato:'Contato',telefone:'Telefone',email:'E-mail',publico:'Público',participantes:'Participantes',servicos:'Serviços',equipamentos:'Equipamentos',info:'Observações',obs:'Observações',desc:'Descrição',tipo:'Tipo',prazo:'Prazo',origem:'Origem',fonte:'Fonte',
+ item:'Item',qtd:'Quantidade',quant:'Quantidade',un:'Unidade',forn:'Fornecedor',fornecedor:'Fornecedor',ri:'Nº RI',rc:'Nº RC',pc:'Nº Pedido',pedido:'Nº Pedido',valor:'Valor',total:'Valor total',solicitante:'Solicitante',setor:'Setor',centro:'Centro de custo',proj:'Ata/OS / Projeto',catRi:'Tipo req. interna',catRc:'Tipo req. compra',contato:'Contato para cobrar',mxm:'Código MXM',num:'Número',cat:'Categoria',em:'Lançado em',deadline:'Previsão de entrega',criadoEm:'Criado em',recebidoEm:'Recebido em',arquivadoEm:'Arquivado em',statusTxt:'Última atualização',nf:'Nota fiscal',categoria:'Categoria',prioridade:'Prioridade',concluidoEm:'Concluído em'};
+var SKIP=/^(em|id|anexo|arquivo|hist|paths|evId|eventoId|_.*|k|base|closed|encerrado|feito|atividades|docs)$/;
+var WIDE=/^(info|obs|desc|servicos|equipamentos|statusTxt|titulo|item)$/;
+function val(k,v){if(v==null||v==='')return '';if(Array.isArray(v))v=v.map(function(x){return typeof x==='object'?(x.nome||x.titulo||x.desc||JSON.stringify(x)):x}).join(', ');else if(typeof v==='object')return '';else if(typeof v==='boolean')v=v?'Sim':'Não';
+ if(/^(data|prazo|deadline|criadoEm|recebidoEm|arquivadoEm|concluidoEm)$/.test(k)&&/^\d{4}-\d{2}-\d{2}$/.test(String(v)))v=F(v);return String(v)}
+function campos(o,ordem){var keys=ordem.filter(function(k){return k in o}).concat(Object.keys(o).filter(function(k){return ordem.indexOf(k)<0}));
+ return '<div class="m3-grid">'+keys.filter(function(k){return !SKIP.test(k)}).map(function(k){var v=val(k,o[k]);if(!v)return '';return '<div class="m3-f'+(WIDE.test(k)?' wide':'')+'"><small>'+E(LABEL[k]||k.replace(/([A-Z])/g,' $1'))+'</small><div>'+E(v)+'</div></div>'}).join('')+'</div>'}
+function els(){var b=document.getElementById('mdk300-back'),p=document.getElementById('mdk300-pop');
+ if(!b){b=document.createElement('div');b.id='mdk300-back';b.onclick=fechar;document.body.appendChild(b)}
+ if(!p){p=document.createElement('div');p.id='mdk300-pop';p.setAttribute('role','dialog');p.setAttribute('aria-modal','true');document.body.appendChild(p)}return [b,p]}
+function abrir(cls,html){var e=els();e[1].className=cls;e[1].innerHTML=html;requestAnimationFrame(function(){e[0].classList.add('on');e[1].classList.add('on');var c=e[1].querySelector('.m3-x');if(c)c.focus()})}
+function fechar(){var b=document.getElementById('mdk300-back'),p=document.getElementById('mdk300-pop');if(b)b.classList.remove('on');if(p)p.classList.remove('on')}
+window.mdk300Fechar=fechar;
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){var p=document.getElementById('mdk300-pop');if(p&&p.classList.contains('on'))fechar()}});
+function head(kick,tit,sub){return '<div class="m3-head"><div><div class="m3-kick">'+E(kick)+'</div><h3>'+E(tit)+'</h3>'+(sub?'<div class="m3-sub">'+sub+'</div>':'')+'</div><button class="btn sm m3-x" aria-label="Fechar" onclick="mdk300Fechar()">✕</button></div>'}
+
+/* ---------- AGENDA / EVENTOS ---------- */
+function achar(k){var s=S(),t=k.charAt(0),id=k.slice(1);
+ if(t==='e')return {tipo:'Evento',o:(s.eventos||[]).find(function(x){return String(x.id)===id})};
+ if(t==='a')return {tipo:'Atividade',o:(s.atividades||[]).find(function(x){return String(x.id)===id})};
+ if(t==='l')return {tipo:'Lembrete',o:(s.lembretes||[]).find(function(x){return String(x.id||x.titulo)===id})};return null}
+window.mdk300Evento=function(k){var r=achar(k);if(!r||!r.o)return false;var o=r.o,quando=[o.data||o.prazo?F(o.data||o.prazo):'',o.hora?(o.hora+(o.horaFim?' – '+o.horaFim:'')):'Dia inteiro'].filter(Boolean).join(' · ');
+ var sub=(o.status?'<span class="m3-badge">'+E(o.status)+'</span>':'')+E(quando);
+ var html=head(r.tipo,o.titulo||o.cliente||o.texto||r.tipo,sub)+'<div class="m3-body">';
+ if(r.tipo==='Evento'){html+='<div class="m3-sec">Local & cliente</div>'+campos({local:o.local||o.sala,cliente:o.cliente,resp:o.resp||o.responsavel,contato:o.contato,telefone:o.telefone,email:o.email,publico:o.publico||o.participantes},[])+'<div class="m3-sec">Detalhes</div>';
+  var resto={};Object.keys(o).forEach(function(x){if(!/^(local|sala|cliente|resp|responsavel|contato|telefone|email|publico|participantes|titulo|status)$/.test(x))resto[x]=o[x]});html+=campos(resto,['data','hora','horaFim','servicos','info']);
+  var rel=(S().atividades||[]).filter(function(a){return a.evId===o.id||a.eventoId===o.id});
+  if(rel.length)html+='<div class="m3-sec">Tarefas ligadas</div><div class="m3-hist">'+rel.map(function(a){return '<div>'+(a.feito?'✅ ':'⬜ ')+E(a.titulo||'')+'<small>'+E(F(a.prazo||''))+'</small></div>'}).join('')+'</div>';
+ }else html+=campos(o,['data','prazo','hora','tipo','desc']);
+ if(o.anexo&&o.anexo.nome)html+='<div class="m3-sec">Anexo</div><div class="m3-f wide"><div>📎 '+E(o.anexo.nome)+'</div></div>';
+ html+='</div><div class="m3-foot"><button class="btn" onclick="mdk300Fechar()">Fechar</button>'+(r.tipo==='Evento'&&window.verEvento?'<button class="btn primary" onclick="mdk300Fechar();verEvento(\''+E(o.id)+'\')">Editar</button>':(window.verAtiv?'<button class="btn primary" onclick="mdk300Fechar();verAtiv(\''+E(o.id)+'\')">Editar</button>':''))+'</div>';
+ abrir('modal-c',html);return true};
+var oldAbrir=window.mdkAgAbrir;window.mdkAgAbrir=function(k){if(!window.mdk300Evento(k)&&oldAbrir)oldAbrir(k)};
+function chipKey(chip){var day=chip.closest('.agenda-day');var m=day&&(day.getAttribute('onclick')||'').match(/\d{4}-\d{2}-\d{2}/);if(!m)return null;
+ var t=(chip.getAttribute('title')||chip.textContent||'').trim();var its=[];try{its=(window.mdkTodosItens?mdkTodosItens():[])}catch(e){}
+ var day_=its.filter(function(x){return x.data===m[0]});var x=day_.find(function(i){return i.titulo===t})||day_.find(function(i){return t.indexOf(i.titulo)>=0});
+ if(!x){var idx=Array.prototype.indexOf.call(chip.parentNode.querySelectorAll('.agenda-chip'),chip);x=day_[idx]}return x?x.k:null}
+document.addEventListener('click',function(e){
+ var chip=e.target.closest&&e.target.closest('.agenda-chip');
+ if(chip){var k=chipKey(chip);if(k){e.preventDefault();e.stopPropagation();window.mdkAgAbrir(k)}return}
+ var it=e.target.closest&&e.target.closest('.agenda-item');
+ if(it&&!e.target.closest('button,input,select,a,label,textarea')){var b=it.querySelector('[onclick*="mdkAgAbrir"]');var m=b&&b.getAttribute('onclick').match(/mdkAgAbrir\('([^']+)'\)/);if(m){e.preventDefault();window.mdkAgAbrir(m[1])}return}
+ /* ---------- COMPRAS ---------- */
+ var tr=e.target.closest&&e.target.closest('tr, .cp11-card');
+ if(tr&&!e.target.closest('button,input,select,a,label,textarea,[contenteditable]')){var g=tr.querySelector('[onclick*="cp11Gaveta("]');var mm=g&&g.getAttribute('onclick').match(/cp11Gaveta\('([^']+)'\)/);if(mm){e.preventDefault();window.mdk300Pedido(mm[1])}}
+},true);
+window.mdk300Pedido=function(id){var c={};try{c=window.comprasDados?comprasDados():(S().compras||{})}catch(e){}
+ var all=[].concat(c.pedidos||[],c.arquivados||[],c.lista||[],c.reqs||[],c.internas||[]);var p=all.find(function(x){return x.id===id});if(!p){if(window.cp11Gaveta)cp11Gaveta(id);return}
+ var sub=(p.status?'<span class="m3-badge">'+E(p.status)+'</span>':'')+E([p.ri||p.rc||p.pc||'',p.forn||''].filter(Boolean).join(' · '));
+ var html=head(p.arquivadoEm?'Pedido realizado':'Pedido de compra',p.desc||p.item||'Pedido',sub)+'<div class="m3-body"><div class="m3-sec">Dados do pedido</div>'+
+  campos(p,['item','desc','qtd','quant','un','proj','ri','catRi','rc','catRc','pc','forn','fornecedor','contato','data','valor','total','solicitante','setor','deadline','criadoEm','recebidoEm','arquivadoEm','statusTxt']);
+ var docs=Object.keys(p.paths||{}).filter(function(k){return p.paths[k]});if(docs.length)html+='<div class="m3-sec">Documentos</div><div class="m3-hist">'+docs.map(function(k){return '<div>📄 '+E(k.toUpperCase())+'<small>'+E(p.paths[k])+'</small></div>'}).join('')+'</div>';
+ var h=(p.hist||[]).slice().reverse();html+='<div class="m3-sec">Histórico</div>'+(h.length?'<div class="m3-hist">'+h.map(function(x){return '<div><b>'+E(x.st||'')+'</b> '+E(x.txt||'')+'<small>'+E(x.em||'')+'</small></div>'}).join('')+'</div>':'<p class="m3-sub">Sem histórico ainda.</p>');
+ html+='</div><div class="m3-foot"><button class="btn" onclick="mdk300Fechar()">Fechar</button>'+(window.cp11Gaveta?'<button class="btn primary" onclick="mdk300Fechar();cp11Gaveta(\''+E(p.id)+'\')">Atualizar status</button>':'')+'</div>';
+ abrir('drawer-r',html)};
+/* marca linhas clicáveis */
+new MutationObserver(function(){document.querySelectorAll('tr:not(.cp300-row), .cp11-card:not(.cp300-row)').forEach(function(tr){if(tr.querySelector('[onclick*="cp11Gaveta("]')){tr.classList.add('cp300-row');tr.title='Clique para ver os detalhes do pedido'}})}).observe(document.documentElement,{childList:true,subtree:true});
+})();
+</script>
 </body>
 </html>
