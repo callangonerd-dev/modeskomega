@@ -1088,7 +1088,7 @@ pre,code{white-space:pre-wrap;overflow-wrap:anywhere}
 @media(max-width:768px){[class*="grid"]:not([class*="grid-cols"]){grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr))!important}}
 </style><script id="mdk-v303-local-guard">
 /* v303: somente armazenamento local — bloqueia serviços externos de sincronização */
-(function(){var BL=/script\.google\.com|script\.googleusercontent\.com|googleapis\.com/i;
+(function(){var BL=/script\.google\.com|script\.googleusercontent\.com/i;
 window.MDK_SOMENTE_LOCAL=true;
 var f=window.fetch;if(f)window.fetch=function(u,o){var x=typeof u==='string'?u:(u&&u.url)||'';if(BL.test(x))return Promise.reject(new Error('Sincronização desativada (somente local)'));return f.apply(this,arguments)};
 var op=XMLHttpRequest.prototype.open;XMLHttpRequest.prototype.open=function(m,u){if(BL.test(String(u)))throw new Error('Sincronização desativada');return op.apply(this,arguments)};
@@ -14614,6 +14614,86 @@ try{if(window.mdkPollT)clearInterval(mdkPollT)}catch(e){}try{db=null}catch(e){}
 window.setSyncStatus=function(){window.SYNC_STATUS='local';var l=document.getElementById('side-sync-label'),b=document.getElementById('side-sync-state');if(l)l.textContent='Dados salvos neste aparelho';if(b)b.textContent='LOCAL'};
 window.pintarDrive=function(){var t=document.getElementById('dr-t'),s=document.getElementById('dr-s');if(t)t.textContent='Somente local';if(s)s.textContent='Anexos ficam salvos neste aparelho'};
 try{setSyncStatus()}catch(e){}})();
+</script>
+<script>/* MODESK Firebase Sync automático — sem login, sem botão */
+(function () {
+  var cfg = {
+    apiKey: "AIzaSyD1OoDmK0VL5g20BGhi6CYtyQ7rIOT97lQ",
+    authDomain: "modeskpro.firebaseapp.com",
+    projectId: "modeskpro",
+    storageBucket: "modeskpro.firebasestorage.app",
+    messagingSenderId: "460535767375",
+    appId: "1:460535767375:web:e0196ff5ae3d2c14ab653a",
+    measurementId: "G-WBGXKEB9YN"
+  };
+  var SPACE = "marciooliveira"; /* todos os aparelhos usam este mesmo espaço */
+  var CHUNK = 700000, IGNORE = /^(firebase|mdk_sync_|modesk\.tk$|modesk\.trusted$|mdk\.payload\.pending|mdk\.cloud\.base)/;
+  var ls = window.localStorage, origSet = ls.setItem.bind(ls), origRem = ls.removeItem.bind(ls);
+  var db, ready = false, applying = false, pending = {}, timer, lastPush = {};
+  var deviceId = ls.getItem("mdk_sync_device") || (Math.random().toString(36).slice(2) + Date.now());
+  origSet("mdk_sync_device", deviceId);
+  function load(src) { return new Promise(function (ok, no) { var s = document.createElement("script"); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); }); }
+  var V = "https://www.gstatic.com/firebasejs/10.12.0/";
+  function status(txt, badge) {
+    var l = document.getElementById("side-sync-label"), b = document.getElementById("side-sync-state");
+    if (l) l.textContent = txt; if (b) b.textContent = badge;
+    window.SYNC_STATUS = badge === "NUVEM" ? "online" : badge === "SYNC" ? "sync" : badge === "ERRO" ? "erro" : "local";
+    var box = document.querySelector(".side-system"); if (box) box.setAttribute("data-estado", window.SYNC_STATUS);
+  }
+  window.setSyncStatus = function () {};
+  function col() { return db.collection("modesk_shared").doc(SPACE).collection("kv"); }
+  function docId(k) { return encodeURIComponent(k).replace(/\./g, "%2E").slice(0, 1400); }
+  function push(k) { if (IGNORE.test(k)) return; pending[k] = true; if (!ready) return; clearTimeout(timer); timer = setTimeout(flush, 1200); status("Salvando alterações…", "SYNC"); }
+  function flush() {
+    var keys = Object.keys(pending); pending = {};
+    Promise.all(keys.map(function (k) {
+      var v = ls.getItem(k), ref = col().doc(docId(k));
+      if (v === null) { delete lastPush[k]; return ref.delete(); }
+      if (lastPush[k] === v) return null;
+      lastPush[k] = v;
+      var parts = []; for (var i = 0; i < v.length; i += CHUNK) parts.push(v.slice(i, i + CHUNK));
+      var ts = Date.now(), base = { key: k, n: parts.length, ts: ts, dev: deviceId };
+      if (parts.length <= 1) { base.v = v; return ref.set(base); }
+      return Promise.all(parts.map(function (p, i) { return ref.collection("c").doc(String(i)).set({ p: p, ts: ts }); })).then(function () { return ref.set(base); });
+    })).then(function () { status("Sincronizado em todos os aparelhos", "NUVEM"); })
+      .catch(function (e) { keys.forEach(function (k) { pending[k] = true; delete lastPush[k]; }); status("Falha na nuvem — tentando de novo", "ERRO"); clearTimeout(timer); timer = setTimeout(flush, 8000); console.error("MODESK sync", e); });
+  }
+  function pushAll() { for (var i = 0; i < ls.length; i++) { var k = ls.key(i); if (!IGNORE.test(k)) pending[k] = true; } lastPush = {}; flush(); }
+  function apply(k, v) { if (ls.getItem(k) === v) return false; applying = true; lastPush[k] = v; try { v === null ? origRem(k) : origSet(k, v); } finally { applying = false; } return true; }
+  var reloadTimer;
+  function changed() { clearTimeout(reloadTimer); reloadTimer = setTimeout(function () { location.reload(); }, 1200); }
+  function listen() {
+    var first = true;
+    col().onSnapshot(function (snap) {
+      var any = false, jobs = [];
+      snap.docChanges().forEach(function (ch) {
+        var d = ch.doc.data();
+        if (ch.type === "removed") { if (d && apply(d.key, null)) any = true; return; }
+        if (d.dev === deviceId && !first) return;
+        if (pending[d.key]) return;
+        if (d.n <= 1) { if (apply(d.key, d.v)) any = true; }
+        else jobs.push(ch.doc.ref.collection("c").get().then(function (cs) { var arr = []; cs.forEach(function (c) { arr[+c.id] = c.data().p; }); if (apply(d.key, arr.slice(0, d.n).join(""))) any = true; }));
+      });
+      Promise.all(jobs).then(function () {
+        if (first) { first = false; ready = true; if (snap.empty) pushAll(); else if (Object.keys(pending).length) flush(); }
+        if (any) changed(); else if (!Object.keys(pending).length) status("Sincronizado em todos os aparelhos", "NUVEM");
+      });
+    }, function (err) { status("Nuvem sem permissão — veja as regras do Firestore", "ERRO"); console.error("Firestore:", err); });
+  }
+  ls.setItem = function (k, v) { origSet(k, v); if (!applying) push(String(k)); };
+  ls.removeItem = function (k) { origRem(k); if (!applying) push(String(k)); };
+  function start() {
+    status("Conectando à nuvem…", "SYNC");
+    load(V + "firebase-app-compat.js").then(function () { return load(V + "firebase-firestore-compat.js"); })
+      .then(function () {
+        firebase.initializeApp(cfg); db = firebase.firestore();
+        try { db.enablePersistence({ synchronizeTabs: true }); } catch (e) {}
+        listen();
+      }).catch(function () { status("Sem internet — dados salvos neste aparelho", "LOCAL"); });
+  }
+  addEventListener("online", function () { if (ready && Object.keys(pending).length) flush(); });
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start); else start();
+})();
 </script>
 </body>
 </html>
