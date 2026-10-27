@@ -14627,7 +14627,7 @@ try{setSyncStatus()}catch(e){}})();
     measurementId: "G-WBGXKEB9YN"
   };
   var SPACE = "marciooliveira"; /* todos os aparelhos usam este mesmo espaço */
-  var CHUNK = 700000, IGNORE = /^(firebase|mdk_sync_|modesk\.tk$|modesk\.trusted$|modesk\.sess|modesk\.api$|modesk\.cfgsel|modesk\.nuvem|modesk\.autobackup|sb_aba|mdk_itens_view|mdk\.cp11\.modo|modesk_exp_|mdk_any_|mdk_is_exe|mdk_v\d+_|mdk\.fix\.|mdk\.backup\.antes|mdk\.payload\.pending|mdk\.cloud\.base)/;
+  var CHUNK = 700000, IGNORE = /^(firebase|firestore|mdk\.sync\.ts$|mdk_sync_|modesk\.tk$|modesk\.trusted$|modesk\.sess|modesk\.api$|modesk\.cfgsel|modesk\.nuvem|modesk\.autobackup|sb_aba|mdk_itens_view|mdk\.cp11\.modo|modesk_exp_|mdk_any_|mdk_is_exe|mdk_v\d+_|mdk\.fix\.|mdk\.backup\.antes|mdk\.payload\.pending|mdk\.cloud\.base)/;
   var ls = window.localStorage, origSet = ls.setItem.bind(ls), origRem = ls.removeItem.bind(ls);
   var db, ready = false, applying = false, pending = {}, timer, lastPush = {};
   var deviceId = ls.getItem("mdk_sync_device") || (Math.random().toString(36).slice(2) + Date.now());
@@ -14643,12 +14643,12 @@ try{setSyncStatus()}catch(e){}})();
   window.setSyncStatus = function () {};
   function col() { return db.collection("modesk_shared").doc(SPACE).collection("kv"); }
   function docId(k) { return encodeURIComponent(k).replace(/\./g, "%2E").slice(0, 1400); }
-  function push(k) { if (IGNORE.test(k)) return; pending[k] = true; if (!ready) return; clearTimeout(timer); timer = setTimeout(flush, 1200); status("Salvando alterações…", "SYNC"); }
+  function push(k) { if (IGNORE.test(k)) return; pending[k] = true; if (!ready) return; if (!timer) timer = setTimeout(flush, 1200); status("Salvando alterações…", "SYNC"); }
   function flush() {
-    var keys = Object.keys(pending); pending = {};
+    timer = null; var keys = Object.keys(pending); pending = {}; if (!keys.length) { status("Sincronizado em todos os aparelhos", "NUVEM"); return; }
     Promise.all(keys.map(function (k) {
       var v = ls.getItem(k), ref = col().doc(docId(k));
-      if (v === null) { delete lastPush[k]; return ref.delete(); }
+      if (v === null) { if (lastPush[k] === null) return null; lastPush[k] = null; return ref.set({ key: k, n: 0, del: true, ts: Date.now(), dev: deviceId }); }
       if (lastPush[k] === v) return null;
       lastPush[k] = v;
       var parts = []; for (var i = 0; i < v.length; i += CHUNK) parts.push(v.slice(i, i + CHUNK));
@@ -14677,6 +14677,7 @@ try{setSyncStatus()}catch(e){}})();
         if (ch.type === "removed") { if (d && apply(d.key, null)) any = true; return; }
         if (d.dev === deviceId && !first) return;
         if (pending[d.key]) return;
+        if (d.del) { if (apply(d.key, null)) any = true; return; }
         if (d.n <= 1) { if (apply(d.key, d.v)) any = true; }
         else jobs.push(ch.doc.ref.collection("c").get().then(function (cs) { var arr = []; cs.forEach(function (c) { arr[+c.id] = c.data().p; }); if (apply(d.key, arr.slice(0, d.n).join(""))) any = true; }));
       });
