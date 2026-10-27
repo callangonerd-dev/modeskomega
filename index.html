@@ -2814,17 +2814,35 @@ function restaurarBackup(inp){
     const _res='Itens: '+_n('itens')+' · Eventos: '+_n('eventos')+' · Atividades: '+_n('atividades')+' · Impressoras: '+_n('impressoras')+' · Mapa: '+_n('mapa')+' · Links: '+_n('links')+' · Pastas: '+_n('pastas')+' · Arquivos: '+_n('arquivos');
     mdkModoImport(f.name,_res,function(modo){
     try{
-      if(modo==='substituir')state=limparComprasV121(Object.assign(structuredClone(DEF),d));
-      else state=limparComprasV121(mdkMesclar(state,d,modo));
+      /* v311: o backup vale independente da versão do MODESK que o gerou */
+      var _bk=modo==='substituir'?Object.assign(structuredClone(DEF),d):mdkMesclar(state,d,modo);
+      /* marca as migrações antigas como concluídas para que as limpezas de versão não apaguem os dados do backup */
+      _bk._comprasLimpoV121=1;_bk._avisosComprasRemovidosV122=1;_bk._senhaV152=1;_bk._fiscalLimpoV171=1;
+      /* preserva os itens de mapa e acessos vindos do backup (o filtro de seeds não pode removê-los) */
+      ['mapa','acessos'].forEach(function(k){if(Array.isArray(_bk[k]))_bk[k].forEach(function(x){if(x&&typeof x==='object')x._manual158=1})});
+      state=_bk;
       if(typeof migrar==='function')migrar(state);
       save();
       if(typeof render==='function')render();
       try{if(inp&&inp.value!==undefined)inp.value=''}catch(e){}
       toast(modo==='substituir'?'Backup restaurado (substituído)':modo==='agregar'?'Backup agregado':'Novos itens acrescentados');
+      mdkForcarEnvioAposRestauracao();
     }catch(e){toast('Falha ao restaurar o backup')}
     });
   };
   r.readAsText(f);
+}
+/* v311: após restaurar, os dados do backup têm prioridade sobre a nuvem —
+   alinha a versão base com a nuvem e envia o estado restaurado sem cair em conflito */
+async function mdkForcarEnvioAposRestauracao(){
+  try{
+    mdkConflict=false;mdkDirty(true);mdkGeneration++;
+    if(!mdkTk()||!db)return; /* sem nuvem: fica salvo no aparelho e envia ao conectar */
+    var j=await mdkApi('get',{doc:GESTOR});
+    if(j&&typeof j.ver!=='undefined')mdkBase(j.ver);
+    clearTimeout(mdkPushT);mdkPushT=null;mdkReady=true;
+    mdkPushAgora();
+  }catch(e){/* se falhar, o envio automático tenta de novo */}
 }
 function importJSON(){return restaurarBackup(document.getElementById('cf-f'))}
 function baixarHTML(){
@@ -14061,7 +14079,9 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     if(j.modesk==='backup-compras'||(arr(j.itens).length&&arr(j.itens)[0]&&('Item' in arr(j.itens)[0])))return {tipo:'compras',nome:'Compras',dados:j};
     if(j.modesk==='backup-itens')return {tipo:'itens',nome:'Itens da sala de som',dados:j};
     var marcas=['itens','eventos','atividades','compras','links','pastas','impressoras','mapa','servicos','acessos','arquivos','senha'];
-    if(marcas.filter(function(k){return k in j}).length>=3)return {tipo:'completo',nome:'Backup completo do MODESK',dados:j};
+    /* v311: aceita backup de qualquer versão — basta 1 chave conhecida do MODESK */
+    if(marcas.filter(function(k){return k in j}).length>=1)return {tipo:'completo',nome:'Backup completo do MODESK',dados:j};
+    if(j.dados&&typeof j.dados==='object')return {tipo:'completo',nome:'Backup completo do MODESK',dados:j.dados};
     return null};
   function resumo(t){var d=t.dados,n=function(k){return arr(d[k]).length};
     if(t.tipo==='completo'){var c=d.compras||{};return 'Itens: '+n('itens')+' · Eventos: '+n('eventos')+' · Atividades: '+n('atividades')+' · Links: '+n('links')+' · Pastas: '+n('pastas')+' · Impressoras: '+n('impressoras')+' · Mapa: '+n('mapa')+' · Arquivos: '+n('arquivos')+' · Pedidos de compra: '+arr(c.pedidos).length+' · Realizados: '+(arr(c.arquivados).length+arr(c.baixados).length)}
@@ -14076,7 +14096,10 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
         else if(k==='compras'&&v&&typeof v==='object'){state.compras=state.compras||{};Object.keys(v).forEach(function(ck){if(Array.isArray(v[ck])){var m=mesclar(state.compras[ck],v[ck]);state.compras[ck]=m.lista}else if(v[ck]&&typeof v[ck]==='object')state.compras[ck]=Object.assign({},state.compras[ck]||{},v[ck]);else if(!(ck in state.compras))state.compras[ck]=v[ck]});r.push('compras atualizadas')}
         else if(v&&typeof v==='object')state[k]=Object.assign({},state[k]||{},v);
         else if(state[k]==null||state[k]==='')state[k]=v})}
-      try{if(typeof limparComprasV121==='function')state=limparComprasV121(state)}catch(e){}
+      /* v311: o backup vale independente da versão — protege os dados restaurados das limpezas de migração */
+      state._comprasLimpoV121=1;state._avisosComprasRemovidosV122=1;state._senhaV152=1;state._fiscalLimpoV171=1;
+      ['mapa','acessos'].forEach(function(k){if(Array.isArray(state[k]))state[k].forEach(function(x){if(x&&typeof x==='object')x._manual158=1})});
+      if(modo!=='substituir'){try{if(typeof limparComprasV121==='function')state=limparComprasV121(state)}catch(e){}}
       try{if(typeof migrar==='function')migrar(state)}catch(e){}}
     else if(t.tipo==='agenda'){var a=mesclar(state.eventos,d.eventos),b=mesclar(state.atividades,d.atividades);state.eventos=a.lista;state.atividades=b.lista;state.avisosOk=Object.assign({},state.avisosOk||{},d.avisosOk||{});r.push('Eventos +'+a.add+' · Atividades +'+b.add)}
     else if(t.tipo==='compras'){state.compras=state.compras||{};var P=arr(state.compras.pedidos),add=0;
@@ -14766,5 +14789,36 @@ try{setSyncStatus()}catch(e){}})();
  window.addEventListener('resize',init);
 })();
 </script>
+<style id="mdk-v310-menu-mobile-compacto">
+/* v310 · menu mobile compacto: gaveta lateral estreita, lista em 1 coluna */
+@media(max-width:700px){
+ html body div#app.app>aside{inset:0 auto 0 0!important;left:0!important;top:0!important;margin:0!important;height:100dvh!important;max-height:100dvh!important;width:min(78vw,272px)!important;max-width:272px!important;border-radius:0 12px 12px 0!important;border-left:0!important;transform:translateX(-102%)!important;opacity:1!important;transition:transform .22s cubic-bezier(.22,.75,.3,1),visibility 0s linear .22s!important}
+ html body.mdk-drawer-open div#app.app>aside{transform:none!important;visibility:visible!important;transition-delay:0s!important}
+ html body div#app.app>aside .brand{min-height:44px!important;padding:6px 10px!important;gap:8px!important}
+ html body div#app.app>aside .brand .logo{width:26px!important;height:26px!important;font-size:13px!important}
+ html body div#app.app>aside .brand h3{font-size:12px!important}
+ html body div#app.app>aside .brand small,html body div#app.app>aside .brand:after{display:none!important}
+ html body div#app.app>aside .sb-tabs{margin:4px 6px!important;padding:2px!important;min-height:0!important}
+ html body div#app.app>aside .sb-tabs button{min-height:26px!important;padding:3px 6px!important;font-size:10.5px!important}
+ html body div#app.app>aside #menu{padding:4px 6px!important}
+ html body div#app.app>aside #menu .folder{margin:0 0 2px!important;border:0!important;border-radius:6px!important;background:transparent!important}
+ html body div#app.app>aside #menu .fhead{min-height:30px!important;padding:4px 6px!important;font-size:9.5px!important;grid-template-columns:15px minmax(0,1fr) 14px!important;border-radius:6px!important}
+ html body div#app.app>aside #menu .fhead .ui-icon{width:14px!important;height:14px!important}
+ html body div#app.app>aside #menu .folder.open>.fhead{background:rgba(255,255,255,.04)!important}
+ html body div#app.app>aside #menu .fbody,html body div#app.app>aside #menu .folder.open .fbody{grid-template-columns:1fr!important;gap:1px!important;padding:2px 0 4px 10px!important;margin-left:7px!important;border-left:1px solid rgba(139,164,187,.18)!important}
+ html body div#app.app>aside #menu .navbtn{min-height:30px!important;padding:4px 8px!important;grid-template-columns:15px minmax(0,1fr)!important;gap:7px!important;border:0!important;border-radius:5px!important;background:transparent!important;font-size:11.5px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+ html body div#app.app>aside #menu .navbtn .ui-icon{width:14px!important;height:14px!important}
+ html body div#app.app>aside #menu .navbtn.active{background:rgba(255,48,74,.14)!important;box-shadow:inset 2px 0 0 var(--mm-red,#ff304a)!important}
+ html body div#app.app>aside .side-command{margin:0 6px 6px!important;padding:4px 0 0!important}
+ html body div#app.app>aside .side-system{display:none!important}
+ html body div#app.app>aside .side-command-panel{grid-template-columns:1fr!important;padding:4px!important;gap:4px!important}
+ html body div#app.app>aside .side-command-btn{min-height:34px!important;padding:4px 6px!important;grid-template-columns:18px minmax(0,1fr)!important}
+ html body div#app.app>aside .side-command-icon{width:18px!important;height:18px!important}
+ html body div#app.app>aside #mdk-reading-toggle{min-height:30px!important;padding:4px 8px!important;font-size:11px!important;margin:2px 6px!important;width:auto!important}
+ html body #mdk-menu-btn{width:36px!important;height:36px!important;top:max(8px,env(safe-area-inset-top))!important;left:8px!important}
+ html body.mdk-drawer-open #mdk-menu-btn{right:auto!important;left:calc(min(78vw,272px) + 8px)!important;top:max(8px,env(safe-area-inset-top))!important}
+ html body #mdk-scrim{backdrop-filter:none!important;background:rgba(1,4,8,.6)!important}
+}
+</style>
 </body>
 </html>
