@@ -1419,7 +1419,16 @@ function doLogin(){
   mdkApiLogin(s,lembrar).then(function(){
     $('lg-err').textContent='';
     sessionStorage.setItem('modesk.sess','1'); if(lembrar)localStorage.setItem('modesk.trusted','1'); start();
-  }).catch(function(e){$('lg-err').textContent=e.code==='senha-incorreta'?'Senha incorreta.':'Não foi possível entrar: '+e.message});
+  }).catch(function(e){
+    if(e.code==='senha-incorreta'){$('lg-err').textContent='Senha incorreta.';return}
+    /* v312: nuvem fora do ar — entra em modo local (1ª senha digitada vira a senha local) */
+    mdkLoginInterno(s,lembrar).then(function(){
+      $('lg-err').textContent='';
+      sessionStorage.setItem('modesk.sess','1'); if(lembrar)localStorage.setItem('modesk.trusted','1');
+      try{toast('Nuvem indisponível — entrando em modo local')}catch(_){}
+      start();
+    }).catch(function(e2){$('lg-err').textContent=e2.code==='senha-incorreta'?'Senha local incorreta.':'Não foi possível entrar: '+e2.message});
+  });
 }
 function logout(){mdkClearTk();sessionStorage.removeItem('modesk.sess');localStorage.removeItem('modesk.trusted');location.reload()}
 function start(){$('login').classList.add('hidden');$('app').classList.remove('hidden');detectOS();buildMenu();render();mdkAutoNuvem();fsAutoConectar();
