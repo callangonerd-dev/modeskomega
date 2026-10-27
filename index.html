@@ -3,6 +3,132 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
+<script id="mdk-v309-firestore-realtime">/* MODESK v309 — Firestore em tempo real (onSnapshot). Dados NÃO ficam no localStorage. */
+(function () {
+  var cfg = { apiKey: "AIzaSyD1OoDmK0VL5g20BGhi6CYtyQ7rIOT97lQ", authDomain: "modeskpro.firebaseapp.com", projectId: "modeskpro", storageBucket: "modeskpro.firebasestorage.app", messagingSenderId: "460535767375", appId: "1:460535767375:web:e0196ff5ae3d2c14ab653a" };
+  var SPACE = "marciooliveira", CHUNK = 700000, V = "https://www.gstatic.com/firebasejs/10.12.0/";
+  /* preferências só deste aparelho (login, aba aberta, modo de visão) — não são dados do app */
+  var LOCAL = /^(firebase|firestore|mdk\.sync\.ts$|mdk_sync_|modesk\.tk$|modesk\.trusted$|modesk\.sess|modesk\.api$|modesk\.cfgsel|modesk\.nuvem|modesk\.autobackup|sb_aba|mdk_itens_view|mdk\.cp11\.modo|modesk_exp_|mdk_any_|mdk_is_exe|mdk_v\d+_|mdk\.fix\.|mdk\.backup\.antes|mdk\.payload\.pending|mdk\.cloud\.base)/;
+  var real; try { real = window.localStorage; } catch (e) { real = null; }
+  var mem = {}, order = [], db = null, ready = false, applying = false, early = {}, chunks = {}, legacy = {};
+  var dev = Math.random().toString(36).slice(2) + Date.now();
+  function rget(k) { try { return real ? real.getItem(k) : null; } catch (e) { return null; } }
+  function has(k) { return Object.prototype.hasOwnProperty.call(mem, k); }
+  function memSet(k, v) { if (!has(k)) order.push(k); mem[k] = v; }
+  function memDel(k) { if (has(k)) { delete mem[k]; order.splice(order.indexOf(k), 1); } }
+  function docId(k) { return encodeURIComponent(k).replace(/\./g, "%2E").slice(0, 1400); }
+  function col() { return db.collection("modesk_shared").doc(SPACE).collection("kv"); }
+  function status(txt, badge) {
+    window.SYNC_STATUS = badge === "NUVEM" ? "online" : badge === "SYNC" ? "sync" : badge === "ERRO" ? "erro" : "local";
+    var l = document.getElementById("side-sync-label"), b = document.getElementById("side-sync-state");
+    if (l) l.textContent = txt; if (b) b.textContent = badge;
+    var box = document.querySelector(".side-system"); if (box) box.setAttribute("data-estado", window.SYNC_STATUS);
+  }
+  window.mdkSyncStatus = status;
+
+  /* ---------- escrita direta no Firestore ---------- */
+  function write(k, v) {
+    if (!db) return;
+    var ref = col().doc(docId(k)), ts = Date.now(), p;
+    if (v === null) p = ref.set({ key: k, del: true, n: 0, ts: ts, dev: dev });
+    else if (v.length <= CHUNK) p = ref.set({ key: k, v: v, n: 1, ts: ts, dev: dev });
+    else {
+      var b = db.batch(), n = 0;
+      for (var i = 0; i < v.length; i += CHUNK, n++) b.set(col().doc(docId(k) + "~" + n), { part: k, i: n, ver: ts, p: v.slice(i, i + CHUNK) });
+      b.set(ref, { key: k, n: n, ver: ts, ts: ts, dev: dev }); p = b.commit();
+    }
+    status(navigator.onLine ? "Enviando…" : "Sem internet — será enviado ao reconectar", "SYNC");
+    p.then(function () { status("Sincronizado em tempo real", "NUVEM"); }, function (e) { console.error("Firestore write", e); status("Nuvem recusou a gravação — veja as regras do Firestore", "ERRO"); });
+  }
+
+  /* ---------- armazenamento em memória que substitui o localStorage ---------- */
+  var store = {
+    getItem: function (k) { k = String(k); if (LOCAL.test(k)) return rget(k); return has(k) ? mem[k] : null; },
+    setItem: function (k, v) {
+      k = String(k); v = String(v);
+      if (LOCAL.test(k)) { try { real && real.setItem(k, v); } catch (e) {} return; }
+      if (mem[k] === v) return; memSet(k, v);
+      if (applying) return; if (!ready) { early[k] = true; return; } write(k, v);
+    },
+    removeItem: function (k) {
+      k = String(k); if (LOCAL.test(k)) { try { real && real.removeItem(k); } catch (e) {} return; }
+      if (!has(k)) return; memDel(k); if (applying) return; if (!ready) { early[k] = true; return; } write(k, null);
+    },
+    clear: function () { order.slice().forEach(function (k) { store.removeItem(k); }); },
+    key: function (i) { return order[i] === undefined ? null : order[i]; }
+  };
+  Object.defineProperty(store, "length", { get: function () { return order.length; } });
+  try { Object.defineProperty(window, "localStorage", { configurable: true, get: function () { return store; } }); } catch (e) { console.error("MODESK: não foi possível substituir o localStorage", e); }
+
+  /* ---------- leitura em tempo real ---------- */
+  function apply(k, v) {
+    if (LOCAL.test(k)) return false; var cur = has(k) ? mem[k] : null; if (cur === v) return false;
+    applying = true; try { v === null ? memDel(k) : memSet(k, v); } finally { applying = false; } return true;
+  }
+  var rt; function refresh() {
+    clearTimeout(rt); rt = setTimeout(function () {
+      var ae = document.activeElement;
+      if (ae && /INPUT|TEXTAREA|SELECT/.test(ae.tagName) && ae.closest && ae.closest(".modal.open,.drawer.open,[id^=drawer].open,#mdk300-pop.on")) { rt = setTimeout(refresh, 1500); return; }
+      try { if (typeof window.load === "function" && typeof window.render === "function") { window.state = window.load(); try { state = window.state; } catch (e) {} window.render(); } } catch (e) { console.error("MODESK refresh", e); }
+      try { window.dispatchEvent(new CustomEvent("mdk:dados", {})); } catch (e) {}
+    }, 250);
+  }
+  function assemble(k) {
+    var h = chunks["h" + k]; if (!h) return null; var parts = chunks["p" + k] || {}, out = "";
+    for (var i = 0; i < h.n; i++) { var c = parts[i]; if (!c || c.ver !== h.ver) return undefined; out += c.p; }
+    return out;
+  }
+  function legacyListen(ref, d) { /* formato antigo (subcoleção "c") — também em tempo real */
+    if (legacy[d.key]) legacy[d.key](); var key = d.key, n = d.n;
+    legacy[key] = ref.collection("c").onSnapshot(function (cs) { var a = []; cs.forEach(function (c) { a[+c.id] = c.data().p; }); if (a.filter(function (x) { return x != null; }).length >= n && apply(key, a.slice(0, n).join(""))) refresh(); });
+  }
+  function listen() {
+    var first = true;
+    col().onSnapshot({ includeMetadataChanges: false }, function (snap) {
+      var any = false, touched = {};
+      snap.docChanges().forEach(function (ch) {
+        var d = ch.doc.data() || {};
+        if (d.part !== undefined) { var m = chunks["p" + d.part] = chunks["p" + d.part] || {}; if (ch.type === "removed") delete m[d.i]; else m[d.i] = d; touched[d.part] = true; return; }
+        if (!d.key) return;
+        if (ch.type === "removed" || d.del) { delete chunks["h" + d.key]; if (apply(d.key, null)) any = true; return; }
+        if (d.n > 1 && !d.ver) { legacyListen(ch.doc.ref, d); return; }
+        if (legacy[d.key]) { legacy[d.key](); delete legacy[d.key]; }
+        if (d.n > 1) { chunks["h" + d.key] = d; touched[d.key] = true; return; }
+        delete chunks["h" + d.key]; if (apply(d.key, d.v == null ? "" : d.v)) any = true;
+      });
+      Object.keys(touched).forEach(function (k) { var v = assemble(k); if (typeof v === "string" && apply(k, v)) any = true; });
+      if (first) {
+        first = false;
+        /* migração única: dados antigos do localStorage deste aparelho que ainda não estão na nuvem */
+        var cloud = {}; snap.forEach(function (x) { var d = x.data(); if (d.key) cloud[d.key] = true; });
+        if (real) { var mig = []; try { for (var i = 0; i < real.length; i++) { var k = real.key(i); if (k && !LOCAL.test(k)) mig.push(k); } } catch (e) {}
+          mig.forEach(function (k) { var v = rget(k); if (!cloud[k] && v !== null) { memSet(k, v); early[k] = true; any = true; } try { real.removeItem(k); } catch (e) {} }); }
+        ready = true;
+        Object.keys(early).forEach(function (k) { if (!cloud[k]) write(k, has(k) ? mem[k] : null); }); early = {};
+        var sp = document.getElementById("mdk309-splash"); if (sp) sp.remove();
+        refresh();
+      } else if (any) refresh();
+      status(snap.metadata.fromCache && !navigator.onLine ? "Sem internet — usando cópia offline" : "Sincronizado em tempo real", snap.metadata.fromCache && !navigator.onLine ? "LOCAL" : "NUVEM");
+    }, function (err) { console.error("Firestore:", err); status("Nuvem sem permissão — veja as regras do Firestore", "ERRO"); ready = true; var sp = document.getElementById("mdk309-splash"); if (sp) sp.remove(); });
+  }
+  addEventListener("online", function () { status("Reconectado — sincronizando…", "SYNC"); });
+  addEventListener("offline", function () { status("Sem internet — alterações ficam na fila offline", "LOCAL"); });
+
+  function load(src) { return new Promise(function (ok, no) { var s = document.createElement("script"); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); }); }
+  function splash() {
+    if (document.getElementById("mdk309-splash")) return; var d = document.createElement("div"); d.id = "mdk309-splash";
+    d.style.cssText = "position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;background:#03060c;color:#e2e8f0;font:600 15px system-ui,sans-serif";
+    d.textContent = "Carregando dados da nuvem…"; (document.body || document.documentElement).appendChild(d);
+    setTimeout(function () { if (d.parentNode) d.textContent = "Sem conexão com a nuvem — verifique a internet"; }, 15000);
+  }
+  if (document.body) splash(); else document.addEventListener("DOMContentLoaded", function () { if (!ready) splash(); });
+  load(V + "firebase-app-compat.js").then(function () { return load(V + "firebase-firestore-compat.js"); }).then(function () {
+    firebase.initializeApp(cfg); db = firebase.firestore();
+    return db.enablePersistence({ synchronizeTabs: true }).catch(function (e) { console.warn("Persistência offline indisponível:", e && e.code); });
+  }).then(listen).catch(function (e) { console.error(e); status("Não foi possível carregar a nuvem", "ERRO"); });
+})();
+</script>
+
 <meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
 <meta content="yes" name="apple-mobile-web-app-capable"/>
@@ -14615,93 +14741,7 @@ window.setSyncStatus=function(){window.SYNC_STATUS='local';var l=document.getEle
 window.pintarDrive=function(){var t=document.getElementById('dr-t'),s=document.getElementById('dr-s');if(t)t.textContent='Somente local';if(s)s.textContent='Anexos ficam salvos neste aparelho'};
 try{setSyncStatus()}catch(e){}})();
 </script>
-<script>/* MODESK Firebase Sync automático — sem login, sem botão */
-(function () {
-  var cfg = {
-    apiKey: "AIzaSyD1OoDmK0VL5g20BGhi6CYtyQ7rIOT97lQ",
-    authDomain: "modeskpro.firebaseapp.com",
-    projectId: "modeskpro",
-    storageBucket: "modeskpro.firebasestorage.app",
-    messagingSenderId: "460535767375",
-    appId: "1:460535767375:web:e0196ff5ae3d2c14ab653a",
-    measurementId: "G-WBGXKEB9YN"
-  };
-  var SPACE = "marciooliveira"; /* todos os aparelhos usam este mesmo espaço */
-  var CHUNK = 700000, IGNORE = /^(firebase|firestore|mdk\.sync\.ts$|mdk_sync_|modesk\.tk$|modesk\.trusted$|modesk\.sess|modesk\.api$|modesk\.cfgsel|modesk\.nuvem|modesk\.autobackup|sb_aba|mdk_itens_view|mdk\.cp11\.modo|modesk_exp_|mdk_any_|mdk_is_exe|mdk_v\d+_|mdk\.fix\.|mdk\.backup\.antes|mdk\.payload\.pending|mdk\.cloud\.base)/;
-  var ls = window.localStorage, origSet = ls.setItem.bind(ls), origRem = ls.removeItem.bind(ls);
-  var db, ready = false, applying = false, pending = {}, timer, lastPush = {};
-  var deviceId = ls.getItem("mdk_sync_device") || (Math.random().toString(36).slice(2) + Date.now());
-  origSet("mdk_sync_device", deviceId);
-  function load(src) { return new Promise(function (ok, no) { var s = document.createElement("script"); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); }); }
-  var V = "https://www.gstatic.com/firebasejs/10.12.0/";
-  function status(txt, badge) {
-    var l = document.getElementById("side-sync-label"), b = document.getElementById("side-sync-state");
-    if (l) l.textContent = txt; if (b) b.textContent = badge;
-    window.SYNC_STATUS = badge === "NUVEM" ? "online" : badge === "SYNC" ? "sync" : badge === "ERRO" ? "erro" : "local";
-    var box = document.querySelector(".side-system"); if (box) box.setAttribute("data-estado", window.SYNC_STATUS);
-  }
-  window.setSyncStatus = function () {};
-  function col() { return db.collection("modesk_shared").doc(SPACE).collection("kv"); }
-  function docId(k) { return encodeURIComponent(k).replace(/\./g, "%2E").slice(0, 1400); }
-  function push(k) { if (IGNORE.test(k)) return; pending[k] = true; if (!ready) return; if (!timer) timer = setTimeout(flush, 1200); status("Salvando alterações…", "SYNC"); }
-  function flush() {
-    timer = null; var keys = Object.keys(pending); pending = {}; if (!keys.length) { status("Sincronizado em todos os aparelhos", "NUVEM"); return; }
-    Promise.all(keys.map(function (k) {
-      var v = ls.getItem(k), ref = col().doc(docId(k));
-      if (v === null) { if (lastPush[k] === null) return null; lastPush[k] = null; return ref.set({ key: k, n: 0, del: true, ts: Date.now(), dev: deviceId }); }
-      if (lastPush[k] === v) return null;
-      lastPush[k] = v;
-      var parts = []; for (var i = 0; i < v.length; i += CHUNK) parts.push(v.slice(i, i + CHUNK));
-      var ts = Date.now(), base = { key: k, n: parts.length, ts: ts, dev: deviceId };
-      if (parts.length <= 1) { base.v = v; return ref.set(base); }
-      return Promise.all(parts.map(function (p, i) { return ref.collection("c").doc(String(i)).set({ p: p, ts: ts }); })).then(function () { return ref.set(base); });
-    })).then(function () { status("Sincronizado em todos os aparelhos", "NUVEM"); })
-      .catch(function (e) { keys.forEach(function (k) { pending[k] = true; delete lastPush[k]; }); status("Falha na nuvem — tentando de novo", "ERRO"); clearTimeout(timer); timer = setTimeout(flush, 8000); console.error("MODESK sync", e); });
-  }
-  function pushAll() { for (var i = 0; i < ls.length; i++) { var k = ls.key(i); if (!IGNORE.test(k)) pending[k] = true; } lastPush = {}; flush(); }
-  function apply(k, v) { if (ls.getItem(k) === v) return false; if (k !== null && IGNORE.test(k)) return false; applying = true; lastPush[k] = v; try { v === null ? origRem(k) : origSet(k, v); } finally { applying = false; } return true; }
-  var reloadTimer;
-  function changed() { clearTimeout(reloadTimer); reloadTimer = setTimeout(soft, 1200); }
-  function soft() {
-    var ae = document.activeElement;
-    if (ae && /INPUT|TEXTAREA|SELECT/.test(ae.tagName) || document.querySelector('.drawer.open,.modal.open,[id^="drawer"].open')) { reloadTimer = setTimeout(soft, 3000); return; }
-    try { if (typeof window.load === "function" && typeof window.render === "function") { state = window.load(); window.render(); } } catch (e) { console.error("MODESK sync refresh", e); }
-    status("Sincronizado em todos os aparelhos", "NUVEM");
-  }
-  function listen() {
-    var first = true;
-    col().onSnapshot(function (snap) {
-      var any = false, jobs = [];
-      snap.docChanges().forEach(function (ch) {
-        var d = ch.doc.data();
-        if (ch.type === "removed") { if (d && apply(d.key, null)) any = true; return; }
-        if (d.dev === deviceId && !first) return;
-        if (pending[d.key]) return;
-        if (d.del) { if (apply(d.key, null)) any = true; return; }
-        if (d.n <= 1) { if (apply(d.key, d.v)) any = true; }
-        else jobs.push(ch.doc.ref.collection("c").get().then(function (cs) { var arr = []; cs.forEach(function (c) { arr[+c.id] = c.data().p; }); if (apply(d.key, arr.slice(0, d.n).join(""))) any = true; }));
-      });
-      Promise.all(jobs).then(function () {
-        if (first) { first = false; ready = true; if (snap.empty) pushAll(); else if (Object.keys(pending).length) flush(); }
-        if (any) changed(); else if (!Object.keys(pending).length) status("Sincronizado em todos os aparelhos", "NUVEM");
-      });
-    }, function (err) { status("Nuvem sem permissão — veja as regras do Firestore", "ERRO"); console.error("Firestore:", err); });
-  }
-  ls.setItem = function (k, v) { var old = ls.getItem(k); origSet(k, v); if (!applying && old !== String(v)) push(String(k)); };
-  ls.removeItem = function (k) { origRem(k); if (!applying) push(String(k)); };
-  function start() {
-    status("Conectando à nuvem…", "SYNC");
-    load(V + "firebase-app-compat.js").then(function () { return load(V + "firebase-firestore-compat.js"); })
-      .then(function () {
-        firebase.initializeApp(cfg); db = firebase.firestore();
-        try { db.enablePersistence({ synchronizeTabs: true }); } catch (e) {}
-        listen();
-      }).catch(function () { status("Sem internet — dados salvos neste aparelho", "LOCAL"); });
-  }
-  addEventListener("online", function () { if (ready && Object.keys(pending).length) flush(); });
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start); else start();
-})();
-</script>
+<script>window.setSyncStatus=function(){};</script>
 <style id="mdk-v306-mobile-menu">
 @media(max-width:960px){
 .cfgx-lay{grid-template-columns:1fr!important}
