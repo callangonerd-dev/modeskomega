@@ -3,7 +3,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
-<script id="mdk-v309-firestore-realtime">/* MODESK v309 — Firestore em tempo real (onSnapshot). Dados NÃO ficam no localStorage. */
+<script id="mdk-v309-firestore-realtime">/* MODESK v315 — Firestore em tempo real (onSnapshot), nuvem tem prioridade sobre aparelho vazio. Dados NÃO ficam no localStorage. */
 (function () {
   var cfg = { apiKey: "AIzaSyD2KByzMJw1bu-pu93pI2lnvcyiVOJ8umU", authDomain: "modeskcore-e8424.firebaseapp.com", projectId: "modeskcore-e8424", storageBucket: "modeskcore-e8424.firebasestorage.app", messagingSenderId: "1028884997348", appId: "1:1028884997348:web:1c25ad96d9e6f23968f8f1" };
   var SPACE = "marciooliveira", CHUNK = 700000, V = "https://www.gstatic.com/firebasejs/10.12.0/";
@@ -84,8 +84,11 @@
   }
   function listen() {
     var first = true;
-    col().onSnapshot({ includeMetadataChanges: false }, function (snap) {
+    col().onSnapshot({ includeMetadataChanges: true }, function (snap) {
       var any = false, touched = {};
+      /* v315: aparelho novo/vazio — o 1º snapshot vem do cache local (vazio). Não pode liberar gravações
+         antes de receber a resposta REAL do servidor, senão o estado vazio sobrescreve a nuvem. */
+      var waitServer = first && snap.metadata.fromCache && navigator.onLine;
       snap.docChanges().forEach(function (ch) {
         var d = ch.doc.data() || {};
         if (d.part !== undefined) { var m = chunks["p" + d.part] = chunks["p" + d.part] || {}; if (ch.type === "removed") delete m[d.i]; else m[d.i] = d; touched[d.part] = true; return; }
@@ -97,6 +100,7 @@
         delete chunks["h" + d.key]; if (apply(d.key, d.v == null ? "" : d.v)) any = true;
       });
       Object.keys(touched).forEach(function (k) { var v = assemble(k); if (typeof v === "string" && apply(k, v)) any = true; });
+      if (first && waitServer) { if (any) refresh(); status("Baixando dados da nuvem…", "SYNC"); return; }
       if (first) {
         first = false;
         /* migração única: dados antigos do localStorage deste aparelho que ainda não estão na nuvem */
