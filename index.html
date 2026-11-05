@@ -5,7 +5,7 @@
 <meta charset="utf-8"/>
 <script id="mdk-v309-firestore-realtime">/* MODESK v315 — Firestore em tempo real (onSnapshot), nuvem tem prioridade sobre aparelho vazio. Dados NÃO ficam no localStorage. */
 (function () {
-  var cfg = { apiKey: "AIzaSyD2KByzMJw1bu-pu93pI2lnvcyiVOJ8umU", authDomain: "modeskcore-e8424.firebaseapp.com", projectId: "modeskcore-e8424", storageBucket: "modeskcore-e8424.firebasestorage.app", messagingSenderId: "1028884997348", appId: "1:1028884997348:web:1c25ad96d9e6f23968f8f1" };
+  var cfg = { apiKey: "@secret:GOOGLE_API_KEY", authDomain: "modeskcore-e8424.firebaseapp.com", projectId: "modeskcore-e8424", storageBucket: "modeskcore-e8424.firebasestorage.app", messagingSenderId: "1028884997348", appId: "1:1028884997348:web:1c25ad96d9e6f23968f8f1" };
   var SPACE = "marciooliveira", CHUNK = 700000, V = "https://www.gstatic.com/firebasejs/10.12.0/";
   /* preferências só deste aparelho (login, aba aberta, modo de visão) — não são dados do app */
   var LOCAL = /^(firebase|firestore|mdk\.sync\.ts$|mdk_sync_|modesk\.tk$|modesk\.trusted$|modesk\.sess|modesk\.api$|modesk\.cfgsel|modesk\.nuvem|modesk\.autobackup|sb_aba|mdk_itens_view|mdk\.cp11\.modo|modesk_exp_|mdk_any_|mdk_is_exe|mdk_v\d+_|mdk\.fix\.|mdk\.backup\.antes|mdk\.payload\.pending|mdk\.cloud\.base)/;
@@ -14834,5 +14834,26 @@ try{setSyncStatus()}catch(e){}})();
  html body #mdk-scrim{backdrop-filter:none!important;background:rgba(1,4,8,.6)!important}
 }
 </style>
+<script id="mdk-backup-tempo-real">
+/* Backup em tempo real no computador (Chrome/Edge): grava o arquivo escolhido sempre que os dados mudam */
+(function(){
+  if(!window.showSaveFilePicker){return;}
+  var handle=null,last='',busy=false,DBN='mdk-rt-backup';
+  function idb(m,v){return new Promise(function(r){var q=indexedDB.open(DBN,1);q.onupgradeneeded=function(){q.result.createObjectStore('h')};q.onsuccess=function(){var t=q.result.transaction('h',m?'readwrite':'readonly').objectStore('h');var x=m?t.put(v,'f'):t.get('f');x.onsuccess=function(){r(x.result)};x.onerror=function(){r(null)}};q.onerror=function(){r(null)}})}
+  var btn=document.createElement('button');
+  btn.style.cssText='position:fixed;right:16px;bottom:16px;z-index:99999;padding:10px 14px;border-radius:10px;border:0;font:600 13px sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.25)';
+  function ui(t,ok){btn.textContent=t;btn.style.background=ok?'#16a34a':'#f59e0b';btn.style.color='#fff'}
+  function data(){try{return JSON.stringify(state,null,2)}catch(e){return ''}}
+  async function save(){if(!handle||busy)return;var d=data();if(!d||d===last)return;busy=true;try{var w=await handle.createWritable();await w.write(d);await w.close();last=d;ui('💾 Backup em tempo real: salvo '+new Date().toLocaleTimeString(),true)}catch(e){handle=null;ui('⚠ Backup parado — clique para reativar',false)}busy=false}
+  async function perm(h){try{if(await h.queryPermission({mode:'readwrite'})==='granted')return true;return (await h.requestPermission({mode:'readwrite'}))==='granted'}catch(e){return false}}
+  btn.onclick=async function(){
+    var h=await idb(false);
+    if(h&&await perm(h)){handle=h;last='';save();return}
+    try{h=await showSaveFilePicker({suggestedName:'MODESK_backup_tempo_real.json',types:[{description:'Backup MODESK',accept:{'application/json':['.json']}}]});await idb(true,h);handle=h;last='';save()}catch(e){}
+  };
+  function boot(){document.body.appendChild(btn);idb(false).then(async function(h){if(h&&await h.queryPermission({mode:'readwrite'})==='granted'){handle=h;save()}else ui(h?'💾 Clique para retomar o backup em tempo real':'💾 Ativar backup em tempo real no computador',false)});setInterval(save,2000);window.addEventListener('beforeunload',save)}
+  if(document.body)boot();else document.addEventListener('DOMContentLoaded',boot);
+})();
+</script>
 </body>
 </html>
