@@ -1297,27 +1297,55 @@ html body #view .lb-itens .lb-tab td:last-child .lb-btn{width:100%!important;hei
  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
 })();
 </script>
-<style id="mdk-v432-popups">
+<style id="mdk-v433-popups">
 [data-mdkpop]:popover-open{position:fixed!important;inset:0!important;margin:auto!important;width:min(1500px,94vw)!important;height:fit-content!important;max-height:92vh!important;overflow:auto!important;transform:none!important;border:1px solid rgba(255,60,80,.35)!important;padding:18px!important;color:inherit;background:linear-gradient(180deg,#1a1c24,#11131a)!important;border-radius:16px!important;box-shadow:0 30px 80px rgba(0,0,0,.6)!important}
 #itsv16 .its16-form[data-mdkpop]:popover-open{padding:0!important}
-[data-mdkpop]::backdrop{background:rgba(0,0,0,.7);backdrop-filter:blur(3px)}
+[data-mdkpop]::backdrop{background:rgba(0,0,0,.7)}
 #modal-root:popover-open{position:fixed;inset:0;margin:0;padding:0;border:0;background:transparent;width:100vw;height:100vh;overflow:visible;pointer-events:none}
 #modal-root:popover-open>*{pointer-events:auto}
-@keyframes mdkPop{from{opacity:0;transform:scale(.98)}to{opacity:1}}
+#mdk-pdfv{width:min(1200px,96vw);height:94vh;max-width:none;max-height:none;padding:0;border:1px solid rgba(255,60,80,.4);border-radius:14px;background:#11131a;color:#e8e8ee;overflow:hidden}
+#mdk-pdfv[open]{display:flex;flex-direction:column}
+#mdk-pdfv::backdrop{background:rgba(0,0,0,.78)}
+#mdk-pdfv .pv-bar{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.1)}
+#mdk-pdfv .pv-bar b{flex:1;font-size:14px}
+#mdk-pdfv .pv-bar button{cursor:pointer;border:1px solid rgba(255,60,80,.45);background:transparent;color:inherit;border-radius:8px;padding:6px 12px;font:inherit;font-size:13px}
+#mdk-pdfv .pv-bar button.pr{background:#e3192f;border-color:#e3192f}
+#mdk-pdfv iframe{flex:1;width:100%;border:0;background:#2a2a30}
+#mdk-pdfv .pv-load{flex:1;display:flex;align-items:center;justify-content:center;opacity:.7}
 </style>
-<script id="mdk-v432-popups-js">(function(){
+<script id="mdk-v433-popups-js">(function(){
 if(!HTMLElement.prototype.showPopover)return;
-var SEL='.mdt-card.mdt-det,#itsv16 .its16-form';
-function want(el){if(el.matches('#itsv16 .its16-form'))return el.open;return true}
-function show(el){try{if(!el.matches(':popover-open'))el.showPopover()}catch(e){}}
-function hide(el){try{if(el.matches(':popover-open'))el.hidePopover()}catch(e){}}
-function front(id){var m=document.getElementById(id);if(!m)return;if(!m.hasAttribute('popover'))m.setAttribute('popover','manual');if(m.children.length&&m.textContent.trim()!==''||m.querySelector('*')){hide(m);show(m)}else hide(m)}
-function scan(){var els=[].slice.call(document.querySelectorAll(SEL));var f=document.getElementById('mdtForm');if(f){var c=f.closest('.mdt-card');if(c)els.push(c)}
-els.forEach(function(el){if(!el.hasAttribute('popover')){el.setAttribute('popover','manual');el.setAttribute('data-mdkpop','')}want(el)?show(el):hide(el)});
-var any=els.some(function(e){return e.matches(':popover-open')});document.documentElement.style.overflow=any?'hidden':'';
-var mr=document.getElementById('modal-root');if(mr&&mr.children.length)front('modal-root');else if(mr&&mr.matches&&mr.hasAttribute('popover'))hide(mr);
-}
-var q=0;new MutationObserver(function(){if(q)return;q=1;requestAnimationFrame(function(){q=0;scan()})}).observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['open']});
-document.addEventListener('keydown',function(e){if(e.key!=='Escape')return;var mr=document.getElementById('modal-root');if(mr&&mr.children.length)return;var f=document.querySelector('#itsv16 .its16-form[open]');if(f){f.open=false;return}if(document.querySelector('.mdt-det,#mdtForm')&&window.mdkTermo&&mdkTermo.cancel)mdkTermo.cancel()});
+var SEL='.mdt-card.mdt-det,#itsv16 .its16-form',lastOpen=null;
+function isOpen(el){try{return el.matches(':popover-open')}catch(e){return false}}
+function show(el){try{if(!isOpen(el)){el.showPopover();lastOpen=el}}catch(e){}}
+function hide(el){try{if(isOpen(el))el.hidePopover()}catch(e){}}
+function scan(){var els=[].slice.call(document.querySelectorAll(SEL));var f=document.getElementById('mdtForm');if(f){var c=f.closest('.mdt-card');if(c&&els.indexOf(c)<0)els.push(c)}
+var opened=false;
+els.forEach(function(el){if(!el.hasAttribute('popover')){el.setAttribute('popover','manual');el.setAttribute('data-mdkpop','')}var w=el.matches('#itsv16 .its16-form')?el.open:true;if(w&&!isOpen(el)){show(el);opened=true}else if(!w)hide(el)});
+var any=els.some(isOpen);document.documentElement.style.overflow=any?'hidden':'';
+var mr=document.getElementById('modal-root');if(mr){if(!mr.hasAttribute('popover'))mr.setAttribute('popover','manual');
+ if(mr.children.length){if(opened||!isOpen(mr)){hide(mr);show(mr)}}else hide(mr)}
+var pv=document.getElementById('mdk-pdfv');if(opened&&pv&&pv.open){pv.close();pv.showModal()}}
+var q=0;new MutationObserver(function(ms){if(q)return;for(var i=0;i<ms.length;i++){var t=ms[i].target;if(t.nodeType===1&&(t.id==='tb-clock'||t.closest&&t.closest('#tb-clock,#mdk-pdfv')))continue;q=1;break}if(!q)return;requestAnimationFrame(function(){q=0;scan()})}).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['open']});
+/* visualizador de PDF dentro da página */
+function viewer(){var d=document.getElementById('mdk-pdfv');if(d)return d;d=document.createElement('dialog');d.id='mdk-pdfv';
+d.innerHTML='<div class="pv-bar"><b id="pv-t">Visualizar PDF</b><button type="button" id="pv-p">Imprimir</button><button type="button" class="pr" id="pv-d">Baixar PDF</button><button type="button" id="pv-x">Fechar ✕</button></div><div class="pv-load">Gerando PDF…</div><iframe id="pv-f" title="PDF" hidden></iframe>';
+document.body.appendChild(d);
+d.querySelector('#pv-x').onclick=function(){d.close()};
+d.addEventListener('close',function(){var f=d.querySelector('#pv-f');f.removeAttribute('src');f.hidden=true;d.querySelector('.pv-load').style.display=''});
+d.addEventListener('click',function(e){if(e.target===d)d.close()});
+return d}
+function abrirInterno(id,orig){var d=viewer(),f=d.querySelector('#pv-f'),ld=d.querySelector('.pv-load');
+f.hidden=true;ld.style.display='';ld.textContent='Gerando PDF…';d.querySelector('#pv-t').textContent='Visualizar PDF';
+d.querySelector('#pv-p').onclick=function(){try{f.contentWindow.focus();f.contentWindow.print()}catch(e){mdkTermo.imprimir(id)}};
+d.querySelector('#pv-d').onclick=function(){mdkTermo.pdf(id)};
+if(!d.open)d.showModal();
+var ow=window.open,fake={close:function(){}};var done=function(u){f.src=u+'#view=FitH';f.hidden=false;ld.style.display='none'};
+Object.defineProperty(fake,'location',{set:done,get:function(){return''}});
+var oal=window.alert;window.alert=function(m){ld.textContent=m;};
+window.open=function(){return fake};
+try{orig(id)}finally{window.open=ow;setTimeout(function(){window.alert=oal},15000)}}
+(function hook(){var T=window.mdkTermo;if(!T||!T.abrir)return setTimeout(hook,300);if(T.__pv)return;var o=T.abrir;T.abrir=function(id){abrirInterno(id,o)};T.__pv=1})();
+document.addEventListener('keydown',function(e){if(e.key!=='Escape')return;var pv=document.getElementById('mdk-pdfv');if(pv&&pv.open)return;var mr=document.getElementById('modal-root');if(mr&&mr.children.length)return;var f=document.querySelector('#itsv16 .its16-form[open]');if(f){f.open=false;return}if(document.querySelector('.mdt-det,#mdtForm')&&window.mdkTermo&&mdkTermo.cancel)mdkTermo.cancel()});
 scan()})();</script>
 </body></html>
