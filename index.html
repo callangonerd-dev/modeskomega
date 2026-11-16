@@ -2977,4 +2977,17 @@ html body div#app.app>aside{overflow-y:auto!important}
 html:root body:not(#z1):not(#z2):not(#z3):not(#z4) div#app#app>aside .sb-tabs{display:grid!important;grid-template-columns:1fr 1fr!important;gap:4px!important;padding:4px!important;margin:4px 0 10px!important;height:auto!important;min-height:0!important;flex:0 0 auto!important;align-items:stretch!important;border-radius:99px!important;box-sizing:border-box!important;overflow:visible!important}
 html:root body:not(#z1):not(#z2):not(#z3):not(#z4) div#app#app>aside .sb-tabs button{height:32px!important;min-height:32px!important;margin:0!important;padding:0 10px!important;border-radius:99px!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:6px!important;line-height:1!important;font-size:12px!important;box-sizing:border-box!important;transform:none!important}
 html:root body:not(#z1):not(#z2):not(#z3):not(#z4) div#app#app>aside .sb-tabs button .ui-icon{width:14px!important;height:14px!important;flex:0 0 14px!important;margin:0!important}
-</style></body></html>
+</style><script id="mdk-v515-inventario-dedup">(function(){"use strict";
+function st(){try{if(typeof state!=="undefined"&&state)return state}catch(e){}return window.state||null}
+function setorN(s){return String(s||"").trim().replace(/\s+/g," ").toLocaleUpperCase("pt-BR")}
+function vazio(v){return v==null||String(v).trim()===""}
+function unir(lista,chave){var por={},out=[],mudou=false;(Array.isArray(lista)?lista:[]).forEach(function(x){if(!x||typeof x!=="object")return;if(x.setor!=null){var n=setorN(x.setor);if(n!==x.setor){x.setor=n;mudou=true}}var k=chave(x);if(!k){out.push(x);return}var a=por[k];if(!a){por[k]=x;out.push(x);return}mudou=true;var novo=(+x._mod||0)>(+a._mod||0);Object.keys(x).forEach(function(c){if(c==="id")return;if(vazio(a[c])||(novo&&!vazio(x[c])))a[c]=x[c]})});return{lista:out,mudou:mudou}}
+function kMapa(m){var n=String(m.nome||"").trim().toUpperCase();if(n)return"N:"+n;var mac=String(m.mac||"").toUpperCase().replace(/[^0-9A-F]/g,"");if(mac.length===12)return"M:"+mac;return m.pat?"P:"+m.pat:""}
+function kImp(o){var ip=String(o.ip||"").replace(/^https?:\/\//i,"").replace(/[:/].*$/,"").trim();if(ip)return"I:"+ip;var s=String(o.serie||"").trim().toUpperCase();return s?"S:"+s:(o.nome?"N:"+String(o.nome).toUpperCase():"")}
+window.mdk515Dedup=function(){var s=st();if(!s)return false;var a=unir(s.mapa,kMapa),b=unir(s.impressoras,kImp);if(Array.isArray(s.mapa))s.mapa=a.lista;if(Array.isArray(s.impressoras))s.impressoras=b.lista;if(a.mudou||b.mudou){try{save()}catch(e){}return true}return false};
+function embrulhar(){var orig=window.vMapa;if(typeof orig!=="function"||orig.__v515)return;var f=function(){try{window.mdk515Dedup()}catch(e){}return orig.apply(this,arguments)};f.__v515=1;window.vMapa=f;window.vRemoto=f;try{vMapa=f;vRemoto=f}catch(e){}}
+var r=window.restaurarBackup;if(typeof r==="function"&&!r.__v515){var nr=function(){var x=r.apply(this,arguments);var n=0,t=setInterval(function(){if(window.mdk515Dedup()){try{render()}catch(e){}}if(++n>8)clearInterval(t)},700);return x};nr.__v515=1;window.restaurarBackup=nr;try{restaurarBackup=nr}catch(e){}}
+embrulhar();try{window.mdk515Dedup()}catch(e){}
+document.addEventListener("DOMContentLoaded",function(){embrulhar();try{if(window.mdk515Dedup())render()}catch(e){}});
+})()</script>
+</body></html>
