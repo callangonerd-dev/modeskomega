@@ -677,7 +677,7 @@ function chips(main){var s=sel(),g=s[0],src=document.querySelectorAll('.cfgx-g[d
  var h="";src.forEach(function(b){h+='<button type="button" data-k="'+b.dataset.k+'" class="'+(b.dataset.k===s.join(":")?"on":"")+'">'+b.textContent+"</button>"});if(c.__h!==h){c.innerHTML=h;c.__h=h}}
 function paint(){var m=document.querySelector(".cfgx-main");if(!m)return;var cx=m.closest(".cfgx");if(cx){cx.style.setProperty("--c412",(K[sel()[0]]||K.geral)[0])}dash(m);chips(m)}
 document.addEventListener("click",function(e){if(e.target.closest(".cfgx-gh"))setTimeout(paint,30)},true);
-function go(){paint();setInterval(paint,1200);new MutationObserver(function(){if(document.querySelector(".cfgx-main")&&!document.querySelector(".m412-dash"))paint()}).observe(document.body,{childList:true,subtree:true})}
+function go(){/* v455: painel gráfico removido das Configurações */}
 if(document.body)go();else document.addEventListener("DOMContentLoaded",go)})();</script>
 <style id="mdk-cfg-compact-v413">
 /* ===== Configurações compactas v4.13 ===== */
@@ -2568,7 +2568,8 @@ function run(){try{var v=document.getElementById("view"),k=key(),R=window.MDK_RE
  p=document.createElement("section");p.className="card mdk453-rel";p.dataset.k=k;p.innerHTML=h;p.__h=h;
  var ref=v.querySelector(".mdk230-bar")||v.querySelector(".hint")||v.querySelector("h2.page");
  if(ref)ref.insertAdjacentElement("afterend",p);else{var c=v.querySelector(".sect")||v;c.insertBefore(p,c.firstChild)}}catch(e){}}
-setInterval(run,1000);document.addEventListener("DOMContentLoaded",run);run();
+/* v455: relatórios só no Dashboard e sob comando — injeção automática desativada */
+setInterval(function(){try{var p=document.querySelectorAll("#view .mdk453-rel");p.forEach(function(x){x.remove()})}catch(e){}},1000);
 })();</script>
 <style id="mdk-v454-coerencia">
 /* v454 · coerência visual e organização: Configurações, Agenda, Fonte e tema */
